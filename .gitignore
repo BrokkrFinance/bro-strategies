@@ -1,0 +1,14 @@
+deployments
+node_modules
+.env
+coverage
+coverage.json
+typechain
+.vscode
+yarn-error.log
+*.swp
+
+#Hardhat files
+cache
+artifacts
+.openzeppelin/unknown-*
