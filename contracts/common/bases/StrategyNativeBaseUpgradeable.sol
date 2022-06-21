@@ -1,21 +1,31 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "./Common.sol";
-import "./StrategyToken.sol";
+import "../Common.sol";
+import "../StrategyToken.sol";
+import "./FeeOwnableUpgradeable.sol";
+import "../interfaces/AUMI.sol";
+import "../interfaces/FeeI.sol";
+import "../interfaces/StrategyNativeI.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
-abstract contract StrategyNativeBaseUpgradable is ERC165Upgradeable {
+abstract contract StrategyNativeBaseUpgradable is
+    StrategyNativeI,
+    AUMI,
+    ERC165Upgradeable,
+    FeeOwnableUpgradeable
+{
     StrategyToken public strategyToken;
 
     // solhint-disable-next-line func-name-mixedcase
-    function __StrategyNativeBaseUpgradable_init(StrategyToken strategyToken_)
-        internal
-        onlyInitializing
-    {
+    function __StrategyNativeBaseUpgradable_init(
+        StrategyToken strategyToken_,
+        uint24 fee_
+    ) internal onlyInitializing {
+        __ERC165_init();
+        __FeeOwnableUpgradeable_init(fee_);
         strategyToken = strategyToken_;
     }
 
@@ -39,7 +49,9 @@ abstract contract StrategyNativeBaseUpgradable is ERC165Upgradeable {
         returns (bool)
     {
         return
-            interfaceId == type(StrategyNativeBaseUpgradable).interfaceId ||
+            interfaceId == type(StrategyNativeI).interfaceId ||
+            interfaceId == type(AUMI).interfaceId ||
+            interfaceId == type(FeeI).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 }
