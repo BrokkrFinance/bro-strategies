@@ -4,17 +4,17 @@ pragma solidity ^0.8.0;
 import "../Common.sol";
 import "../StrategyToken.sol";
 import "./FeeOwnableUpgradeable.sol";
-import "../interfaces/AUMI.sol";
-import "../interfaces/FeeI.sol";
-import "../interfaces/StrategyErc20I.sol";
+import "../interfaces/IAUM.sol";
+import "../interfaces/IFee.sol";
+import "../interfaces/IStrategyErc20.sol";
 
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 abstract contract StrategyErc20BaseUpgradable is
-    StrategyErc20I,
-    AUMI,
+    IStrategyErc20,
+    IAUM,
     ERC165Upgradeable,
     FeeOwnableUpgradeable
 {
@@ -57,9 +57,9 @@ abstract contract StrategyErc20BaseUpgradable is
         returns (bool)
     {
         return
-            interfaceId == type(StrategyErc20I).interfaceId ||
-            interfaceId == type(AUMI).interfaceId ||
-            interfaceId == type(FeeI).interfaceId ||
+            interfaceId == type(IStrategyErc20).interfaceId ||
+            interfaceId == type(IAUM).interfaceId ||
+            interfaceId == type(IFee).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 }

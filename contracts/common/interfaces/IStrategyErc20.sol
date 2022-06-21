@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 
 import "../Common.sol";
-import "../interfaces/FeeI.sol";
+import "../interfaces/IFee.sol";
 
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 
-interface StrategyErc20I is FeeI {
+interface IStrategyErc20 is IFee {
     function depositErc20(
         uint256 amount,
         IERC20 token,
