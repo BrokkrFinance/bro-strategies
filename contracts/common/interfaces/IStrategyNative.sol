@@ -2,10 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "../Common.sol";
-import "../interfaces/FeeI.sol";
-import "../interfaces/StrategyNativeI.sol";
+import "../interfaces/IFee.sol";
 
-interface StrategyNativeI is FeeI {
+interface StrategyNativeI is IFee {
     function deposit(NameValuePair[] memory params) external payable;
 
     function burn(uint256 amount, NameValuePair[] memory params) external;

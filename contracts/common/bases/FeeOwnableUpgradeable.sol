@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../interfaces/FeeI.sol";
+import "../interfaces/IFee.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-abstract contract FeeOwnableUpgradeable is FeeI, OwnableUpgradeable {
+abstract contract FeeOwnableUpgradeable is IFee, OwnableUpgradeable {
     uint24 public fee;
 
     // solhint-disable-next-line func-name-mixedcase
@@ -17,11 +17,11 @@ abstract contract FeeOwnableUpgradeable is FeeI, OwnableUpgradeable {
         fee = fee_;
     }
 
-    function setFee(uint24 fee_) external override onlyOwner {
+    function setFee(uint24 fee_) external virtual override onlyOwner {
         fee = fee_;
     }
 
-    function getFee() external view override returns (uint24) {
+    function getFee() external view virtual override returns (uint24) {
         return fee;
     }
 

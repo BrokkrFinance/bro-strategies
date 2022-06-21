@@ -4,16 +4,16 @@ pragma solidity ^0.8.0;
 import "../Common.sol";
 import "../StrategyToken.sol";
 import "./FeeOwnableUpgradeable.sol";
-import "../interfaces/AUMI.sol";
-import "../interfaces/FeeI.sol";
-import "../interfaces/StrategyNativeI.sol";
+import "../interfaces/IAUM.sol";
+import "../interfaces/IFee.sol";
+import "../interfaces/IStrategyNative.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 abstract contract StrategyNativeBaseUpgradable is
     StrategyNativeI,
-    AUMI,
+    IAUM,
     ERC165Upgradeable,
     FeeOwnableUpgradeable
 {
@@ -50,8 +50,8 @@ abstract contract StrategyNativeBaseUpgradable is
     {
         return
             interfaceId == type(StrategyNativeI).interfaceId ||
-            interfaceId == type(AUMI).interfaceId ||
-            interfaceId == type(FeeI).interfaceId ||
+            interfaceId == type(IAUM).interfaceId ||
+            interfaceId == type(IFee).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 }
