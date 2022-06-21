@@ -9,6 +9,9 @@ struct TokenDesc {
 }
 
 library StrategyLib {
+    address public constant NATIVE_AVAX =
+        0x0000000000000000000000000000000000000001;
+
     function calculateMintAmount(
         TokenDesc[] memory tokenDescs,
         uint256 stratTokenSupply
