@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract StrategyErc20BaseUpgradable is
+abstract contract StrategyErc20BaseUpgradeable is
     IStrategyErc20,
     IAUM,
     ERC165Upgradeable,
@@ -21,7 +21,7 @@ abstract contract StrategyErc20BaseUpgradable is
     StrategyToken public strategyToken;
 
     // solhint-disable-next-line func-name-mixedcase
-    function __StrategyErc20BaseUpgradable_init(
+    function __StrategyErc20BaseUpgradeable_init(
         StrategyToken strategyToken_,
         uint24 fee_
     ) internal onlyInitializing {

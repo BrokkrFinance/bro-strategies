@@ -1,9 +1,28 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../../common/bases/StrategyErc20BaseUpgradable.sol";
+import "../../common/bases/StrategyErc20BaseUpgradeable.sol";
 
-contract GmxDn is StrategyErc20BaseUpgradable {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
+
+contract GmxDn is StrategyErc20BaseUpgradeable {
+    address payable public aavePoolAddr;
+    IERC20 public usdcAddr;
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        //_disableInitializers();
+    }
+
+    function initialize(address payable aavePoolAddr_, IERC20 usdcAddr_)
+        external
+        initializer
+    {
+        aavePoolAddr = aavePoolAddr_;
+        usdcAddr = usdcAddr_;
+    }
+
     function depositErc20(
         uint256 amount,
         IERC20 token,
