@@ -1,11 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-interface IOracle {
+interface IPriceOracle {
     function getPrice(
         address token,
         bool maximise,
-        bool includeAmmPrice,
-        bool useSwapPricing
-    ) external returns (uint256);
+        bool includeAmmPrice
+    ) external view returns (uint256);
 }

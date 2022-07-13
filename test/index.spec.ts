@@ -2,7 +2,7 @@ import { ethers, upgrades } from "hardhat"
 
 describe("StrategyToken", function () {
   it("Testing basic functionality", async function () {
-    const StrategyToken = await ethers.getContractFactory("StrategyToken")
+    const StrategyToken = await ethers.getContractFactory("InvestmentToken")
     const strategyToken = await upgrades.deployProxy(StrategyToken, ["SuperStrategy", "SUP"])
     await strategyToken.deployed()
 

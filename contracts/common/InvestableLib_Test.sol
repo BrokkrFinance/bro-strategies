@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "./StrategyLib.sol";
+import "./InvestableLib.sol";
 
 import "@mangrovedao/hardhat-test-solidity/test.sol";
 
 // solhint-disable-next-line contract-name-camelcase
-contract StrategyLib_Test {
+contract InvestableLib_Test {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {} // necessary to receive eth from test runner
 
@@ -15,7 +15,7 @@ contract StrategyLib_Test {
         TokenDesc[] memory tokenDescs = new TokenDesc[](1);
         tokenDescs[0] = TokenDesc(100, 20);
         Test.eq(
-            StrategyLib.calculateMintAmount(tokenDescs, 10),
+            InvestableLib.calculateMintAmount(tokenDescs, 10),
             2,
             "test 1 failed"
         );
@@ -24,7 +24,7 @@ contract StrategyLib_Test {
         tokenDescs[0] = TokenDesc(100, 20);
         tokenDescs[1] = TokenDesc(100, 15);
         Test.eq(
-            StrategyLib.calculateMintAmount(tokenDescs, 10),
+            InvestableLib.calculateMintAmount(tokenDescs, 10),
             1,
             "test 2 failed"
         );
@@ -33,7 +33,7 @@ contract StrategyLib_Test {
         tokenDescs[0] = TokenDesc(0, 20);
         tokenDescs[1] = TokenDesc(0, 15);
         Test.eq(
-            StrategyLib.calculateMintAmount(tokenDescs, 0),
+            InvestableLib.calculateMintAmount(tokenDescs, 0),
             17,
             "test 3 failed"
         );
