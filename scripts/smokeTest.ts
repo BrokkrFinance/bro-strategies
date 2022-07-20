@@ -1,59 +1,10 @@
 import { config } from "chai"
 import { Contract } from "ethers"
 import { ethers } from "hardhat"
+import { deployFreeMoneyProvider, deployPortfolio, deployStrategy } from "./helper"
 
-import { contractAt, deployContract, deployProxyContract, expectSuccess } from "./helper"
+import { contractAt, deployProxyContract, expectSuccess } from "./helper"
 config.includeStack = true
-
-async function deployFreeMoneyProvider() {
-  const freeMoneyProvider = await deployContract("FreeMoneyProvider", [])
-  return freeMoneyProvider
-}
-
-async function deployMockStrategy(
-  investnemtTokenName: string,
-  investnemtTokenTicker: string,
-  depositToken: any,
-  depositFee: number,
-  withdrawalFee: number,
-  performanceFee: number,
-  strategyExtraArgs: any[]
-) {
-  const strategyToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
-  const mockStrategy = await expectSuccess(deployContract("MockStrategy", []))
-  await expectSuccess(strategyToken.transferOwnership(mockStrategy.address))
-  await expectSuccess(
-    mockStrategy.initialize(
-      strategyToken.address,
-      depositToken.address,
-      depositFee,
-      withdrawalFee,
-      performanceFee,
-      ...strategyExtraArgs
-    )
-  )
-
-  return mockStrategy
-}
-
-async function deployMockPortfolio(
-  investnemtTokenName: string,
-  investnemtTokenTicker: string,
-  depositToken: any,
-  investables: any[]
-) {
-  const portfolioToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
-  const mockPortfolio = await expectSuccess(deployContract("MockPortfolio", []))
-  await expectSuccess(portfolioToken.transferOwnership(mockPortfolio.address))
-
-  await expectSuccess(mockPortfolio.initialize(portfolioToken.address, depositToken.address))
-  for (let investable of investables) {
-    await expectSuccess(mockPortfolio.addInvestable(investable.address))
-  }
-
-  await expectSuccess(mockPortfolio.setTargetInvestableAllocations([25000, 75000, 0]))
-  return mockPortfolio
-}
 
 async function printState(
   header: String,
@@ -98,20 +49,26 @@ describe("Unified strategy interface and base implementation", function () {
   it("Smoke test", async function () {
     const freeMoneyProvider = await deployFreeMoneyProvider()
     const depositToken = await deployProxyContract("InvestmentToken", ["FakeUSD", "USDF"])
-    const strategy1 = await deployMockStrategy("Super Strategy Token 1", "SUP1", depositToken, 0, 50000, 0, [
+    const strategy1 = await deployStrategy(
+      "MockStrategy",
+      "Super Strategy Token 1",
+      "SUP1",
+      depositToken,
+      0,
+      50000,
+      0,
+      [2, freeMoneyProvider.address]
+    )
+    const strategy2 = await deployStrategy("MockStrategy", "Super Strategy Token 2", "SUP2", depositToken, 0, 0, 0, [
       2,
       freeMoneyProvider.address,
     ])
-    const strategy2 = await deployMockStrategy("Super Strategy Token 2", "SUP2", depositToken, 0, 0, 0, [
-      2,
-      freeMoneyProvider.address,
-    ])
-    const strategy3 = await deployMockStrategy("Super Strategy Token 3", "SUP3", depositToken, 0, 0, 0, [
+    const strategy3 = await deployStrategy("MockStrategy", "Super Strategy Token 3", "SUP3", depositToken, 0, 0, 0, [
       1,
       freeMoneyProvider.address,
     ])
 
-    const portfolio = await deployMockPortfolio("Super Portfolio Token 1", "SUPP1", depositToken, [
+    const portfolio = await deployPortfolio("MockPortfolio", "Super Portfolio Token 1", "SUPP1", depositToken, [
       strategy1,
       strategy2,
       strategy3,

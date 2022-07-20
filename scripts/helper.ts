@@ -21,6 +21,58 @@ export async function expectSuccess<T>(fut: Promise<T>) {
   return await resolvedPromise
 }
 
+export async function deployFreeMoneyProvider() {
+  const freeMoneyProvider = await deployContract("FreeMoneyProvider", [])
+  return freeMoneyProvider
+}
+
+export async function deployStrategy(
+  strategyContractName: string,
+  investnemtTokenName: string,
+  investnemtTokenTicker: string,
+  depositToken: any,
+  depositFee: number,
+  withdrawalFee: number,
+  performanceFee: number,
+  strategyExtraArgs: any[]
+) {
+  const strategyToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
+  const strategy = await expectSuccess(deployContract(strategyContractName, []))
+  await expectSuccess(strategyToken.transferOwnership(strategy.address))
+  await expectSuccess(
+    strategy.initialize(
+      strategyToken.address,
+      depositToken.address,
+      depositFee,
+      withdrawalFee,
+      performanceFee,
+      ...strategyExtraArgs
+    )
+  )
+
+  return strategy
+}
+
+export async function deployPortfolio(
+  portfolioContractName: string,
+  investnemtTokenName: string,
+  investnemtTokenTicker: string,
+  depositToken: any,
+  investables: any[]
+) {
+  const portfolioToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
+  const portfolio = await expectSuccess(deployContract(portfolioContractName, []))
+  await expectSuccess(portfolioToken.transferOwnership(portfolio.address))
+
+  await expectSuccess(portfolio.initialize(portfolioToken.address, depositToken.address))
+  for (let investable of investables) {
+    await expectSuccess(portfolio.addInvestable(investable.address))
+  }
+
+  await expectSuccess(portfolio.setTargetInvestableAllocations([25000, 75000, 0]))
+  return portfolio
+}
+
 export async function deployContract(name: string, args: any[], label?: string, options?: any) {
   let info = name
   if (label != undefined) {

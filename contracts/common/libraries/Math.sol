@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 library Math {
-    uint256 public constant MAX_UINT = 2**256 - 1;
     uint16 public constant SHORT_FIXED_DECIMAL_POINTS = 10**3;
     uint24 public constant MEDIUM_FIXED_DECIMAL_POINTS = 10**6;
 
