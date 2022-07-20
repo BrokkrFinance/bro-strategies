@@ -66,4 +66,13 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     function setPerformanceFee(uint24 fee_) public virtual override onlyOwner {
         super.setPerformanceFee(fee_);
     }
+
+    function setFeeReceiver(address feeReceiver_)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setFeeReceiver(feeReceiver_);
+    }
 }
