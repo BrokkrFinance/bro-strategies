@@ -58,7 +58,7 @@ contract InvestmentToken is
         _burn(account, amount);
     }
 
-    function decimals() public view virtual override returns (uint8) {
+    function decimals() public pure virtual override returns (uint8) {
         return 6;
     }
 }
