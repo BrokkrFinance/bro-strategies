@@ -19,6 +19,7 @@ abstract contract StrategyOwnableBaseUpgradeable is
         uint24 withdrawalFee_,
         uint24 performanceFee_
     ) internal onlyInitializing {
+        __Ownable_init();
         __StrategyBaseUpgradeable_init(
             investmentToken_,
             depositToken_,
@@ -26,7 +27,6 @@ abstract contract StrategyOwnableBaseUpgradeable is
             withdrawalFee_,
             performanceFee_
         );
-        __Ownable_init();
     }
 
     function setDepositFee(uint24 fee_) public virtual override onlyOwner {

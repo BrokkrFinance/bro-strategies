@@ -13,7 +13,7 @@ interface IPortfolio is IInvestable {
     error InvestableAlreadyAdded();
     error InvestableNotYetAdded();
     error InvestableHasNonZeroAllocation();
-    error RebalancePctNot100();
+    error RebalancePercentageNot100();
     error RebalanceIncorrectAllocationsLength();
 
     event InvestableAdd(IInvestable investable);

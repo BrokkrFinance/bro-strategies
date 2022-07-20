@@ -3,11 +3,11 @@ pragma solidity ^0.8.0;
 
 import "./FeeUpgradeable.sol";
 import "../Common.sol";
-import "../InvestableLib.sol";
 import "../InvestmentToken.sol";
 import "../interfaces/IPortfolio.sol";
 import "../interfaces/IInvestmentToken.sol";
-import "../Math.sol";
+import "../libraries/Math.sol";
+import "../libraries/InvestableLib.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
@@ -29,8 +29,8 @@ abstract contract PortfolioBaseUpgradeable is
 
     EnumerableMapUpgradeable.AddressToUintMap internal investableAllocations;
 
-    IInvestmentToken public investmentToken;
-    IERC20Upgradeable public depositToken;
+    IInvestmentToken internal investmentToken;
+    IERC20Upgradeable internal depositToken;
 
     // solhint-disable-next-line
     function __PortfolioBaseUpgradeable_init(
@@ -95,7 +95,7 @@ abstract contract PortfolioBaseUpgradeable is
             totalPct += newAllocations[i];
         }
         if (totalPct != uint256(100) * Math.SHORT_FIXED_DECIMAL_POINTS)
-            revert RebalancePctNot100();
+            revert RebalancePercentageNot100();
         if (investableAllocations.length() != newAllocations.length)
             revert RebalanceIncorrectAllocationsLength();
         for (uint256 i = 0; i < investableAllocations.length(); i++) {

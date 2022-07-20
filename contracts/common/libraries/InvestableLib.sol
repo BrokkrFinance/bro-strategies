@@ -22,7 +22,7 @@ library InvestableLib {
                 res *= tokenDescs[i].acquired;
             return Math.sqrt(res);
         } else {
-            uint256 res = Math.MAX_UINT;
+            uint256 res = type(uint256).max;
             for (uint256 i = 0; i < tokenDescs.length; i++)
                 res = Math.min(
                     res,

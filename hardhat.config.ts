@@ -1,4 +1,5 @@
 import "@mangrovedao/hardhat-test-solidity"
+import "@nomiclabs/hardhat-ethers"
 import "@nomiclabs/hardhat-etherscan"
 import "@nomiclabs/hardhat-waffle"
 import "@openzeppelin/hardhat-upgrades"
@@ -14,7 +15,7 @@ dotenv.config()
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.9",
+    version: "0.8.10",
     settings: {
       optimizer: {
         enabled: true,
@@ -31,6 +32,10 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: false,
       blockGasLimit: 30_000_000,
+      forking: {
+        url: "https://api.avax.network/ext/bc/C/rpc",
+        enabled: true,
+      },
     },
 
     avax_mainnet: {

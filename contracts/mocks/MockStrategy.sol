@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./FreeMoneyProvider.sol";
-import "../common/bases/StrategyBaseUpgradeable.sol";
+import "../common/bases/StrategyOwnableBaseUpgradeable.sol";
 import "../common/InvestmentToken.sol";
 
 import "hardhat/console.sol";
@@ -10,12 +10,13 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-contract MockStrategy is StrategyBaseUpgradeable {
+contract MockStrategy is StrategyOwnableBaseUpgradeable {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     uint256 public yieldMultiplier;
     FreeMoneyProvider public freeMoneyProvider;
+    uint256[] public x;
 
     function initialize(
         IInvestmentToken investmentToken_,
@@ -26,7 +27,7 @@ contract MockStrategy is StrategyBaseUpgradeable {
         uint256 yieldMultiplier_,
         FreeMoneyProvider freeMoneyProvider_
     ) external initializer {
-        __StrategyBaseUpgradeable_init(
+        __StrategyOwnableBaseUpgradeable_init(
             investmentToken_,
             depositToken_,
             depositFee_,

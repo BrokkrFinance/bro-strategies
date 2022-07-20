@@ -57,4 +57,8 @@ contract InvestmentToken is
         _spendAllowance(account, _msgSender(), amount);
         _burn(account, amount);
     }
+
+    function decimals() public view virtual override returns (uint8) {
+        return 6;
+    }
 }

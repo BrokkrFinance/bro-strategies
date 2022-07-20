@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../common/bases/StrategyOwnableBaseUpgradeable.sol";
-import "../common/InvestmentToken.sol";
+import "../../common/bases/StrategyOwnableBaseUpgradeable.sol";
+import "../../common/InvestmentToken.sol";
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -24,7 +24,7 @@ contract TemplateStrategy is StrategyOwnableBaseUpgradeable {
         uint24 withdrawalFee_,
         uint24 performanceFee_
     ) external initializer {
-        __StrategyBaseUpgradeable_init(
+        __StrategyOwnableBaseUpgradeable_init(
             investmentToken_,
             depositToken_,
             depositFee_,
@@ -33,19 +33,19 @@ contract TemplateStrategy is StrategyOwnableBaseUpgradeable {
         );
     }
 
-    function _deposit(uint256 amount, NameValuePair[] memory)
+    function _deposit(uint256 amount, NameValuePair[] calldata)
         internal
         virtual
         override
     {}
 
-    function _withdraw(uint256 amount, NameValuePair[] memory)
+    function _withdraw(uint256 amount, NameValuePair[] calldata)
         internal
         virtual
         override
     {}
 
-    function _reapReward(NameValuePair[] memory params)
+    function _reapReward(NameValuePair[] calldata params)
         internal
         virtual
         override

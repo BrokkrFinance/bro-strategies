@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../Common.sol";
 import "../InvestmentToken.sol";
-import "../InvestableLib.sol";
+import "../libraries/InvestableLib.sol";
 import "./FeeUpgradeable.sol";
 import "../interfaces/IStrategy.sol";
 
@@ -24,8 +24,8 @@ abstract contract StrategyBaseUpgradeable is
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    IInvestmentToken public investmentToken;
-    IERC20Upgradeable public depositToken;
+    IInvestmentToken internal investmentToken;
+    IERC20Upgradeable internal depositToken;
 
     // solhint-disable-next-line
     function __StrategyBaseUpgradeable_init(
@@ -180,9 +180,9 @@ abstract contract StrategyBaseUpgradeable is
         returns (uint256);
 
     function claimFee() public virtual override nonReentrant {
-        uint256 currentAccumulatedFeeCpy = currentAccumulatedFee;
-        claimedFee += currentAccumulatedFeeCpy;
+        uint256 currentAccumulatedFeeCopy = currentAccumulatedFee;
+        claimedFee += currentAccumulatedFeeCopy;
         currentAccumulatedFee = 0;
-        depositToken.safeTransfer(feeReceiver, currentAccumulatedFeeCpy);
+        depositToken.safeTransfer(feeReceiver, currentAccumulatedFeeCopy);
     }
 }
