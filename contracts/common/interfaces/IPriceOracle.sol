@@ -1,9 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
+
 interface IPriceOracle {
     function getPrice(
-        address token,
+        IERC20Upgradeable token,
         bool shouldMaximize,
         bool includeAmmPrice
     ) external view returns (uint256);

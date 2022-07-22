@@ -26,6 +26,7 @@ contract GmxOracle is OwnableUpgradeable, UUPSUpgradeable, IPriceOracle {
         initializer
     {
         __Ownable_init();
+        __UUPSUpgradeable_init();
         setGmxVaultPriceFeed(gmxVaultPriceFeed_);
         usdcToken = IERC20(usdcToken_);
     }
@@ -37,14 +38,14 @@ contract GmxOracle is OwnableUpgradeable, UUPSUpgradeable, IPriceOracle {
     }
 
     function getPrice(
-        address token,
+        IERC20Upgradeable token,
         bool shouldMaximize,
         bool includeAmmPrice
     ) external view returns (uint256) {
         return
             InvestableLib.convertPricePrecision(
                 ((gmxVaultPriceFeed.getPrice(
-                    token,
+                    address(token),
                     shouldMaximize,
                     includeAmmPrice,
                     false
