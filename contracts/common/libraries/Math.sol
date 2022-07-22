@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 library Math {
-    uint16 public constant SHORT_FIXED_DECIMAL_POINTS = 10**3;
-    uint24 public constant MEDIUM_FIXED_DECIMAL_POINTS = 10**6;
+    uint16 public constant SHORT_FIXED_DECIMAL_FACTOR = 10**3;
+    uint24 public constant MEDIUM_FIXED_DECIMAL_FACTOR = 10**6;
+    uint256 public constant LONG_FIXED_DECIMAL_FACTOR = 10**30;
 
     function min(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = x < y ? x : y;

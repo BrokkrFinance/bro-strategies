@@ -97,7 +97,7 @@ abstract contract StrategyBaseUpgradeable is
         uint256 withdrewAmount = depositToken.balanceOf(address(this)) -
             depositTokenBalanceBefore;
         uint256 feeAmount = (withdrewAmount * withdrawalFee) /
-            Math.SHORT_FIXED_DECIMAL_POINTS /
+            Math.SHORT_FIXED_DECIMAL_FACTOR /
             100;
         currentAccumulatedFee += feeAmount;
         depositToken.safeTransfer(_msgSender(), withdrewAmount - feeAmount);
