@@ -12,6 +12,21 @@ library InvestableLib {
     address public constant NATIVE_AVAX =
         0x0000000000000000000000000000000000000001;
 
+    uint8 public constant PRICE_PRECISION_DIGITS = 6;
+    uint256 public constant PRICE_PRECISION_FACTOR = 10**PRICE_PRECISION_DIGITS;
+
+    function convertPricePrecision(
+        uint256 price,
+        uint256 currentPrecision,
+        uint256 desiredPrecision
+    ) internal pure returns (uint256) {
+        if (currentPrecision > desiredPrecision)
+            return (price / (currentPrecision / desiredPrecision));
+        else if (currentPrecision < desiredPrecision)
+            return price * (desiredPrecision / currentPrecision);
+        else return price;
+    }
+
     function calculateMintAmount(
         TokenDesc[] memory tokenDescs,
         uint256 investableTokenSupply

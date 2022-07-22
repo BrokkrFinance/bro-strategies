@@ -94,7 +94,7 @@ abstract contract PortfolioBaseUpgradeable is
         for (uint256 i = 0; i < newAllocations.length; ++i) {
             totalPct += newAllocations[i];
         }
-        if (totalPct != uint256(100) * Math.SHORT_FIXED_DECIMAL_POINTS)
+        if (totalPct != uint256(100) * Math.SHORT_FIXED_DECIMAL_FACTOR)
             revert RebalancePercentageNot100();
         if (investableAllocations.length() != newAllocations.length)
             revert RebalanceIncorrectAllocationsLength();
@@ -145,7 +145,7 @@ abstract contract PortfolioBaseUpgradeable is
             ) = investableAllocations.at(i);
 
             uint256 embeddedAmount = (amount * allocationPct) /
-                Math.SHORT_FIXED_DECIMAL_POINTS /
+                Math.SHORT_FIXED_DECIMAL_FACTOR /
                 100;
             if (embeddedAmount == 0) continue;
 
@@ -233,7 +233,7 @@ abstract contract PortfolioBaseUpgradeable is
             (, uint256 targetAllocation) = investableAllocations.at(i);
             targetInvestableAums[i] =
                 (rebalanceLocalVars.totalAum * targetAllocation) /
-                Math.SHORT_FIXED_DECIMAL_POINTS /
+                Math.SHORT_FIXED_DECIMAL_FACTOR /
                 100;
         }
 

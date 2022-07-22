@@ -118,7 +118,11 @@ export async function contractAt(name: string, address: string, provider?: any) 
 }
 
 export async function getUsdcContract() {
-  return await ethers.getContractAt(erc20abi, "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E")
+  return await ethers.getContractAt(erc20abi, CoinAddrs["usdc"])
+}
+
+export async function getTokenContract(address: string) {
+  return await ethers.getContractAt(erc20abi, address)
 }
 
 export const CoinAddrs = {

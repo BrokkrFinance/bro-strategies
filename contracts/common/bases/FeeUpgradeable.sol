@@ -33,7 +33,7 @@ abstract contract FeeUpgradeable is ContextUpgradeable, IFee {
 
         if (
             withdrawalFee + depositFee + performanceFee >=
-            uint256(100) * Math.SHORT_FIXED_DECIMAL_POINTS
+            uint256(100) * Math.SHORT_FIXED_DECIMAL_FACTOR
         ) revert InvalidFeeError();
     }
 

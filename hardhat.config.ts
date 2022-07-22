@@ -52,9 +52,9 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545/",
     },
     tenderly: {
-      url: "https://rpc.tenderly.co/fork/159120f7-15b5-49db-9907-c63522197ac2",
+      url: `{process.env.TENDERLY_FORK_URL}`,
       chainId: 43114,
-      accounts: [`0x${process.env.TESTNET_PRIVATE_KEY}`],
+      accounts: [`0x${process.env.TENDERLY_PRIVATE_KEY}`],
     },
   },
   gasReporter: {
