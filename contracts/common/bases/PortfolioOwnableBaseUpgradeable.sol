@@ -9,37 +9,42 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 abstract contract PortfolioOwnableBaseUpgradeable is
-    PortfolioBaseUpgradeable,
-    OwnableUpgradeable
+    OwnableUpgradeable,
+    PortfolioBaseUpgradeable
 {
+    uint256[8] private futureFeaturesGap;
+
     // solhint-disable-next-line
     function __PortfolioOwnableBaseUpgradeable_init(
-        IInvestmentToken investmentToken_,
-        IERC20Upgradeable depositToken_
+        PortfolioArgs calldata portfolioArgs
     ) internal onlyInitializing {
         __Ownable_init();
-        __PortfolioBaseUpgradeable_init(investmentToken_, depositToken_);
+        __PortfolioBaseUpgradeable_init(portfolioArgs);
     }
 
-    function addInvestable(IInvestable investable)
-        public
-        virtual
-        override
-        onlyOwner
-    {
-        super.addInvestable(investable);
+    function addInvestable(
+        IInvestable investable,
+        uint24[] calldata newAllocations,
+        NameValuePair[] calldata params
+    ) public virtual override onlyOwner {
+        super.addInvestable(investable, newAllocations, params);
     }
 
-    function removeInvestable(IInvestable investable)
-        public
-        virtual
-        override
-        onlyOwner
-    {
-        super.removeInvestable(investable);
+    function removeInvestable(
+        IInvestable investable,
+        uint24[] calldata newAllocations
+    ) public virtual override onlyOwner {
+        super.removeInvestable(investable, newAllocations);
     }
 
-    function setTargetInvestableAllocations(uint256[] calldata newAllocations)
+    function changeInvestable(
+        IInvestable investable,
+        NameValuePair[] calldata params
+    ) public virtual override onlyOwner {
+        super.changeInvestable(investable, params);
+    }
+
+    function setTargetInvestableAllocations(uint24[] calldata newAllocations)
         public
         virtual
         override
@@ -55,24 +60,46 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         super.rebalance(depositParams, withdrawParams);
     }
 
-    function setDepositFee(uint24 fee_) public virtual override onlyOwner {
-        super.setDepositFee(fee_);
-    }
-
-    function setWithdrawalFee(uint24 fee_) public virtual override onlyOwner {
-        super.setWithdrawalFee(fee_);
-    }
-
-    function setPerformanceFee(uint24 fee_) public virtual override onlyOwner {
-        super.setPerformanceFee(fee_);
-    }
-
-    function setFeeReceiver(address feeReceiver_)
+    function setDepositFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
         override
         onlyOwner
     {
-        super.setFeeReceiver(feeReceiver_);
+        super.setDepositFee(fee_, params);
+    }
+
+    function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setWithdrawalFee(fee_, params);
+    }
+
+    function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setPerformanceFee(fee_, params);
+    }
+
+    function setFeeReceiver(
+        address feeReceiver_,
+        NameValuePair[] calldata params
+    ) public virtual override onlyOwner {
+        super.setFeeReceiver(feeReceiver_, params);
+    }
+
+    function setInvestmentToken(IInvestmentToken investmentToken)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setInvestmentToken(investmentToken);
     }
 }

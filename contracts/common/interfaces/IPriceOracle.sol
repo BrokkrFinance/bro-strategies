@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 interface IPriceOracle {
     function getPrice(
         IERC20Upgradeable token,
-        bool shouldMaximize,
+        bool shouldMaximise,
         bool includeAmmPrice
     ) external view returns (uint256);
 }

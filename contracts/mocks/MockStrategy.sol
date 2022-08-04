@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./FreeMoneyProvider.sol";
-import "../common/bases/StrategyOwnableBaseUpgradeable.sol";
+import "../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 import "../common/InvestmentToken.sol";
 
 import "hardhat/console.sol";
@@ -10,7 +10,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-contract MockStrategy is StrategyOwnableBaseUpgradeable {
+contract MockStrategy is StrategyOwnablePausableBaseUpgradeable {
+    // solhint-disable-next-line const-name-snakecase
+    string public constant name =
+        "block42.mock_strategy.<insert git label here>";
+    // solhint-disable-next-line const-name-snakecase
+    string public constant humanReadableName = "Mock strategy";
+    // solhint-disable-next-line const-name-snakecase
+    string public constant version = "1.0.0";
+
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -19,21 +27,11 @@ contract MockStrategy is StrategyOwnableBaseUpgradeable {
     uint256[] public x;
 
     function initialize(
-        IInvestmentToken investmentToken_,
-        IERC20Upgradeable depositToken_,
-        uint24 depositFee_,
-        uint24 withdrawalFee_,
-        uint24 performanceFee_,
+        StrategyArgs calldata strategyArgs,
         uint256 yieldMultiplier_,
         FreeMoneyProvider freeMoneyProvider_
     ) external initializer {
-        __StrategyOwnableBaseUpgradeable_init(
-            investmentToken_,
-            depositToken_,
-            depositFee_,
-            withdrawalFee_,
-            performanceFee_
-        );
+        __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
         yieldMultiplier = yieldMultiplier_;
         freeMoneyProvider = freeMoneyProvider_;
     }
@@ -48,7 +46,7 @@ contract MockStrategy is StrategyOwnableBaseUpgradeable {
         uint256 amount,
         NameValuePair[] calldata /*params*/
     ) internal virtual override {
-        freeMoneyProvider.giveMeMoney(amount * 2, depositToken);
+        freeMoneyProvider.giveMeMoney(amount * yieldMultiplier, depositToken);
     }
 
     function _reapReward(
@@ -57,18 +55,45 @@ contract MockStrategy is StrategyOwnableBaseUpgradeable {
         freeMoneyProvider.giveMeMoney(10**18, depositToken);
     }
 
-    function getAssets()
+    function getAssetBalances()
         external
         view
         virtual
         override
-        returns (Asset[] memory)
-    {
-        Asset[] memory res;
-        return res;
-    }
+        returns (Balance[] memory assetBalances)
+    {}
 
-    function getTotalAUM(
+    function getLiabilityBalances()
+        external
+        view
+        virtual
+        override
+        returns (Balance[] memory liabilityBalances)
+    {}
+
+    function getAssetValuations(
+        bool, /*shouldMaximise*/
+        bool /*shouldIncludeAmmPrice*/
+    )
+        public
+        view
+        virtual
+        override
+        returns (Valuation[] memory assetValuations)
+    {}
+
+    function getLiabilityValuations(
+        bool, /*shouldMaximise*/
+        bool /*shouldIncludeAmmPrice*/
+    )
+        public
+        view
+        virtual
+        override
+        returns (Valuation[] memory liabilityValuations)
+    {}
+
+    function getEquityValuation(
         bool, /*shouldMaximise*/
         bool /*shouldIncludeAmmPrice*/
     ) public view virtual override returns (uint256) {

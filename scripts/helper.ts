@@ -1,6 +1,8 @@
 import { expect } from "chai"
+import { providers } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import erc20abi from "./abi/erc20.json"
+type TransactionResponse = providers.TransactionResponse
 
 export async function expectSuccess<T>(fut: Promise<T>) {
   var resolvedPromise: Promise<T>
@@ -26,26 +28,59 @@ export async function deployFreeMoneyProvider() {
   return freeMoneyProvider
 }
 
+export async function getExecutionCostInUsd(
+  transactionResponse: TransactionResponse,
+  gasPriceInGwei: number = 30,
+  avaxPriceInUsd: number = 24
+) {
+  return ((await transactionResponse.wait()).gasUsed.toNumber() * gasPriceInGwei * avaxPriceInUsd) / 1_000_000_000
+}
+
+export async function getExecutionGasAmount(transactionResponse: TransactionResponse) {
+  return (await transactionResponse.wait()).gasUsed.toNumber()
+}
+
+export async function increaseEvmTimeBySeconds(seconds: number) {
+  await expectSuccess(ethers.provider.send("evm_increaseTime", [3600 * 48]))
+  await expectSuccess(ethers.provider.send("evm_mine", []))
+}
+
 export async function deployStrategy(
   strategyContractName: string,
   investnemtTokenName: string,
   investnemtTokenTicker: string,
   depositToken: any,
   depositFee: number,
+  depositFeeParams: any[],
   withdrawalFee: number,
+  withdrawalFeeParams: any[],
   performanceFee: number,
+  performanceFeeParams: any[],
+  feeReceiver: string,
+  feeReceiverParams: any[],
+  totalInvestmentLimit: BigInt,
+  investmentLimitPerAddress: BigInt,
   strategyExtraArgs: any[]
 ) {
-  const strategyToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
+  const investableToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
   const strategy = await expectSuccess(deployContract(strategyContractName, []))
-  await expectSuccess(strategyToken.transferOwnership(strategy.address))
+  await expectSuccess(investableToken.transferOwnership(strategy.address))
   await expectSuccess(
     strategy.initialize(
-      strategyToken.address,
-      depositToken.address,
-      depositFee,
-      withdrawalFee,
-      performanceFee,
+      [
+        investableToken.address,
+        depositToken.address,
+        depositFee,
+        depositFeeParams,
+        withdrawalFee,
+        withdrawalFeeParams,
+        performanceFee,
+        performanceFeeParams,
+        feeReceiver,
+        feeReceiverParams,
+        totalInvestmentLimit,
+        investmentLimitPerAddress,
+      ],
       ...strategyExtraArgs
     )
   )
@@ -58,18 +93,43 @@ export async function deployPortfolio(
   investnemtTokenName: string,
   investnemtTokenTicker: string,
   depositToken: any,
-  investables: any[]
+  investables: any[],
+  depositFee: number,
+  depositFeeParams: any[],
+  withdrawalFee: number,
+  withdrawalFeeParams: any[],
+  performanceFee: number,
+  performanceFeeParams: any[],
+  feeReceiver: string,
+  feeReceiverParams: any[],
+  totalInvestmentLimit: BigInt,
+  investmentLimitPerAddress: BigInt,
+  allocations: number[][]
 ) {
-  const portfolioToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
+  const investableToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
   const portfolio = await expectSuccess(deployContract(portfolioContractName, []))
-  await expectSuccess(portfolioToken.transferOwnership(portfolio.address))
+  await expectSuccess(investableToken.transferOwnership(portfolio.address))
 
-  await expectSuccess(portfolio.initialize(portfolioToken.address, depositToken.address))
-  for (let investable of investables) {
-    await expectSuccess(portfolio.addInvestable(investable.address))
+  await expectSuccess(
+    portfolio.initialize([
+      investableToken.address,
+      depositToken.address,
+      depositFee,
+      depositFeeParams,
+      withdrawalFee,
+      withdrawalFeeParams,
+      performanceFee,
+      performanceFeeParams,
+      feeReceiver,
+      feeReceiverParams,
+      totalInvestmentLimit,
+      investmentLimitPerAddress,
+    ])
+  )
+  for (const [index, investable] of investables.entries()) {
+    await expectSuccess(portfolio.addInvestable(investable.address, allocations[index], []))
   }
 
-  await expectSuccess(portfolio.setTargetInvestableAllocations([25000, 75000, 0]))
   return portfolio
 }
 
@@ -140,4 +200,16 @@ export const CoinAddrs = {
 export const ContractAddrs = {
   aavePool: "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
   gmxRewardRouter: "0x82147C5A7E850eA4E28155DF107F2590fD4ba327",
+}
+
+export function logCyan(text: string) {
+  console.log("\x1b[36m%s\x1b[0m", text)
+}
+
+export function logBlue(text: string) {
+  console.log("\x1b[34m%s\x1b[0m", text)
+}
+
+export function logRed(text: string) {
+  console.log("\x1b[31m%s\x1b[0m", text)
 }

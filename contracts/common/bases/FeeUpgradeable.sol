@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+import "../Common.sol";
 import "../interfaces/IFee.sol";
 import "../libraries/Math.sol";
 
@@ -11,61 +12,136 @@ abstract contract FeeUpgradeable is ContextUpgradeable, IFee {
     uint24 internal withdrawalFee;
     uint24 internal depositFee;
     uint24 internal performanceFee;
-    uint256 public currentAccumulatedFee;
-    uint256 public claimedFee;
-    address public feeReceiver;
+    uint256 internal currentAccumulatedFee;
+    uint256 internal claimedFee;
+    address internal feeReceiver;
+    uint256[40] private futureFeaturesGap;
 
     // solhint-disable-next-line func-name-mixedcase
-    function __FeeOwnableUpgradeable_init(
+    function __FeeUpgradeable_init(
         uint24 depositFee_,
+        NameValuePair[] calldata depositFeeParams_,
         uint24 withdrawalFee_,
-        uint24 performanceFee_
+        NameValuePair[] calldata withdrawFeeParams_,
+        uint24 performanceFee_,
+        NameValuePair[] calldata performanceFeeParams_,
+        address feeReceiver_,
+        NameValuePair[] calldata feeReceiverParams_
     ) internal onlyInitializing {
         __Context_init();
-        setDepositFee(depositFee_);
-        setWithdrawalFee(withdrawalFee_);
-        setPerformanceFee(performanceFee_);
-        setFeeReceiver(_msgSender());
+        setDepositFee(depositFee_, depositFeeParams_);
+        setWithdrawalFee(withdrawalFee_, withdrawFeeParams_);
+        setPerformanceFee(performanceFee_, performanceFeeParams_);
+        setFeeReceiver(feeReceiver_, feeReceiverParams_);
     }
 
-    modifier checkFee() {
+    modifier checkFee(uint24 fee) {
+        if (fee >= uint256(100) * Math.SHORT_FIXED_DECIMAL_FACTOR)
+            revert InvalidFeeError();
+
         _;
-
-        if (
-            withdrawalFee + depositFee + performanceFee >=
-            uint256(100) * Math.SHORT_FIXED_DECIMAL_FACTOR
-        ) revert InvalidFeeError();
     }
 
-    function getDepositFee() external virtual override returns (uint24) {
+    function getDepositFee(NameValuePair[] calldata)
+        public
+        view
+        virtual
+        override
+        returns (uint24)
+    {
         return depositFee;
     }
 
-    function setDepositFee(uint24 fee) public virtual override checkFee {
+    function setDepositFee(uint24 fee, NameValuePair[] calldata params)
+        public
+        virtual
+        override
+        checkFee(fee)
+    {
         depositFee = fee;
-        emit DepositFeeChange(depositFee);
+        emit DepositFeeChange(depositFee, params);
     }
 
-    function getWithdrawalFee() external virtual override returns (uint24) {
+    function getWithdrawalFee(NameValuePair[] calldata)
+        public
+        view
+        virtual
+        override
+        returns (uint24)
+    {
         return withdrawalFee;
     }
 
-    function setWithdrawalFee(uint24 fee) public virtual override checkFee {
+    function setWithdrawalFee(uint24 fee, NameValuePair[] calldata params)
+        public
+        virtual
+        override
+        checkFee(fee)
+    {
         withdrawalFee = fee;
-        emit WithdrawalFeeChange(withdrawalFee);
+        emit WithdrawalFeeChange(withdrawalFee, params);
     }
 
-    function getPerformanceFee() external virtual override returns (uint24) {
+    function getPerformanceFee(NameValuePair[] calldata)
+        public
+        view
+        virtual
+        override
+        returns (uint24)
+    {
         return performanceFee;
     }
 
-    function setPerformanceFee(uint24 fee) public virtual override checkFee {
+    function setPerformanceFee(uint24 fee, NameValuePair[] calldata params)
+        public
+        virtual
+        override
+        checkFee(fee)
+    {
         performanceFee = fee;
-        emit PerformanceFeeChange(performanceFee);
+        emit PerformanceFeeChange(performanceFee, params);
     }
 
-    function setFeeReceiver(address feeReceiver_) public virtual override {
+    function getFeeReceiver(NameValuePair[] calldata)
+        external
+        view
+        virtual
+        override
+        returns (address)
+    {
+        return feeReceiver;
+    }
+
+    function setFeeReceiver(
+        address feeReceiver_,
+        NameValuePair[] calldata params
+    ) public virtual override {
         feeReceiver = feeReceiver_;
-        emit FeeReceiverChange(feeReceiver);
+        emit FeeReceiverChange(feeReceiver, params);
+    }
+
+    function getCurrentAccumulatedFee()
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        return currentAccumulatedFee;
+    }
+
+    function getClaimedFee() public view virtual override returns (uint256) {
+        return claimedFee;
+    }
+
+    function setClaimedFee(uint256 claimedFee_) internal virtual {
+        claimedFee = claimedFee_;
+    }
+
+    function setCurrentAccumulatedFee(uint256 currentAccumulatedFee_)
+        internal
+        virtual
+    {
+        currentAccumulatedFee = currentAccumulatedFee_;
     }
 }

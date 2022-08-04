@@ -1,7 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../../common/bases/StrategyOwnableBaseUpgradeable.sol";
+import "./TemplateStrategyStorageLib.sol";
+import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 import "../../common/InvestmentToken.sol";
 
 import "hardhat/console.sol";
@@ -9,7 +10,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-contract TemplateStrategy is StrategyOwnableBaseUpgradeable {
+contract TemplateStrategy is StrategyOwnablePausableBaseUpgradeable {
+    // solhint-disable-next-line const-name-snakecase
+    string public constant name =
+        "block42.template_strategy.<insert git label here>";
+    // solhint-disable-next-line const-name-snakecase
+    string public constant humanReadableName = "Template strategy";
+    // solhint-disable-next-line const-name-snakecase
+    string public constant version = "1.0.0";
+
     using SafeERC20Upgradeable for IInvestmentToken;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -17,27 +26,21 @@ contract TemplateStrategy is StrategyOwnableBaseUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(
-        IInvestmentToken investmentToken_,
-        IERC20Upgradeable depositToken_,
-        uint24 depositFee_,
-        uint24 withdrawalFee_,
-        uint24 performanceFee_
-    ) external initializer {
-        __StrategyOwnableBaseUpgradeable_init(
-            investmentToken_,
-            depositToken_,
-            depositFee_,
-            withdrawalFee_,
-            performanceFee_
-        );
+    function initialize(StrategyArgs calldata strategyArgs)
+        external
+        initializer
+    {
+        __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
     }
 
-    function _deposit(uint256 amount, NameValuePair[] calldata)
-        internal
-        virtual
-        override
-    {}
+    function _deposit(
+        uint256, /* amount */
+        NameValuePair[] calldata /* params */
+    ) internal virtual override {
+        TemplateStrategyStorage
+            storage strategyStorage = TemplateStrategyStorageLib.getStorage();
+        strategyStorage.dataA = "this is just an example of using the storage";
+    }
 
     function _withdraw(uint256 amount, NameValuePair[] calldata)
         internal
@@ -53,21 +56,41 @@ contract TemplateStrategy is StrategyOwnableBaseUpgradeable {
         // contains the interaction with DEFI protocols to reap the rewards
     }
 
-    function getAssets()
+    function getAssetBalances()
         external
         view
         virtual
         override
-        returns (Asset[] memory)
-    {
-        Asset[] memory res;
-        return res;
-    }
+        returns (Balance[] memory assetBalances)
+    {}
 
-    function getTotalAUM(
+    function getLiabilityBalances()
+        external
+        view
+        virtual
+        override
+        returns (Balance[] memory liabilityBalances)
+    {}
+
+    function getAssetValuations(
         bool, /*shouldMaximise*/
         bool /*shouldIncludeAmmPrice*/
-    ) public view virtual override returns (uint256) {
-        return 0;
-    }
+    )
+        public
+        view
+        virtual
+        override
+        returns (Valuation[] memory assetValuations)
+    {}
+
+    function getLiabilityValuations(
+        bool, /*shouldMaximise*/
+        bool /*shouldIncludeAmmPrice*/
+    )
+        public
+        view
+        virtual
+        override
+        returns (Valuation[] memory liabilityValuations)
+    {}
 }
