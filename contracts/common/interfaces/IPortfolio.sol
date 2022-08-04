@@ -4,9 +4,14 @@ pragma solidity ^0.8.0;
 import "../Common.sol";
 import "../interfaces/IInvestable.sol";
 
-struct InvestableAllocation {
-    IInvestable investableAddr;
-    uint24 allocationPct;
+// Ideally this struct would contain NameValuePair[], however
+// that would result in 'Copying of type struct memory[] memory to storage not yet supported'
+// when this struct is pushed to a storage array
+struct InvestableDesc {
+    IInvestable investable;
+    uint24 allocationPercentage;
+    string[] keys;
+    string[] values;
 }
 
 interface IPortfolio is IInvestable {
@@ -16,25 +21,52 @@ interface IPortfolio is IInvestable {
     error RebalancePercentageNot100();
     error RebalanceIncorrectAllocationsLength();
 
-    event InvestableAdd(IInvestable investable);
-    event InvestableRemove(IInvestable investable);
-    event TargetInvestableAllocationsSet(uint256[] newAllocations);
+    event InvestableAdd(
+        IInvestable investable,
+        uint24[] newAllocations,
+        NameValuePair[] params
+    );
+    event InvestableRemove(IInvestable investable, uint24[] newAllocations);
+    event InvestableChange(IInvestable investable, NameValuePair[] params);
+    event TargetInvestableAllocationsSet(uint24[] newAllocations);
     event Rebalance();
 
-    function addInvestable(IInvestable investable) external;
+    struct PortfolioArgs {
+        IInvestmentToken investmentToken;
+        IERC20Upgradeable depositToken;
+        uint24 depositFee;
+        NameValuePair[] depositFeeParams;
+        uint24 withdrawalFee;
+        NameValuePair[] withdrawFeeParams;
+        uint24 performanceFee;
+        NameValuePair[] performanceFeeParams;
+        address feeReceiver;
+        NameValuePair[] feeReceiverParams;
+        uint256 totalInvestmentLimit;
+        uint256 investmentLimitPerAddress;
+    }
 
-    function removeInvestable(IInvestable investable) external;
+    function addInvestable(
+        IInvestable investable,
+        uint24[] calldata newAllocations,
+        NameValuePair[] calldata params
+    ) external;
 
-    function setTargetInvestableAllocations(uint256[] calldata newAllocations)
+    function removeInvestable(
+        IInvestable investable,
+        uint24[] calldata newAllocations
+    ) external;
+
+    function changeInvestable(
+        IInvestable investable,
+        NameValuePair[] calldata params
+    ) external;
+
+    function setTargetInvestableAllocations(uint24[] calldata newAllocations)
         external;
 
     function rebalance(
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams
     ) external;
-
-    function getTargetInvestableAllocations()
-        external
-        view
-        returns (InvestableAllocation[] memory investableAllocations);
 }
