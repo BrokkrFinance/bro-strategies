@@ -111,4 +111,8 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         override
         returns (Valuation[] memory liabilityValuations)
     {}
+
+    function getStargateLpBalance() public view returns (uint256) {
+        return stargateLpStaking.userInfo(stargateFarmId, address(this)).amount;
+    }
 }
