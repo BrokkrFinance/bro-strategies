@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
+import "../../common/libraries/InvestableLib.sol";
 import "../../dependencies/stargate/IStargateLpStaking.sol";
 import "../../dependencies/stargate/IStargatePool.sol";
 import "../../dependencies/stargate/IStargateRouter.sol";
@@ -86,7 +87,13 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
         returns (Balance[] memory assetBalances)
-    {}
+    {
+        assetBalances = new Balance[](1);
+        assetBalances[0] = Balance(
+            address(stargateLpToken),
+            getStargateLpBalance()
+        );
+    }
 
     function getLiabilityBalances()
         external
@@ -96,13 +103,31 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function getAssetValuations(bool, bool)
+    function getAssetValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
         public
         view
         virtual
         override
         returns (Valuation[] memory assetValuations)
-    {}
+    {
+        assetValuations = new Valuation[](1);
+        assetValuations[0] = Valuation(
+            address(stargateLpToken),
+            (getStargateLpBalance() * stargatePool.totalLiquidity()) /
+                stargatePool.totalSupply()
+        );
+
+        if (depositToken != stargateDepositToken) {
+            assetValuations[0].valuation =
+                (assetValuations[0].valuation *
+                    priceOracle.getPrice(
+                        stargateDepositToken,
+                        shouldMaximise,
+                        shouldIncludeAmmPrice
+                    )) /
+                InvestableLib.PRICE_PRECISION_FACTOR;
+        }
+    }
 
     function getLiabilityValuations(bool, bool)
         public
