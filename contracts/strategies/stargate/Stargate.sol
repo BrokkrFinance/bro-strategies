@@ -115,7 +115,15 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         }
     }
 
-    function _reapReward(NameValuePair[] calldata) internal virtual override {}
+    function _reapReward(NameValuePair[] calldata) internal virtual override {
+        stargateLpStaking.deposit(stargateFarmId, 0);
+
+        swapToken(
+            stargateStgToken,
+            depositToken,
+            stargateStgToken.balanceOf(address(this))
+        );
+    }
 
     function getAssetBalances()
         external
