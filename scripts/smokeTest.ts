@@ -6,7 +6,7 @@ import {
   deployFreeMoneyProvider,
   deployPortfolio,
   deployProxyContract,
-  deployStrategy,
+  deployUpgradeableStrategy,
   expectSuccess,
   logBlue,
   logCyan,
@@ -16,7 +16,7 @@ config.includeStack = true
 
 deployFreeMoneyProvider
 deployPortfolio
-deployStrategy
+deployUpgradeableStrategy
 logBlue
 logCyan
 logRed
@@ -96,7 +96,7 @@ describe("Unified strategy interface and base implementation", function () {
 
     const freeMoneyProvider = await deployFreeMoneyProvider()
     const depositToken = await deployProxyContract("InvestmentToken", ["FakeUSD", "USDF"])
-    const strategy1 = await deployStrategy(
+    const strategy1 = await deployUpgradeableStrategy(
       "MockStrategy",
       "Super Strategy Token 1",
       "SUP1",
@@ -114,7 +114,7 @@ describe("Unified strategy interface and base implementation", function () {
       "0xce70b9444c4e22ae150C81dA7375542B49D15efA",
       [2, freeMoneyProvider.address]
     )
-    const strategy2 = await deployStrategy(
+    const strategy2 = await deployUpgradeableStrategy(
       "MockStrategy",
       "Super Strategy Token 2",
       "SUP2",
@@ -132,7 +132,7 @@ describe("Unified strategy interface and base implementation", function () {
       "0xce70b9444c4e22ae150C81dA7375542B49D15efA",
       [1, freeMoneyProvider.address]
     )
-    const strategy3 = await deployStrategy(
+    const strategy3 = await deployUpgradeableStrategy(
       "MockStrategy",
       "Super Strategy Token 3",
       "SUP3",
