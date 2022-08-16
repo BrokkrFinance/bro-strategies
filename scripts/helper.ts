@@ -49,7 +49,7 @@ export async function deployPriceOracle(vendorFeed: string, baseCurrency: string
   return await deployProxyContract("AaveOracle", [vendorFeed, baseCurrency])
 }
 
-export async function deployStrategy(
+export async function deployUpgradeableStrategy(
   strategyContractName: string,
   investnemtTokenName: string,
   investnemtTokenTicker: string,
@@ -65,31 +65,33 @@ export async function deployStrategy(
   totalInvestmentLimit: BigInt,
   investmentLimitPerAddress: BigInt,
   priceOracle: string,
+  swapServiceProvider: number,
+  swapServiceRouter: string,
   strategyExtraArgs: any[]
 ) {
   const investableToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
-  const strategy = await expectSuccess(deployContract(strategyContractName, []))
+  const strategy = await deployProxyContract(strategyContractName, [
+    [
+      investableToken.address,
+      depositToken.address,
+      CoinAddrs.wAvax,
+      depositFee,
+      depositFeeParams,
+      withdrawalFee,
+      withdrawalFeeParams,
+      performanceFee,
+      performanceFeeParams,
+      feeReceiver,
+      feeReceiverParams,
+      totalInvestmentLimit,
+      investmentLimitPerAddress,
+      priceOracle,
+      swapServiceProvider,
+      swapServiceRouter,
+    ],
+    ...strategyExtraArgs,
+  ])
   await expectSuccess(investableToken.transferOwnership(strategy.address))
-  await expectSuccess(
-    strategy.initialize(
-      [
-        investableToken.address,
-        depositToken.address,
-        depositFee,
-        depositFeeParams,
-        withdrawalFee,
-        withdrawalFeeParams,
-        performanceFee,
-        performanceFeeParams,
-        feeReceiver,
-        feeReceiverParams,
-        totalInvestmentLimit,
-        investmentLimitPerAddress,
-        priceOracle,
-      ],
-      ...strategyExtraArgs
-    )
-  )
 
   return strategy
 }
@@ -184,11 +186,11 @@ export async function contractAt(name: string, address: string, provider?: any) 
 }
 
 export async function getUsdcContract() {
-  return await ethers.getContractAt(erc20abi, CoinAddrs["usdc"])
+  return await ethers.getContractAt(erc20abi, CoinAddrs.usdc)
 }
 
 export async function getUsdtContract() {
-  return await ethers.getContractAt(erc20abi, CoinAddrs["usdt"])
+  return await ethers.getContractAt(erc20abi, CoinAddrs.usdt)
 }
 
 export async function getTokenContract(address: string) {
