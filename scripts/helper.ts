@@ -187,12 +187,17 @@ export async function getUsdcContract() {
   return await ethers.getContractAt(erc20abi, CoinAddrs["usdc"])
 }
 
+export async function getUsdtContract() {
+  return await ethers.getContractAt(erc20abi, CoinAddrs["usdt"])
+}
+
 export async function getTokenContract(address: string) {
   return await ethers.getContractAt(erc20abi, address)
 }
 
 export const CoinAddrs = {
   usdc: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  usdt: "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
   btc: "0x50b7545627a5162F82A992c33b87aDc75187B218",
   eth: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB",
   wAvax: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
