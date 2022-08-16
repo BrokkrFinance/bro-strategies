@@ -90,7 +90,30 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         internal
         virtual
         override
-    {}
+    {
+        uint256 stargateDepositTokenBalanceBefore = stargateDepositToken
+            .balanceOf(address(this));
+        uint256 lpBalanceToWithdraw = (getStargateLpBalance() * amount) /
+            getInvestmentTokenSupply();
+        stargateLpStaking.withdraw(stargateFarmId, lpBalanceToWithdraw);
+        stargateRouter.instantRedeemLocal(
+            uint16(stargatePoolId),
+            lpBalanceToWithdraw,
+            address(this)
+        );
+        uint256 stargateDepositTokenBalanceAfter = stargateDepositToken
+            .balanceOf(address(this));
+
+        if (depositToken != stargateDepositToken) {
+            uint256 stargateDepositTokenBalanceIncrement = stargateDepositTokenBalanceAfter -
+                    stargateDepositTokenBalanceBefore;
+            swapToken(
+                stargateDepositToken,
+                depositToken,
+                stargateDepositTokenBalanceIncrement
+            );
+        }
+    }
 
     function _reapReward(NameValuePair[] calldata) internal virtual override {}
 
