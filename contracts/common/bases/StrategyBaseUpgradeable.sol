@@ -101,9 +101,23 @@ abstract contract StrategyBaseUpgradeable is
         emit Deposit(_msgSender(), investableTokenReceiver, amount);
     }
 
+    function _beforeWithdraw(
+        uint256, /*amount*/
+        NameValuePair[] calldata /*params*/
+    ) internal virtual returns (uint256) {
+        return depositToken.balanceOf(address(this));
+    }
+
     function _withdraw(uint256 amount, NameValuePair[] calldata params)
         internal
         virtual;
+
+    function _afterWithdraw(
+        uint256, /*amount*/
+        NameValuePair[] calldata /*params*/
+    ) internal virtual returns (uint256) {
+        return depositToken.balanceOf(address(this));
+    }
 
     function withdraw(
         uint256 amount,
@@ -112,19 +126,15 @@ abstract contract StrategyBaseUpgradeable is
     ) public virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountWithdrawn();
 
-        investmentToken.burnFrom(_msgSender(), amount);
-        uint256 depositTokenBalanceBefore = depositToken.balanceOf(
-            address(this)
-        );
-
+        uint256 depositTokenBalanceBefore = _beforeWithdraw(amount, params);
         _withdraw(amount, params);
-
-        uint256 withdrewAmount = depositToken.balanceOf(address(this)) -
+        uint256 withdrewAmount = _afterWithdraw(amount, params) -
             depositTokenBalanceBefore;
         uint256 feeAmount = (withdrewAmount * getWithdrawalFee(params)) /
             Math.SHORT_FIXED_DECIMAL_FACTOR /
             100;
 
+        investmentToken.burnFrom(_msgSender(), amount);
         setCurrentAccumulatedFee(getCurrentAccumulatedFee() + feeAmount);
         depositToken.safeTransfer(
             depositTokenReceiver,

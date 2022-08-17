@@ -4,7 +4,8 @@
 
 ### High priority
 
-1. create a cash strategy for the wrapper portfolio
+1. <s>create a cash strategy for the wrapper portfolio</s>
+1. add a new price oracle supporting USDT
 1. create reusable tests for portfolios and strategies
 1. deposits on the portfolio should respect the caps on the the embedded investables
 1. deposits on the portfolio should respect the pausability of the embedded investables
@@ -17,6 +18,7 @@
 
 ### Medium priority
 
+1. create our own price oracle instead of depending on other projects
 1. rebalancing should be precise even in the presence of fees
 1. add rebalancePair(IInvestable investable1, uint256 allocationPercentage1, IInvestable investable2, uint256 allocationPercentage2) to the portfolio interface, and implement it, so rebalancing can be done offchain
 1. implement taking all 3 kind of fees on the portfolio level
