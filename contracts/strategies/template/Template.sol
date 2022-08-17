@@ -1,16 +1,15 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "./TemplateStrategyStorageLib.sol";
+import "./TemplateStorageLib.sol";
 import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 import "../../common/InvestmentToken.sol";
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-contract TemplateStrategy is StrategyOwnablePausableBaseUpgradeable {
+contract Template is StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
         "block42.template_strategy.<insert git label here>";
@@ -37,8 +36,8 @@ contract TemplateStrategy is StrategyOwnablePausableBaseUpgradeable {
         uint256, /* amount */
         NameValuePair[] calldata /* params */
     ) internal virtual override {
-        TemplateStrategyStorage
-            storage strategyStorage = TemplateStrategyStorageLib.getStorage();
+        TemplateStorage storage strategyStorage = TemplateStorageLib
+            .getStorage();
         strategyStorage.dataA = "this is just an example of using the storage";
     }
 

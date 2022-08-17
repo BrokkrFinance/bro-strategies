@@ -1,22 +1,18 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-struct TemplateStrategyStorage {
+struct TemplateStorage {
     string dataA;
     uint256 dataB;
 }
 
-library TemplateStrategyStorageLib {
-    // keccak256("block42.storage.template.strategy.v1");
+library TemplateStorageLib {
+    // keccak256("block42.storage.template.strategy");
     // solhint-disable-next-line const-name-snakecase
     bytes32 private constant storagePosition =
-        0x88daa2ea2983d6fbb5b162a7cee941255b0635529ebe8f4d39b6617d0f84ccc7;
+        0x2aa4f97c53f130d09247b52aa489416dfecd008354a1c3a83587b5d6ed2b6da1;
 
-    function getStorage()
-        internal
-        pure
-        returns (TemplateStrategyStorage storage ts)
-    {
+    function getStorage() internal pure returns (TemplateStorage storage ts) {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ts.slot := storagePosition

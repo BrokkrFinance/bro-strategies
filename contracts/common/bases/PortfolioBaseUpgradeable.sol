@@ -254,7 +254,6 @@ abstract contract PortfolioBaseUpgradeable is
     ) external virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountWithdrawn();
         uint256 investmentTokenSupply = getInvestmentTokenSupply();
-        investmentToken.burnFrom(_msgSender(), amount);
         uint256 withdrewAmount = depositToken.balanceOf(address(this));
         emit Withdrawal(_msgSender(), depositTokenReceiver, amount);
         for (uint256 i = 0; i < investableDescs.length; i++) {
@@ -274,6 +273,7 @@ abstract contract PortfolioBaseUpgradeable is
             );
         }
         withdrewAmount = depositToken.balanceOf(address(this)) - withdrewAmount;
+        investmentToken.burnFrom(_msgSender(), amount);
         depositToken.safeTransfer(depositTokenReceiver, withdrewAmount);
     }
 
