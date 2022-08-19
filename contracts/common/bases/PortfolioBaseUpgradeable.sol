@@ -17,6 +17,21 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
+struct PortfolioArgs {
+    IInvestmentToken investmentToken;
+    IERC20Upgradeable depositToken;
+    uint24 depositFee;
+    NameValuePair[] depositFeeParams;
+    uint24 withdrawalFee;
+    NameValuePair[] withdrawFeeParams;
+    uint24 performanceFee;
+    NameValuePair[] performanceFeeParams;
+    address feeReceiver;
+    NameValuePair[] feeReceiverParams;
+    uint256 totalInvestmentLimit;
+    uint256 investmentLimitPerAddress;
+}
+
 abstract contract PortfolioBaseUpgradeable is
     ReentrancyGuardUpgradeable,
     ERC165Upgradeable,

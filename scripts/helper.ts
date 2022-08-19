@@ -45,6 +45,10 @@ export async function increaseEvmTimeBySeconds(seconds: number) {
   await expectSuccess(ethers.provider.send("evm_mine", []))
 }
 
+export async function deployPriceOracle(vendorFeed: string, baseCurrency: string) {
+  return await deployProxyContract("AaveOracle", [vendorFeed, baseCurrency])
+}
+
 export async function deployStrategy(
   strategyContractName: string,
   investnemtTokenName: string,
@@ -60,6 +64,7 @@ export async function deployStrategy(
   feeReceiverParams: any[],
   totalInvestmentLimit: BigInt,
   investmentLimitPerAddress: BigInt,
+  priceOracle: string,
   strategyExtraArgs: any[]
 ) {
   const investableToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
@@ -80,6 +85,7 @@ export async function deployStrategy(
         feeReceiverParams,
         totalInvestmentLimit,
         investmentLimitPerAddress,
+        priceOracle,
       ],
       ...strategyExtraArgs
     )
@@ -199,7 +205,9 @@ export const CoinAddrs = {
 
 export const ContractAddrs = {
   aavePool: "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
+  aaveOracle: "0xEBd36016B3eD09D4693Ed4251c67Bd858c3c7C9C",
   gmxRewardRouter: "0x82147C5A7E850eA4E28155DF107F2590fD4ba327",
+  gmxOracle: "0x81b7e71a1d9e08a6ca016a0f4d6fa50dbce89ee3",
 }
 
 export function logCyan(text: string) {

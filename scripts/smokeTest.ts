@@ -111,6 +111,7 @@ describe("Unified strategy interface and base implementation", function () {
       [],
       BigInt(10 ** 20),
       BigInt(10 ** 20),
+      "0xce70b9444c4e22ae150C81dA7375542B49D15efA",
       [2, freeMoneyProvider.address]
     )
     const strategy2 = await deployStrategy(
@@ -128,6 +129,7 @@ describe("Unified strategy interface and base implementation", function () {
       [],
       BigInt(10 ** 20),
       BigInt(10 ** 20),
+      "0xce70b9444c4e22ae150C81dA7375542B49D15efA",
       [1, freeMoneyProvider.address]
     )
     const strategy3 = await deployStrategy(
@@ -145,6 +147,7 @@ describe("Unified strategy interface and base implementation", function () {
       [],
       BigInt(10 ** 20),
       BigInt(10 ** 20),
+      "0xce70b9444c4e22ae150C81dA7375542B49D15efA",
       [1, freeMoneyProvider.address]
     )
 

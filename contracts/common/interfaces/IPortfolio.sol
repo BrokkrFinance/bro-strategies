@@ -31,21 +31,6 @@ interface IPortfolio is IInvestable {
     event TargetInvestableAllocationsSet(uint24[] newAllocations);
     event Rebalance();
 
-    struct PortfolioArgs {
-        IInvestmentToken investmentToken;
-        IERC20Upgradeable depositToken;
-        uint24 depositFee;
-        NameValuePair[] depositFeeParams;
-        uint24 withdrawalFee;
-        NameValuePair[] withdrawFeeParams;
-        uint24 performanceFee;
-        NameValuePair[] performanceFeeParams;
-        address feeReceiver;
-        NameValuePair[] feeReceiverParams;
-        uint256 totalInvestmentLimit;
-        uint256 investmentLimitPerAddress;
-    }
-
     function addInvestable(
         IInvestable investable,
         uint24[] calldata newAllocations,
