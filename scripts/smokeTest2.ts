@@ -2,6 +2,7 @@ import { providers } from "ethers"
 import { ethers } from "hardhat"
 
 import {
+  ContractAddrs,
   deployProxyContract,
   deployStrategy,
   expectSuccess,
@@ -13,6 +14,7 @@ import {
 } from "./helper"
 type TransactionResponse = providers.TransactionResponse
 
+ContractAddrs
 deployProxyContract
 deployStrategy
 expectSuccess
@@ -47,29 +49,35 @@ describe("DNS Vector", function () {
     // depoloy contracts
 
     const priceOracle = await expectSuccess(
-      deployProxyContract("GmxOracle", [
-        "0x81b7e71a1d9e08a6ca016a0f4d6fa50dbce89ee3",
-        "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
-      ])
+      deployPriceOracle(ContractAddrs.gmxOracle, (await getUsdcContract()).address)
     )
 
     const strategy = await expectSuccess(
-      deployStrategy("DnsVectorStrategy", "Super Strategy Token 2", "SUP2", usdcContract, 0, 0, 0, [
+      deployStrategy(
+        "DnsVectorStrategy",
+        "Super Strategy Token 2",
+        "SUP2",
+        usdcContract,
+        0,
+        0,
+        0,
+        priceOracle.address,
         [
-          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // Usdc
-          "0x625E7708f30cA75bfd92586e17077590C60eb4cD", // wAave usdc supply token
-          "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", // wAvax
-          "0x4a1c3aD6Ed28a636ee1751C69071f6be75DEb8B8", // Aave variable wAvax debt token
-          "0xf4003f4efbe8691b60249e6afbd307abe7758adb", // Usdc wAvax joe lp token
-          "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd", // Joe token
-          priceOracle.address, // price oracle
-          "0x794a61358D6845594F94dc1DB02A252b5b4814aD", // Aave pool
-          "0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654", // Aave protocol data provider
-          "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", // TraderJoe router
-          "0xf4003F4efBE8691B60249E6afbD307aBE7758adb", // TraderJeo pair (same as the LP token in TraderJoe's implementation)
-          "0x9ef319429c4d32bc98957881723070dbca036b39", // Vector pool helper joe
-        ], // Aave data provider
-      ])
+          [
+            "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // Usdc
+            "0x625E7708f30cA75bfd92586e17077590C60eb4cD", // wAave usdc supply token
+            "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", // wAvax
+            "0x4a1c3aD6Ed28a636ee1751C69071f6be75DEb8B8", // Aave variable wAvax debt token
+            "0xf4003f4efbe8691b60249e6afbd307abe7758adb", // Usdc wAvax joe lp token
+            "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd", // Joe token
+            "0x794a61358D6845594F94dc1DB02A252b5b4814aD", // Aave pool
+            "0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654", // Aave protocol data provider
+            "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", // TraderJoe router
+            "0xf4003F4efBE8691B60249E6afbD307aBE7758adb", // TraderJeo pair (same as the LP token in TraderJoe's implementation)
+            "0x9ef319429c4d32bc98957881723070dbca036b39", // Vector pool helper joe
+          ], // Aave data provider
+        ]
+      )
     )
 
     console.log("Assets before deposit: ", JSON.stringify(await strategy.getAssets()))

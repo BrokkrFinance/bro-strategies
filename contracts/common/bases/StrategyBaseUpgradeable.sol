@@ -7,6 +7,7 @@ import "../libraries/InvestableLib.sol";
 import "./FeeUpgradeable.sol";
 import "./InvestmentLimitUpgradeable.sol";
 import "../interfaces/IStrategy.sol";
+import "../interfaces/IPriceOracle.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
@@ -14,6 +15,22 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+
+struct StrategyArgs {
+    IInvestmentToken investmentToken;
+    IERC20Upgradeable depositToken;
+    uint24 depositFee;
+    NameValuePair[] depositFeeParams;
+    uint24 withdrawalFee;
+    NameValuePair[] withdrawFeeParams;
+    uint24 performanceFee;
+    NameValuePair[] performanceFeeParams;
+    address feeReceiver;
+    NameValuePair[] feeReceiverParams;
+    uint256 totalInvestmentLimit;
+    uint256 investmentLimitPerAddress;
+    IPriceOracle priceOracle;
+}
 
 abstract contract StrategyBaseUpgradeable is
     ReentrancyGuardUpgradeable,
@@ -28,7 +45,7 @@ abstract contract StrategyBaseUpgradeable is
 
     IInvestmentToken internal investmentToken;
     IERC20Upgradeable internal depositToken;
-
+    IPriceOracle public priceOracle;
     uint256[8] private futureFeaturesGap;
 
     // solhint-disable-next-line
@@ -55,6 +72,7 @@ abstract contract StrategyBaseUpgradeable is
         );
         investmentToken = strategyArgs.investmentToken;
         depositToken = strategyArgs.depositToken;
+        setPriceOracle(strategyArgs.priceOracle);
     }
 
     function _deposit(uint256 amount, NameValuePair[] calldata params)
@@ -170,6 +188,10 @@ abstract contract StrategyBaseUpgradeable is
         virtual
         override
     {}
+
+    function setPriceOracle(IPriceOracle priceOracle_) public virtual {
+        priceOracle = priceOracle_;
+    }
 
     function supportsInterface(bytes4 interfaceId)
         public

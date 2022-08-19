@@ -81,4 +81,13 @@ abstract contract StrategyOwnableBaseUpgradeable is
     {
         super.setInvestmentLimitPerAddress(investmentLimitPerAddress);
     }
+
+    function setPriceOracle(IPriceOracle priceOracle)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setPriceOracle(priceOracle);
+    }
 }
