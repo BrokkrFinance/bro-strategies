@@ -12,6 +12,7 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     error InvalidStargateLpToken();
+    error NotEnoughDeltaCredit();
 
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
@@ -91,10 +92,15 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
     {
-        uint256 stargateDepositTokenBalanceBefore = stargateDepositToken
-            .balanceOf(address(this));
         uint256 lpBalanceToWithdraw = (getStargateLpBalance() * amount) /
             getInvestmentTokenSupply();
+
+        if (lpBalanceToWithdraw > stargatePool.deltaCredit()) {
+            revert NotEnoughDeltaCredit();
+        }
+
+        uint256 stargateDepositTokenBalanceBefore = stargateDepositToken
+            .balanceOf(address(this));
         stargateLpStaking.withdraw(stargateFarmId, lpBalanceToWithdraw);
         stargateRouter.instantRedeemLocal(
             uint16(stargatePoolId),
