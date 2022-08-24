@@ -9,4 +9,6 @@ interface IStargatePool {
     function totalSupply() external view returns (uint256);
 
     function totalLiquidity() external view returns (uint256);
+
+    function deltaCredit() external view returns (uint256);
 }
