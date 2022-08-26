@@ -352,28 +352,28 @@ abstract contract StrategyBaseUpgradeable is
         return investmentToken.totalSupply();
     }
 
-    function swapTokens(
+    function swapExactTokensForTokens(
         SwapService memory swapService_,
-        IERC20Upgradeable tokenIn,
-        IERC20Upgradeable tokenOut,
-        uint256 amountIn
+        uint256 amountIn,
+        address[] memory path
     ) internal returns (uint256 amountOut) {
         if (swapService_.provider == SwapServiceProvider.TraderJoe) {
             ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(
                 swapService_.router
             );
 
-            address[] memory paths = new address[](3);
-            paths[0] = address(tokenIn);
-            paths[1] = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); // wAvax
-            paths[2] = address(tokenOut);
-            amountOut = traderjoeRouter.getAmountsOut(amountIn, paths)[2];
+            amountOut = traderjoeRouter.getAmountsOut(amountIn, path)[
+                path.length - 1
+            ];
 
-            tokenIn.approve(address(traderjoeRouter), amountIn);
+            IERC20Upgradeable(path[0]).approve(
+                address(traderjoeRouter),
+                amountIn
+            );
             traderjoeRouter.swapExactTokensForTokens(
                 amountIn,
                 amountOut,
-                paths,
+                path,
                 address(this),
                 block.timestamp
             );

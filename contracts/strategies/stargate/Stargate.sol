@@ -81,12 +81,12 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
             .getStorage();
 
         if (depositToken != strategyStorage.stargateDepositToken) {
-            amount = swapTokens(
-                swapService,
-                depositToken,
-                strategyStorage.stargateDepositToken,
-                amount
-            );
+            address[] memory path = new address[](3);
+            path[0] = address(depositToken);
+            path[1] = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); // wAvax
+            path[2] = address(strategyStorage.stargateDepositToken);
+
+            amount = swapExactTokensForTokens(swapService, amount, path);
         }
 
         uint256 lpBalanceBefore = strategyStorage.stargateLpToken.balanceOf(
@@ -106,6 +106,7 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         );
 
         uint256 lpBalanceIncrement = lpBalanceAfter - lpBalanceBefore;
+
         strategyStorage.stargateLpToken.approve(
             address(strategyStorage.stargateLpStaking),
             lpBalanceIncrement
@@ -150,11 +151,15 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         if (depositToken != strategyStorage.stargateDepositToken) {
             uint256 stargateDepositTokenBalanceIncrement = stargateDepositTokenBalanceAfter -
                     stargateDepositTokenBalanceBefore;
-            swapTokens(
+            address[] memory path = new address[](3);
+            path[0] = address(strategyStorage.stargateDepositToken);
+            path[1] = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); // wAvax
+            path[2] = address(depositToken);
+
+            swapExactTokensForTokens(
                 swapService,
-                strategyStorage.stargateDepositToken,
-                depositToken,
-                stargateDepositTokenBalanceIncrement
+                stargateDepositTokenBalanceIncrement,
+                path
             );
         }
     }
@@ -168,11 +173,15 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
             0
         );
 
-        swapTokens(
+        address[] memory path = new address[](3);
+        path[0] = address(strategyStorage.stargateStgToken);
+        path[1] = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); // wAvax
+        path[2] = address(depositToken);
+
+        swapExactTokensForTokens(
             swapService,
-            strategyStorage.stargateStgToken,
-            depositToken,
-            strategyStorage.stargateStgToken.balanceOf(address(this))
+            strategyStorage.stargateStgToken.balanceOf(address(this)),
+            path
         );
     }
 
