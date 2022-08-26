@@ -74,7 +74,6 @@ export async function deployUpgradeableStrategy(
     [
       investableToken.address,
       depositToken.address,
-      CoinAddrs.wAvax,
       depositFee,
       depositFeeParams,
       withdrawalFee,

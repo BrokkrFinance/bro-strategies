@@ -20,7 +20,6 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 struct StrategyArgs {
     IInvestmentToken investmentToken;
     IERC20Upgradeable depositToken;
-    IERC20Upgradeable wAvaxToken;
     uint24 depositFee;
     NameValuePair[] depositFeeParams;
     uint24 withdrawalFee;
@@ -60,7 +59,6 @@ abstract contract StrategyBaseUpgradeable is
 
     IInvestmentToken internal investmentToken;
     IERC20Upgradeable internal depositToken;
-    IERC20Upgradeable public wAvaxToken;
     IPriceOracle public priceOracle;
     SwapService public swapService;
     uint256[8] private futureFeaturesGap;
@@ -89,7 +87,6 @@ abstract contract StrategyBaseUpgradeable is
         );
         investmentToken = strategyArgs.investmentToken;
         depositToken = strategyArgs.depositToken;
-        wAvaxToken = strategyArgs.wAvaxToken;
         setPriceOracle(strategyArgs.priceOracle);
         setSwapService(
             SwapServiceProvider(strategyArgs.swapServiceProvider),
@@ -355,19 +352,20 @@ abstract contract StrategyBaseUpgradeable is
         return investmentToken.totalSupply();
     }
 
-    function swapToken(
+    function swapTokens(
+        SwapService memory swapService_,
         IERC20Upgradeable tokenIn,
         IERC20Upgradeable tokenOut,
         uint256 amountIn
     ) internal returns (uint256 amountOut) {
-        if (swapService.provider == SwapServiceProvider.TraderJoe) {
+        if (swapService_.provider == SwapServiceProvider.TraderJoe) {
             ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(
-                swapService.router
+                swapService_.router
             );
 
             address[] memory paths = new address[](3);
             paths[0] = address(tokenIn);
-            paths[1] = address(wAvaxToken);
+            paths[1] = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); // wAvax
             paths[2] = address(tokenOut);
             amountOut = traderjoeRouter.getAmountsOut(amountIn, paths)[2];
 
