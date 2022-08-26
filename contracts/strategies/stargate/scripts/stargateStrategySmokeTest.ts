@@ -10,7 +10,7 @@ import {
   getTokenContract,
   getUsdcContract,
   getUsdtContract,
-} from "./helper"
+} from "../../../../scripts/helper"
 
 function printGasUsedAndCost(action: String, txReceipt: TransactionReceipt) {
   const gasUsed = txReceipt.cumulativeGasUsed
