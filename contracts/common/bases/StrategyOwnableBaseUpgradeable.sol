@@ -90,4 +90,13 @@ abstract contract StrategyOwnableBaseUpgradeable is
     {
         super.setPriceOracle(priceOracle);
     }
+
+    function setSwapService(SwapServiceProvider provider, address router)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setSwapService(provider, router);
+    }
 }

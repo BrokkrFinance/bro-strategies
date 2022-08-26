@@ -81,7 +81,8 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
             .getStorage();
 
         if (depositToken != strategyStorage.stargateDepositToken) {
-            amount = swapToken(
+            amount = swapTokens(
+                swapService,
                 depositToken,
                 strategyStorage.stargateDepositToken,
                 amount
@@ -149,7 +150,8 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
         if (depositToken != strategyStorage.stargateDepositToken) {
             uint256 stargateDepositTokenBalanceIncrement = stargateDepositTokenBalanceAfter -
                     stargateDepositTokenBalanceBefore;
-            swapToken(
+            swapTokens(
+                swapService,
                 strategyStorage.stargateDepositToken,
                 depositToken,
                 stargateDepositTokenBalanceIncrement
@@ -166,7 +168,8 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
             0
         );
 
-        swapToken(
+        swapTokens(
+            swapService,
             strategyStorage.stargateStgToken,
             depositToken,
             strategyStorage.stargateStgToken.balanceOf(address(this))
