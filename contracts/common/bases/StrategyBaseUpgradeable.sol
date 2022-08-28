@@ -229,6 +229,10 @@ abstract contract StrategyBaseUpgradeable is
         returns (bool)
     {
         return
+            interfaceId == type(IAum).interfaceId ||
+            interfaceId == type(IFee).interfaceId ||
+            interfaceId == type(IInvestable).interfaceId ||
+            interfaceId == type(IReward).interfaceId ||
             interfaceId == type(IStrategy).interfaceId ||
             super.supportsInterface(interfaceId);
     }

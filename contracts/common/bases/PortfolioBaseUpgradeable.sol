@@ -205,6 +205,9 @@ abstract contract PortfolioBaseUpgradeable is
         returns (bool)
     {
         return
+            interfaceId == type(IAum).interfaceId ||
+            interfaceId == type(IFee).interfaceId ||
+            interfaceId == type(IInvestable).interfaceId ||
             interfaceId == type(IPortfolio).interfaceId ||
             super.supportsInterface(interfaceId);
     }
