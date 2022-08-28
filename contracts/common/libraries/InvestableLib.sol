@@ -53,7 +53,8 @@ library InvestableLib {
         uint256 amountInvestedNow,
         uint256 investableTokenSupplySoFar
     ) internal pure returns (uint256) {
-        if (investableTokenSupplySoFar == 0) return amountInvestedNow;
+        if (investableTokenSupplySoFar == 0 || totalAmountInvestedSoFar == 0)
+            return amountInvestedNow;
         else
             return
                 (amountInvestedNow * investableTokenSupplySoFar) /
