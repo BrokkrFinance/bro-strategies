@@ -75,7 +75,7 @@ contract Cash is StrategyOwnablePausableBaseUpgradeable {
         CashStorage storage strategyStorage = CashStorageLib.getStorage();
         assetBalances = new Balance[](1);
         assetBalances[0] = Balance(
-            address(investmentToken),
+            address(depositToken),
             strategyStorage.balance
         );
     }
@@ -101,7 +101,7 @@ contract Cash is StrategyOwnablePausableBaseUpgradeable {
         CashStorage storage strategyStorage = CashStorageLib.getStorage();
         assetValuations = new Valuation[](1);
         assetValuations[0] = Valuation(
-            address(investmentToken),
+            address(depositToken),
             strategyStorage.balance
         );
     }
