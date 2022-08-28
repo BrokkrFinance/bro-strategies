@@ -3,10 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./PortfolioBaseUpgradeable.sol";
 
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 abstract contract PortfolioOwnableBaseUpgradeable is
     OwnableUpgradeable,
@@ -21,6 +18,8 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         __Ownable_init();
         __PortfolioBaseUpgradeable_init(portfolioArgs);
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function addInvestable(
         IInvestable investable,

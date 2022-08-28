@@ -99,24 +99,4 @@ contract MockStrategy is StrategyOwnablePausableBaseUpgradeable {
     ) public view virtual override returns (uint256) {
         return getInvestmentTokenSupply() * yieldMultiplier;
     }
-
-    function getInvestmentTokenSupply()
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
-        return investmentToken.totalSupply();
-    }
-
-    function getInvestmentTokenBalanceOf(address account)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
-        return investmentToken.balanceOf(account);
-    }
 }

@@ -1,21 +1,21 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../Common.sol";
-import "../InvestmentToken.sol";
-import "../libraries/InvestableLib.sol";
 import "./FeeUpgradeable.sol";
 import "./InvestmentLimitUpgradeable.sol";
-import "../interfaces/IStrategy.sol";
+import "../interfaces/IInvestmentToken.sol";
 import "../interfaces/IPriceOracle.sol";
+import "../interfaces/IStrategy.sol";
+import "../libraries/InvestableLib.sol";
 import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 struct StrategyArgs {
     IInvestmentToken investmentToken;
@@ -36,9 +36,11 @@ struct StrategyArgs {
 }
 
 abstract contract StrategyBaseUpgradeable is
+    Initializable,
+    ContextUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC165Upgradeable,
-    ContextUpgradeable,
+    UUPSUpgradeable,
     FeeUpgradeable,
     InvestmentLimitUpgradeable,
     IStrategy
@@ -68,9 +70,9 @@ abstract contract StrategyBaseUpgradeable is
         internal
         onlyInitializing
     {
+        __Context_init();
         __ReentrancyGuard_init();
         __ERC165_init();
-        __Context_init();
         __FeeUpgradeable_init(
             strategyArgs.depositFee,
             strategyArgs.depositFeeParams,

@@ -3,19 +3,18 @@ pragma solidity ^0.8.0;
 
 import "./FeeUpgradeable.sol";
 import "./InvestmentLimitUpgradeable.sol";
-import "../Common.sol";
-import "../InvestmentToken.sol";
-import "../interfaces/IPortfolio.sol";
 import "../interfaces/IInvestmentToken.sol";
-import "../libraries/Math.sol";
+import "../interfaces/IPortfolio.sol";
 import "../libraries/InvestableLib.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 struct PortfolioArgs {
     IInvestmentToken investmentToken;
@@ -33,9 +32,11 @@ struct PortfolioArgs {
 }
 
 abstract contract PortfolioBaseUpgradeable is
+    Initializable,
+    ContextUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC165Upgradeable,
-    ContextUpgradeable,
+    UUPSUpgradeable,
     FeeUpgradeable,
     InvestmentLimitUpgradeable,
     IPortfolio

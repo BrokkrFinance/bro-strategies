@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "./StargateStorageLib.sol";
 import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
-import "../../common/libraries/InvestableLib.sol";
 import "../../dependencies/stargate/IStargateLpStaking.sol";
 import "../../dependencies/stargate/IStargatePool.sol";
 import "../../dependencies/stargate/IStargateRouter.sol";

@@ -6,8 +6,8 @@ import "./StrategyOwnableBaseUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 abstract contract StrategyOwnablePausableBaseUpgradeable is
-    StrategyOwnableBaseUpgradeable,
-    PausableUpgradeable
+    PausableUpgradeable,
+    StrategyOwnableBaseUpgradeable
 {
     uint256[4] private futureFeaturesGap;
 
@@ -15,8 +15,8 @@ abstract contract StrategyOwnablePausableBaseUpgradeable is
     function __StrategyOwnablePausableBaseUpgradeable_init(
         StrategyArgs calldata strategyArgs
     ) internal onlyInitializing {
-        __StrategyOwnableBaseUpgradeable_init(strategyArgs);
         __Pausable_init();
+        __StrategyOwnableBaseUpgradeable_init(strategyArgs);
     }
 
     function pause() external onlyOwner {
