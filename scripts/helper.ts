@@ -90,6 +90,7 @@ export async function deployUpgradeableStrategy(
     ],
     ...strategyExtraArgs,
   ])
+  console.log("strategy owner after deploying proxy contract: ", await strategy.owner())
   await expectSuccess(investableToken.transferOwnership(strategy.address))
 
   return strategy
@@ -115,8 +116,12 @@ export async function deployPortfolio(
 ) {
   const investableToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
   const portfolio = await expectSuccess(deployContract(portfolioContractName, []))
+  console.log("before transfer ownership. owner of investableToken: ", await investableToken.owner())
   await expectSuccess(investableToken.transferOwnership(portfolio.address))
+  console.log("after transfer ownership. owner of investableToken: ", await investableToken.owner())
+  console.log("after transfer ownership. owner of portfolio: ", await portfolio.owner())
 
+  console.log("before portfolio initialization")
   await expectSuccess(
     portfolio.initialize([
       investableToken.address,
