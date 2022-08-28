@@ -10,7 +10,12 @@ import { testReapReward } from "./UnifiedReapReward.test"
 import { testUpgradeable } from "./UnifiedUpgradeable.test"
 import { testWithdraw } from "./UnifiedWithdraw.test"
 
-export function testStrategy(description: string, strategyContractName: string, strategyExtraArgs: any[]) {
+export function testStrategy(
+  description: string,
+  strategyContractName: string,
+  strategyExtraArgs: any[],
+  strategySpecificTests: (() => any)[]
+) {
   describe(description, function () {
     before(async function () {
       // Signers.
@@ -113,6 +118,10 @@ export function testStrategy(description: string, strategyContractName: string, 
     testReapReward()
     testUpgradeable()
     testWithdraw()
+
+    for (const strategySpecificTest of strategySpecificTests) {
+      strategySpecificTest()
+    }
   })
 
   after(async function () {

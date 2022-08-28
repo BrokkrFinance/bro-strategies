@@ -10,18 +10,28 @@ const ADDRESSES = {
   stargateStgToken: "0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590",
 }
 
-testStrategy("Stargate USDC Strategy", "Stargate", [
-  ADDRESSES.stargateRouter,
-  ADDRESSES.stargateUsdcPool,
-  ADDRESSES.stargateLpStaking,
-  ADDRESSES.stargateUsdcLpToken,
-  ADDRESSES.stargateStgToken,
-])
+testStrategy(
+  "Stargate USDC Strategy",
+  "Stargate",
+  [
+    ADDRESSES.stargateRouter,
+    ADDRESSES.stargateUsdcPool,
+    ADDRESSES.stargateLpStaking,
+    ADDRESSES.stargateUsdcLpToken,
+    ADDRESSES.stargateStgToken,
+  ],
+  []
+)
 
-testStrategy("Stargate USDT Strategy", "Stargate", [
-  ADDRESSES.stargateRouter,
-  ADDRESSES.stargateUsdtPool,
-  ADDRESSES.stargateLpStaking,
-  ADDRESSES.stargateUsdtLpToken,
-  ADDRESSES.stargateStgToken,
-])
+testStrategy(
+  "Stargate USDT Strategy",
+  "Stargate",
+  [
+    ADDRESSES.stargateRouter,
+    ADDRESSES.stargateUsdtPool,
+    ADDRESSES.stargateLpStaking,
+    ADDRESSES.stargateUsdtLpToken,
+    ADDRESSES.stargateStgToken,
+  ],
+  []
+)
