@@ -197,11 +197,12 @@ abstract contract StrategyBaseUpgradeable is
         uint256 rewardAmount = depositToken.balanceOf(address(this)) -
             depositTokenBalanceBefore;
 
+        emit RewardProcess(rewardAmount);
+
         if (rewardAmount == 0) return;
 
         _deposit(rewardAmount, depositParams);
         emit Deposit(address(this), address(0), rewardAmount);
-        emit RewardProcess(rewardAmount);
     }
 
     function withdrawReward(NameValuePair[] calldata withdrawParams)
