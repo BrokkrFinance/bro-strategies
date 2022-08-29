@@ -1,5 +1,4 @@
 import { expect } from "chai"
-import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { getErrorRange, airdropToken } from "../shared/utils"
 
@@ -22,10 +21,7 @@ export function testWithdraw() {
       )
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
       expect(await this.strategy.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
-        BigNumber.from(0),
-        getErrorRange(BigNumber.from(0))
-      )
+      expect(await this.strategy.getEquityValuation(true, false)).to.equal(0)
     })
 
     it("should success when a single user withdraws InvestmentToken that he/she has - 1", async function () {
@@ -106,10 +102,7 @@ export function testWithdraw() {
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
       expect(await this.investmentToken.balanceOf(this.user1.address)).to.equal(0)
       expect(await this.strategy.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
-        BigNumber.from(0),
-        getErrorRange(BigNumber.from(0))
-      )
+      expect(await this.strategy.getEquityValuation(true, false)).to.equal(0)
     })
 
     it("should fail when a single user withdraws zero amount", async function () {
@@ -179,10 +172,7 @@ export function testWithdraw() {
       )
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
       expect(await this.strategy.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
-        BigNumber.from(0),
-        getErrorRange(BigNumber.from(0))
-      )
+      expect(await this.strategy.getEquityValuation(true, false)).to.equal(0)
     })
 
     it("should success when multiple users withdraw InvestmentTokens that they have - 0", async function () {
@@ -221,10 +211,7 @@ export function testWithdraw() {
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
       expect(await this.investmentToken.balanceOf(this.user1.address)).to.equal(0)
       expect(await this.strategy.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
-        BigNumber.from(0),
-        getErrorRange(BigNumber.from(0))
-      )
+      expect(await this.strategy.getEquityValuation(true, false)).to.equal(0)
     })
 
     it("should success when multiple users withdraw InvestmentTokens that they have - 1", async function () {
@@ -312,10 +299,7 @@ export function testWithdraw() {
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
       expect(await this.investmentToken.balanceOf(this.user1.address)).to.equal(0)
       expect(await this.strategy.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
-        BigNumber.from(0),
-        getErrorRange(BigNumber.from(0))
-      )
+      expect(await this.strategy.getEquityValuation(true, false)).to.equal(0)
     })
 
     it("should fail when multiple users withdraw zero amount", async function () {
