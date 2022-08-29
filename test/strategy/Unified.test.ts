@@ -123,11 +123,4 @@ export function testStrategy(
       strategySpecificTest()
     }
   })
-
-  after(async function () {
-    await network.provider.request({
-      method: "hardhat_reset",
-      params: [],
-    })
-  })
 }
