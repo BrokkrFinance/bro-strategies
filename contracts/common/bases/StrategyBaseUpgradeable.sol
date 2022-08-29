@@ -10,7 +10,6 @@ import "../libraries/InvestableLib.sol";
 import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -36,7 +35,6 @@ struct StrategyArgs {
 }
 
 abstract contract StrategyBaseUpgradeable is
-    Initializable,
     ContextUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC165Upgradeable,

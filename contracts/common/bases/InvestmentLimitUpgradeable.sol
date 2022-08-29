@@ -3,7 +3,9 @@ pragma solidity ^0.8.0;
 
 import "../interfaces/IInvestable.sol";
 
-abstract contract InvestmentLimitUpgradeable is IInvestable {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
     error TotalInvestmentLimitExceeded();
     error InvestmentLimitPerAddressExceeded();
 
@@ -15,7 +17,7 @@ abstract contract InvestmentLimitUpgradeable is IInvestable {
     function __InvestmentLimitUpgradeable_init(
         uint256 totalInvestmentLimit_,
         uint256 investmentLimitPerAddress_
-    ) internal {
+    ) internal onlyInitializing {
         setTotalInvestmentLimit(totalInvestmentLimit_);
         setInvestmentLimitPerAddress(investmentLimitPerAddress_);
     }

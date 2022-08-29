@@ -5,7 +5,9 @@ import "../Common.sol";
 import "../interfaces/IFee.sol";
 import "../libraries/Math.sol";
 
-abstract contract FeeUpgradeable is IFee {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+abstract contract FeeUpgradeable is Initializable, IFee {
     uint24 internal withdrawalFee;
     uint24 internal depositFee;
     uint24 internal performanceFee;
@@ -24,7 +26,7 @@ abstract contract FeeUpgradeable is IFee {
         NameValuePair[] calldata performanceFeeParams_,
         address feeReceiver_,
         NameValuePair[] calldata feeReceiverParams_
-    ) internal {
+    ) internal onlyInitializing {
         setDepositFee(depositFee_, depositFeeParams_);
         setWithdrawalFee(withdrawalFee_, withdrawFeeParams_);
         setPerformanceFee(performanceFee_, performanceFeeParams_);
