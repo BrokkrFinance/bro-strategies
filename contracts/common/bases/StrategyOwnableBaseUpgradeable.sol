@@ -19,8 +19,6 @@ abstract contract StrategyOwnableBaseUpgradeable is
         __StrategyBaseUpgradeable_init(strategyArgs);
     }
 
-    function _authorizeUpgrade(address) internal override onlyOwner {}
-
     function setDepositFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual

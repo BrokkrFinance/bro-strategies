@@ -8,7 +8,6 @@ import "../interfaces/IPortfolio.sol";
 import "../libraries/InvestableLib.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
@@ -34,7 +33,6 @@ abstract contract PortfolioBaseUpgradeable is
     ContextUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC165Upgradeable,
-    UUPSUpgradeable,
     FeeUpgradeable,
     InvestmentLimitUpgradeable,
     IPortfolio

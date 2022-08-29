@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 import "./CashStorageLib.sol";
 import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 
-contract Cash is StrategyOwnablePausableBaseUpgradeable {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
     string public constant name = "block42.cash_strategy.cash_strategy_initial";
     // solhint-disable-next-line const-name-snakecase
@@ -23,6 +25,8 @@ contract Cash is StrategyOwnablePausableBaseUpgradeable {
     {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function _deposit(
         uint256 amount,

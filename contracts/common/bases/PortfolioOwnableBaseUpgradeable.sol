@@ -19,8 +19,6 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         __PortfolioBaseUpgradeable_init(portfolioArgs);
     }
 
-    function _authorizeUpgrade(address) internal override onlyOwner {}
-
     function addInvestable(
         IInvestable investable,
         uint24[] calldata newAllocations,

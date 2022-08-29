@@ -7,7 +7,9 @@ import "../../dependencies/stargate/IStargateLpStaking.sol";
 import "../../dependencies/stargate/IStargatePool.sol";
 import "../../dependencies/stargate/IStargateRouter.sol";
 
-contract Stargate is StrategyOwnablePausableBaseUpgradeable {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -70,6 +72,8 @@ contract Stargate is StrategyOwnablePausableBaseUpgradeable {
             revert InvalidStargateLpToken();
         }
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function _deposit(uint256 amount, NameValuePair[] calldata)
         internal

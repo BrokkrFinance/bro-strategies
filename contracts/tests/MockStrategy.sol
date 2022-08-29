@@ -5,12 +5,12 @@ import "./FreeMoneyProvider.sol";
 import "../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 import "../common/InvestmentToken.sol";
 
-import "hardhat/console.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract MockStrategy is StrategyOwnablePausableBaseUpgradeable {
+contract MockStrategy is
+    UUPSUpgradeable,
+    StrategyOwnablePausableBaseUpgradeable
+{
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
         "block42.mock_strategy.<insert git label here>";
@@ -26,6 +26,11 @@ contract MockStrategy is StrategyOwnablePausableBaseUpgradeable {
     FreeMoneyProvider public freeMoneyProvider;
     uint256[] public x;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         StrategyArgs calldata strategyArgs,
         uint256 yieldMultiplier_,
@@ -35,6 +40,8 @@ contract MockStrategy is StrategyOwnablePausableBaseUpgradeable {
         yieldMultiplier = yieldMultiplier_;
         freeMoneyProvider = freeMoneyProvider_;
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function _deposit(uint256 amount, NameValuePair[] calldata params)
         internal

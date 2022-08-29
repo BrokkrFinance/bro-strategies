@@ -3,7 +3,12 @@ pragma solidity ^0.8.0;
 
 import "../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 
-contract TestUpgradedStrategy is StrategyOwnablePausableBaseUpgradeable {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+contract TestUpgradedStrategy is
+    UUPSUpgradeable,
+    StrategyOwnablePausableBaseUpgradeable
+{
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
         "brokkr.test_strategy.<insert git label here>";
@@ -18,6 +23,8 @@ contract TestUpgradedStrategy is StrategyOwnablePausableBaseUpgradeable {
     {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function _deposit(uint256, NameValuePair[] calldata)
         internal
