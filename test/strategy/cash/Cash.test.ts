@@ -1,10 +1,10 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
-import { ethers } from "hardhat"
+import { ethers, upgrades } from "hardhat"
 import { getErrorRange, airdropToken } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
-testStrategy("Cash Strategy", "Cash", [], [testCashAum, testCashDeposit])
+testStrategy("Cash Strategy", "Cash", [], [testCashAum, testCashDeposit, testCashUpgradeable])
 
 function testCashAum() {
   describe("AUM - Cash Strategy Specific", async function () {
@@ -196,6 +196,67 @@ function testCashDeposit() {
         ethers.utils.parseUnits("60", 6).add(1),
         getErrorRange(ethers.utils.parseUnits("60", 6).add(1))
       )
+    })
+  })
+}
+
+function testCashUpgradeable() {
+  describe("Upgradeable - Cash Strategy Specific", async function () {
+    it("should success to leave all strategy specific state variables' value intact", async function () {
+      // IAum.
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
+      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
+
+      const CashV2 = await ethers.getContractFactory("CashV2")
+      const cashV2 = await upgrades.upgradeProxy(this.strategy.address, CashV2, {
+        call: {
+          fn: "initialize",
+          args: [
+            [
+              this.investmentToken.address,
+              this.usdc.address,
+              this.depositFee,
+              this.depositFeeParams,
+              this.withdrawalFee,
+              this.withdrawalFeeParams,
+              this.performanceFee,
+              this.performanceFeeParams,
+              this.feeReceiver,
+              this.feeReceiverParams,
+              this.totalInvestmentLimit,
+              this.investmentLimitPerAddress,
+              this.priceOracle.address,
+              this.swapServiceProvider,
+              this.swapServiceRouter,
+            ],
+          ],
+        },
+      })
+      await cashV2.deployed()
+
+      // IAum.
+      const assetBalancesAfter = await this.strategy.getAssetBalances()
+      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
+      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
+
+      // IAum.
+      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
+      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
+
+      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
+
+      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
+      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
+
+      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
+
+      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
+
+      // IInvestable.
+      expect(await this.strategy.name()).to.equal("block42.cash_strategy.cash_strategy_initial")
+      expect(await this.strategy.humanReadableName()).to.equal("Cash strategy")
+      expect(await this.strategy.version()).to.equal("2.0.0")
     })
   })
 }
