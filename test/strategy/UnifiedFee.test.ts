@@ -2,7 +2,6 @@ import { expect } from "chai"
 import { ethers } from "hardhat"
 import { getErrorRange, airdropToken } from "../shared/utils"
 
-
 export function testFee() {
   describe("Fee", async function () {
     it("should success when any user calls claim fee", async function () {
@@ -27,6 +26,27 @@ export function testFee() {
       expect(await this.strategy.getCurrentAccumulatedFee()).to.equal(0)
       expect(await this.strategy.getClaimedFee()).to.equal(feeAmount)
       expect(usdcBalanceAfter - usdcBalanceBefore).to.equal(feeAmount)
+    })
+
+    it("should fail when the owner user sets deposit fee greater than or equal to 100%", async function () {
+      await expect(this.strategy.setDepositFee(100000, [])).to.be.revertedWithCustomError(
+        this.strategy,
+        "InvalidFeeError"
+      )
+    })
+
+    it("should fail when the owner user sets withdrawal fee greater than or equal to 100%", async function () {
+      await expect(this.strategy.setWithdrawalFee(100000, [])).to.be.revertedWithCustomError(
+        this.strategy,
+        "InvalidFeeError"
+      )
+    })
+
+    it("should fail when the owner user sets performance fee greater than or equal to 100%", async function () {
+      await expect(this.strategy.setPerformanceFee(100000, [])).to.be.revertedWithCustomError(
+        this.strategy,
+        "InvalidFeeError"
+      )
     })
 
     it("should success when a single user withdraws and withdrawal fee is 30%", async function () {

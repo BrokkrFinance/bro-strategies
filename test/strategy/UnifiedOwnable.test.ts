@@ -56,27 +56,6 @@ export function testOwnable() {
       )
     })
 
-    it("should fail when the owner user sets deposit fee greater than or equal to 100%", async function () {
-      await expect(this.strategy.setDepositFee(100000, [])).to.be.revertedWithCustomError(
-        this.strategy,
-        "InvalidFeeError"
-      )
-    })
-
-    it("should fail when the owner user sets withdrawal fee greater than or equal to 100%", async function () {
-      await expect(this.strategy.setWithdrawalFee(100000, [])).to.be.revertedWithCustomError(
-        this.strategy,
-        "InvalidFeeError"
-      )
-    })
-
-    it("should fail when the owner user sets performance fee greater than or equal to 100%", async function () {
-      await expect(this.strategy.setPerformanceFee(100000, [])).to.be.revertedWithCustomError(
-        this.strategy,
-        "InvalidFeeError"
-      )
-    })
-
     it("should success when the owner user sets withdrawal fee to 30%", async function () {
       expect(await this.strategy.setDepositFee(30000, []))
         .to.emit(this.strategy, "DepositFeeChange")
