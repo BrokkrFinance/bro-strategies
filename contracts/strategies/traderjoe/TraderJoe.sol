@@ -156,7 +156,20 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function _reapReward(NameValuePair[] calldata) internal virtual override {}
+    function _reapReward(NameValuePair[] calldata) internal virtual override {
+        masterChef.deposit(farmId, 0);
+
+        address[] memory path = new address[](3);
+        path[0] = address(joeToken);
+        path[1] = address(0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7); // USDT
+        path[2] = address(depositToken);
+
+        swapExactTokensForTokens(
+            swapService,
+            joeToken.balanceOf(address(this)),
+            path
+        );
+    }
 
     function getAssetBalances()
         external
