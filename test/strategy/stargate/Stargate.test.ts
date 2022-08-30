@@ -24,7 +24,7 @@ testStrategy(
     STARGATE_ADDRESSES.usdcLpToken,
     STARGATE_ADDRESSES.stgToken,
   ],
-  [testStargateUsdcAum, testStargateUsdcInitialize, testStargateUsdcDeposit]
+  [testStargateUsdcAum, testStargateUsdcDeposit, testStargateUsdcInitialize, testStargateUsdcUpgradeable]
 )
 
 testStrategy(
@@ -37,7 +37,7 @@ testStrategy(
     STARGATE_ADDRESSES.usdtLpToken,
     STARGATE_ADDRESSES.stgToken,
   ],
-  [testStargateUsdtAum, testStargateUsdtInitialize, testStargateUsdtDeposit]
+  [testStargateUsdtAum, testStargateUsdtDeposit, testStargateUsdtInitialize, testStargateUsdtUpgradeable]
 )
 
 function testStargateUsdcAum() {
@@ -109,43 +109,6 @@ function testStargateUsdcAum() {
         ethers.utils.parseUnits("70", 6),
         getErrorRange(ethers.utils.parseUnits("70", 6))
       )
-    })
-  })
-}
-
-function testStargateUsdcInitialize() {
-  describe("Initialize - Stargate USDC Strategy Specific", async function () {
-    it("should fail when passed wrong LP token address", async function () {
-      await expect(
-        upgrades.deployProxy(
-          this.Strategy,
-          [
-            [
-              this.investmentToken.address,
-              this.usdc.address,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-              this.priceOracle.address,
-              this.swapServiceProvider,
-              this.swapServiceRouter,
-            ],
-            STARGATE_ADDRESSES.router,
-            STARGATE_ADDRESSES.usdtPool,
-            STARGATE_ADDRESSES.lpStaking,
-            this.usdc.address,
-            STARGATE_ADDRESSES.stgToken,
-          ],
-          { kind: "uups" }
-        )
-      ).to.be.revertedWithCustomError(this.strategy, "InvalidStargateLpToken")
     })
   })
 }
@@ -289,6 +252,43 @@ function testStargateUsdcDeposit() {
   })
 }
 
+function testStargateUsdcInitialize() {
+  describe("Initialize - Stargate USDC Strategy Specific", async function () {
+    it("should fail when passed wrong LP token address", async function () {
+      await expect(
+        upgrades.deployProxy(
+          this.Strategy,
+          [
+            [
+              this.investmentToken.address,
+              this.usdc.address,
+              this.depositFee,
+              this.depositFeeParams,
+              this.withdrawalFee,
+              this.withdrawalFeeParams,
+              this.performanceFee,
+              this.performanceFeeParams,
+              this.feeReceiver,
+              this.feeReceiverParams,
+              this.totalInvestmentLimit,
+              this.investmentLimitPerAddress,
+              this.priceOracle.address,
+              this.swapServiceProvider,
+              this.swapServiceRouter,
+            ],
+            STARGATE_ADDRESSES.router,
+            STARGATE_ADDRESSES.usdtPool,
+            STARGATE_ADDRESSES.lpStaking,
+            this.usdc.address,
+            STARGATE_ADDRESSES.stgToken,
+          ],
+          { kind: "uups" }
+        )
+      ).to.be.revertedWithCustomError(this.strategy, "InvalidStargateLpToken")
+    })
+  })
+}
+
 function testStargateUsdcUpgradeable() {
   describe("Upgradeable - Stargate USDC Strategy Specific", async function () {
     it("should success to leave all strategy specific state variables' value intact", async function () {
@@ -428,43 +428,6 @@ function testStargateUsdtAum() {
   })
 }
 
-function testStargateUsdtInitialize() {
-  describe("Initialize - Stargate USDT Strategy Specific", async function () {
-    it("should fail when passed wrong LP token address", async function () {
-      await expect(
-        upgrades.deployProxy(
-          this.Strategy,
-          [
-            [
-              this.investmentToken.address,
-              this.usdc.address,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-              this.priceOracle.address,
-              this.swapServiceProvider,
-              this.swapServiceRouter,
-            ],
-            STARGATE_ADDRESSES.router,
-            STARGATE_ADDRESSES.usdtPool,
-            STARGATE_ADDRESSES.lpStaking,
-            this.usdc.address,
-            STARGATE_ADDRESSES.stgToken,
-          ],
-          { kind: "uups" }
-        )
-      ).to.be.revertedWithCustomError(this.strategy, "InvalidStargateLpToken")
-    })
-  })
-}
-
 function testStargateUsdtDeposit() {
   describe("Deposit - Stargate USDT Strategy Specific", async function () {
     it("should fail when a single user deposits the possible minimum USDC", async function () {
@@ -578,6 +541,43 @@ function testStargateUsdtDeposit() {
         ethers.utils.parseUnits("60", 6),
         getErrorRange(ethers.utils.parseUnits("60", 6))
       )
+    })
+  })
+}
+
+function testStargateUsdtInitialize() {
+  describe("Initialize - Stargate USDT Strategy Specific", async function () {
+    it("should fail when passed wrong LP token address", async function () {
+      await expect(
+        upgrades.deployProxy(
+          this.Strategy,
+          [
+            [
+              this.investmentToken.address,
+              this.usdc.address,
+              this.depositFee,
+              this.depositFeeParams,
+              this.withdrawalFee,
+              this.withdrawalFeeParams,
+              this.performanceFee,
+              this.performanceFeeParams,
+              this.feeReceiver,
+              this.feeReceiverParams,
+              this.totalInvestmentLimit,
+              this.investmentLimitPerAddress,
+              this.priceOracle.address,
+              this.swapServiceProvider,
+              this.swapServiceRouter,
+            ],
+            STARGATE_ADDRESSES.router,
+            STARGATE_ADDRESSES.usdtPool,
+            STARGATE_ADDRESSES.lpStaking,
+            this.usdc.address,
+            STARGATE_ADDRESSES.stgToken,
+          ],
+          { kind: "uups" }
+        )
+      ).to.be.revertedWithCustomError(this.strategy, "InvalidStargateLpToken")
     })
   })
 }
