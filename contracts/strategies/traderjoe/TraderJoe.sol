@@ -116,4 +116,8 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         override
         returns (Valuation[] memory liabilityValuations)
     {}
+
+    function getTraderJoeLpBalance() public view returns (uint256) {
+        return masterChef.userInfo(farmId, address(this)).amount;
+    }
 }
