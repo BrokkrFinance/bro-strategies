@@ -2,12 +2,17 @@
 pragma solidity ^0.8.0;
 
 import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
+import "../../dependencies/traderjoe/ITraderJoeMasterChef.sol";
+import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
+import "../../dependencies/traderjoe/ITraderJoePair.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
+
+    error InvalidTraderJoeLpToken();
 
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
@@ -17,16 +22,51 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
     string public constant version = "1.0.0";
 
+    ITraderJoeRouter public router;
+    IERC20Upgradeable public pairDepositToken;
+    ITraderJoePair public lpToken;
+    ITraderJoeMasterChef public masterChef;
+    IERC20Upgradeable public joeToken;
+    uint256 public farmId;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(StrategyArgs calldata strategyArgs)
-        external
-        initializer
-    {
+    function initialize(
+        StrategyArgs calldata strategyArgs,
+        ITraderJoeRouter router_,
+        ITraderJoeMasterChef masterChef_,
+        ITraderJoePair lpToken_,
+        IERC20Upgradeable joeToken_
+    ) external initializer {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
+
+        router = router_;
+        masterChef = masterChef_;
+        lpToken = lpToken_;
+        joeToken = joeToken_;
+
+        address token0 = lpToken.token0();
+        if (token0 != address(depositToken)) {
+            pairDepositToken = IERC20Upgradeable(token0);
+        } else {
+            pairDepositToken = IERC20Upgradeable(lpToken.token1());
+        }
+
+        ITraderJoeMasterChef.PoolInfo memory poolInfo;
+        uint256 poolLength = masterChef.poolLength();
+        for (uint256 i = 0; i < poolLength; i++) {
+            poolInfo = masterChef.poolInfo(i);
+            if (address(poolInfo.lpToken) == address(lpToken)) {
+                farmId = i;
+                break;
+            }
+        }
+        if (address(poolInfo.lpToken) != address(lpToken)) {
+            revert InvalidTraderJoeLpToken();
+        }
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
