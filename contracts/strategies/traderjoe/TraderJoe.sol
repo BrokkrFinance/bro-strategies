@@ -91,7 +91,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
         returns (Balance[] memory assetBalances)
-    {}
+    {
+        assetBalances = new Balance[](1);
+        assetBalances[0] = Balance(address(lpToken), getTraderJoeLpBalance());
+    }
 
     function getLiabilityBalances()
         external
@@ -107,7 +110,31 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
         returns (Valuation[] memory assetValuations)
-    {}
+    {
+        (
+            uint256 depositTokenReserve,
+            uint256 pairDepositTokenReserve
+        ) = getTraderJoeLpReserves();
+
+        uint256 lpBalance = getTraderJoeLpBalance();
+        uint256 lpTotalSupply = lpToken.totalSupply();
+
+        uint256 depositTokenValuation = (lpBalance * depositTokenReserve) /
+            lpTotalSupply;
+        uint256 pairDepositTokenValuation = (((lpBalance *
+            pairDepositTokenReserve) / lpTotalSupply) *
+            priceOracle.getPrice(
+                pairDepositToken,
+                shouldMaximise,
+                shouldIncludeAmmPrice
+            )) / InvestableLib.PRICE_PRECISION_FACTOR;
+
+        assetValuations = new Valuation[](1);
+        assetValuations[0] = Valuation(
+            address(lpToken),
+            depositTokenValuation + pairDepositTokenValuation
+        );
+    }
 
     function getLiabilityValuations(bool, bool)
         public
