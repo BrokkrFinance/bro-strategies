@@ -3,19 +3,16 @@ pragma solidity ^0.8.0;
 
 import "./FeeUpgradeable.sol";
 import "./InvestmentLimitUpgradeable.sol";
-import "../Common.sol";
-import "../InvestmentToken.sol";
-import "../interfaces/IPortfolio.sol";
 import "../interfaces/IInvestmentToken.sol";
-import "../libraries/Math.sol";
+import "../interfaces/IPortfolio.sol";
 import "../libraries/InvestableLib.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 struct PortfolioArgs {
     IInvestmentToken investmentToken;
@@ -33,9 +30,9 @@ struct PortfolioArgs {
 }
 
 abstract contract PortfolioBaseUpgradeable is
+    ContextUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC165Upgradeable,
-    ContextUpgradeable,
     FeeUpgradeable,
     InvestmentLimitUpgradeable,
     IPortfolio
@@ -204,13 +201,16 @@ abstract contract PortfolioBaseUpgradeable is
         returns (bool)
     {
         return
+            interfaceId == type(IAum).interfaceId ||
+            interfaceId == type(IFee).interfaceId ||
+            interfaceId == type(IInvestable).interfaceId ||
             interfaceId == type(IPortfolio).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
     function deposit(
         uint256 amount,
-        address investableTokenReceiver,
+        address investmentTokenReceiver,
         NameValuePair[] memory params
     ) external virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountDeposited();
@@ -223,7 +223,7 @@ abstract contract PortfolioBaseUpgradeable is
             totalEquity = getEquityValuation(true, false);
 
             uint256 investmentTokenBalance = getInvestmentTokenBalanceOf(
-                investableTokenReceiver
+                investmentTokenReceiver
             );
             userEquity =
                 (totalEquity * investmentTokenBalance) /
@@ -236,14 +236,14 @@ abstract contract PortfolioBaseUpgradeable is
         uint256 equity = getEquityValuation(true, false);
         uint256 investmentTokenTotalSupply = getInvestmentTokenSupply();
         investmentToken.mint(
-            investableTokenReceiver,
+            investmentTokenReceiver,
             InvestableLib.calculateMintAmount(
                 equity,
                 amount,
                 investmentTokenTotalSupply
             )
         );
-        emit Deposit(_msgSender(), investableTokenReceiver, amount);
+        emit Deposit(_msgSender(), investmentTokenReceiver, amount);
         for (uint256 i = 0; i < investableDescs.length; i++) {
             uint256 embeddedAmount = (amount *
                 investableDescs[i].allocationPercentage) /

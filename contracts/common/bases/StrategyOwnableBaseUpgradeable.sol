@@ -3,9 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./StrategyBaseUpgradeable.sol";
 
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 abstract contract StrategyOwnableBaseUpgradeable is
     OwnableUpgradeable,

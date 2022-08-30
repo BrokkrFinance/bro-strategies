@@ -1,21 +1,19 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../Common.sol";
-import "../InvestmentToken.sol";
-import "../libraries/InvestableLib.sol";
 import "./FeeUpgradeable.sol";
 import "./InvestmentLimitUpgradeable.sol";
-import "../interfaces/IStrategy.sol";
+import "../interfaces/IInvestmentToken.sol";
 import "../interfaces/IPriceOracle.sol";
+import "../interfaces/IStrategy.sol";
+import "../libraries/InvestableLib.sol";
 import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 struct StrategyArgs {
     IInvestmentToken investmentToken;
@@ -36,9 +34,9 @@ struct StrategyArgs {
 }
 
 abstract contract StrategyBaseUpgradeable is
+    ContextUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC165Upgradeable,
-    ContextUpgradeable,
     FeeUpgradeable,
     InvestmentLimitUpgradeable,
     IStrategy
@@ -68,9 +66,9 @@ abstract contract StrategyBaseUpgradeable is
         internal
         onlyInitializing
     {
+        __Context_init();
         __ReentrancyGuard_init();
         __ERC165_init();
-        __Context_init();
         __FeeUpgradeable_init(
             strategyArgs.depositFee,
             strategyArgs.depositFeeParams,
@@ -100,7 +98,7 @@ abstract contract StrategyBaseUpgradeable is
 
     function deposit(
         uint256 amount,
-        address investableTokenReceiver,
+        address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountDeposited();
@@ -113,7 +111,7 @@ abstract contract StrategyBaseUpgradeable is
             totalEquity = getEquityValuation(true, false);
 
             uint256 investmentTokenBalance = getInvestmentTokenBalanceOf(
-                investableTokenReceiver
+                investmentTokenReceiver
             );
             userEquity =
                 (totalEquity * investmentTokenBalance) /
@@ -127,7 +125,7 @@ abstract contract StrategyBaseUpgradeable is
         uint256 equity = getEquityValuation(true, false);
         uint256 investmentTokenTotalSupply = getInvestmentTokenSupply();
         investmentToken.mint(
-            investableTokenReceiver,
+            investmentTokenReceiver,
             InvestableLib.calculateMintAmount(
                 equity,
                 amount,
@@ -135,7 +133,7 @@ abstract contract StrategyBaseUpgradeable is
             )
         );
         _deposit(amount, params);
-        emit Deposit(_msgSender(), investableTokenReceiver, amount);
+        emit Deposit(_msgSender(), investmentTokenReceiver, amount);
     }
 
     function _beforeWithdraw(
@@ -195,11 +193,12 @@ abstract contract StrategyBaseUpgradeable is
         uint256 rewardAmount = depositToken.balanceOf(address(this)) -
             depositTokenBalanceBefore;
 
+        emit RewardProcess(rewardAmount);
+
         if (rewardAmount == 0) return;
 
         _deposit(rewardAmount, depositParams);
         emit Deposit(address(this), address(0), rewardAmount);
-        emit RewardProcess(rewardAmount);
     }
 
     function withdrawReward(NameValuePair[] calldata withdrawParams)
@@ -227,6 +226,10 @@ abstract contract StrategyBaseUpgradeable is
         returns (bool)
     {
         return
+            interfaceId == type(IAum).interfaceId ||
+            interfaceId == type(IFee).interfaceId ||
+            interfaceId == type(IInvestable).interfaceId ||
+            interfaceId == type(IReward).interfaceId ||
             interfaceId == type(IStrategy).interfaceId ||
             super.supportsInterface(interfaceId);
     }

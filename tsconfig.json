@@ -7,7 +7,7 @@
     "resolveJsonModule": true,
     "outDir": "dist",
     "typeRoots": ["./typechain", "./node_modules/@types"],
-    "types": ["@nomiclabs/hardhat-ethers", "@nomiclabs/hardhat-waffle"]
+    "types": ["@nomiclabs/hardhat-ethers"]
   },
   "include": ["./test", "./scripts", "contracts/strategies/stargate/scripts"],
   "files": ["./hardhat.config.ts"]

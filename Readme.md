@@ -31,3 +31,5 @@
 1. rebalancing should be done entirely offchain
 1. gas optimization
 1. refactoring: scripts/helper.ts
+1. add comments to unified test scripts
+1. improve unified test performance

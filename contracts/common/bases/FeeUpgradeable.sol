@@ -5,10 +5,9 @@ import "../Common.sol";
 import "../interfaces/IFee.sol";
 import "../libraries/Math.sol";
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract FeeUpgradeable is ContextUpgradeable, IFee {
+abstract contract FeeUpgradeable is Initializable, IFee {
     uint24 internal withdrawalFee;
     uint24 internal depositFee;
     uint24 internal performanceFee;
@@ -28,7 +27,6 @@ abstract contract FeeUpgradeable is ContextUpgradeable, IFee {
         address feeReceiver_,
         NameValuePair[] calldata feeReceiverParams_
     ) internal onlyInitializing {
-        __Context_init();
         setDepositFee(depositFee_, depositFeeParams_);
         setWithdrawalFee(withdrawalFee_, withdrawFeeParams_);
         setPerformanceFee(performanceFee_, performanceFeeParams_);
