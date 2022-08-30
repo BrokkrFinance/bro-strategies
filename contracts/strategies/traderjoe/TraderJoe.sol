@@ -111,7 +111,50 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         internal
         virtual
         override
-    {}
+    {
+        uint256 lpBalanceToWithdraw = (getTraderJoeLpBalance() * amount) /
+            getInvestmentTokenSupply();
+
+        (
+            uint256 depositTokenReserve,
+            uint256 pairDepositTokenReserve
+        ) = getTraderJoeLpReserves();
+        uint256 lpTotalSupply = lpToken.totalSupply();
+        uint256 pairDepositTokenMin = (lpBalanceToWithdraw *
+            pairDepositTokenReserve) / lpTotalSupply;
+        uint256 depositTokenMin = (lpBalanceToWithdraw * depositTokenReserve) /
+            lpTotalSupply;
+
+        uint256 pairDepositTokenBalanceBefore = pairDepositToken.balanceOf(
+            address(this)
+        );
+        masterChef.withdraw(farmId, lpBalanceToWithdraw);
+        lpToken.approve(address(router), lpBalanceToWithdraw);
+        router.removeLiquidity(
+            address(pairDepositToken),
+            address(depositToken),
+            lpBalanceToWithdraw,
+            pairDepositTokenMin,
+            depositTokenMin,
+            address(this),
+            block.timestamp
+        );
+        uint256 pairDepositTokenBalanceAfter = pairDepositToken.balanceOf(
+            address(this)
+        );
+
+        uint256 pairDepositTokenBalanceIncrement = pairDepositTokenBalanceAfter -
+                pairDepositTokenBalanceBefore;
+        address[] memory path = new address[](2);
+        path[0] = address(pairDepositToken);
+        path[1] = address(depositToken);
+
+        swapExactTokensForTokens(
+            swapService,
+            pairDepositTokenBalanceIncrement,
+            path
+        );
+    }
 
     function _reapReward(NameValuePair[] calldata) internal virtual override {}
 
