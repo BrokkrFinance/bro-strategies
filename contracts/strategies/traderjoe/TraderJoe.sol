@@ -120,4 +120,18 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     function getTraderJoeLpBalance() public view returns (uint256) {
         return masterChef.userInfo(farmId, address(this)).amount;
     }
+
+    function getTraderJoeLpReserves()
+        public
+        view
+        returns (uint256 depositTokenReserve, uint256 pairDepositTokenReserve)
+    {
+        (uint256 reserve0, uint256 reserve1, ) = lpToken.getReserves();
+
+        if (lpToken.token0() == address(depositToken)) {
+            return (reserve0, reserve1);
+        } else {
+            return (reserve1, reserve0);
+        }
+    }
 }
