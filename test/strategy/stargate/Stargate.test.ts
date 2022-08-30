@@ -4,25 +4,25 @@ import { ethers, upgrades } from "hardhat"
 import { getErrorRange, airdropToken } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
-const ADDRESSES = {
-  stargateRouter: "0x45a01e4e04f14f7a4a6702c74187c5f6222033cd",
-  stargateUsdcPool: "0x1205f31718499dbf1fca446663b532ef87481fe1",
-  stargateUsdtPool: "0x29e38769f23701a2e4a8ef0492e19da4604be62c",
-  stargateLpStaking: "0x8731d54e9d02c286767d56ac03e8037c07e01e98",
-  stargateUsdcLpToken: "0x1205f31718499dbf1fca446663b532ef87481fe1",
-  stargateUsdtLpToken: "0x29e38769f23701a2e4a8ef0492e19da4604be62c",
-  stargateStgToken: "0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590",
+const STARGATE_ADDRESSES = {
+  router: "0x45a01e4e04f14f7a4a6702c74187c5f6222033cd",
+  usdcPool: "0x1205f31718499dbf1fca446663b532ef87481fe1",
+  usdtPool: "0x29e38769f23701a2e4a8ef0492e19da4604be62c",
+  lpStaking: "0x8731d54e9d02c286767d56ac03e8037c07e01e98",
+  usdcLpToken: "0x1205f31718499dbf1fca446663b532ef87481fe1",
+  usdtLpToken: "0x29e38769f23701a2e4a8ef0492e19da4604be62c",
+  stgToken: "0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590",
 }
 
 testStrategy(
   "Stargate USDC Strategy",
   "Stargate",
   [
-    ADDRESSES.stargateRouter,
-    ADDRESSES.stargateUsdcPool,
-    ADDRESSES.stargateLpStaking,
-    ADDRESSES.stargateUsdcLpToken,
-    ADDRESSES.stargateStgToken,
+    STARGATE_ADDRESSES.router,
+    STARGATE_ADDRESSES.usdcPool,
+    STARGATE_ADDRESSES.lpStaking,
+    STARGATE_ADDRESSES.usdcLpToken,
+    STARGATE_ADDRESSES.stgToken,
   ],
   [testStargateUsdcAum, testStargateUsdcInitialize, testStargateUsdcDeposit]
 )
@@ -31,11 +31,11 @@ testStrategy(
   "Stargate USDT Strategy",
   "Stargate",
   [
-    ADDRESSES.stargateRouter,
-    ADDRESSES.stargateUsdtPool,
-    ADDRESSES.stargateLpStaking,
-    ADDRESSES.stargateUsdtLpToken,
-    ADDRESSES.stargateStgToken,
+    STARGATE_ADDRESSES.router,
+    STARGATE_ADDRESSES.usdtPool,
+    STARGATE_ADDRESSES.lpStaking,
+    STARGATE_ADDRESSES.usdtLpToken,
+    STARGATE_ADDRESSES.stgToken,
   ],
   [testStargateUsdtAum, testStargateUsdtInitialize, testStargateUsdtDeposit]
 )
@@ -49,7 +49,7 @@ function testStargateUsdcAum() {
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
       const assetBalances = await this.strategy.getAssetBalances()
-      expect(assetBalances[0].asset.toLowerCase()).to.equal(ADDRESSES.stargateUsdcLpToken.toLowerCase())
+      expect(assetBalances[0].asset.toLowerCase()).to.equal(STARGATE_ADDRESSES.usdcLpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(
         ethers.utils.parseUnits("100", 6),
         getErrorRange(ethers.utils.parseUnits("100", 6))
@@ -58,7 +58,7 @@ function testStargateUsdcAum() {
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuations = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuations[0].asset.toLowerCase()).to.equal(ADDRESSES.stargateUsdcLpToken.toLowerCase())
+      expect(assetValuations[0].asset.toLowerCase()).to.equal(STARGATE_ADDRESSES.usdcLpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
         ethers.utils.parseUnits("100", 6),
         getErrorRange(ethers.utils.parseUnits("100", 6))
@@ -88,7 +88,7 @@ function testStargateUsdcAum() {
       await this.strategy.connect(this.user0).withdraw(ethers.utils.parseUnits("10", 6), this.user0.address, [])
 
       const assetBalances = await this.strategy.getAssetBalances()
-      expect(assetBalances[0].asset.toLowerCase()).to.equal(ADDRESSES.stargateUsdcLpToken.toLowerCase())
+      expect(assetBalances[0].asset.toLowerCase()).to.equal(STARGATE_ADDRESSES.usdcLpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(
         ethers.utils.parseUnits("70", 6),
         getErrorRange(ethers.utils.parseUnits("70", 6))
@@ -97,7 +97,7 @@ function testStargateUsdcAum() {
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuations = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuations[0].asset.toLowerCase()).to.equal(ADDRESSES.stargateUsdcLpToken.toLowerCase())
+      expect(assetValuations[0].asset.toLowerCase()).to.equal(STARGATE_ADDRESSES.usdcLpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
         ethers.utils.parseUnits("70", 6),
         getErrorRange(ethers.utils.parseUnits("70", 6))
@@ -137,11 +137,11 @@ function testStargateUsdcInitialize() {
               this.swapServiceProvider,
               this.swapServiceRouter,
             ],
-            ADDRESSES.stargateRouter,
-            ADDRESSES.stargateUsdtPool,
-            ADDRESSES.stargateLpStaking,
+            STARGATE_ADDRESSES.router,
+            STARGATE_ADDRESSES.usdtPool,
+            STARGATE_ADDRESSES.lpStaking,
             this.usdc.address,
-            ADDRESSES.stargateStgToken,
+            STARGATE_ADDRESSES.stgToken,
           ],
           { kind: "uups" }
         )
@@ -319,11 +319,11 @@ function testStargateUsdcUpgradeable() {
               this.swapServiceProvider,
               this.swapServiceRouter,
             ],
-            ADDRESSES.stargateRouter,
-            ADDRESSES.stargateUsdcPool,
-            ADDRESSES.stargateLpStaking,
-            ADDRESSES.stargateUsdcLpToken,
-            ADDRESSES.stargateStgToken,
+            STARGATE_ADDRESSES.router,
+            STARGATE_ADDRESSES.usdcPool,
+            STARGATE_ADDRESSES.lpStaking,
+            STARGATE_ADDRESSES.usdcLpToken,
+            STARGATE_ADDRESSES.stgToken,
           ],
         },
       })
@@ -364,7 +364,7 @@ function testStargateUsdtAum() {
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
       const assetBalances = await this.strategy.getAssetBalances()
-      expect(assetBalances[0].asset.toLowerCase()).to.equal(ADDRESSES.stargateUsdtLpToken.toLowerCase())
+      expect(assetBalances[0].asset.toLowerCase()).to.equal(STARGATE_ADDRESSES.usdtLpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(
         ethers.utils.parseUnits("100", 6),
         getErrorRange(ethers.utils.parseUnits("100", 6))
@@ -373,7 +373,7 @@ function testStargateUsdtAum() {
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuations = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuations[0].asset.toLowerCase()).to.equal(ADDRESSES.stargateUsdtLpToken.toLowerCase())
+      expect(assetValuations[0].asset.toLowerCase()).to.equal(STARGATE_ADDRESSES.usdtLpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
         ethers.utils.parseUnits("100", 6),
         getErrorRange(ethers.utils.parseUnits("100", 6))
@@ -403,7 +403,7 @@ function testStargateUsdtAum() {
       await this.strategy.connect(this.user0).withdraw(ethers.utils.parseUnits("10", 6), this.user0.address, [])
 
       const assetBalances = await this.strategy.getAssetBalances()
-      expect(assetBalances[0].asset.toLowerCase()).to.equal(ADDRESSES.stargateUsdtLpToken.toLowerCase())
+      expect(assetBalances[0].asset.toLowerCase()).to.equal(STARGATE_ADDRESSES.usdtLpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(
         ethers.utils.parseUnits("70", 6),
         getErrorRange(ethers.utils.parseUnits("70", 6))
@@ -412,7 +412,7 @@ function testStargateUsdtAum() {
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuations = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuations[0].asset.toLowerCase()).to.equal(ADDRESSES.stargateUsdtLpToken.toLowerCase())
+      expect(assetValuations[0].asset.toLowerCase()).to.equal(STARGATE_ADDRESSES.usdtLpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
         ethers.utils.parseUnits("70", 6),
         getErrorRange(ethers.utils.parseUnits("70", 6))
@@ -452,11 +452,11 @@ function testStargateUsdtInitialize() {
               this.swapServiceProvider,
               this.swapServiceRouter,
             ],
-            ADDRESSES.stargateRouter,
-            ADDRESSES.stargateUsdtPool,
-            ADDRESSES.stargateLpStaking,
+            STARGATE_ADDRESSES.router,
+            STARGATE_ADDRESSES.usdtPool,
+            STARGATE_ADDRESSES.lpStaking,
             this.usdc.address,
-            ADDRESSES.stargateStgToken,
+            STARGATE_ADDRESSES.stgToken,
           ],
           { kind: "uups" }
         )
@@ -612,11 +612,11 @@ function testStargateUsdtUpgradeable() {
               this.swapServiceProvider,
               this.swapServiceRouter,
             ],
-            ADDRESSES.stargateRouter,
-            ADDRESSES.stargateUsdtPool,
-            ADDRESSES.stargateLpStaking,
-            ADDRESSES.stargateUsdtLpToken,
-            ADDRESSES.stargateStgToken,
+            STARGATE_ADDRESSES.router,
+            STARGATE_ADDRESSES.usdtPool,
+            STARGATE_ADDRESSES.lpStaking,
+            STARGATE_ADDRESSES.usdtLpToken,
+            STARGATE_ADDRESSES.stgToken,
           ],
         },
       })

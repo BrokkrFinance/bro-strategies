@@ -8,14 +8,14 @@ import "../../dependencies/stargate/IStargateRouter.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 
 struct StargateStorage {
-    IStargateRouter stargateRouter;
-    IStargatePool stargatePool;
-    IStargateLpStaking stargateLpStaking;
-    IERC20Upgradeable stargateDepositToken;
-    IERC20Upgradeable stargateLpToken;
-    IERC20Upgradeable stargateStgToken;
-    uint256 stargatePoolId;
-    uint256 stargateFarmId;
+    IStargateRouter router;
+    IStargatePool pool;
+    IStargateLpStaking lpStaking;
+    IERC20Upgradeable poolDepositToken;
+    IERC20Upgradeable lpToken;
+    IERC20Upgradeable stgToken;
+    uint256 poolId;
+    uint256 farmId;
 }
 
 library StargateStorageLib {
