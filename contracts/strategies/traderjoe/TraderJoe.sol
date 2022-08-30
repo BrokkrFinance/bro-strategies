@@ -75,7 +75,37 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         internal
         virtual
         override
-    {}
+    {
+        uint256 swapAmount = amount / 2;
+        address[] memory path = new address[](2);
+        path[0] = address(depositToken);
+        path[1] = address(pairDepositToken);
+
+        uint256 pairDepositTokenDesired = swapExactTokensForTokens(
+            swapService,
+            swapAmount,
+            path
+        );
+        uint256 depositTokenDesired = amount - swapAmount;
+        uint256 pairDepositTokenMin = (pairDepositTokenDesired * 99) / 100;
+        uint256 depositTokenMin = (depositTokenDesired * 99) / 100;
+
+        pairDepositToken.approve(address(router), pairDepositTokenDesired);
+        depositToken.approve(address(router), depositTokenDesired);
+        (, , uint256 lpBalance) = router.addLiquidity(
+            address(pairDepositToken),
+            address(depositToken),
+            pairDepositTokenDesired,
+            depositTokenDesired,
+            pairDepositTokenMin,
+            depositTokenMin,
+            address(this),
+            block.timestamp
+        );
+
+        lpToken.approve(address(masterChef), lpBalance);
+        masterChef.deposit(farmId, lpBalance);
+    }
 
     function _withdraw(uint256 amount, NameValuePair[] calldata)
         internal
