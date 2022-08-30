@@ -5,12 +5,14 @@ import { getErrorRange, airdropToken } from "../shared/utils"
 export function testFee() {
   describe("Fee", async function () {
     it("should success when any user calls claim fee", async function () {
-      const usdcBalance = await this.usdc.balanceOf(this.impersonatedSigner.address)
+      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("10000", 6))
 
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, usdcBalance)
+      await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
+      await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
 
-      await this.usdc.connect(this.user0).approve(this.strategy.address, usdcBalance)
-      await this.strategy.connect(this.user0).deposit(usdcBalance, this.user0.address, [])
+      // Wait 1 month to reward get accrued.
+      await ethers.provider.send("evm_increaseTime", [86400 * 30])
+      await ethers.provider.send("evm_mine", [])
 
       await this.strategy.connect(this.user1).processReward([], [])
 
