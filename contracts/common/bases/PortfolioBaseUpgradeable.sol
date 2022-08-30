@@ -210,7 +210,7 @@ abstract contract PortfolioBaseUpgradeable is
 
     function deposit(
         uint256 amount,
-        address investableTokenReceiver,
+        address investmentTokenReceiver,
         NameValuePair[] memory params
     ) external virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountDeposited();
@@ -223,7 +223,7 @@ abstract contract PortfolioBaseUpgradeable is
             totalEquity = getEquityValuation(true, false);
 
             uint256 investmentTokenBalance = getInvestmentTokenBalanceOf(
-                investableTokenReceiver
+                investmentTokenReceiver
             );
             userEquity =
                 (totalEquity * investmentTokenBalance) /
@@ -236,14 +236,14 @@ abstract contract PortfolioBaseUpgradeable is
         uint256 equity = getEquityValuation(true, false);
         uint256 investmentTokenTotalSupply = getInvestmentTokenSupply();
         investmentToken.mint(
-            investableTokenReceiver,
+            investmentTokenReceiver,
             InvestableLib.calculateMintAmount(
                 equity,
                 amount,
                 investmentTokenTotalSupply
             )
         );
-        emit Deposit(_msgSender(), investableTokenReceiver, amount);
+        emit Deposit(_msgSender(), investmentTokenReceiver, amount);
         for (uint256 i = 0; i < investableDescs.length; i++) {
             uint256 embeddedAmount = (amount *
                 investableDescs[i].allocationPercentage) /

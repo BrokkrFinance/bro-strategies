@@ -29,10 +29,10 @@ abstract contract StrategyOwnablePausableBaseUpgradeable is
 
     function deposit(
         uint256 amount,
-        address investableTokenReceiver,
+        address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.deposit(amount, investableTokenReceiver, params);
+        super.deposit(amount, investmentTokenReceiver, params);
     }
 
     function withdraw(

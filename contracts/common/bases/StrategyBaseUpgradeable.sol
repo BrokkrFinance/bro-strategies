@@ -98,7 +98,7 @@ abstract contract StrategyBaseUpgradeable is
 
     function deposit(
         uint256 amount,
-        address investableTokenReceiver,
+        address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountDeposited();
@@ -111,7 +111,7 @@ abstract contract StrategyBaseUpgradeable is
             totalEquity = getEquityValuation(true, false);
 
             uint256 investmentTokenBalance = getInvestmentTokenBalanceOf(
-                investableTokenReceiver
+                investmentTokenReceiver
             );
             userEquity =
                 (totalEquity * investmentTokenBalance) /
@@ -125,7 +125,7 @@ abstract contract StrategyBaseUpgradeable is
         uint256 equity = getEquityValuation(true, false);
         uint256 investmentTokenTotalSupply = getInvestmentTokenSupply();
         investmentToken.mint(
-            investableTokenReceiver,
+            investmentTokenReceiver,
             InvestableLib.calculateMintAmount(
                 equity,
                 amount,
@@ -133,7 +133,7 @@ abstract contract StrategyBaseUpgradeable is
             )
         );
         _deposit(amount, params);
-        emit Deposit(_msgSender(), investableTokenReceiver, amount);
+        emit Deposit(_msgSender(), investmentTokenReceiver, amount);
     }
 
     function _beforeWithdraw(

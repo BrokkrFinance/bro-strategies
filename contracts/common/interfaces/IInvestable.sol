@@ -23,7 +23,7 @@ interface IInvestable is IAum, IFee {
 
     function deposit(
         uint256 amount,
-        address investableTokenReceiver,
+        address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) external;
 
