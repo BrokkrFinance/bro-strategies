@@ -434,9 +434,7 @@ function testStargateUsdtDeposit() {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, 1)
-      await expect(this.strategy.connect(this.user0).deposit(1, this.user0.address, [])).to.be.revertedWith(
-        "Joe: INSUFFICIENT_OUTPUT_AMOUNT"
-      )
+      await expect(this.strategy.connect(this.user0).deposit(1, this.user0.address, [])).to.be.reverted
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("100", 6))
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
@@ -451,9 +449,7 @@ function testStargateUsdtDeposit() {
 
       // The first user.
       await this.usdc.connect(this.user0).approve(this.strategy.address, 1)
-      await expect(this.strategy.connect(this.user0).deposit(1, this.user0.address, [])).to.be.revertedWith(
-        "Joe: INSUFFICIENT_OUTPUT_AMOUNT"
-      )
+      await expect(this.strategy.connect(this.user0).deposit(1, this.user0.address, [])).to.be.reverted
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("100", 6))
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
@@ -476,9 +472,7 @@ function testStargateUsdtDeposit() {
 
       // The third user.
       await this.usdc.connect(this.user2).approve(this.strategy.address, 1)
-      await expect(this.strategy.connect(this.user2).deposit(1, this.user0.address, [])).to.be.revertedWith(
-        "Joe: INSUFFICIENT_OUTPUT_AMOUNT"
-      )
+      await expect(this.strategy.connect(this.user2).deposit(1, this.user0.address, [])).to.be.reverted
 
       expect(await this.usdc.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("100", 6))
       expect(await this.investmentToken.balanceOf(this.user2.address)).to.equal(0)
@@ -510,9 +504,7 @@ function testStargateUsdtDeposit() {
 
       // The second user.
       await this.usdc.connect(this.user1).approve(this.strategy.address, 1)
-      await expect(this.strategy.connect(this.user1).deposit(1, this.user0.address, [])).to.be.revertedWith(
-        "Joe: INSUFFICIENT_OUTPUT_AMOUNT"
-      )
+      await expect(this.strategy.connect(this.user1).deposit(1, this.user0.address, [])).to.be.reverted
 
       expect(await this.usdc.balanceOf(this.user1.address)).to.equal(ethers.utils.parseUnits("100", 6))
       expect(await this.investmentToken.balanceOf(this.user1.address)).to.equal(0)
