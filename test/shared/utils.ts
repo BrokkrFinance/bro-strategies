@@ -1,7 +1,7 @@
 import { BigNumber, Contract } from "ethers"
 import { ethers } from "hardhat"
-import erc20abi from "./abi/erc20.json"
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
+import erc20Abi from "./abi/erc20.json"
 
 const ERROR_RANGE = 5 // ±5%
 const ERROR_RANGE_PRECISION = 1e2
@@ -17,5 +17,5 @@ export async function airdropToken(from: SignerWithAddress, to: SignerWithAddres
 }
 
 export async function getTokenContract(address: string) {
-  return await ethers.getContractAt(erc20abi, address)
+  return await ethers.getContractAt(erc20Abi, address)
 }
