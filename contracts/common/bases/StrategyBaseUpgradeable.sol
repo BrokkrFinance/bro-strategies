@@ -373,11 +373,13 @@ abstract contract StrategyBaseUpgradeable is
                 address(traderjoeRouter),
                 amountIn
             );
+
             traderjoeRouter.swapExactTokensForTokens(
                 amountIn,
                 amountOut,
                 path,
                 address(this),
+                // solhint-disable-next-line not-rely-on-time
                 block.timestamp
             );
         } else {

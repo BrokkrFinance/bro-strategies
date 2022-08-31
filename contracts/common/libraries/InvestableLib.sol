@@ -49,15 +49,13 @@ library InvestableLib {
     }
 
     function calculateMintAmount(
-        uint256 totalAmountInvestedSoFar,
+        uint256 equitySoFar,
         uint256 amountInvestedNow,
-        uint256 investableTokenSupplySoFar
+        uint256 investmentTokenSupplySoFar
     ) internal pure returns (uint256) {
-        if (investableTokenSupplySoFar == 0 || totalAmountInvestedSoFar == 0)
-            return amountInvestedNow;
+        if (investmentTokenSupplySoFar == 0) return amountInvestedNow;
         else
             return
-                (amountInvestedNow * investableTokenSupplySoFar) /
-                totalAmountInvestedSoFar;
+                (amountInvestedNow * investmentTokenSupplySoFar) / equitySoFar;
     }
 }
