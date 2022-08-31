@@ -211,8 +211,8 @@ abstract contract PortfolioBaseUpgradeable is
     function deposit(
         uint256 amount,
         address investmentTokenReceiver,
-        NameValuePair[] memory params
-    ) external virtual override nonReentrant {
+        NameValuePair[] calldata params
+    ) public virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountDeposited();
 
         // check investment limits
@@ -265,8 +265,8 @@ abstract contract PortfolioBaseUpgradeable is
     function withdraw(
         uint256 amount,
         address depositTokenReceiver,
-        NameValuePair[] memory params
-    ) external virtual override nonReentrant {
+        NameValuePair[] calldata params
+    ) public virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountWithdrawn();
         uint256 investmentTokenSupply = getInvestmentTokenSupply();
         uint256 withdrewAmount = depositToken.balanceOf(address(this));
