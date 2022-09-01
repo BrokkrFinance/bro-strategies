@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { getErrorRange, airdropToken } from "../shared/utils"
+import { getErrorRange, airdropToken, getMonthsInSeconds } from "../shared/utils"
+import { mine } from "@nomicfoundation/hardhat-network-helpers"
 
 export function testFee() {
   describe("Fee", async function () {
@@ -11,8 +12,7 @@ export function testFee() {
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
 
       // Wait 1 month to reward get accrued.
-      await ethers.provider.send("evm_increaseTime", [86400 * 30])
-      await ethers.provider.send("evm_mine", [])
+      await mine(getMonthsInSeconds(1))
 
       await this.strategy.connect(this.user1).processReward([], [])
 

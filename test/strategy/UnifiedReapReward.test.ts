@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { airdropToken } from "../shared/utils"
+import { airdropToken, getDaysInSeconds, getMonthsInSeconds, getYearsInSeconds } from "../shared/utils"
+import { mine } from "@nomicfoundation/hardhat-network-helpers"
 
 export function testReapReward() {
   describe("ReapReward", async function () {
@@ -11,8 +12,7 @@ export function testReapReward() {
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
 
       // Wait 1 month to reward get accrued.
-      await ethers.provider.send("evm_increaseTime", [86400 * 30])
-      await ethers.provider.send("evm_mine", [])
+      await mine(getMonthsInSeconds(1))
 
       await expect(this.strategy.connect(this.user1).processReward([], [])).to.emit(this.strategy, "RewardProcess")
     })
@@ -30,8 +30,7 @@ export function testReapReward() {
       const filterRewardProcess = (event: { event: string }) => event.event == "RewardProcess"
 
       // Wait 1 week to reward get accrued.
-      await ethers.provider.send("evm_increaseTime", [86400 * 7])
-      await ethers.provider.send("evm_mine", [])
+      await mine(getDaysInSeconds(7))
 
       const txBefore = await this.strategy.processReward([], [])
       const reciptBefore = await txBefore.wait()
@@ -39,8 +38,7 @@ export function testReapReward() {
       const rewardAmountBefore = eventBefore.args.amount.toBigInt()
 
       // Wait another 1 year more.
-      await ethers.provider.send("evm_increaseTime", [86400 * 365])
-      await ethers.provider.send("evm_mine", [])
+      await mine(getYearsInSeconds(1))
 
       const txAfter = await this.strategy.processReward([], [])
       const reciptAfter = await txAfter.wait()

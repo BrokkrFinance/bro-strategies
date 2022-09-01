@@ -12,6 +12,18 @@ export function getErrorRange(value: BigNumber) {
   return errorRange > BigNumber.from(0) ? errorRange : value
 }
 
+export function getDaysInSeconds(days: number) {
+  return 86400 * days
+}
+
+export function getMonthsInSeconds(months: number) {
+  return getDaysInSeconds(30) * months
+}
+
+export function getYearsInSeconds(years: number) {
+  return getDaysInSeconds(365) * years
+}
+
 // TODO: To be deleted.
 export async function airdropToken(from: SignerWithAddress, to: SignerWithAddress, token: Contract, amount: BigNumber) {
   await token.connect(from).transfer(to.address, amount)
