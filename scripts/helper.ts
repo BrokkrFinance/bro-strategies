@@ -121,6 +121,7 @@ export async function deployPortfolio(
   console.log("after transfer ownership. owner of investableToken: ", await investableToken.owner())
   console.log("after transfer ownership. owner of portfolio: ", await portfolio.owner())
 
+  await new Promise((f) => setTimeout(f, 10000))
   console.log("before portfolio initialization")
   await expectSuccess(
     portfolio.initialize([
@@ -138,8 +139,11 @@ export async function deployPortfolio(
       investmentLimitPerAddress,
     ])
   )
+  await new Promise((f) => setTimeout(f, 10000))
   for (const [index, investable] of investables.entries()) {
     await expectSuccess(portfolio.addInvestable(investable.address, allocations[index], []))
+    await new Promise((f) => setTimeout(f, 10000))
+    console.log("added investable")
   }
 
   return portfolio
