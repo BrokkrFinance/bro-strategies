@@ -176,10 +176,9 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         strategyStorage.masterChef.deposit(strategyStorage.farmId, 0);
 
-        address[] memory path = new address[](3);
+        address[] memory path = new address[](2);
         path[0] = address(strategyStorage.joeToken);
-        path[1] = address(0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7); // USDT
-        path[2] = address(depositToken);
+        path[1] = address(depositToken);
 
         swapExactTokensForTokens(
             swapService,
