@@ -1,9 +1,9 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
+import joePairAbi from "../../shared/abi/joePair.json"
+import { Oracles } from "../../shared/oracles"
 import { getErrorRange, airdropToken } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
-
-import joePairAbi from "../../shared/abi/joePair.json"
 
 const TRADER_JOE_ADDRESSES = {
   router: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
@@ -21,7 +21,8 @@ testStrategy(
     TRADER_JOE_ADDRESSES.lpToken,
     TRADER_JOE_ADDRESSES.joeToken,
   ],
-  [testTraderJoeAum, testTraderJoeDeposit, testTraderJoeInitialize, testTraderJoeUpgradeable]
+  Oracles.gmx,
+  [testTraderJoeAum, testTraderJoeInitialize, testTraderJoeUpgradeable]
 )
 
 function testTraderJoeAum() {

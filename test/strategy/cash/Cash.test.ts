@@ -1,10 +1,10 @@
 import { expect } from "chai"
-import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
-import { getErrorRange, airdropToken } from "../../shared/utils"
+import { Oracles } from "../../shared/oracles"
+import { airdropToken } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
-testStrategy("Cash Strategy", "Cash", [], [testCashAum, testCashDeposit, testCashUpgradeable])
+testStrategy("Cash Strategy", "Cash", [], Oracles.gmx, [testCashAum, testCashUpgradeable])
 
 function testCashAum() {
   describe("AUM - Cash Strategy Specific", async function () {

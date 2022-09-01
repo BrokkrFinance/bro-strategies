@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
+import { Oracles } from "../../shared/oracles"
 import { getErrorRange, airdropToken } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
@@ -24,7 +24,8 @@ testStrategy(
     STARGATE_ADDRESSES.usdcLpToken,
     STARGATE_ADDRESSES.stgToken,
   ],
-  [testStargateUsdcAum, testStargateUsdcDeposit, testStargateUsdcInitialize, testStargateUsdcUpgradeable]
+  Oracles.gmx,
+  [testStargateUsdcAum, testStargateUsdcInitialize, testStargateUsdcUpgradeable]
 )
 
 testStrategy(
@@ -37,7 +38,8 @@ testStrategy(
     STARGATE_ADDRESSES.usdtLpToken,
     STARGATE_ADDRESSES.stgToken,
   ],
-  [testStargateUsdtAum, testStargateUsdtDeposit, testStargateUsdtInitialize, testStargateUsdtUpgradeable]
+  Oracles.aave,
+  [testStargateUsdtAum, testStargateUsdtInitialize, testStargateUsdtUpgradeable]
 )
 
 function testStargateUsdcAum() {

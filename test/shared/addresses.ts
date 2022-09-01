@@ -11,18 +11,7 @@ export const TokenAddrs = {
   gmx: "0x62edc0692BD897D2295872a9FFCac5425011c661",
 }
 
-export const ContractAddrs = {
-  aavePool: "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
-  aaveOracle: "0xEBd36016B3eD09D4693Ed4251c67Bd858c3c7C9C",
-  gmxRewardRouter: "0x82147C5A7E850eA4E28155DF107F2590fD4ba327",
-  gmxOracle: "0x81b7e71a1d9e08a6ca016a0f4d6fa50dbce89ee3",
-}
-
+// TODO: To be deleted
 export const WhaleAddrs = {
   usdc: "0x42d6ce661bb2e5f5cc639e7befe74ff9fd649541",
-}
-
-export const SwapServiceAddrs = {
-  // SwapService[provider: number, router: string]
-  traderjoe: [0, "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"],
 }

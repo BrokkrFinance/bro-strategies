@@ -12,6 +12,7 @@ export function getErrorRange(value: BigNumber) {
   return errorRange > BigNumber.from(0) ? errorRange : value
 }
 
+// TODO: To be deleted.
 export async function airdropToken(from: SignerWithAddress, to: SignerWithAddress, token: Contract, amount: BigNumber) {
   await token.connect(from).transfer(to.address, amount)
 }

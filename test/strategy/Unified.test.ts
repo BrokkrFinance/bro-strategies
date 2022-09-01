@@ -1,6 +1,8 @@
-import { ethers, upgrades, network } from "hardhat"
-import { ContractAddrs, TokenAddrs, WhaleAddrs, SwapServiceAddrs } from "../shared/addresses"
+import { ethers, upgrades } from "hardhat"
+import { TokenAddrs, WhaleAddrs } from "../shared/addresses"
+import { Oracle } from "../shared/oracles"
 import { getTokenContract } from "../shared/utils"
+import { SwapServices } from "../shared/swaps"
 import { testDeposit } from "./UnifiedDeposit.test"
 import { testERC165 } from "./UnifiedERC165.test"
 import { testFee } from "./UnifiedFee.test"
@@ -9,11 +11,13 @@ import { testPausable } from "./UnifiedPausable.test"
 import { testReapReward } from "./UnifiedReapReward.test"
 import { testUpgradeable } from "./UnifiedUpgradeable.test"
 import { testWithdraw } from "./UnifiedWithdraw.test"
+import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 
 export function testStrategy(
   description: string,
-  strategyContractName: string,
+  strategyName: string,
   strategyExtraArgs: any[],
+  oracle: Oracle,
   strategySpecificTests: (() => any)[]
 ) {
   describe(description, function () {
@@ -25,6 +29,22 @@ export function testStrategy(
       this.user1 = this.signers[2]
       this.user2 = this.signers[3]
       this.userCount = 3
+
+      // Airdrop signers.
+      this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.usdc)
+      for (let i = 1; i <= this.userCount; i++) {
+        await this.impersonatedSigner.sendTransaction({
+          to: this.signers[i].address,
+          value: ethers.utils.parseEther("100"),
+        })
+        // TODO: Airdrop 10000 USDC to each signers.
+        // TODO: Add USDC setter helper.
+      }
+
+      // Contact factories.
+      this.PriceOracle = await ethers.getContractFactory(oracle.name)
+      this.InvestmentToken = await ethers.getContractFactory("InvestmentToken")
+      this.Strategy = await ethers.getContractFactory(strategyName)
 
       // Strategy parameters.
       this.usdc = await getTokenContract(TokenAddrs.usdc)
@@ -38,40 +58,11 @@ export function testStrategy(
       this.feeReceiverParams = []
       this.totalInvestmentLimit = BigInt(1e20)
       this.investmentLimitPerAddress = BigInt(1e20)
-      this.swapServiceProvider = SwapServiceAddrs.traderjoe[0]
-      this.swapServiceRouter = SwapServiceAddrs.traderjoe[1]
+      this.swapServiceProvider = SwapServices.traderjoe.provider
+      this.swapServiceRouter = SwapServices.traderjoe.router
 
-      // Contact factories.
-      this.PriceOracle = await ethers.getContractFactory("AaveOracle")
-      this.InvestmentToken = await ethers.getContractFactory("InvestmentToken")
-      this.Strategy = await ethers.getContractFactory(strategyContractName)
-    })
-
-    beforeEach(async function () {
-      await network.provider.request({
-        method: "hardhat_reset",
-        params: [
-          {
-            allowUnlimitedContractSize: false,
-            blockGasLimit: 30_000_000,
-            forking: {
-              jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
-              enabled: true,
-              blockNumber: 18191781,
-            },
-          },
-        ],
-      })
-
-      this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.usdc)
-      for (let i = 1; i <= this.userCount; i++) {
-        await this.impersonatedSigner.sendTransaction({
-          to: this.signers[i].address,
-          value: ethers.utils.parseEther("100"),
-        })
-      }
-
-      this.priceOracle = await upgrades.deployProxy(this.PriceOracle, [ContractAddrs.aaveOracle, this.usdc.address], {
+      // Deploy contracts.
+      this.priceOracle = await upgrades.deployProxy(this.PriceOracle, [oracle.address, this.usdc.address], {
         kind: "uups",
       })
       await this.priceOracle.deployed()
@@ -108,6 +99,12 @@ export function testStrategy(
       await this.strategy.deployed()
 
       await this.investmentToken.transferOwnership(this.strategy.address)
+
+      this.snapshot = await takeSnapshot()
+    })
+
+    beforeEach(async function () {
+      await this.snapshot.restore()
     })
 
     testDeposit()
