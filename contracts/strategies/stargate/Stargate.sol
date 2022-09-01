@@ -62,7 +62,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 break;
             }
         }
-        
+
         if (!isPoolFound) {
             revert InvalidStargateLpToken();
         }

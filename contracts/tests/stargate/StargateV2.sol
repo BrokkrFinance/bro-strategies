@@ -39,7 +39,7 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     ) external reinitializer(2) {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
-                StargateStorage storage strategyStorage = StargateStorageLib
+        StargateStorage storage strategyStorage = StargateStorageLib
             .getStorage();
 
         strategyStorage.router = router;
@@ -62,7 +62,7 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 break;
             }
         }
-        
+
         if (!isPoolFound) {
             revert InvalidStargateLpToken();
         }
