@@ -23,11 +23,58 @@ describe("Stargate Strategy", function () {
     usdc = await expectSuccess(getUsdcContract())
     usdt = await expectSuccess(getUsdtContract())
     priceOracle = await expectSuccess(deployPriceOracle(ContractAddrs.aaveOracle, (await getUsdcContract()).address))
+
+    let cashStrategy1 = await expectSuccess(
+      deployUpgradeableStrategy(
+        "Cash",
+        "Cash Strategy Token",
+        "CASH",
+        usdc,
+        0,
+        [],
+        0,
+        [],
+        0,
+        [],
+        "0x3f19dC970eF894c57aE4c8b09F842823b3d79772",
+        [],
+        BigInt(10 ** 20),
+        BigInt(10 ** 20),
+        priceOracle.address,
+        0,
+        "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", // TraderJoe Router v2
+        []
+      )
+    )
+
+    let cashStrategy2 = await expectSuccess(
+      deployUpgradeableStrategy(
+        "Cash",
+        "Cash Strategy Token",
+        "CASH",
+        usdc,
+        0,
+        [],
+        0,
+        [],
+        0,
+        [],
+        "0x3f19dC970eF894c57aE4c8b09F842823b3d79772",
+        [],
+        BigInt(10 ** 20),
+        BigInt(10 ** 20),
+        priceOracle.address,
+        0,
+        "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", // TraderJoe Router v2
+        []
+      )
+    )
+
     strategyUsdcStrategy = await expectSuccess(
       deployUpgradeableStrategy(
         "Stargate",
-        "Stargate Strategy Token",
-        "SUST",
+        "Stargate USDC Strategy Token",
+        "SSUSDC",
         usdc,
         0,
         [],
@@ -54,8 +101,8 @@ describe("Stargate Strategy", function () {
     strategyUsdtStrategy = await expectSuccess(
       deployUpgradeableStrategy(
         "Stargate",
-        "Stargate Strategy Token",
-        "SUST",
+        "Stargate USDT Strategy Token",
+        "SSUSDT",
         usdc,
         0,
         [],
@@ -80,12 +127,38 @@ describe("Stargate Strategy", function () {
       )
     )
 
-    const portfolio = await deployPortfolio(
+    const wrapperPortfolioStargateUsdc = await deployPortfolio(
       "MockPortfolio", // portfolioContractName
-      "Super Portfolio Token 1", // investnemtTokenName
-      "SUPP1", // investnemtTokenTicker
+      "Wrapper Portfolio Stargate USDC Token", // investnemtTokenName
+      "WPSUSDC", // investnemtTokenTicker
       usdc, // depositToken
-      [strategyUsdtStrategy, strategyUsdcStrategy], // investables
+      [strategyUsdcStrategy, cashStrategy1], // investables
+      0, // depositFee
+      [], // depositFeeParams
+      0, // withdrawalFee
+      [], // withdrawalFeeParams
+      0, // performanceFee
+      [], // performanceFeeParams
+      "0x3f19dC970eF894c57aE4c8b09F842823b3d79772", // feeReceiver
+      [], // feeReceiverParams
+      BigInt(10 ** 20), // totalInvestmentLimit
+      BigInt(10 ** 20), // investmentLimitPerAddress
+      [[100000], [100000, 0]] // allocations
+    )
+
+    const wrapperPortfolioStargateUsdcToken = await contractAt(
+      "InvestmentToken",
+      await wrapperPortfolioStargateUsdc.getInvestmentToken()
+    )
+    console.log("wrapperPortfolioStargateUsdcToken.address: ", wrapperPortfolioStargateUsdcToken.address)
+    console.log("wrapperPortfolioStargateUsdc.address: ", wrapperPortfolioStargateUsdc.address)
+
+    const wrapperPortfolioStargateUsdt = await deployPortfolio(
+      "MockPortfolio", // portfolioContractName
+      "Wrapper Portfolio Stargate USDT Token", // investnemtTokenName
+      "WPSUSDT", // investnemtTokenTicker
+      usdc, // depositToken
+      [strategyUsdtStrategy, cashStrategy2], // investables
       0, // depositFee
       [], // depositFeeParams
       0, // withdrawalFee
@@ -99,9 +172,35 @@ describe("Stargate Strategy", function () {
       [[100000], [50000, 50000]] // allocations
     )
 
-    const portfolioToken = await contractAt("InvestmentToken", await portfolio.getInvestmentToken())
-    console.log("portfolioToken.address: ", portfolioToken.address)
-    console.log("portfolio.address: ", portfolio.address)
+    const wrapperPortfolioStargateUsdtToken = await contractAt(
+      "InvestmentToken",
+      await wrapperPortfolioStargateUsdt.getInvestmentToken()
+    )
+    console.log("portfolioToken.address: ", wrapperPortfolioStargateUsdtToken.address)
+    console.log("portfolio.address: ", wrapperPortfolioStargateUsdt.address)
+
+    const topLevelPortfolio = await deployPortfolio(
+      "MockPortfolio", // portfolioContractName
+      "Super Portfolio Token 1", // investnemtTokenName
+      "SUPP1", // investnemtTokenTicker
+      usdc, // depositToken
+      [wrapperPortfolioStargateUsdc, wrapperPortfolioStargateUsdt], // investables
+      0, // depositFee
+      [], // depositFeeParams
+      0, // withdrawalFee
+      [], // withdrawalFeeParams
+      0, // performanceFee
+      [], // performanceFeeParams
+      "0x3f19dC970eF894c57aE4c8b09F842823b3d79772", // feeReceiver
+      [], // feeReceiverParams
+      BigInt(10 ** 20), // totalInvestmentLimit
+      BigInt(10 ** 20), // investmentLimitPerAddress
+      [[100000], [50000, 50000]] // allocations
+    )
+
+    const topLeveLportfolioToken = await contractAt("InvestmentToken", await topLevelPortfolio.getInvestmentToken())
+    console.log("topLeveLportfolioTokenToken.address: ", topLeveLportfolioToken.address)
+    console.log("topLevelPortfolio.address: ", topLevelPortfolio.address)
   })
 
   it("Smoke test", async function () {
