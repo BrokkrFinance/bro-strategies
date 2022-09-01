@@ -6,7 +6,7 @@ import "../../common/InvestmentToken.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract PercentageAllocationPortfolio is
+contract PercentageAllocation is
     UUPSUpgradeable,
     PortfolioOwnablePausableBaseUpgradeable
 {
