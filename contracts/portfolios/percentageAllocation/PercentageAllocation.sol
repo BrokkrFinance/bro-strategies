@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../../common/bases/PortfolioOwnablePausableBaseUpgradeable.sol";
-import "../../common/InvestmentToken.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
