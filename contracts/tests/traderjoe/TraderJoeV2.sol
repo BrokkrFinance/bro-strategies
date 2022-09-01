@@ -49,24 +49,28 @@ contract TraderJoeV2 is
         strategyStorage.joeToken = joeToken;
 
         address token0 = lpToken.token0();
+        address token1 = lpToken.token1();
         if (token0 != address(depositToken)) {
             strategyStorage.pairDepositToken = IERC20Upgradeable(token0);
+        } else if (token1 != address(depositToken)) {
+            strategyStorage.pairDepositToken = IERC20Upgradeable(token1);
         } else {
-            strategyStorage.pairDepositToken = IERC20Upgradeable(
-                lpToken.token1()
-            );
+            revert InvalidTraderJoeLpToken();
         }
 
         ITraderJoeMasterChef.PoolInfo memory poolInfo;
         uint256 poolLength = masterChef.poolLength();
+        bool isPoolFound = false;
         for (uint256 i = 0; i < poolLength; i++) {
             poolInfo = masterChef.poolInfo(i);
             if (address(poolInfo.lpToken) == address(lpToken)) {
                 strategyStorage.farmId = i;
+                isPoolFound = true;
                 break;
             }
         }
-        if (address(poolInfo.lpToken) != address(lpToken)) {
+
+        if (!isPoolFound) {
             revert InvalidTraderJoeLpToken();
         }
     }
@@ -81,13 +85,7 @@ contract TraderJoeV2 is
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
-        (
-            uint256 depositTokenReserve,
-            uint256 pairDepositTokenReserve
-        ) = getTraderJoeLpReserves();
-
-        uint256 swapAmount = (amount * pairDepositTokenReserve) /
-            (depositTokenReserve + pairDepositTokenReserve);
+        uint256 swapAmount = amount / 2;
         address[] memory path = new address[](2);
         path[0] = address(depositToken);
         path[1] = address(strategyStorage.pairDepositToken);
@@ -98,9 +96,6 @@ contract TraderJoeV2 is
             path
         );
         uint256 depositTokenDesired = amount - swapAmount;
-        uint256 pairDepositTokenMin = pairDepositTokenDesired;
-        uint256 depositTokenMin = (pairDepositTokenDesired *
-            depositTokenReserve) / pairDepositTokenReserve;
 
         strategyStorage.pairDepositToken.approve(
             address(strategyStorage.router),
@@ -115,9 +110,10 @@ contract TraderJoeV2 is
             address(depositToken),
             pairDepositTokenDesired,
             depositTokenDesired,
-            pairDepositTokenMin,
-            depositTokenMin,
+            0,
+            0,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
 
@@ -139,16 +135,6 @@ contract TraderJoeV2 is
         uint256 lpBalanceToWithdraw = (getTraderJoeLpBalance() * amount) /
             getInvestmentTokenSupply();
 
-        (
-            uint256 depositTokenReserve,
-            uint256 pairDepositTokenReserve
-        ) = getTraderJoeLpReserves();
-        uint256 lpTotalSupply = strategyStorage.lpToken.totalSupply();
-        uint256 pairDepositTokenMin = (lpBalanceToWithdraw *
-            pairDepositTokenReserve) / lpTotalSupply;
-        uint256 depositTokenMin = (lpBalanceToWithdraw * depositTokenReserve) /
-            lpTotalSupply;
-
         uint256 pairDepositTokenBalanceBefore = strategyStorage
             .pairDepositToken
             .balanceOf(address(this));
@@ -164,9 +150,10 @@ contract TraderJoeV2 is
             address(strategyStorage.pairDepositToken),
             address(depositToken),
             lpBalanceToWithdraw,
-            pairDepositTokenMin,
-            depositTokenMin,
+            0,
+            0,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
         uint256 pairDepositTokenBalanceAfter = strategyStorage
@@ -192,10 +179,9 @@ contract TraderJoeV2 is
 
         strategyStorage.masterChef.deposit(strategyStorage.farmId, 0);
 
-        address[] memory path = new address[](3);
+        address[] memory path = new address[](2);
         path[0] = address(strategyStorage.joeToken);
-        path[1] = address(0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7); // USDT
-        path[2] = address(depositToken);
+        path[1] = address(depositToken);
 
         swapExactTokensForTokens(
             swapService,
@@ -229,7 +215,7 @@ contract TraderJoeV2 is
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function getAssetValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
+    function getAssetValuations(bool, bool)
         public
         view
         virtual
@@ -239,28 +225,11 @@ contract TraderJoeV2 is
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
-        (
-            uint256 depositTokenReserve,
-            uint256 pairDepositTokenReserve
-        ) = getTraderJoeLpReserves();
-
-        uint256 lpBalance = getTraderJoeLpBalance();
-        uint256 lpTotalSupply = strategyStorage.lpToken.totalSupply();
-
-        uint256 depositTokenValuation = (lpBalance * depositTokenReserve) /
-            lpTotalSupply;
-        uint256 pairDepositTokenValuation = (((lpBalance *
-            pairDepositTokenReserve) / lpTotalSupply) *
-            priceOracle.getPrice(
-                depositToken, //strategyStorage.pairDepositToken,
-                shouldMaximise,
-                shouldIncludeAmmPrice
-            )) / InvestableLib.PRICE_PRECISION_FACTOR;
-
         assetValuations = new Valuation[](1);
         assetValuations[0] = Valuation(
             address(strategyStorage.lpToken),
-            depositTokenValuation + pairDepositTokenValuation
+            (getTraderJoeLpBalance() * getTraderJoeLpReserve()) /
+                strategyStorage.lpToken.totalSupply()
         );
     }
 
@@ -283,11 +252,7 @@ contract TraderJoeV2 is
                 .amount;
     }
 
-    function getTraderJoeLpReserves()
-        public
-        view
-        returns (uint256 depositTokenReserve, uint256 pairDepositTokenReserve)
-    {
+    function getTraderJoeLpReserve() public view returns (uint256) {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
@@ -295,10 +260,6 @@ contract TraderJoeV2 is
             .lpToken
             .getReserves();
 
-        if (strategyStorage.lpToken.token0() == address(depositToken)) {
-            return (reserve0, reserve1);
-        } else {
-            return (reserve1, reserve0);
-        }
+        return reserve0 + reserve1;
     }
 }
