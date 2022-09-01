@@ -18,6 +18,7 @@ contract PercentageAllocation is
     // solhint-disable-next-line const-name-snakecase
     string public constant version = "1.0.0";
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
