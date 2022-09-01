@@ -46,12 +46,13 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         strategyStorage.joeToken = joeToken;
 
         address token0 = lpToken.token0();
+        address token1 = lpToken.token1();
         if (token0 != address(depositToken)) {
             strategyStorage.pairDepositToken = IERC20Upgradeable(token0);
+        } else if (token1 != address(depositToken)) {
+            strategyStorage.pairDepositToken = IERC20Upgradeable(token1);
         } else {
-            strategyStorage.pairDepositToken = IERC20Upgradeable(
-                lpToken.token1()
-            );
+            revert InvalidTraderJoeLpToken();
         }
 
         ITraderJoeMasterChef.PoolInfo memory poolInfo;
