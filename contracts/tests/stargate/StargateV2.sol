@@ -31,38 +31,39 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function initialize(
         StrategyArgs calldata strategyArgs,
-        IStargateRouter router_,
-        IStargatePool pool_,
-        IStargateLpStaking lpStaking_,
-        IERC20Upgradeable lpToken_,
-        IERC20Upgradeable stgToken_
+        IStargateRouter router,
+        IStargatePool pool,
+        IStargateLpStaking lpStaking,
+        IERC20Upgradeable lpToken,
+        IERC20Upgradeable stgToken
     ) external reinitializer(2) {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
-        StargateStorage storage strategyStorage = StargateStorageLib
+                StargateStorage storage strategyStorage = StargateStorageLib
             .getStorage();
 
-        strategyStorage.router = router_;
-        strategyStorage.pool = pool_;
-        strategyStorage.lpStaking = lpStaking_;
-        strategyStorage.lpToken = lpToken_;
-        strategyStorage.stgToken = stgToken_;
+        strategyStorage.router = router;
+        strategyStorage.pool = pool;
+        strategyStorage.lpStaking = lpStaking;
+        strategyStorage.lpToken = lpToken;
+        strategyStorage.stgToken = stgToken;
 
-        strategyStorage.poolDepositToken = IERC20Upgradeable(
-            strategyStorage.pool.token()
-        );
-        strategyStorage.poolId = strategyStorage.pool.poolId();
+        strategyStorage.poolDepositToken = IERC20Upgradeable(pool.token());
+        strategyStorage.poolId = pool.poolId();
 
         IStargateLpStaking.PoolInfo memory poolInfo;
-        uint256 poolLength = strategyStorage.lpStaking.poolLength();
+        uint256 poolLength = lpStaking.poolLength();
+        bool isPoolFound = false;
         for (uint256 i = 0; i < poolLength; i++) {
-            poolInfo = strategyStorage.lpStaking.poolInfo(i);
-            if (address(poolInfo.lpToken) == address(strategyStorage.lpToken)) {
+            poolInfo = lpStaking.poolInfo(i);
+            if (address(poolInfo.lpToken) == address(lpToken)) {
                 strategyStorage.farmId = i;
+                isPoolFound = true;
                 break;
             }
         }
-        if (address(poolInfo.lpToken) != address(strategyStorage.lpToken)) {
+        
+        if (!isPoolFound) {
             revert InvalidStargateLpToken();
         }
     }
