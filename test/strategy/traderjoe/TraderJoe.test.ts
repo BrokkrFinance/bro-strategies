@@ -1,26 +1,15 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import joePairAbi from "../../shared/abi/joePair.json"
+import { TraderJoeAddrs } from "../../shared/addresses"
 import { Oracles } from "../../shared/oracles"
 import { getErrorRange, airdropToken } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
-const TRADER_JOE_ADDRESSES = {
-  router: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
-  masterChef: "0x4483f0b6e2f5486d06958c20f8c39a7abe87bf8f",
-  lpToken: "0x2A8A315e82F85D1f0658C5D66A452Bbdd9356783",
-  joeToken: "0x6e84a6216ea6dacc71ee8e6b0a5b7322eebc0fdd",
-}
-
 testStrategy(
   "TraderJoe USDC-USDC.e Strategy",
   "TraderJoe",
-  [
-    TRADER_JOE_ADDRESSES.router,
-    TRADER_JOE_ADDRESSES.masterChef,
-    TRADER_JOE_ADDRESSES.lpToken,
-    TRADER_JOE_ADDRESSES.joeToken,
-  ],
+  [TraderJoeAddrs.router, TraderJoeAddrs.masterChef, TraderJoeAddrs.lpToken, TraderJoeAddrs.joeToken],
   Oracles.gmx,
   [testTraderJoeAum, testTraderJoeInitialize, testTraderJoeUpgradeable]
 )
@@ -33,19 +22,19 @@ function testTraderJoeAum() {
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
-      const lpTokenContract = await ethers.getContractAt(joePairAbi, TRADER_JOE_ADDRESSES.lpToken)
+      const lpTokenContract = await ethers.getContractAt(joePairAbi, TraderJoeAddrs.lpToken)
       const [, reserves1] = await lpTokenContract.getReserves() // USDC reserve in USDC-USDC.e pool
       const totalSupply = await lpTokenContract.totalSupply()
       const lpBalance = ethers.utils.parseUnits("100", 6).div(2).mul(totalSupply).div(reserves1)
 
       const assetBalances = await this.strategy.getAssetBalances()
-      expect(assetBalances[0].asset.toLowerCase()).to.equal(TRADER_JOE_ADDRESSES.lpToken.toLowerCase())
+      expect(assetBalances[0].asset.toLowerCase()).to.equal(TraderJoeAddrs.lpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(lpBalance, getErrorRange(lpBalance))
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuations = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuations[0].asset.toLowerCase()).to.equal(TRADER_JOE_ADDRESSES.lpToken.toLowerCase())
+      expect(assetValuations[0].asset.toLowerCase()).to.equal(TraderJoeAddrs.lpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
         ethers.utils.parseUnits("100", 6),
         getErrorRange(ethers.utils.parseUnits("100", 6))
@@ -74,19 +63,19 @@ function testTraderJoeAum() {
       await this.investmentToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10", 6))
       await this.strategy.connect(this.user0).withdraw(ethers.utils.parseUnits("10", 6), this.user0.address, [])
 
-      const lpTokenContract = await ethers.getContractAt(joePairAbi, TRADER_JOE_ADDRESSES.lpToken)
+      const lpTokenContract = await ethers.getContractAt(joePairAbi, TraderJoeAddrs.lpToken)
       const [, reserves1] = await lpTokenContract.getReserves() // USDC reserve in USDC-USDC.e pool
       const totalSupply = await lpTokenContract.totalSupply()
       const lpBalance = ethers.utils.parseUnits("70", 6).div(2).mul(totalSupply).div(reserves1)
 
       const assetBalances = await this.strategy.getAssetBalances()
-      expect(assetBalances[0].asset.toLowerCase()).to.equal(TRADER_JOE_ADDRESSES.lpToken.toLowerCase())
+      expect(assetBalances[0].asset.toLowerCase()).to.equal(TraderJoeAddrs.lpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(lpBalance, getErrorRange(lpBalance))
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuations = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuations[0].asset.toLowerCase()).to.equal(TRADER_JOE_ADDRESSES.lpToken.toLowerCase())
+      expect(assetValuations[0].asset.toLowerCase()).to.equal(TraderJoeAddrs.lpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
         ethers.utils.parseUnits("70", 6),
         getErrorRange(ethers.utils.parseUnits("70", 6))
@@ -126,10 +115,10 @@ function testTraderJoeInitialize() {
               this.swapServiceProvider,
               this.swapServiceRouter,
             ],
-            TRADER_JOE_ADDRESSES.router,
-            TRADER_JOE_ADDRESSES.masterChef,
+            TraderJoeAddrs.router,
+            TraderJoeAddrs.masterChef,
             this.usdc.address,
-            TRADER_JOE_ADDRESSES.joeToken,
+            TraderJoeAddrs.joeToken,
           ],
           { kind: "uups" }
         )
@@ -168,10 +157,10 @@ function testTraderJoeUpgradeable() {
               this.swapServiceProvider,
               this.swapServiceRouter,
             ],
-            TRADER_JOE_ADDRESSES.router,
-            TRADER_JOE_ADDRESSES.masterChef,
-            TRADER_JOE_ADDRESSES.lpToken,
-            TRADER_JOE_ADDRESSES.joeToken,
+            TraderJoeAddrs.router,
+            TraderJoeAddrs.masterChef,
+            TraderJoeAddrs.lpToken,
+            TraderJoeAddrs.joeToken,
           ],
         },
       })
