@@ -31,44 +31,39 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function initialize(
         StrategyArgs calldata strategyArgs,
-        IStargateRouter stargateRouter_,
-        IStargatePool stargatePool_,
-        IStargateLpStaking stargateLpStaking_,
-        IERC20Upgradeable stargateLpToken_,
-        IERC20Upgradeable stargateStgToken_
+        IStargateRouter router,
+        IStargatePool pool,
+        IStargateLpStaking lpStaking,
+        IERC20Upgradeable lpToken,
+        IERC20Upgradeable stgToken
     ) external initializer {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
         StargateStorage storage strategyStorage = StargateStorageLib
             .getStorage();
 
-        strategyStorage.stargateRouter = stargateRouter_;
-        strategyStorage.stargatePool = stargatePool_;
-        strategyStorage.stargateLpStaking = stargateLpStaking_;
-        strategyStorage.stargateLpToken = stargateLpToken_;
-        strategyStorage.stargateStgToken = stargateStgToken_;
+        strategyStorage.router = router;
+        strategyStorage.pool = pool;
+        strategyStorage.lpStaking = lpStaking;
+        strategyStorage.lpToken = lpToken;
+        strategyStorage.stgToken = stgToken;
 
-        strategyStorage.stargateDepositToken = IERC20Upgradeable(
-            strategyStorage.stargatePool.token()
-        );
-        strategyStorage.stargatePoolId = strategyStorage.stargatePool.poolId();
+        strategyStorage.poolDepositToken = IERC20Upgradeable(pool.token());
+        strategyStorage.poolId = pool.poolId();
 
         IStargateLpStaking.PoolInfo memory poolInfo;
-        uint256 poolLength = strategyStorage.stargateLpStaking.poolLength();
+        uint256 poolLength = lpStaking.poolLength();
+        bool isPoolFound = false;
         for (uint256 i = 0; i < poolLength; i++) {
-            poolInfo = strategyStorage.stargateLpStaking.poolInfo(i);
-            if (
-                address(poolInfo.lpToken) ==
-                address(strategyStorage.stargateLpToken)
-            ) {
-                strategyStorage.stargateFarmId = i;
+            poolInfo = lpStaking.poolInfo(i);
+            if (address(poolInfo.lpToken) == address(lpToken)) {
+                strategyStorage.farmId = i;
+                isPoolFound = true;
                 break;
             }
         }
-        if (
-            address(poolInfo.lpToken) !=
-            address(strategyStorage.stargateLpToken)
-        ) {
+
+        if (!isPoolFound) {
             revert InvalidStargateLpToken();
         }
     }
@@ -83,39 +78,39 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         StargateStorage storage strategyStorage = StargateStorageLib
             .getStorage();
 
-        if (depositToken != strategyStorage.stargateDepositToken) {
+        if (depositToken != strategyStorage.poolDepositToken) {
             address[] memory path = new address[](3);
             path[0] = address(depositToken);
-            path[1] = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); // wAvax
-            path[2] = address(strategyStorage.stargateDepositToken);
+            path[1] = address(InvestableLib.WAVAX);
+            path[2] = address(strategyStorage.poolDepositToken);
 
             amount = swapExactTokensForTokens(swapService, amount, path);
         }
 
-        uint256 lpBalanceBefore = strategyStorage.stargateLpToken.balanceOf(
+        uint256 lpBalanceBefore = strategyStorage.lpToken.balanceOf(
             address(this)
         );
-        strategyStorage.stargateDepositToken.approve(
-            address(strategyStorage.stargateRouter),
+        strategyStorage.poolDepositToken.approve(
+            address(strategyStorage.router),
             amount
         );
-        strategyStorage.stargateRouter.addLiquidity(
-            strategyStorage.stargatePoolId,
+        strategyStorage.router.addLiquidity(
+            strategyStorage.poolId,
             amount,
             address(this)
         );
-        uint256 lpBalanceAfter = strategyStorage.stargateLpToken.balanceOf(
+        uint256 lpBalanceAfter = strategyStorage.lpToken.balanceOf(
             address(this)
         );
 
         uint256 lpBalanceIncrement = lpBalanceAfter - lpBalanceBefore;
 
-        strategyStorage.stargateLpToken.approve(
-            address(strategyStorage.stargateLpStaking),
+        strategyStorage.lpToken.approve(
+            address(strategyStorage.lpStaking),
             lpBalanceIncrement
         );
-        strategyStorage.stargateLpStaking.deposit(
-            strategyStorage.stargateFarmId,
+        strategyStorage.lpStaking.deposit(
+            strategyStorage.farmId,
             lpBalanceIncrement
         );
     }
@@ -131,37 +126,37 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 lpBalanceToWithdraw = (getStargateLpBalance() * amount) /
             getInvestmentTokenSupply();
 
-        if (lpBalanceToWithdraw > strategyStorage.stargatePool.deltaCredit()) {
+        if (lpBalanceToWithdraw > strategyStorage.pool.deltaCredit()) {
             revert NotEnoughDeltaCredit();
         }
 
-        uint256 stargateDepositTokenBalanceBefore = strategyStorage
-            .stargateDepositToken
+        uint256 poolDepositTokenBalanceBefore = strategyStorage
+            .poolDepositToken
             .balanceOf(address(this));
-        strategyStorage.stargateLpStaking.withdraw(
-            strategyStorage.stargateFarmId,
+        strategyStorage.lpStaking.withdraw(
+            strategyStorage.farmId,
             lpBalanceToWithdraw
         );
-        strategyStorage.stargateRouter.instantRedeemLocal(
-            uint16(strategyStorage.stargatePoolId),
+        strategyStorage.router.instantRedeemLocal(
+            uint16(strategyStorage.poolId),
             lpBalanceToWithdraw,
             address(this)
         );
-        uint256 stargateDepositTokenBalanceAfter = strategyStorage
-            .stargateDepositToken
+        uint256 poolDepositTokenBalanceAfter = strategyStorage
+            .poolDepositToken
             .balanceOf(address(this));
 
-        if (depositToken != strategyStorage.stargateDepositToken) {
-            uint256 stargateDepositTokenBalanceIncrement = stargateDepositTokenBalanceAfter -
-                    stargateDepositTokenBalanceBefore;
+        if (depositToken != strategyStorage.poolDepositToken) {
+            uint256 poolDepositTokenBalanceIncrement = poolDepositTokenBalanceAfter -
+                    poolDepositTokenBalanceBefore;
             address[] memory path = new address[](3);
-            path[0] = address(strategyStorage.stargateDepositToken);
-            path[1] = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); // wAvax
+            path[0] = address(strategyStorage.poolDepositToken);
+            path[1] = address(InvestableLib.WAVAX);
             path[2] = address(depositToken);
 
             swapExactTokensForTokens(
                 swapService,
-                stargateDepositTokenBalanceIncrement,
+                poolDepositTokenBalanceIncrement,
                 path
             );
         }
@@ -171,19 +166,16 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         StargateStorage storage strategyStorage = StargateStorageLib
             .getStorage();
 
-        strategyStorage.stargateLpStaking.deposit(
-            strategyStorage.stargateFarmId,
-            0
-        );
+        strategyStorage.lpStaking.deposit(strategyStorage.farmId, 0);
 
         address[] memory path = new address[](3);
-        path[0] = address(strategyStorage.stargateStgToken);
-        path[1] = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); // wAvax
+        path[0] = address(strategyStorage.stgToken);
+        path[1] = address(InvestableLib.WAVAX);
         path[2] = address(depositToken);
 
         swapExactTokensForTokens(
             swapService,
-            strategyStorage.stargateStgToken.balanceOf(address(this)),
+            strategyStorage.stgToken.balanceOf(address(this)),
             path
         );
     }
@@ -200,7 +192,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         assetBalances = new Balance[](1);
         assetBalances[0] = Balance(
-            address(strategyStorage.stargateLpToken),
+            address(strategyStorage.lpToken),
             getStargateLpBalance()
         );
     }
@@ -225,17 +217,16 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         assetValuations = new Valuation[](1);
         assetValuations[0] = Valuation(
-            address(strategyStorage.stargateLpToken),
-            (getStargateLpBalance() *
-                strategyStorage.stargatePool.totalLiquidity()) /
-                strategyStorage.stargatePool.totalSupply()
+            address(strategyStorage.lpToken),
+            (getStargateLpBalance() * strategyStorage.pool.totalLiquidity()) /
+                strategyStorage.pool.totalSupply()
         );
 
-        if (depositToken != strategyStorage.stargateDepositToken) {
+        if (depositToken != strategyStorage.poolDepositToken) {
             assetValuations[0].valuation =
                 (assetValuations[0].valuation *
                     priceOracle.getPrice(
-                        strategyStorage.stargateDepositToken,
+                        strategyStorage.poolDepositToken,
                         shouldMaximise,
                         shouldIncludeAmmPrice
                     )) /
@@ -257,8 +248,8 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         return
             strategyStorage
-                .stargateLpStaking
-                .userInfo(strategyStorage.stargateFarmId, address(this))
+                .lpStaking
+                .userInfo(strategyStorage.farmId, address(this))
                 .amount;
     }
 }

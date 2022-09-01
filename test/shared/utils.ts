@@ -1,7 +1,7 @@
 import { BigNumber, Contract } from "ethers"
 import { ethers } from "hardhat"
-import erc20abi from "./abi/erc20.json"
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
+import erc20Abi from "./abi/erc20.json"
 
 const ERROR_RANGE = 5 // ±5%
 const ERROR_RANGE_PRECISION = 1e2
@@ -12,10 +12,23 @@ export function getErrorRange(value: BigNumber) {
   return errorRange > BigNumber.from(0) ? errorRange : value
 }
 
+export function getDaysInSeconds(days: number) {
+  return 86400 * days
+}
+
+export function getMonthsInSeconds(months: number) {
+  return getDaysInSeconds(30) * months
+}
+
+export function getYearsInSeconds(years: number) {
+  return getDaysInSeconds(365) * years
+}
+
+// TODO: To be deleted.
 export async function airdropToken(from: SignerWithAddress, to: SignerWithAddress, token: Contract, amount: BigNumber) {
   await token.connect(from).transfer(to.address, amount)
 }
 
 export async function getTokenContract(address: string) {
-  return await ethers.getContractAt(erc20abi, address)
+  return await ethers.getContractAt(erc20Abi, address)
 }

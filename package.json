@@ -9,6 +9,7 @@
     "@aave/core-v3": "^1.13.1",
     "@mangrovedao/hardhat-test-solidity": "^0.0.17",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.1.0",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@nomiclabs/hardhat-solpp": "^2.0.1",
