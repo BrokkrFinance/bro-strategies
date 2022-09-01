@@ -15,3 +15,20 @@ export const TokenAddrs = {
 export const WhaleAddrs = {
   usdc: "0x42d6ce661bb2e5f5cc639e7befe74ff9fd649541",
 }
+
+export const StargateAddrs = {
+  router: "0x45a01e4e04f14f7a4a6702c74187c5f6222033cd",
+  usdcPool: "0x1205f31718499dbf1fca446663b532ef87481fe1",
+  usdtPool: "0x29e38769f23701a2e4a8ef0492e19da4604be62c",
+  lpStaking: "0x8731d54e9d02c286767d56ac03e8037c07e01e98",
+  usdcLpToken: "0x1205f31718499dbf1fca446663b532ef87481fe1",
+  usdtLpToken: "0x29e38769f23701a2e4a8ef0492e19da4604be62c",
+  stgToken: "0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590",
+}
+
+export const TraderJoeAddrs = {
+  router: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
+  masterChef: "0x4483f0b6e2f5486d06958c20f8c39a7abe87bf8f",
+  lpToken: "0x2A8A315e82F85D1f0658C5D66A452Bbdd9356783",
+  joeToken: "0x6e84a6216ea6dacc71ee8e6b0a5b7322eebc0fdd",
+}
