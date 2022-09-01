@@ -1,7 +1,7 @@
 import { ethers, upgrades } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../shared/addresses"
 import { Oracle } from "../shared/oracles"
-import { getTokenContract } from "../shared/utils"
+import { getTokenContract } from "../shared/contracts"
 import { SwapServices } from "../shared/swaps"
 import { testDeposit } from "./UnifiedDeposit.test"
 import { testERC165 } from "./UnifiedERC165.test"
