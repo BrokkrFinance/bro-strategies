@@ -112,6 +112,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             pairDepositTokenMin,
             depositTokenMin,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
 
@@ -161,6 +162,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             pairDepositTokenMin,
             depositTokenMin,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
         uint256 pairDepositTokenBalanceAfter = strategyStorage
