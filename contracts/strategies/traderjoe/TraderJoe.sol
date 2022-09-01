@@ -93,8 +93,6 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             path
         );
         uint256 depositTokenDesired = amount - swapAmount;
-        uint256 pairDepositTokenMin = (pairDepositTokenDesired * 99) / 100;
-        uint256 depositTokenMin = (depositTokenDesired * 99) / 100;
 
         strategyStorage.pairDepositToken.approve(
             address(strategyStorage.router),
@@ -109,8 +107,8 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             address(depositToken),
             pairDepositTokenDesired,
             depositTokenDesired,
-            pairDepositTokenMin,
-            depositTokenMin,
+            0,
+            0,
             address(this),
             // solhint-disable-next-line not-rely-on-time
             block.timestamp
@@ -134,16 +132,6 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 lpBalanceToWithdraw = (getTraderJoeLpBalance() * amount) /
             getInvestmentTokenSupply();
 
-        (
-            uint256 depositTokenReserve,
-            uint256 pairDepositTokenReserve
-        ) = getTraderJoeLpReserves();
-        uint256 lpTotalSupply = strategyStorage.lpToken.totalSupply();
-        uint256 pairDepositTokenMin = (lpBalanceToWithdraw *
-            pairDepositTokenReserve) / lpTotalSupply;
-        uint256 depositTokenMin = (lpBalanceToWithdraw * depositTokenReserve) /
-            lpTotalSupply;
-
         uint256 pairDepositTokenBalanceBefore = strategyStorage
             .pairDepositToken
             .balanceOf(address(this));
@@ -159,8 +147,8 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             address(strategyStorage.pairDepositToken),
             address(depositToken),
             lpBalanceToWithdraw,
-            pairDepositTokenMin,
-            depositTokenMin,
+            0,
+            0,
             address(this),
             // solhint-disable-next-line not-rely-on-time
             block.timestamp

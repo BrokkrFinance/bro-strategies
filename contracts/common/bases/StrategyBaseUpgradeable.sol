@@ -365,23 +365,19 @@ abstract contract StrategyBaseUpgradeable is
                 swapService_.router
             );
 
-            amountOut = traderjoeRouter.getAmountsOut(amountIn, path)[
-                path.length - 1
-            ];
-
             IERC20Upgradeable(path[0]).approve(
                 address(traderjoeRouter),
                 amountIn
             );
 
-            traderjoeRouter.swapExactTokensForTokens(
+            amountOut = traderjoeRouter.swapExactTokensForTokens(
                 amountIn,
-                amountOut,
+                0,
                 path,
                 address(this),
                 // solhint-disable-next-line not-rely-on-time
                 block.timestamp
-            );
+            )[path.length - 1];
         } else {
             revert InvalidSwapServiceProvider();
         }
