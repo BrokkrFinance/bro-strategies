@@ -1,8 +1,13 @@
-import "@nomiclabs/hardhat-waffle"
+import "@mangrovedao/hardhat-test-solidity"
+import "@nomicfoundation/hardhat-chai-matchers"
+import "@nomicfoundation/hardhat-network-helpers"
+import "@nomiclabs/hardhat-ethers"
+import "@nomiclabs/hardhat-etherscan"
 import "@openzeppelin/hardhat-upgrades"
 import "@typechain/hardhat"
 import * as dotenv from "dotenv"
 import "hardhat-contract-sizer"
+import "hardhat-deploy"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
 import "solidity-coverage"
@@ -25,7 +30,13 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
+      allowUnlimitedContractSize: false,
       blockGasLimit: 30_000_000,
+      forking: {
+        url: "https://api.avax.network/ext/bc/C/rpc",
+        enabled: true,
+        blockNumber: 18191781,
+      },
     },
   },
   gasReporter: {
