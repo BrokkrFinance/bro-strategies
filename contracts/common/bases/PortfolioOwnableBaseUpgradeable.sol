@@ -99,4 +99,22 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     {
         super.setInvestmentToken(investmentToken);
     }
+
+    function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setTotalInvestmentLimit(totalInvestmentLimit);
+    }
+
+    function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setInvestmentLimitPerAddress(investmentLimitPerAddress);
+    }
 }
