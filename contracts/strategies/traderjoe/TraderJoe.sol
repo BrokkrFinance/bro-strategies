@@ -56,14 +56,17 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         ITraderJoeMasterChef.PoolInfo memory poolInfo;
         uint256 poolLength = masterChef.poolLength();
+        bool isPoolFound = false;
         for (uint256 i = 0; i < poolLength; i++) {
             poolInfo = masterChef.poolInfo(i);
             if (address(poolInfo.lpToken) == address(lpToken)) {
                 strategyStorage.farmId = i;
+                isPoolFound = true;
                 break;
             }
         }
-        if (address(poolInfo.lpToken) != address(lpToken)) {
+
+        if (!isPoolFound) {
             revert InvalidTraderJoeLpToken();
         }
     }

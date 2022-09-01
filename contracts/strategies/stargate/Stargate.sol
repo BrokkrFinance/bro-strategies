@@ -53,14 +53,17 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         IStargateLpStaking.PoolInfo memory poolInfo;
         uint256 poolLength = lpStaking.poolLength();
+        bool isPoolFound = false;
         for (uint256 i = 0; i < poolLength; i++) {
             poolInfo = lpStaking.poolInfo(i);
             if (address(poolInfo.lpToken) == address(lpToken)) {
                 strategyStorage.farmId = i;
+                isPoolFound = true;
                 break;
             }
         }
-        if (address(poolInfo.lpToken) != address(lpToken)) {
+        
+        if (!isPoolFound) {
             revert InvalidStargateLpToken();
         }
     }
