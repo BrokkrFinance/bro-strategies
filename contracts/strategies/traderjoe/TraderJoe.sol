@@ -213,7 +213,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function getAssetValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
+    function getAssetValuations(bool, bool)
         public
         view
         virtual
@@ -223,28 +223,11 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
-        (
-            uint256 depositTokenReserve,
-            uint256 pairDepositTokenReserve
-        ) = getTraderJoeLpReserves();
-
-        uint256 lpBalance = getTraderJoeLpBalance();
-        uint256 lpTotalSupply = strategyStorage.lpToken.totalSupply();
-
-        uint256 depositTokenValuation = (lpBalance * depositTokenReserve) /
-            lpTotalSupply;
-        uint256 pairDepositTokenValuation = (((lpBalance *
-            pairDepositTokenReserve) / lpTotalSupply) *
-            priceOracle.getPrice(
-                strategyStorage.pairDepositToken,
-                shouldMaximise,
-                shouldIncludeAmmPrice
-            )) / InvestableLib.PRICE_PRECISION_FACTOR;
-
         assetValuations = new Valuation[](1);
         assetValuations[0] = Valuation(
             address(strategyStorage.lpToken),
-            depositTokenValuation + pairDepositTokenValuation
+            (getTraderJoeLpBalance() * getTraderJoeLpReserve()) /
+                strategyStorage.lpToken.totalSupply()
         );
     }
 
@@ -267,11 +250,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 .amount;
     }
 
-    function getTraderJoeLpReserves()
-        public
-        view
-        returns (uint256 depositTokenReserve, uint256 pairDepositTokenReserve)
-    {
+    function getTraderJoeLpReserve() public view returns (uint256) {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
@@ -279,10 +258,6 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             .lpToken
             .getReserves();
 
-        if (strategyStorage.lpToken.token0() == address(depositToken)) {
-            return (reserve0, reserve1);
-        } else {
-            return (reserve1, reserve0);
-        }
+        return reserve0 + reserve1;
     }
 }
