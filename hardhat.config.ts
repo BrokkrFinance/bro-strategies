@@ -51,6 +51,7 @@ const config: HardhatUserConfig = {
         blockNumber: 18191781,
       },
     },
+
     avax_mainnet: {
       url: "https://api.avax.network/ext/bc/C/rpc",
       chainId: 43114,
