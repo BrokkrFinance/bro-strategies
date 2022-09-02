@@ -17,6 +17,9 @@ contract InvestmentToken is
     ERC20BurnableUpgradeable,
     IInvestmentToken
 {
+    string private _name; // redeclare name prop to be able to change it
+    string private _symbol; // redeclare symbol prop to be able to change it
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -29,7 +32,10 @@ contract InvestmentToken is
         __Context_init();
         __Ownable_init();
         __UUPSUpgradeable_init();
-        __ERC20_init(name_, symbol_);
+        __ERC20_init("", "");
+
+        _name = name_;
+        _symbol = symbol_;
     }
 
     function mint(address account_, uint256 amount_) public virtual onlyOwner {
@@ -59,5 +65,21 @@ contract InvestmentToken is
 
     function decimals() public pure virtual override returns (uint8) {
         return 6;
+    }
+
+    function setName(string memory name_) external onlyOwner {
+        _name = name_;
+    }
+
+    function setSymbol(string memory symbol_) external onlyOwner {
+        _symbol = symbol_;
+    }
+
+    function name() public view override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view override returns (string memory) {
+        return _symbol;
     }
 }
