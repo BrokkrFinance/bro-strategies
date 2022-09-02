@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../../strategies/stargate/StargateStorageLib.sol";
-import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
-import "../../dependencies/stargate/IStargateLpStaking.sol";
-import "../../dependencies/stargate/IStargatePool.sol";
-import "../../dependencies/stargate/IStargateRouter.sol";
+import "../../../strategies/stargate/StargateStorageLib.sol";
+import "../../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
+import "../../../dependencies/stargate/IStargateLpStaking.sol";
+import "../../../dependencies/stargate/IStargatePool.sol";
+import "../../../dependencies/stargate/IStargateRouter.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
