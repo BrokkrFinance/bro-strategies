@@ -1,4 +1,4 @@
-import { ethers, upgrades } from "hardhat"
+import { ethers, upgrades, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../shared/addresses"
 import { Oracle } from "../shared/oracles"
 import { getTokenContract } from "../shared/contracts"
@@ -22,6 +22,21 @@ export function testStrategy(
 ) {
   describe(description, function () {
     before(async function () {
+      await network.provider.request({
+        method: "hardhat_reset",
+        params: [
+          {
+            allowUnlimitedContractSize: false,
+            blockGasLimit: 30_000_000,
+            forking: {
+              jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+              enabled: true,
+              blockNumber: 18191781,
+            },
+          },
+        ],
+      })
+
       // Signers.
       this.signers = await ethers.getSigners()
       this.owner = this.signers[0]
@@ -119,5 +134,12 @@ export function testStrategy(
     for (const strategySpecificTest of strategySpecificTests) {
       strategySpecificTest()
     }
+
+    after(async function () {
+      await network.provider.request({
+        method: "hardhat_reset",
+        params: [],
+      })
+    })
   })
 }
