@@ -38,6 +38,18 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
           .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
       }
 
+      // Portfolio parameters.
+      this.depositFee = 0
+      this.depositFeeParams = []
+      this.withdrawalFee = 0
+      this.withdrawalFeeParams = []
+      this.performanceFee = 0
+      this.performanceFeeParams = []
+      this.feeReceiver = this.owner.address
+      this.feeReceiverParams = []
+      this.totalInvestmentLimit = BigInt(1e20)
+      this.investmentLimitPerAddress = BigInt(1e20)
+
       // Deploy portfolio and all its investables.
       this.portfolio = await deployPortfolio(this)
 
