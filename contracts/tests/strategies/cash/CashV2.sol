@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../../strategies/cash/CashStorageLib.sol";
-import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
+import "../../../strategies/cash/CashStorageLib.sol";
+import "../../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
