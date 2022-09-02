@@ -1,4 +1,4 @@
-import { ethers } from "hardhat"
+import { ethers, network } from "hardhat"
 import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { TokenAddrs, WhaleAddrs } from "../shared/addresses"
 import { getTokenContract } from "../shared/contracts"
@@ -15,6 +15,21 @@ import { testWithdraw } from "./UnifiedWithdraw.test"
 export function testPortfolio(description: string, deployPortfolio: Function, portfolioSpecificTests: (() => any)[]) {
   describe(description, function () {
     before(async function () {
+      await network.provider.request({
+        method: "hardhat_reset",
+        params: [
+          {
+            allowUnlimitedContractSize: false,
+            blockGasLimit: 30_000_000,
+            forking: {
+              jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+              enabled: true,
+              blockNumber: 18191781,
+            },
+          },
+        ],
+      })
+
       // Get ERC20 tokens.
       this.usdc = await getTokenContract(TokenAddrs.usdc)
 
@@ -78,5 +93,12 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
     for (const portfolioSpecificTest of portfolioSpecificTests) {
       portfolioSpecificTest()
     }
+
+    after(async function () {
+      await network.provider.request({
+        method: "hardhat_reset",
+        params: [],
+      })
+    })
   })
 }
