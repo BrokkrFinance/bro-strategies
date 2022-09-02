@@ -49,6 +49,11 @@ interface IPortfolio is IInvestable {
     function setTargetInvestableAllocations(uint24[] calldata newAllocations)
         external;
 
+    function getInvestables()
+        external
+        view
+        returns (InvestableDesc[] memory investableDescs);
+
     function rebalance(
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams

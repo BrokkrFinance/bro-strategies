@@ -41,7 +41,7 @@ abstract contract PortfolioBaseUpgradeable is
     using SafeERC20Upgradeable for IInvestmentToken;
     using EnumerableMapUpgradeable for EnumerableMapUpgradeable.AddressToUintMap;
 
-    InvestableDesc[] public investableDescs;
+    InvestableDesc[] private investableDescs;
 
     IInvestmentToken internal investmentToken;
     IERC20Upgradeable internal depositToken;
@@ -655,4 +655,8 @@ abstract contract PortfolioBaseUpgradeable is
         override
         nonReentrant
     {}
+
+    function getInvestables() external view returns (InvestableDesc[] memory) {
+        return investableDescs;
+    }
 }
