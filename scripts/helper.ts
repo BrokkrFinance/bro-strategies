@@ -5,9 +5,10 @@ import erc20abi from "./abi/erc20.json"
 type TransactionResponse = providers.TransactionResponse
 
 export async function expectSuccess<T>(fut: Promise<T>) {
+  await new Promise((f) => setTimeout(f, 5000))
   var resolvedPromise: Promise<T>
   try {
-    let resolved = await fut
+    const resolved = await fut
     resolvedPromise = new Promise<T>((resolve, reject) => {
       resolve(resolved)
     })
@@ -51,8 +52,8 @@ export async function deployPriceOracle(vendorFeed: string, baseCurrency: string
 
 export async function deployUpgradeableStrategy(
   strategyContractName: string,
-  investnemtTokenName: string,
-  investnemtTokenTicker: string,
+  investmentTokenName: string,
+  investmentTokenTicker: string,
   depositToken: any,
   depositFee: number,
   depositFeeParams: any[],
@@ -69,7 +70,7 @@ export async function deployUpgradeableStrategy(
   swapServiceRouter: string,
   strategyExtraArgs: any[]
 ) {
-  const investableToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
+  const investableToken = await deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker])
   const strategy = await deployProxyContract(strategyContractName, [
     [
       investableToken.address,
@@ -98,8 +99,8 @@ export async function deployUpgradeableStrategy(
 
 export async function deployPortfolio(
   portfolioContractName: string,
-  investnemtTokenName: string,
-  investnemtTokenTicker: string,
+  investmentTokenName: string,
+  investmentTokenTicker: string,
   depositToken: any,
   investables: any[],
   depositFee: number,
@@ -114,17 +115,9 @@ export async function deployPortfolio(
   investmentLimitPerAddress: BigInt,
   allocations: number[][]
 ) {
-  const investableToken = await deployProxyContract("InvestmentToken", [investnemtTokenName, investnemtTokenTicker])
-  const portfolio = await expectSuccess(deployContract(portfolioContractName, []))
-  console.log("before transfer ownership. owner of investableToken: ", await investableToken.owner())
-  await expectSuccess(investableToken.transferOwnership(portfolio.address))
-  console.log("after transfer ownership. owner of investableToken: ", await investableToken.owner())
-  console.log("after transfer ownership. owner of portfolio: ", await portfolio.owner())
-
-  await new Promise((f) => setTimeout(f, 10000))
-  console.log("before portfolio initialization")
-  await expectSuccess(
-    portfolio.initialize([
+  const investableToken = await deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker])
+  const portfolio = await deployProxyContract(portfolioContractName, [
+    [
       investableToken.address,
       depositToken.address,
       depositFee,
@@ -137,12 +130,38 @@ export async function deployPortfolio(
       feeReceiverParams,
       totalInvestmentLimit,
       investmentLimitPerAddress,
-    ])
-  )
-  await new Promise((f) => setTimeout(f, 10000))
+    ],
+  ])
+  console.log("before transfer ownership. owner of investableToken: ", await investableToken.owner())
+  console.log(`portfolio.address: ${portfolio.address}`)
+  await expectSuccess(investableToken.transferOwnership(portfolio.address))
+  console.log("after transfer ownership. owner of investableToken: ", await investableToken.owner())
+  console.log("after transfer ownership. owner of portfolio: ", await portfolio.owner())
+
+  // await new Promise((f) => setTimeout(f, 10000))
+  // console.log("before portfolio initialization")
+  // await expectSuccess(
+  //   portfolio.initialize([
+  //     investableToken.address,
+  //     depositToken.address,
+  //     depositFee,
+  //     depositFeeParams,
+  //     withdrawalFee,
+  //     withdrawalFeeParams,
+  //     performanceFee,
+  //     performanceFeeParams,
+  //     feeReceiver,
+  //     feeReceiverParams,
+  //     totalInvestmentLimit,
+  //     investmentLimitPerAddress,
+  //   ])
+  // )
+  console.log(`investables: ${investables.length}`)
   for (const [index, investable] of investables.entries()) {
+    console.log(`index ${index}, investable: ${investable}`)
+    console.log(`investable ${investable.address}`)
+    console.log(`allocations[index] ${allocations[index]}`)
     await expectSuccess(portfolio.addInvestable(investable.address, allocations[index], []))
-    await new Promise((f) => setTimeout(f, 10000))
     console.log("added investable")
   }
 
