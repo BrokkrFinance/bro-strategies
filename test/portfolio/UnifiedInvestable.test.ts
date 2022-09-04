@@ -1,6 +1,4 @@
 import { expect } from "chai"
-import { ethers } from "hardhat"
-import { getErrorRange, getMonthsInSeconds } from "../shared/utils"
 
 export function testInvestable() {
   describe("Investable", async function () {
