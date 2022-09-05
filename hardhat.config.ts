@@ -55,12 +55,16 @@ const config: HardhatUserConfig = {
     avax_mainnet: {
       url: "https://api.avax.network/ext/bc/C/rpc",
       chainId: 43114,
-      accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
+      accounts: [
+        `0x${process.env.MAINNET_PRIVATE_KEY}`,
+        `0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82`, // specify a valid private for Alice here in case you want to use the deploy script
+      ],
     },
     avax_testnet: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       chainId: 43113,
       accounts: [`0x${process.env.TESTNET_PRIVATE_KEY}`],
+      gas: 5_000_000,
     },
     localhost: {
       url: "http://127.0.0.1:8545/",
