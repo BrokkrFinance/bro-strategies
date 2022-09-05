@@ -1,5 +1,15 @@
 # Brotocol strategies
 
+## Deployment
+To deploy the contracts, set the correct environment variables needed in `hardhat.config.ts`.
+Then, modify the config file `scripts/deploymentConfig.json`.
+
+Finally run:
+```
+npx hardhat test scripts/deploy.ts
+```
+
+
 ## Pending tasks
 
 ### High priority
