@@ -78,10 +78,6 @@ abstract contract PortfolioBaseUpgradeable is
         depositToken = portfolioArgs.depositToken;
     }
 
-    function investableLength() external view returns (uint256) {
-        return investableDescs.length;
-    }
-
     function findInvestableDescInd(IInvestable investable)
         internal
         view

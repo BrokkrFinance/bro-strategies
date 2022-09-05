@@ -96,10 +96,10 @@ export function testDeposit() {
     })
 
     it("should success when a single user deposits USDC that he/she has and another user deposited into investable directly before that", async function () {
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investable = await ethers.getContractAt(investableAbi, await investableDesc.investable)
+      const investables = await this.portfolio.getInvestables()
+      const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
-      const investableAllocationPercentage = await investableDesc.allocationPercentage
+      const investableAllocationPercentage = await investables[0].allocationPercentage
 
       await this.usdc.connect(this.user1).approve(investable.address, ethers.utils.parseUnits("3000", 6))
       await expect(investable.connect(this.user1).deposit(ethers.utils.parseUnits("3000", 6), this.user1.address, []))
@@ -140,10 +140,10 @@ export function testDeposit() {
         .to.emit(this.portfolio, "Deposit")
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("3000", 6))
 
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investable = await ethers.getContractAt(investableAbi, await investableDesc.investable)
+      const investables = await this.portfolio.getInvestables()
+      const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
-      const investableAllocationPercentage = await investableDesc.allocationPercentage
+      const investableAllocationPercentage = await investables[0].allocationPercentage
 
       await this.usdc.connect(this.user1).approve(investable.address, ethers.utils.parseUnits("3000", 6))
       await expect(investable.connect(this.user1).deposit(ethers.utils.parseUnits("3000", 6), this.user1.address, []))
@@ -472,10 +472,10 @@ export function testDeposit() {
     })
 
     it("should success when multiple users deposit USDC that they have and another user deposited into investable directly before that", async function () {
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investable = await ethers.getContractAt(investableAbi, await investableDesc.investable)
+      const investables = await this.portfolio.getInvestables()
+      const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
-      const investableAllocationPercentage = await investableDesc.allocationPercentage
+      const investableAllocationPercentage = await investables[0].allocationPercentage
 
       await this.usdc.connect(this.user2).approve(investable.address, ethers.utils.parseUnits("3000", 6))
       await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
@@ -569,10 +569,10 @@ export function testDeposit() {
         .to.emit(this.portfolio, "Deposit")
         .withArgs(this.user1.address, this.user1.address, ethers.utils.parseUnits("3000", 6))
 
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investable = await ethers.getContractAt(investableAbi, await investableDesc.investable)
+      const investables = await this.portfolio.getInvestables()
+      const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
-      const investableAllocationPercentage = await investableDesc.allocationPercentage
+      const investableAllocationPercentage = await investables[0].allocationPercentage
 
       await this.usdc.connect(this.user2).approve(investable.address, ethers.utils.parseUnits("3000", 6))
       await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))

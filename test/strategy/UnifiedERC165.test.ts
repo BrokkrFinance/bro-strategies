@@ -11,7 +11,7 @@ export function testERC165() {
     })
 
     it("should fail to support any interface that strategy doesn't implement", async function () {
-      expect(await this.strategy.supportsInterface("0x9f4acf28")).to.equal(false) // IPortfolio
+      expect(await this.strategy.supportsInterface("0x7461375e")).to.equal(false) // IPortfolio
       expect(await this.strategy.supportsInterface("0x80ac58cd")).to.equal(false) // IERC 721
       expect(await this.strategy.supportsInterface("0xd9b67a26")).to.equal(false) // IERC 1155
       expect(await this.strategy.supportsInterface("0x36372b07")).to.equal(false) // IERC 20
