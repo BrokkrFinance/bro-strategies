@@ -1,0 +1,95 @@
+{
+  "type": "portfolio",
+  "contractName": "PercentageAllocation",
+  "investmentTokenName": "Calm Portfolio Token",
+  "investmentTokenTicker": "CALM",
+  "allocations": [[100000], [50000, 50000], [30000, 30000, 40000]],
+  "investables": [
+    {
+      "type": "portfolio",
+      "contractName": "PercentageAllocation",
+      "investmentTokenName": "Wrapper Portfolio Stargate USDC Token",
+      "investmentTokenTicker": "WP-SS-USDC",
+      "allocations": [[100000], [100000, 0]],
+      "investables": [
+        {
+          "type": "strategy",
+          "contractName": "Stargate",
+          "investmentTokenName": "Stargate USDC Strategy Token",
+          "investmentTokenTicker": "SS-USDC",
+          "strategyExtraArgs": [
+            "0x45A01E4e04F14f7A4a6702c74187c5F6222033cd",
+            "0x1205f31718499dBf1fCa446663B532Ef87481fe1",
+            "0x8731d54e9d02c286767d56ac03e8037c07e01e98",
+            "0x1205f31718499dBf1fCa446663B532Ef87481fe1",
+            "0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590"
+          ]
+        },
+        {
+          "type": "strategy",
+          "contractName": "Cash",
+          "investmentTokenName": "Cash Strategy Token",
+          "investmentTokenTicker": "CASH",
+          "strategyExtraArgs": []
+        }
+      ]
+    },
+    {
+      "type": "portfolio",
+      "contractName": "PercentageAllocation",
+      "investmentTokenName": "Wrapper Portfolio Stargate USDT Token",
+      "investmentTokenTicker": "WP-SS-USDT",
+      "allocations": [[100000], [100000, 0]],
+      "investables": [
+        {
+          "type": "strategy",
+          "contractName": "Stargate",
+          "investmentTokenName": "Stargate USDT Strategy Token",
+          "investmentTokenTicker": "SS-USDT",
+          "strategyExtraArgs": [
+            "0x45A01E4e04F14f7A4a6702c74187c5F6222033cd",
+            "0x29e38769f23701A2e4A8Ef0492e19dA4604Be62c",
+            "0x8731d54e9d02c286767d56ac03e8037c07e01e98",
+            "0x29e38769f23701A2e4A8Ef0492e19dA4604Be62c",
+            "0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590"
+          ]
+        },
+        {
+          "type": "strategy",
+          "contractName": "Cash",
+          "investmentTokenName": "Cash Strategy Token",
+          "investmentTokenTicker": "CASH",
+          "strategyExtraArgs": []
+        }
+      ]
+    },
+    {
+      "type": "portfolio",
+      "contractName": "PercentageAllocation",
+      "investmentTokenName": "Wrapper Portfolio TraderJoe USDC-USDC.e",
+      "investmentTokenTicker": "WP-TS-USDC-USDCe",
+      "allocations": [[100000], [100000, 0]],
+      "investables": [
+        {
+          "type": "strategy",
+          "contractName": "TraderJoe",
+          "investmentTokenName": "TraderJoe USDC-USDC.e Strategy Token",
+          "investmentTokenTicker": "TS-USDC-USDCe",
+          "strategyExtraArgs": [
+            "0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
+            "0x4483f0b6e2f5486d06958c20f8c39a7abe87bf8f",
+            "0x2a8a315e82f85d1f0658c5d66a452bbdd9356783",
+            "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd"
+          ]
+        },
+        {
+          "type": "strategy",
+          "contractName": "Cash",
+          "investmentTokenName": "Cash Strategy Token",
+          "investmentTokenTicker": "CASH",
+          "strategyExtraArgs": []
+        }
+      ]
+    }
+  ]
+}

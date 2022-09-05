@@ -5,7 +5,7 @@ import erc20abi from "./abi/erc20.json"
 type TransactionResponse = providers.TransactionResponse
 
 export async function expectSuccess<T>(fut: Promise<T>) {
-  await new Promise((f) => setTimeout(f, 5000))
+  await new Promise((f) => setTimeout(f, 10000))
   var resolvedPromise: Promise<T>
   try {
     const resolved = await fut
@@ -91,9 +91,10 @@ export async function deployUpgradeableStrategy(
     ],
     ...strategyExtraArgs,
   ])
-  console.log("strategy owner after deploying proxy contract: ", await strategy.owner())
   await expectSuccess(investableToken.transferOwnership(strategy.address))
 
+  console.log(`Successfully deployed strategy. Strategy address: ${strategy.address}`)
+  console.log(`Strategy token address: ${investableToken.address}`)
   return strategy
 }
 
@@ -132,39 +133,15 @@ export async function deployPortfolio(
       investmentLimitPerAddress,
     ],
   ])
-  console.log("before transfer ownership. owner of investableToken: ", await investableToken.owner())
-  console.log(`portfolio.address: ${portfolio.address}`)
-  await expectSuccess(investableToken.transferOwnership(portfolio.address))
-  console.log("after transfer ownership. owner of investableToken: ", await investableToken.owner())
-  console.log("after transfer ownership. owner of portfolio: ", await portfolio.owner())
 
-  // await new Promise((f) => setTimeout(f, 10000))
-  // console.log("before portfolio initialization")
-  // await expectSuccess(
-  //   portfolio.initialize([
-  //     investableToken.address,
-  //     depositToken.address,
-  //     depositFee,
-  //     depositFeeParams,
-  //     withdrawalFee,
-  //     withdrawalFeeParams,
-  //     performanceFee,
-  //     performanceFeeParams,
-  //     feeReceiver,
-  //     feeReceiverParams,
-  //     totalInvestmentLimit,
-  //     investmentLimitPerAddress,
-  //   ])
-  // )
-  console.log(`investables: ${investables.length}`)
+  await expectSuccess(investableToken.transferOwnership(portfolio.address))
+
   for (const [index, investable] of investables.entries()) {
-    console.log(`index ${index}, investable: ${investable}`)
-    console.log(`investable ${investable.address}`)
-    console.log(`allocations[index] ${allocations[index]}`)
     await expectSuccess(portfolio.addInvestable(investable.address, allocations[index], []))
-    console.log("added investable")
   }
 
+  console.log(`Successfully deployed portfolio. Portfolio address: ${portfolio.address}`)
+  console.log(`Portfolio token address: ${investableToken.address}`)
   return portfolio
 }
 
