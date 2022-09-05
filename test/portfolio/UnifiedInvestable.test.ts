@@ -3,10 +3,10 @@ import { expect } from "chai"
 export function testInvestable() {
   describe("Investable", async function () {
     it("should fail to add when the investable already exists", async function () {
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investableAddr = await investableDesc.investable
+      const investables = await this.portfolio.getInvestables()
+      const investableAddr = await investables[0].investable
 
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength + 1; i++) {
         allocations.push(0)
@@ -19,7 +19,7 @@ export function testInvestable() {
     })
 
     it("should success to add when the investable not exists", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength + 1; i++) {
         allocations.push(0)
@@ -29,15 +29,15 @@ export function testInvestable() {
         .to.emit(this.portfolio, "InvestableAdd")
         .withArgs(this.usdc.address, allocations, [])
 
-      expect(await this.portfolio.investableLength()).to.be.equal(investableLength + 1)
-      for (let i = 0; i < investableLength; i++) {
-        const investableDesc = await this.portfolio.investableDescs(i)
-        expect(await investableDesc.allocationPercentage).to.be.equal(allocations[i])
+      const investables = await this.portfolio.getInvestables()
+      expect(investables.length).to.be.equal(investableLength + 1)
+      for (let i = 0; i < investables.length; i++) {
+        expect(await investables[i].allocationPercentage).to.be.equal(allocations[i])
       }
     })
 
     it("should fail to remove when the investable not exists", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength - 1; i++) {
         allocations.push(0)
@@ -50,14 +50,14 @@ export function testInvestable() {
     })
 
     it("should fail to remove when the investable has non-zero allocation", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength; i++) {
         allocations.push(0)
       }
 
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investableAddr = await investableDesc.investable
+      const investables = await this.portfolio.getInvestables()
+      const investableAddr = await investables[0].investable
 
       await expect(this.portfolio.removeInvestable(investableAddr, allocations, [])).to.be.revertedWithCustomError(
         this.portfolio,
@@ -66,7 +66,7 @@ export function testInvestable() {
     })
 
     it("should success to remove when the investable exists and has zero allocation", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
@@ -80,8 +80,8 @@ export function testInvestable() {
 
       expect(await this.portfolio.setTargetInvestableAllocations(allocations)).not.to.be.reverted
 
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investableAddr = await investableDesc.investable
+      const investablesBefore = await this.portfolio.getInvestables()
+      const investableAddr = await investablesBefore[0].investable
 
       allocations.pop()
       allocations[allocations.length - 1] = 100000
@@ -90,15 +90,15 @@ export function testInvestable() {
         .to.emit(this.portfolio, "InvestableRemove")
         .withArgs(investableAddr, allocations, [])
 
-      expect(await this.portfolio.investableLength()).to.be.equal(investableLength - 1)
-      for (let i = 0; i < investableLength - 1; i++) {
-        const investableDesc = await this.portfolio.investableDescs(i)
-        expect(await investableDesc.allocationPercentage).to.be.equal(allocations[i])
+      const investablesAfter = await this.portfolio.getInvestables()
+      expect(investablesAfter.length).to.be.equal(investableLength - 1)
+      for (let i = 0; i < investablesAfter.length - 1; i++) {
+        expect(await investablesAfter[i].allocationPercentage).to.be.equal(allocations[i])
       }
     })
 
     it("should fail to change when the investable not exists", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength - 1; i++) {
         allocations.push(0)
@@ -111,24 +111,22 @@ export function testInvestable() {
     })
 
     it("should success to change when the investable exists", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investableAddr = await investableDesc.investable
+      const investablesBefore = await this.portfolio.getInvestables()
+      const investableAddr = await investablesBefore[0].investable
 
       let allocations: number[] = []
-      for (let i = 0; i < investableLength; i++) {
-        const investableDesc = await this.portfolio.investableDescs(i)
-        allocations.push(await investableDesc.allocationPercentage)
+      for (let i = 0; i < investablesBefore.length; i++) {
+        allocations.push(await investablesBefore[i].allocationPercentage)
       }
 
       expect(await this.portfolio.changeInvestable(investableAddr, []))
         .to.emit(this.portfolio, "InvestableChange")
         .withArgs(investableAddr, [])
 
-      expect((await this.portfolio.investableLength()).toNumber()).to.be.equal(investableLength)
-      for (let i = 0; i < investableLength; i++) {
-        const investableDesc = await this.portfolio.investableDescs(i)
-        expect(await investableDesc.allocationPercentage).to.be.equal(allocations[i])
+      const investablesAfter = await this.portfolio.getInvestables()
+      expect(investablesAfter.length).to.be.equal(investablesBefore.length)
+      for (let i = 0; i < investablesAfter.length; i++) {
+        expect(await investablesAfter[i].allocationPercentage).to.be.equal(allocations[i])
       }
     })
   })
