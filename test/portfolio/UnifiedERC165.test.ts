@@ -6,7 +6,7 @@ export function testERC165() {
       expect(await this.portfolio.supportsInterface("0x49147370")).to.equal(true) // IAum
       expect(await this.portfolio.supportsInterface("0x52f3b8ca")).to.equal(true) // IFee
       expect(await this.portfolio.supportsInterface("0xa9233731")).to.equal(true) // IInvestable
-      expect(await this.portfolio.supportsInterface("0x9f4acf28")).to.equal(true) // IPortfolio
+      expect(await this.portfolio.supportsInterface("0x7461375e")).to.equal(true) // IPortfolio
     })
 
     it("should fail to support any interface that portfolio doesn't implement", async function () {

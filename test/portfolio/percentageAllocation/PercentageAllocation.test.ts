@@ -262,12 +262,12 @@ function testPercentageAllocationPortfolioAum() {
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("3000", 6), this.user0.address, [])
 
-      let investableDesc, investableAddr, investable
+      let investableAddr, investable
 
       const assetBalances = await this.portfolio.getAssetBalances()
+      const investables = await this.portfolio.getInvestables()
 
-      investableDesc = await this.portfolio.investableDescs(0)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[0].investable
       investable = await ethers.getContractAt(investableAbi, investableAddr)
       expect(assetBalances[0].asset).to.equal(await investable.getInvestmentToken())
       expect(assetBalances[0].balance).to.approximately(
@@ -275,8 +275,7 @@ function testPercentageAllocationPortfolioAum() {
         getErrorRange(ethers.utils.parseUnits("900", 6))
       )
 
-      investableDesc = await this.portfolio.investableDescs(1)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[1].investable
       investable = await ethers.getContractAt(investableAbi, investableAddr)
       expect(assetBalances[1].asset).to.equal(await investable.getInvestmentToken())
       expect(assetBalances[1].balance).to.approximately(
@@ -284,8 +283,7 @@ function testPercentageAllocationPortfolioAum() {
         getErrorRange(ethers.utils.parseUnits("900", 6))
       )
 
-      investableDesc = await this.portfolio.investableDescs(2)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[2].investable
       investable = await ethers.getContractAt(investableAbi, investableAddr)
       expect(assetBalances[2].asset).to.equal(await investable.getInvestmentToken())
       expect(assetBalances[2].balance).to.approximately(
@@ -297,24 +295,21 @@ function testPercentageAllocationPortfolioAum() {
 
       const assetValuations = await this.portfolio.getAssetValuations(true, false)
 
-      investableDesc = await this.portfolio.investableDescs(0)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[0].investable
       expect(assetValuations[0].asset).to.equal(investableAddr)
       expect(assetValuations[0].valuation).to.approximately(
         ethers.utils.parseUnits("900", 6),
         getErrorRange(ethers.utils.parseUnits("900", 6))
       )
 
-      investableDesc = await this.portfolio.investableDescs(1)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[1].investable
       expect(assetValuations[1].asset).to.equal(investableAddr)
       expect(assetValuations[1].valuation).to.approximately(
         ethers.utils.parseUnits("900", 6),
         getErrorRange(ethers.utils.parseUnits("900", 6))
       )
 
-      investableDesc = await this.portfolio.investableDescs(2)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[2].investable
       expect(assetValuations[2].asset).to.equal(investableAddr)
       expect(assetValuations[2].valuation).to.approximately(
         ethers.utils.parseUnits("1200", 6),
@@ -342,12 +337,12 @@ function testPercentageAllocationPortfolioAum() {
       await this.investmentToken.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("1000", 6))
       await this.portfolio.connect(this.user0).withdraw(ethers.utils.parseUnits("1000", 6), this.user0.address, [])
 
-      let investableDesc, investableAddr, investable
+      let investableAddr, investable
 
       const assetBalances = await this.portfolio.getAssetBalances()
+      const investables = await this.portfolio.getInvestables()
 
-      investableDesc = await this.portfolio.investableDescs(0)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[0].investable
       investable = await ethers.getContractAt(investableAbi, investableAddr)
       expect(assetBalances[0].asset).to.equal(await investable.getInvestmentToken())
       expect(assetBalances[0].balance).to.approximately(
@@ -355,8 +350,7 @@ function testPercentageAllocationPortfolioAum() {
         getErrorRange(ethers.utils.parseUnits("2100", 6))
       )
 
-      investableDesc = await this.portfolio.investableDescs(1)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[1].investable
       investable = await ethers.getContractAt(investableAbi, investableAddr)
       expect(assetBalances[1].asset).to.equal(await investable.getInvestmentToken())
       expect(assetBalances[1].balance).to.approximately(
@@ -364,8 +358,7 @@ function testPercentageAllocationPortfolioAum() {
         getErrorRange(ethers.utils.parseUnits("2100", 6))
       )
 
-      investableDesc = await this.portfolio.investableDescs(2)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[2].investable
       investable = await ethers.getContractAt(investableAbi, investableAddr)
       expect(assetBalances[2].asset).to.equal(await investable.getInvestmentToken())
       expect(assetBalances[2].balance).to.approximately(
@@ -377,24 +370,21 @@ function testPercentageAllocationPortfolioAum() {
 
       const assetValuations = await this.portfolio.getAssetValuations(true, false)
 
-      investableDesc = await this.portfolio.investableDescs(0)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[0].investable
       expect(assetValuations[0].asset).to.equal(investableAddr)
       expect(assetValuations[0].valuation).to.approximately(
         ethers.utils.parseUnits("2100", 6),
         getErrorRange(ethers.utils.parseUnits("2100", 6))
       )
 
-      investableDesc = await this.portfolio.investableDescs(1)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[1].investable
       expect(assetValuations[1].asset).to.equal(investableAddr)
       expect(assetValuations[1].valuation).to.approximately(
         ethers.utils.parseUnits("2100", 6),
         getErrorRange(ethers.utils.parseUnits("2100", 6))
       )
 
-      investableDesc = await this.portfolio.investableDescs(2)
-      investableAddr = await investableDesc.investable
+      investableAddr = await investables[2].investable
       expect(assetValuations[2].asset).to.equal(investableAddr)
       expect(assetValuations[2].valuation).to.approximately(
         ethers.utils.parseUnits("2800", 6),

@@ -8,7 +8,7 @@ import { getErrorRange } from "../shared/utils"
 export function testRebalance() {
   describe("Rebalance", async function () {
     it("should success when the owner user rebalances - 0", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
@@ -64,9 +64,9 @@ export function testRebalance() {
       )
 
       // Check if equity valuations of investables corresponds to the target allocations.
-      for (let i = 0; i < investableLength; i++) {
-        const investableDesc = await this.portfolio.investableDescs(i)
-        const investableAddr = await investableDesc.investable
+      const investables = await this.portfolio.getInvestables()
+      for (let i = 0; i < investables.length; i++) {
+        const investableAddr = await investables[i].investable
         const investable = await ethers.getContractAt(investableAbi, investableAddr)
 
         const expectedValuation = ethers.utils.parseUnits("10000", 6).mul(allocations[i]).div(100000)
@@ -82,7 +82,7 @@ export function testRebalance() {
     })
 
     it("should success when the owner user rebalances - 1", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
@@ -138,9 +138,9 @@ export function testRebalance() {
       )
 
       // Check if equity valuations of investables corresponds to the target allocations.
-      for (let i = 0; i < investableLength; i++) {
-        const investableDesc = await this.portfolio.investableDescs(i)
-        const investableAddr = await investableDesc.investable
+      const investables = await this.portfolio.getInvestables()
+      for (let i = 0; i < investables.length; i++) {
+        const investableAddr = await investables[i].investable
         const investable = await ethers.getContractAt(investableAbi, investableAddr)
 
         const expectedValuation = ethers.utils.parseUnits("10000", 6).mul(allocations[i]).div(100000)
@@ -156,14 +156,14 @@ export function testRebalance() {
     })
 
     it("should success when the owner user rebalances and another user deposits into investable directly", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
       }
 
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investable = await ethers.getContractAt(investableAbi, await investableDesc.investable)
+      const investablesBefore = await this.portfolio.getInvestables()
+      const investable = await ethers.getContractAt(investableAbi, await investablesBefore[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
 
       await this.usdc.connect(this.user2).approve(investable.address, ethers.utils.parseUnits("3000", 6))
@@ -222,9 +222,9 @@ export function testRebalance() {
       )
 
       // Check if equity valuations of investables corresponds to the target allocations.
-      for (let i = 0; i < investableLength; i++) {
-        const investableDesc = await this.portfolio.investableDescs(i)
-        const investableAddr = await investableDesc.investable
+      const investablesAfter = await this.portfolio.getInvestables()
+      for (let i = 0; i < investablesAfter.length; i++) {
+        const investableAddr = await investablesAfter[i].investable
         const investable = await ethers.getContractAt(investableAbi, investableAddr)
 
         const expectedValuation = ethers.utils.parseUnits("10000", 6).mul(allocations[i]).div(100000)
@@ -241,14 +241,14 @@ export function testRebalance() {
     })
 
     it("should success when the owner user rebalances and another user withdraws from investable directly", async function () {
-      const investableLength = (await this.portfolio.investableLength()).toNumber()
+      const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
       }
 
-      const investableDesc = await this.portfolio.investableDescs(0)
-      const investable = await ethers.getContractAt(investableAbi, await investableDesc.investable)
+      const investablesBefore = await this.portfolio.getInvestables()
+      const investable = await ethers.getContractAt(investableAbi, await investablesBefore[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
 
       await this.usdc.connect(this.user2).approve(investable.address, ethers.utils.parseUnits("3000", 6))
@@ -316,9 +316,9 @@ export function testRebalance() {
       )
 
       // Check if equity valuations of investables corresponds to the target allocations.
-      for (let i = 0; i < investableLength; i++) {
-        const investableDesc = await this.portfolio.investableDescs(i)
-        const investableAddr = await investableDesc.investable
+      const investablesAfter = await this.portfolio.getInvestables()
+      for (let i = 0; i < investablesAfter.length; i++) {
+        const investableAddr = await investablesAfter[i].investable
         const investable = await ethers.getContractAt(investableAbi, investableAddr)
 
         const expectedValuation = ethers.utils.parseUnits("10000", 6).mul(allocations[i]).div(100000)
