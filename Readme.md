@@ -6,7 +6,7 @@ Then, modify the config file `scripts/deploymentConfig.json`.
 
 Finally run:
 ```
-npx hardhat test scripts/deploy.ts
+npx hardhat run scripts/deploy.ts
 ```
 
 
