@@ -152,6 +152,7 @@ describe("Unified strategy interface and base implementation", function () {
     )
 
     const portfolio = await deployPortfolio(
+      false,
       "MockPortfolio",
       "Super Portfolio Token 1",
       "SUPP1",
