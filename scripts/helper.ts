@@ -1,12 +1,26 @@
 import { expect } from "chai"
-import { providers } from "ethers"
+import { providers, Contract } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import erc20abi from "./abi/erc20.json"
 type TransactionResponse = providers.TransactionResponse
 
+export async function retryUntilSuccess<T>(fut: Promise<T>) {
+  while (true) {
+    try {
+      const resolved = await expectSuccess(fut)
+      if (resolved !== undefined) {
+        return resolved
+      } else {
+        console.log(`Error because resolved promise is undefined`)
+      }
+    } catch (e: unknown) {
+      console.log(`Error when expecting Success: ${e}`)
+    }
+  }
+}
+
 export async function expectSuccess<T>(fut: Promise<T>) {
-  await new Promise((f) => setTimeout(f, 10000))
-  var resolvedPromise: Promise<T>
+  let resolvedPromise: Promise<T>
   try {
     const resolved = await fut
     resolvedPromise = new Promise<T>((resolve, reject) => {
@@ -70,28 +84,32 @@ export async function deployUpgradeableStrategy(
   swapServiceRouter: string,
   strategyExtraArgs: any[]
 ) {
-  const investableToken = await deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker])
-  const strategy = await deployProxyContract(strategyContractName, [
-    [
-      investableToken.address,
-      depositToken.address,
-      depositFee,
-      depositFeeParams,
-      withdrawalFee,
-      withdrawalFeeParams,
-      performanceFee,
-      performanceFeeParams,
-      feeReceiver,
-      feeReceiverParams,
-      totalInvestmentLimit,
-      investmentLimitPerAddress,
-      priceOracle,
-      swapServiceProvider,
-      swapServiceRouter,
-    ],
-    ...strategyExtraArgs,
-  ])
-  await expectSuccess(investableToken.transferOwnership(strategy.address))
+  const investableToken = await retryUntilSuccess(
+    deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker])
+  )
+  const strategy = await retryUntilSuccess(
+    deployProxyContract(strategyContractName, [
+      [
+        investableToken.address,
+        depositToken.address,
+        depositFee,
+        depositFeeParams,
+        withdrawalFee,
+        withdrawalFeeParams,
+        performanceFee,
+        performanceFeeParams,
+        feeReceiver,
+        feeReceiverParams,
+        totalInvestmentLimit,
+        investmentLimitPerAddress,
+        priceOracle,
+        swapServiceProvider,
+        swapServiceRouter,
+      ],
+      ...strategyExtraArgs,
+    ])
+  )
+  await retryUntilSuccess(investableToken.transferOwnership(strategy.address))
 
   console.log(`Successfully deployed strategy. Strategy address: ${strategy.address}`)
   console.log(`Strategy token address: ${investableToken.address}`)
@@ -99,6 +117,7 @@ export async function deployUpgradeableStrategy(
 }
 
 export async function deployPortfolio(
+  isUpgradable: boolean,
   portfolioContractName: string,
   investmentTokenName: string,
   investmentTokenTicker: string,
@@ -116,28 +135,53 @@ export async function deployPortfolio(
   investmentLimitPerAddress: BigInt,
   allocations: number[][]
 ) {
-  const investableToken = await deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker])
-  const portfolio = await deployProxyContract(portfolioContractName, [
-    [
-      investableToken.address,
-      depositToken.address,
-      depositFee,
-      depositFeeParams,
-      withdrawalFee,
-      withdrawalFeeParams,
-      performanceFee,
-      performanceFeeParams,
-      feeReceiver,
-      feeReceiverParams,
-      totalInvestmentLimit,
-      investmentLimitPerAddress,
-    ],
-  ])
+  const investableToken = await retryUntilSuccess(
+    deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker])
+  )
+  let portfolio: Contract
+  if (isUpgradable) {
+    portfolio = await retryUntilSuccess(
+      deployProxyContract(portfolioContractName, [
+        [
+          investableToken.address,
+          depositToken.address,
+          depositFee,
+          depositFeeParams,
+          withdrawalFee,
+          withdrawalFeeParams,
+          performanceFee,
+          performanceFeeParams,
+          feeReceiver,
+          feeReceiverParams,
+          totalInvestmentLimit,
+          investmentLimitPerAddress,
+        ],
+      ])
+    )
+  } else {
+    portfolio = await retryUntilSuccess(deployContract(portfolioContractName, []))
+    await retryUntilSuccess(
+      portfolio.initialize([
+        investableToken.address,
+        depositToken.address,
+        depositFee,
+        depositFeeParams,
+        withdrawalFee,
+        withdrawalFeeParams,
+        performanceFee,
+        performanceFeeParams,
+        feeReceiver,
+        feeReceiverParams,
+        totalInvestmentLimit,
+        investmentLimitPerAddress,
+      ])
+    )
+  }
 
-  await expectSuccess(investableToken.transferOwnership(portfolio.address))
+  await retryUntilSuccess(investableToken.transferOwnership(portfolio.address))
 
   for (const [index, investable] of investables.entries()) {
-    await expectSuccess(portfolio.addInvestable(investable.address, allocations[index], []))
+    await retryUntilSuccess(portfolio.addInvestable(investable.address, allocations[index], []))
   }
 
   console.log(`Successfully deployed portfolio. Portfolio address: ${portfolio.address}`)
