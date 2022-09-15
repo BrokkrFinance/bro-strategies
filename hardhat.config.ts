@@ -3,6 +3,7 @@ import "@nomicfoundation/hardhat-chai-matchers"
 import "@nomicfoundation/hardhat-network-helpers"
 import "@nomiclabs/hardhat-ethers"
 import "@nomiclabs/hardhat-etherscan"
+import "@openzeppelin/hardhat-defender"
 import "@openzeppelin/hardhat-upgrades"
 import "@typechain/hardhat"
 import * as dotenv from "dotenv"
@@ -29,6 +30,10 @@ const config: HardhatUserConfig = {
     cache: "./cache",
     artifacts: "./artifacts",
   },
+  defender: {
+    apiKey: `${process.env.DEFENDER_TEAM_API_KEY}`,
+    apiSecret: `${process.env.DEFENDER_TEAM_API_SECRET_KEY}`,
+  },
   networks: {
     hardhat: {
       allowUnlimitedContractSize: false,
@@ -39,7 +44,6 @@ const config: HardhatUserConfig = {
         blockNumber: 18191781,
       },
     },
-
     avax_mainnet: {
       url: "https://api.avax.network/ext/bc/C/rpc",
       chainId: 43114,
