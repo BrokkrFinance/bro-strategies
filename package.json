@@ -15,6 +15,7 @@
     "@nomiclabs/hardhat-solpp": "^2.0.1",
     "@openzeppelin/contracts": "^4.6.0",
     "@openzeppelin/contracts-upgradeable": "^4.6.0",
+    "@openzeppelin/hardhat-defender": "^1.8.0",
     "@openzeppelin/hardhat-upgrades": "^1.18.1",
     "@tenderly/hardhat-tenderly": "^1.1.0",
     "@traderjoe-xyz/core": "^2.4.6",
