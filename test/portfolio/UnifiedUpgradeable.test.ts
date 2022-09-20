@@ -97,12 +97,12 @@ export function testUpgradeable() {
     })
 
     it("should succeed to leave all common state variables' value intact", async function () {
-      // IAum
+      // IAum.
       const investmentTokenSupplyBefore = await this.portfolio.getInvestmentTokenSupply()
       // Don't check asset balances, liability balances, asset valuations, liability valuations
-      // and equity valuation since they can be portfolio specific
+      // and equity valuation since they can be portfolio specific.
 
-      // IFee
+      // IFee.
       const depositFeeBefore = await this.portfolio.getDepositFee([])
       const totalDepositFeeBefore = await this.portfolio.getTotalDepositFee([])
       const withdrawalFeeBefore = await this.portfolio.getWithdrawalFee([])
@@ -113,14 +113,17 @@ export function testUpgradeable() {
       const currentAccumulatedFeeBefore = await this.portfolio.getCurrentAccumulatedFee()
       const claimedFeeBefore = await this.portfolio.getClaimedFee()
 
-      // IInvestable
+      // IInvestable.
       const depositTokenBefore = await this.portfolio.getDepositToken()
       const investmentTokenBefore = await this.portfolio.getInvestmentToken()
       const totalInvestmentLimitBefore = await this.portfolio.getTotalInvestmentLimit()
       const investmentLimitPerAddressBefore = await this.portfolio.getInvestmentLimitPerAddress()
       // Don't check name, humanReadableName and version since they can be portfolio specific.
 
-      // IReward and IPortfolio have no getter.
+      // IPortfolio.
+      const investablesBefore = await this.portfolio.getInvestables()
+
+      // IReward has no getter.
 
       const TestUpgradedPortfolio = await ethers.getContractFactory("TestUpgradedPortfolio")
       const testUpgradedPortfolio = await upgrades.upgradeProxy(this.portfolio.address, TestUpgradedPortfolio, {
@@ -146,10 +149,10 @@ export function testUpgradeable() {
       })
       await testUpgradedPortfolio.deployed()
 
-      // IAum
+      // IAum.
       const investmentTokenSupplyAfter = await this.portfolio.getInvestmentTokenSupply()
 
-      // IFee
+      // IFee.
       const depositFeeAfter = await this.portfolio.getDepositFee([])
       const totalDepositFeeAfter = await this.portfolio.getTotalDepositFee([])
       const withdrawalFeeAfter = await this.portfolio.getWithdrawalFee([])
@@ -160,16 +163,21 @@ export function testUpgradeable() {
       const currentAccumulatedFeeAfter = await this.portfolio.getCurrentAccumulatedFee()
       const claimedFeeAfter = await this.portfolio.getClaimedFee()
 
-      // IInvestable
+      // IInvestable.
       const depositTokenAfter = await this.portfolio.getDepositToken()
       const investmentTokenAfter = await this.portfolio.getInvestmentToken()
       const totalInvestmentLimitAfter = await this.portfolio.getTotalInvestmentLimit()
       const investmentLimitPerAddressAfter = await this.portfolio.getInvestmentLimitPerAddress()
 
-      // IAum
+      // IAum.
       expect(investmentTokenSupplyBefore.eq(investmentTokenSupplyAfter)).to.equal(true)
 
-      // IFee
+      // IPortfolio.
+      const investablesAfter = await this.portfolio.getInvestables()
+
+      // IReward have no getter.
+
+      // IFee.
       expect(depositFeeBefore == depositFeeAfter).to.equal(true)
       expect(totalDepositFeeBefore == totalDepositFeeAfter).to.equal(true)
       expect(withdrawalFeeBefore == withdrawalFeeAfter).to.equal(true)
@@ -180,11 +188,25 @@ export function testUpgradeable() {
       expect(currentAccumulatedFeeBefore.eq(currentAccumulatedFeeAfter)).to.equal(true)
       expect(claimedFeeBefore.eq(claimedFeeAfter)).to.equal(true)
 
-      // IInvestable
+      // IInvestable.
       expect(depositTokenBefore == depositTokenAfter).to.equal(true)
       expect(investmentTokenBefore == investmentTokenAfter).to.equal(true)
       expect(totalInvestmentLimitBefore.eq(totalInvestmentLimitAfter)).to.equal(true)
       expect(investmentLimitPerAddressBefore.eq(investmentLimitPerAddressAfter)).to.equal(true)
+
+      // IPortfolio.
+      expect(investablesBefore.length == investablesAfter.length).to.equal(true)
+      for (let i = 0; i < investablesBefore.length; i++) {
+        expect(investablesBefore[i].investable == investablesAfter[i].investable).to.equal(true)
+        expect(investablesBefore[i].allocationPercentage == investablesAfter[i].allocationPercentage).to.equal(true)
+        expect(investablesBefore[i].keys.length == investablesAfter[i].keys.length).to.equal(true)
+        expect(investablesBefore[i].values.length == investablesAfter[i].values.length).to.equal(true)
+        const paramsLength = investablesBefore[i].keys.length
+        for (let j = 0; j < paramsLength; j++) {
+          expect(investablesBefore[i].keys[j] == investablesAfter[i].keys[j]).to.equal(true)
+          expect(investablesBefore[i].values[j] == investablesAfter[i].values[j]).to.equal(true)
+        }
+      }
     })
   })
 }
