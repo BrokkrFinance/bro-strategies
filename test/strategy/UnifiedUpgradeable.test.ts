@@ -106,12 +106,12 @@ export function testUpgradeable() {
     })
 
     it("should succeed to leave all common state variables' value intact", async function () {
-      // IAum
+      // IAum.
       const investmentTokenSupplyBefore = await this.strategy.getInvestmentTokenSupply()
       // Don't check asset balances, liability balances, asset valuations, liability valuations
-      // and equity valuation since they can be strategy specific
+      // and equity valuation since they can be strategy specific.
 
-      // IFee
+      // IFee.
       const depositFeeBefore = await this.strategy.getDepositFee([])
       const totalDepositFeeBefore = await this.strategy.getTotalDepositFee([])
       const withdrawalFeeBefore = await this.strategy.getWithdrawalFee([])
@@ -122,7 +122,7 @@ export function testUpgradeable() {
       const currentAccumulatedFeeBefore = await this.strategy.getCurrentAccumulatedFee()
       const claimedFeeBefore = await this.strategy.getClaimedFee()
 
-      // IInvestable
+      // IInvestable.
       const depositTokenBefore = await this.strategy.getDepositToken()
       const investmentTokenBefore = await this.strategy.getInvestmentToken()
       const totalInvestmentLimitBefore = await this.strategy.getTotalInvestmentLimit()
@@ -130,6 +130,12 @@ export function testUpgradeable() {
       // Don't check name, humanReadableName and version since they can be strategy specific.
 
       // IReward and IStrategy have no getter.
+
+      // Price oracle.
+      const priceOracleBefore = await this.strategy.priceOracle()
+
+      // Swap service.
+      const swapServiceBefore = await this.strategy.swapService()
 
       const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy")
       const testUpgradedStrategy = await upgrades.upgradeProxy(this.strategy.address, TestUpgradedStrategy, {
@@ -158,10 +164,10 @@ export function testUpgradeable() {
       })
       await testUpgradedStrategy.deployed()
 
-      // IAum
+      // IAum.
       const investmentTokenSupplyAfter = await this.strategy.getInvestmentTokenSupply()
 
-      // IFee
+      // IFee.
       const depositFeeAfter = await this.strategy.getDepositFee([])
       const totalDepositFeeAfter = await this.strategy.getTotalDepositFee([])
       const withdrawalFeeAfter = await this.strategy.getWithdrawalFee([])
@@ -172,16 +178,24 @@ export function testUpgradeable() {
       const currentAccumulatedFeeAfter = await this.strategy.getCurrentAccumulatedFee()
       const claimedFeeAfter = await this.strategy.getClaimedFee()
 
-      // IInvestable
+      // IInvestable.
       const depositTokenAfter = await this.strategy.getDepositToken()
       const investmentTokenAfter = await this.strategy.getInvestmentToken()
       const totalInvestmentLimitAfter = await this.strategy.getTotalInvestmentLimit()
       const investmentLimitPerAddressAfter = await this.strategy.getInvestmentLimitPerAddress()
 
-      // IAum
+      // IReward and IStrategy have no getter.
+
+      // Price oracle.
+      const priceOracleAfter = await this.strategy.priceOracle()
+
+      // Swap service.
+      const swapServiceAfter = await this.strategy.swapService()
+
+      // IAum.
       expect(investmentTokenSupplyBefore.eq(investmentTokenSupplyAfter)).to.equal(true)
 
-      // IFee
+      // IFee.
       expect(depositFeeBefore == depositFeeAfter).to.equal(true)
       expect(totalDepositFeeBefore == totalDepositFeeAfter).to.equal(true)
       expect(withdrawalFeeBefore == withdrawalFeeAfter).to.equal(true)
@@ -192,11 +206,18 @@ export function testUpgradeable() {
       expect(currentAccumulatedFeeBefore.eq(currentAccumulatedFeeAfter)).to.equal(true)
       expect(claimedFeeBefore.eq(claimedFeeAfter)).to.equal(true)
 
-      // IInvestable
+      // IInvestable.
       expect(depositTokenBefore == depositTokenAfter).to.equal(true)
       expect(investmentTokenBefore == investmentTokenAfter).to.equal(true)
       expect(totalInvestmentLimitBefore.eq(totalInvestmentLimitAfter)).to.equal(true)
       expect(investmentLimitPerAddressBefore.eq(investmentLimitPerAddressAfter)).to.equal(true)
+
+      // Price oracle.
+      expect(priceOracleBefore == priceOracleAfter).to.equal(true)
+
+      // Swap service.
+      expect(swapServiceBefore.provider == swapServiceAfter.provider).to.equal(true)
+      expect(swapServiceBefore.router == swapServiceAfter.router).to.equal(true)
     })
   })
 }
