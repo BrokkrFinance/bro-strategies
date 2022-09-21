@@ -56,7 +56,7 @@ export function testOwnable() {
       )
     })
 
-    it("should success when the owner user sets withdrawal fee to 30%", async function () {
+    it("should succeed when the owner user sets withdrawal fee to 30%", async function () {
       expect(await this.strategy.setDepositFee(30000, []))
         .to.emit(this.strategy, "DepositFeeChange")
         .withArgs(30000, [])
@@ -64,7 +64,7 @@ export function testOwnable() {
       expect(await this.strategy.getDepositFee([])).to.equal(30000)
     })
 
-    it("should success when the owner user sets deposit fee to 30%", async function () {
+    it("should succeed when the owner user sets deposit fee to 30%", async function () {
       expect(await this.strategy.setWithdrawalFee(30000, []))
         .to.emit(this.strategy, "WithdrawalFeeChange")
         .withArgs(30000, [])
@@ -72,7 +72,7 @@ export function testOwnable() {
       expect(await this.strategy.getWithdrawalFee([])).to.equal(30000)
     })
 
-    it("should success when the owner user sets performance fee to 30%", async function () {
+    it("should succeed when the owner user sets performance fee to 30%", async function () {
       expect(await this.strategy.setPerformanceFee(30000, []))
         .to.emit(this.strategy, "PerformanceFeeChange")
         .withArgs(30000, [])
@@ -80,7 +80,7 @@ export function testOwnable() {
       expect(await this.strategy.getPerformanceFee([])).to.equal(30000)
     })
 
-    it("should success when the owner user sets fee receiver", async function () {
+    it("should succeed when the owner user sets fee receiver", async function () {
       expect(await this.strategy.setFeeReceiver(this.user0.address, []))
         .to.emit(this.strategy, "FeeReceiverChange")
         .withArgs(this.user0.address, [])
@@ -88,29 +88,29 @@ export function testOwnable() {
       expect(await this.strategy.getFeeReceiver([])).to.equal(this.user0.address)
     })
 
-    it("should success when the owner user sets investment token", async function () {
+    it("should succeed when the owner user sets investment token", async function () {
       expect(await this.strategy.setInvestmentToken(this.usdc.address)).not.to.be.reverted
 
       expect(await this.strategy.getInvestmentToken()).to.equal(this.usdc.address)
     })
 
-    it("should success when the owner user sets total investment limit", async function () {
+    it("should succeed when the owner user sets total investment limit", async function () {
       expect(await this.strategy.setTotalInvestmentLimit(0)).not.to.be.reverted
 
       expect(await this.strategy.getTotalInvestmentLimit()).to.equal(0)
     })
 
-    it("should success when the owner user sets investment limit per address", async function () {
+    it("should succeed when the owner user sets investment limit per address", async function () {
       expect(await this.strategy.setInvestmentLimitPerAddress(0)).not.to.be.reverted
 
       expect(await this.strategy.getInvestmentLimitPerAddress()).to.equal(0)
     })
 
-    it("should success when the owner user sets price oracle", async function () {
+    it("should succeed when the owner user sets price oracle", async function () {
       expect(await this.strategy.setPriceOracle(this.user0.address)).not.to.be.reverted
     })
 
-    it("should success when the owner user sets swap service", async function () {
+    it("should succeed when the owner user sets swap service", async function () {
       expect(await this.strategy.setSwapService(0, this.user0.address)).not.to.be.reverted
     })
   })

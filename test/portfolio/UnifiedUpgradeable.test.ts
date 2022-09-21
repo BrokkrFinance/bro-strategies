@@ -3,7 +3,7 @@ import { ethers, upgrades } from "hardhat"
 
 export function testUpgradeable() {
   describe("Upgradeable", async function () {
-    it("should success when the owner user upgrades", async function () {
+    it("should succeed when the owner user upgrades", async function () {
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.portfolio.address)
 
       const TestUpgradedPortfolio = await ethers.getContractFactory("TestUpgradedPortfolio")
@@ -35,7 +35,7 @@ export function testUpgradeable() {
       expect(addr_before_upgrade != addr_after_upgrade).to.equal(true)
     })
 
-    it("should success when the portfolio is paused", async function () {
+    it("should succeed when the portfolio is paused", async function () {
       expect(await this.portfolio.pause()).not.to.be.reverted
 
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.portfolio.address)
@@ -96,7 +96,7 @@ export function testUpgradeable() {
       ).to.be.revertedWith("Ownable: caller is not the owner")
     })
 
-    it("should success to leave all common state variables' value intact", async function () {
+    it("should succeed to leave all common state variables' value intact", async function () {
       // IAum
       const investmentTokenSupplyBefore = await this.portfolio.getInvestmentTokenSupply()
       // Don't check asset balances, liability balances, asset valuations, liability valuations

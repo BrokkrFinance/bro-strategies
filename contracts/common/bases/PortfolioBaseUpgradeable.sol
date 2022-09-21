@@ -216,34 +216,31 @@ abstract contract PortfolioBaseUpgradeable is
         if (amount == 0) revert ZeroAmountDeposited();
 
         // check investment limits
-        uint256 totalEquity;
+        // the underlying defi protocols might take fees, but for limit check we can safely ignore it
+        uint256 equityValuationBeforeInvestment = getEquityValuation(
+            true,
+            false
+        );
         uint256 userEquity;
         uint256 investmentTokenSupply = getInvestmentTokenSupply();
         if (investmentTokenSupply != 0) {
-            totalEquity = getEquityValuation(true, false);
-
             uint256 investmentTokenBalance = getInvestmentTokenBalanceOf(
                 investmentTokenReceiver
             );
             userEquity =
-                (totalEquity * investmentTokenBalance) /
+                (equityValuationBeforeInvestment * investmentTokenBalance) /
                 investmentTokenSupply;
         }
-        checkTotalInvestmentLimit(amount, totalEquity);
+        checkTotalInvestmentLimit(amount, equityValuationBeforeInvestment);
         checkInvestmentLimitPerAddress(amount, userEquity);
 
+        // transfering deposit tokens from the user
         depositToken.safeTransferFrom(_msgSender(), address(this), amount);
-        uint256 equity = getEquityValuation(true, false);
-        uint256 investmentTokenTotalSupply = getInvestmentTokenSupply();
-        investmentToken.mint(
-            investmentTokenReceiver,
-            InvestableLib.calculateMintAmount(
-                equity,
-                amount,
-                investmentTokenTotalSupply
-            )
-        );
+
+        // 1. emitting event for portfolios at the higher level first
+        // 2. emitting the deposit amount versus the actual invested amount
         emit Deposit(_msgSender(), investmentTokenReceiver, amount);
+
         for (uint256 i = 0; i < investableDescs.length; i++) {
             uint256 embeddedAmount = (amount *
                 investableDescs[i].allocationPercentage) /
@@ -260,6 +257,26 @@ abstract contract PortfolioBaseUpgradeable is
                 params
             );
         }
+
+        // calculating the actual amount invested into the defi protocol
+        uint256 equityValuationAfterInvestment = getEquityValuation(
+            true,
+            false
+        );
+        uint256 actualInvested = equityValuationAfterInvestment -
+            equityValuationBeforeInvestment;
+        if (actualInvested == 0) revert ZeroAmountInvested();
+
+        // minting should be based on the actual amount invested versus the deposited amount
+        // to take defi fees and losses into consideration
+        investmentToken.mint(
+            investmentTokenReceiver,
+            InvestableLib.calculateMintAmount(
+                equityValuationBeforeInvestment,
+                actualInvested,
+                investmentTokenSupply
+            )
+        );
     }
 
     function withdraw(
@@ -375,7 +392,7 @@ abstract contract PortfolioBaseUpgradeable is
                 );
 
                 if (depositAmount != 0) {
-                    depositToken.approve(
+                    depositToken.safeApprove(
                         address(embeddedInvestable),
                         depositAmount
                     );
