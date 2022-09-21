@@ -2,7 +2,7 @@ import { expect } from "chai"
 
 export function testERC165() {
   describe("ERC165", async function () {
-    it("should success to support all interfaces that strategy implements", async function () {
+    it("should succeed to support all interfaces that strategy implements", async function () {
       expect(await this.strategy.supportsInterface("0x49147370")).to.equal(true) // IAum
       expect(await this.strategy.supportsInterface("0x52f3b8ca")).to.equal(true) // IFee
       expect(await this.strategy.supportsInterface("0xa9233731")).to.equal(true) // IInvestable

@@ -1,10 +1,10 @@
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { getErrorRange, airdropToken } from "../shared/utils"
+import { airdropToken, getErrorRange } from "../shared/utils"
 
 export function testDeposit() {
   describe("Deposit", async function () {
-    it("should success when a single user deposits USDC that he/she has - 0", async function () {
+    it("should succeed when a single user deposits USDC that he/she has - integer amount", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("30", 6))
@@ -13,15 +13,21 @@ export function testDeposit() {
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("30", 6))
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("70", 6))
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("30", 6))
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
       )
     })
 
-    it("should success when a single user deposits USDC that he/she has - 1", async function () {
+    it("should succeed when a single user deposits USDC that he/she has - fractional amount", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("473.782192", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("37.810393", 6))
@@ -32,8 +38,14 @@ export function testDeposit() {
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("37.810393", 6))
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("435.971799", 6))
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("37.810393", 6))
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("37.810393", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("37.810393", 6),
+        getErrorRange(ethers.utils.parseUnits("37.810393", 6))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("37.810393", 6),
+        getErrorRange(ethers.utils.parseUnits("37.810393", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("37.810393", 6),
         getErrorRange(ethers.utils.parseUnits("37.810393", 6))
@@ -101,7 +113,7 @@ export function testDeposit() {
       expect(await this.strategy.getEquityValuation(true, false)).to.equal(0)
     })
 
-    it("should success when multiple users deposit USDC that they have - 0", async function () {
+    it("should succeed when multiple users deposit USDC that they have - integer amount", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
       airdropToken(this.impersonatedSigner, this.user1, this.usdc, ethers.utils.parseUnits("100", 6))
       airdropToken(this.impersonatedSigner, this.user2, this.usdc, ethers.utils.parseUnits("100", 6))
@@ -113,8 +125,14 @@ export function testDeposit() {
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("30", 6))
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("70", 6))
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("30", 6))
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
@@ -161,7 +179,7 @@ export function testDeposit() {
       )
     })
 
-    it("should success when multiple users deposit USDC that they have - 1", async function () {
+    it("should succeed when multiple users deposit USDC that they have - fractional amount", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("473.782192", 6))
       airdropToken(this.impersonatedSigner, this.user1, this.usdc, ethers.utils.parseUnits("473.782192", 6))
       airdropToken(this.impersonatedSigner, this.user2, this.usdc, ethers.utils.parseUnits("473.782192", 6))
@@ -175,8 +193,14 @@ export function testDeposit() {
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("37.810393", 6))
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("435.971799", 6))
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("37.810393", 6))
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("37.810393", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("37.810393", 6),
+        getErrorRange(ethers.utils.parseUnits("37.810393", 6))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("37.810393", 6),
+        getErrorRange(ethers.utils.parseUnits("37.810393", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("37.810393", 6),
         getErrorRange(ethers.utils.parseUnits("37.810393", 6))
@@ -255,7 +279,10 @@ export function testDeposit() {
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
       )
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
@@ -270,7 +297,10 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("100", 6))
       expect(await this.investmentToken.balanceOf(this.user2.address)).to.equal(0)
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
@@ -288,8 +318,14 @@ export function testDeposit() {
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("30", 6))
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("70", 6))
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("30", 6))
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
@@ -303,7 +339,10 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user1.address)).to.equal(ethers.utils.parseUnits("100", 6))
       expect(await this.investmentToken.balanceOf(this.user1.address)).to.equal(0)
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
@@ -335,8 +374,14 @@ export function testDeposit() {
         .withArgs(this.user1.address, this.user1.address, ethers.utils.parseUnits("30", 6))
 
       expect(await this.usdc.balanceOf(this.user1.address)).to.equal(ethers.utils.parseUnits("70", 6))
-      expect(await this.investmentToken.balanceOf(this.user1.address)).to.equal(ethers.utils.parseUnits("30", 6))
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.investmentToken.balanceOf(this.user1.address)).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
@@ -350,7 +395,10 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("100", 6))
       expect(await this.investmentToken.balanceOf(this.user2.address)).to.equal(0)
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))
@@ -371,8 +419,14 @@ export function testDeposit() {
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("30", 6))
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("70", 6))
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("30", 6))
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("30", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("30", 6),
+        getErrorRange(ethers.utils.parseUnits("30", 6))
+      )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("30", 6),
         getErrorRange(ethers.utils.parseUnits("30", 6))

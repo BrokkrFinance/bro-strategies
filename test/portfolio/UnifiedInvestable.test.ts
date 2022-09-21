@@ -18,7 +18,7 @@ export function testInvestable() {
       )
     })
 
-    it("should success to add when the investable not exists", async function () {
+    it("should succeed to add when the investable not exists", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength + 1; i++) {
@@ -65,7 +65,7 @@ export function testInvestable() {
       )
     })
 
-    it("should success to remove when the investable exists and has zero allocation", async function () {
+    it("should succeed to remove when the investable exists and has zero allocation", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
@@ -110,7 +110,7 @@ export function testInvestable() {
       )
     })
 
-    it("should success to change when the investable exists", async function () {
+    it("should succeed to change when the investable exists", async function () {
       const investablesBefore = await this.portfolio.getInvestables()
       const investableAddr = await investablesBefore[0].investable
 

@@ -1,11 +1,11 @@
+import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { getErrorRange, airdropToken, getMonthsInSeconds } from "../shared/utils"
-import { mine } from "@nomicfoundation/hardhat-network-helpers"
+import { airdropToken, getErrorRange, getMonthsInSeconds } from "../shared/utils"
 
 export function testFee() {
   describe("Fee", async function () {
-    it("should success when any user calls claim fee", async function () {
+    it("should succeed when any user calls claim fee", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("10000", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
@@ -51,7 +51,7 @@ export function testFee() {
       )
     })
 
-    it("should success when a single user withdraws and withdrawal fee is 30%", async function () {
+    it("should succeed when a single user withdraws and withdrawal fee is 30%", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("200", 6))
 
       await this.strategy.connect(this.owner).setWithdrawalFee(30000, [])
@@ -59,12 +59,11 @@ export function testFee() {
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
-      await this.investmentToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
-      await expect(
-        this.strategy.connect(this.user0).withdraw(ethers.utils.parseUnits("100", 6), this.user0.address, [])
-      )
+      const availableTokenBalance = await this.investmentToken.connect(this.user0).balanceOf(this.user0.address)
+      await this.investmentToken.connect(this.user0).approve(this.strategy.address, availableTokenBalance)
+      await expect(this.strategy.connect(this.user0).withdraw(availableTokenBalance, this.user0.address, []))
         .to.emit(this.strategy, "Withdrawal")
-        .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("100", 6))
+        .withArgs(this.user0.address, this.user0.address, availableTokenBalance)
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.be.approximately(
         ethers.utils.parseUnits("170", 6),
@@ -75,7 +74,7 @@ export function testFee() {
       expect(await this.strategy.getEquityValuation(true, false)).to.equal(0)
     })
 
-    it("should success when multiple users withdraw and withdrawal fee is 30%", async function () {
+    it("should succeed when multiple users withdraw and withdrawal fee is 30%", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
       airdropToken(this.impersonatedSigner, this.user1, this.usdc, ethers.utils.parseUnits("100", 6))
       airdropToken(this.impersonatedSigner, this.user2, this.usdc, ethers.utils.parseUnits("100", 6))
@@ -124,7 +123,10 @@ export function testFee() {
         ethers.utils.parseUnits("84", 6),
         getErrorRange(ethers.utils.parseUnits("84", 6))
       )
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10", 6),
+        getErrorRange(ethers.utils.parseUnits("10", 6))
+      )
       expect(await this.investmentToken.balanceOf(this.user1.address)).to.be.approximately(
         ethers.utils.parseUnits("10", 6),
         getErrorRange(ethers.utils.parseUnits("10", 6))

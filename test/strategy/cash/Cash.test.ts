@@ -8,7 +8,7 @@ testStrategy("Cash Strategy", "Cash", [], Oracles.gmx, [testCashAum, testCashUpg
 
 function testCashAum() {
   describe("AUM - Cash Strategy Specific", async function () {
-    it("should success after a single deposit", async function () {
+    it("should succeed after a single deposit", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
@@ -29,7 +29,7 @@ function testCashAum() {
       expect(await this.strategy.getEquityValuation(true, false)).to.equal(ethers.utils.parseUnits("100", 6))
     })
 
-    it("should success after multiple deposits and withdrawals", async function () {
+    it("should succeed after multiple deposits and withdrawals", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
@@ -63,7 +63,7 @@ function testCashAum() {
 
 function testCashUpgradeable() {
   describe("Upgradeable - Cash Strategy Specific", async function () {
-    it("should success to leave all strategy specific state variables' value intact", async function () {
+    it("should succeed to leave all strategy specific state variables' value intact", async function () {
       // IAum.
       const assetBalancesBefore = await this.strategy.getAssetBalances()
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)

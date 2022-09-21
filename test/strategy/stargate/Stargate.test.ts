@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import { StargateAddrs } from "../../shared/addresses"
 import { Oracles } from "../../shared/oracles"
-import { getErrorRange, airdropToken } from "../../shared/utils"
+import { airdropToken, getErrorRange } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
 testStrategy(
@@ -35,7 +35,7 @@ testStrategy(
 
 function testStargateUsdcAum() {
   describe("AUM - Stargate USDC Strategy Specific", async function () {
-    it("should success after a single deposit", async function () {
+    it("should succeed after a single deposit", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
@@ -65,7 +65,7 @@ function testStargateUsdcAum() {
       )
     })
 
-    it("should success after multiple deposits and withdrawals", async function () {
+    it("should succeed after multiple deposits and withdrawals", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
@@ -145,7 +145,7 @@ function testStargateUsdcInitialize() {
 
 function testStargateUsdcUpgradeable() {
   describe("Upgradeable - Stargate USDC Strategy Specific", async function () {
-    it("should success to leave all strategy specific state variables' value intact", async function () {
+    it("should succeed to leave all strategy specific state variables' value intact", async function () {
       // IAum.
       const assetBalancesBefore = await this.strategy.getAssetBalances()
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
@@ -211,7 +211,7 @@ function testStargateUsdcUpgradeable() {
 
 function testStargateUsdtAum() {
   describe("AUM - Stargate USDT Strategy Specific", async function () {
-    it("should success after a single deposit", async function () {
+    it("should succeed after a single deposit", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
@@ -241,7 +241,7 @@ function testStargateUsdtAum() {
       )
     })
 
-    it("should success after multiple deposits and withdrawals", async function () {
+    it("should succeed after multiple deposits and withdrawals", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
@@ -321,7 +321,7 @@ function testStargateUsdtInitialize() {
 
 function testStargateUsdtUpgradeable() {
   describe("Upgradeable - Stargate USDT Strategy Specific", async function () {
-    it("should success to leave all strategy specific state variables' value intact", async function () {
+    it("should succeed to leave all strategy specific state variables' value intact", async function () {
       // IAum.
       const assetBalancesBefore = await this.strategy.getAssetBalances()
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)

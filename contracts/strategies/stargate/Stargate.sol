@@ -18,11 +18,11 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
-        "brokkr.stargate_strategy.stargate_strategy_v1.0.0";
+        "brokkr.stargate_strategy.stargate_strategy_v1.0.1";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.0";
+    string public constant version = "1.0.1";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -90,7 +90,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 lpBalanceBefore = strategyStorage.lpToken.balanceOf(
             address(this)
         );
-        strategyStorage.poolDepositToken.approve(
+        strategyStorage.poolDepositToken.safeApprove(
             address(strategyStorage.router),
             amount
         );
@@ -105,7 +105,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         uint256 lpBalanceIncrement = lpBalanceAfter - lpBalanceBefore;
 
-        strategyStorage.lpToken.approve(
+        strategyStorage.lpToken.safeApprove(
             address(strategyStorage.lpStaking),
             lpBalanceIncrement
         );
@@ -170,7 +170,6 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         address[] memory path = new address[](3);
         path[0] = address(strategyStorage.stgToken);
-        path[1] = address(InvestableLib.WAVAX);
         path[2] = address(depositToken);
 
         swapExactTokensForTokens(

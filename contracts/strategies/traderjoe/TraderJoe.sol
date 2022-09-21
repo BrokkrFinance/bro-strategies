@@ -17,11 +17,11 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
-        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.0.0";
+        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.0.1";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "TraderJoe Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.0";
+    string public constant version = "1.0.1";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -94,11 +94,11 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
         uint256 depositTokenDesired = amount - swapAmount;
 
-        strategyStorage.pairDepositToken.approve(
+        strategyStorage.pairDepositToken.safeApprove(
             address(strategyStorage.router),
             pairDepositTokenDesired
         );
-        depositToken.approve(
+        depositToken.safeApprove(
             address(strategyStorage.router),
             depositTokenDesired
         );

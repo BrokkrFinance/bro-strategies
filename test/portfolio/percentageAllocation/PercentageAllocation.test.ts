@@ -1,15 +1,15 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import investableAbi from "../../shared/abi/investable.json"
-import { TokenAddrs, StargateAddrs, TraderJoeAddrs } from "../../shared/addresses"
+import { StargateAddrs, TokenAddrs, TraderJoeAddrs } from "../../shared/addresses"
 import {
   getUUPSUpgradeableContract,
-  getUUPSUpgradeableStrategy,
   getUUPSUpgradeablePortfolio,
+  getUUPSUpgradeableStrategy,
 } from "../../shared/contracts"
 import { Oracles } from "../../shared/oracles"
-import { getErrorRange } from "../../shared/utils"
 import { SwapServices } from "../../shared/swaps"
+import { getErrorRange } from "../../shared/utils"
 import { testPortfolio } from "../Unified.test"
 
 testPortfolio("PercentageAllocation Portfolio", deployPortfolio, [
@@ -258,7 +258,7 @@ async function deployPortfolio(context: Mocha.Context) {
 
 function testPercentageAllocationPortfolioAum() {
   describe("AUM - PercentageAllocation Portfolio Specific", async function () {
-    it("should success after a single deposit", async function () {
+    it("should succeed after a single deposit", async function () {
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("3000", 6), this.user0.address, [])
 
@@ -324,7 +324,7 @@ function testPercentageAllocationPortfolioAum() {
       )
     })
 
-    it("should success after multiple deposits and withdrawals", async function () {
+    it("should succeed after multiple deposits and withdrawals", async function () {
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("5000", 6))
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("5000", 6), this.user0.address, [])
 
@@ -403,7 +403,7 @@ function testPercentageAllocationPortfolioAum() {
 
 function testPercentageAllocationPortfolioUpgradeable() {
   describe("Upgradeable - PercentageAllocation Portfolio Specific", async function () {
-    it("should success to leave all portfolio specific state variables' value intact", async function () {
+    it("should succeed to leave all portfolio specific state variables' value intact", async function () {
       // IAum.
       const assetBalancesBefore = await this.portfolio.getAssetBalances()
       const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
