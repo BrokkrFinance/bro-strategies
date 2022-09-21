@@ -36,6 +36,7 @@
 1. refactoring: scripts/helper.ts
 1. add comments to unified test scripts
 1. improve unified test performance
+1. write our own version of safeApprove: https://github.com/OpenZeppelin/openzeppelin-contracts/issues/2219
 
 ## Versioning of strategies
 
