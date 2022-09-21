@@ -168,9 +168,9 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         strategyStorage.lpStaking.deposit(strategyStorage.farmId, 0);
 
-        address[] memory path = new address[](3);
+        address[] memory path = new address[](2);
         path[0] = address(strategyStorage.stgToken);
-        path[2] = address(depositToken);
+        path[1] = address(depositToken);
 
         swapExactTokensForTokens(
             swapService,
