@@ -15,6 +15,7 @@ contract TraderJoeV2 is
 {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeERC20Upgradeable for ITraderJoePair;
 
     error InvalidTraderJoeLpToken();
 
@@ -97,11 +98,11 @@ contract TraderJoeV2 is
         );
         uint256 depositTokenDesired = amount - swapAmount;
 
-        strategyStorage.pairDepositToken.approve(
+        strategyStorage.pairDepositToken.safeApprove(
             address(strategyStorage.router),
             pairDepositTokenDesired
         );
-        depositToken.approve(
+        depositToken.safeApprove(
             address(strategyStorage.router),
             depositTokenDesired
         );

@@ -3,7 +3,7 @@ import { ethers, upgrades } from "hardhat"
 import joePairAbi from "../../shared/abi/joePair.json"
 import { TraderJoeAddrs } from "../../shared/addresses"
 import { Oracles } from "../../shared/oracles"
-import { getErrorRange, airdropToken } from "../../shared/utils"
+import { airdropToken, getErrorRange } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
 testStrategy(
@@ -16,7 +16,7 @@ testStrategy(
 
 function testTraderJoeAum() {
   describe("AUM - TraderJoe Strategy Specific", async function () {
-    it("should success after a single deposit", async function () {
+    it("should succeed after a single deposit", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
@@ -48,7 +48,7 @@ function testTraderJoeAum() {
       )
     })
 
-    it("should success after multiple deposits and withdrawals", async function () {
+    it("should succeed after multiple deposits and withdrawals", async function () {
       airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
@@ -129,7 +129,7 @@ function testTraderJoeInitialize() {
 
 function testTraderJoeUpgradeable() {
   describe("Upgradeable - TraderJoe Strategy Specific", async function () {
-    it("should success to leave all strategy specific state variables' value intact", async function () {
+    it("should succeed to leave all strategy specific state variables' value intact", async function () {
       // IAum.
       const assetBalancesBefore = await this.strategy.getAssetBalances()
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)

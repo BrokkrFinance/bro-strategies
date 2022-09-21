@@ -7,14 +7,14 @@ import { getErrorRange } from "../shared/utils"
 
 export function testRebalance() {
   describe("Rebalance", async function () {
-    it("should success when the owner user rebalances - 0", async function () {
+    it("should succeed when the owner user rebalances - [100%, 0%, 0%] -> [33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
       }
 
-      // Set target allocations 100% to the first investable and 0% to the others. e.g. [100%, 0%, 0%]
+      // Set target allocations 100% to the first investable and 0% to the others. [100%, 0%, 0%]
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength; i++) {
         allocations.push(0)
@@ -27,14 +27,20 @@ export function testRebalance() {
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("10000", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("10000", 6),
         getErrorRange(ethers.utils.parseUnits("10000", 6))
       )
 
-      // Set target allocations approximately equally. e.g. [33%, 33%, 34%]
+      // Set target allocations approximately equally. [33%, 33%, 34%]
       allocations = []
       const equalAllocation = Math.floor(100 / investableLength - 1)
       for (let i = 0; i < investableLength - 1; i++) {
@@ -56,8 +62,14 @@ export function testRebalance() {
       expect(await this.portfolio.rebalance(depositParams, withdrawParams)).to.emit(this.portfolio, "Rebalance")
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("10000", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("10000", 6),
         getErrorRange(ethers.utils.parseUnits("10000", 6))
@@ -81,14 +93,14 @@ export function testRebalance() {
       }
     })
 
-    it("should success when the owner user rebalances - 1", async function () {
+    it("should succeed when the owner user rebalances - [50%, 50%, 0%] -> [33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
       }
 
-      // Set target allocations 50% to the first and second investable and 0% to the others. e.g. [50%, 50%, 0%]
+      // Set target allocations 50% to the first and second investable and 0% to the others. [50%, 50%, 0%]
       let allocations: number[] = [50000, 50000]
       for (let i = 2; i < investableLength; i++) {
         allocations.push(0)
@@ -101,14 +113,20 @@ export function testRebalance() {
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("10000", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("10000", 6),
         getErrorRange(ethers.utils.parseUnits("10000", 6))
       )
 
-      // Set target allocations approximately equally. e.g. [33%, 33%, 34%]
+      // Set target allocations approximately equally. [33%, 33%, 34%]
       allocations = []
       const equalAllocation = Math.floor(100 / investableLength - 1)
       for (let i = 0; i < investableLength - 1; i++) {
@@ -130,8 +148,14 @@ export function testRebalance() {
       expect(await this.portfolio.rebalance(depositParams, withdrawParams)).to.emit(this.portfolio, "Rebalance")
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("10000", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("10000", 6),
         getErrorRange(ethers.utils.parseUnits("10000", 6))
@@ -155,7 +179,7 @@ export function testRebalance() {
       }
     })
 
-    it("should success when the owner user rebalances and another user deposits into investable directly", async function () {
+    it("should succeed when the owner user rebalances and another user deposits into investable directly - [50%, 50%, 0%] -> [33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
@@ -170,7 +194,7 @@ export function testRebalance() {
       await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
         .not.to.be.reverted
 
-      // Set target allocations 50% to the first and second investable and 0% to the others. e.g. [50%, 50%, 0%]
+      // Set target allocations 50% to the first and second investable and 0% to the others. [50%, 50%, 0%]
       let allocations: number[] = [50000, 50000]
       for (let i = 2; i < investableLength; i++) {
         allocations.push(0)
@@ -183,14 +207,20 @@ export function testRebalance() {
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("10000", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("10000", 6),
         getErrorRange(ethers.utils.parseUnits("10000", 6))
       )
 
-      // Set target allocations approximately equally. e.g. [33%, 33%, 34%]
+      // Set target allocations approximately equally. [33%, 33%, 34%]
       allocations = []
       const equalAllocation = Math.floor(100 / investableLength - 1)
       for (let i = 0; i < investableLength - 1; i++) {
@@ -213,9 +243,18 @@ export function testRebalance() {
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
       expect(await this.usdc.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("7000", 6))
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
-      expect(await investableInvestmentToken.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("3000", 6))
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("10000", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
+      expect(await investableInvestmentToken.balanceOf(this.user2.address)).to.be.approximately(
+        ethers.utils.parseUnits("3000", 6),
+        getErrorRange(ethers.utils.parseUnits("3000", 6))
+      )
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("10000", 6),
         getErrorRange(ethers.utils.parseUnits("10000", 6))
@@ -240,7 +279,7 @@ export function testRebalance() {
       }
     })
 
-    it("should success when the owner user rebalances and another user withdraws from investable directly", async function () {
+    it("should succeed when the owner user rebalances and another user withdraws from investable directly - [50%, 50%, 0%] ->[33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
@@ -255,7 +294,7 @@ export function testRebalance() {
       await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
         .not.to.be.reverted
 
-      // Set target allocations 50% to the first and second investable and 0% to the others. e.g. [50%, 50%, 0%]
+      // Set target allocations 50% to the first and second investable and 0% to the others. [50%, 50%, 0%]
       let allocations: number[] = [50000, 50000]
       for (let i = 2; i < investableLength; i++) {
         allocations.push(0)
@@ -268,8 +307,14 @@ export function testRebalance() {
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("10000", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("10000", 6),
         getErrorRange(ethers.utils.parseUnits("10000", 6))
@@ -281,7 +326,7 @@ export function testRebalance() {
       await expect(investable.connect(this.user2).withdraw(ethers.utils.parseUnits("1500", 6), this.user2.address, []))
         .not.to.be.reverted
 
-      // Set target allocations approximately equally. e.g. [33%, 33%, 34%]
+      // Set target allocations approximately equally. [33%, 33%, 34%]
       allocations = []
       const equalAllocation = Math.floor(100 / investableLength - 1)
       for (let i = 0; i < investableLength - 1; i++) {
@@ -307,9 +352,18 @@ export function testRebalance() {
         ethers.utils.parseUnits("8500", 6),
         getErrorRange(ethers.utils.parseUnits("8500", 6))
       )
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
-      expect(await investableInvestmentToken.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("1500", 6))
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(ethers.utils.parseUnits("10000", 6))
+      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
+      expect(await investableInvestmentToken.balanceOf(this.user2.address)).to.be.approximately(
+        ethers.utils.parseUnits("1500", 6),
+        getErrorRange(ethers.utils.parseUnits("1500", 6))
+      )
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
+        ethers.utils.parseUnits("10000", 6),
+        getErrorRange(ethers.utils.parseUnits("10000", 6))
+      )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("10000", 6),
         getErrorRange(ethers.utils.parseUnits("10000", 6))

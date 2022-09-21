@@ -8,6 +8,7 @@ import "./IInvestmentToken.sol";
 
 interface IInvestable is IAum, IFee {
     error ZeroAmountDeposited();
+    error ZeroAmountInvested();
     error ZeroAmountWithdrawn();
 
     event Deposit(

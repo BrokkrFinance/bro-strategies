@@ -63,6 +63,9 @@ const config: HardhatUserConfig = {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
   },
+  mocha: {
+    timeout: 90000,
+  },
   // contractSizer: {
   //   alphaSort: true,
   //   runOnCompile: true,

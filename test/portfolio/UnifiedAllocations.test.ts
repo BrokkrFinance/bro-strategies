@@ -54,7 +54,7 @@ export function testAllocations() {
       )
     })
 
-    it("should success when the sum of target investable allocations equals to 100% and the length of target investable allocations equals to the length of investables", async function () {
+    it("should succeed when the sum of target investable allocations equals to 100% and the length of target investable allocations equals to the length of investables", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength; i++) {
