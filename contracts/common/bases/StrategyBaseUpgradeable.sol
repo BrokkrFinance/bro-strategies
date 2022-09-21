@@ -382,7 +382,7 @@ abstract contract StrategyBaseUpgradeable is
                 swapService_.router
             );
 
-            IERC20Upgradeable(path[0]).safeApprove(
+            IERC20Upgradeable(path[0]).approve(
                 address(traderjoeRouter),
                 amountIn
             );
