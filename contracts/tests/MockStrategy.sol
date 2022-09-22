@@ -13,7 +13,7 @@ contract MockStrategy is
 {
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
-        "block42.mock_strategy.<insert git label here>";
+        "brokkr.mock_strategy.<insert git label here>";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Mock strategy";
     // solhint-disable-next-line const-name-snakecase

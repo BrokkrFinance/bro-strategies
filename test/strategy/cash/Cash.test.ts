@@ -115,7 +115,7 @@ function testCashUpgradeable() {
       expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
 
       // IInvestable.
-      expect(await this.strategy.name()).to.equal("block42.cash_strategy.cash_strategy_initial")
+      expect(await this.strategy.name()).to.equal("brokkr.cash_strategy.cash_strategy_initial")
       expect(await this.strategy.humanReadableName()).to.equal("Cash strategy")
       expect(await this.strategy.version()).to.equal("2.0.0")
     })
