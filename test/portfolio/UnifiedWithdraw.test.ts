@@ -9,9 +9,9 @@ export function testWithdraw() {
     it("should succeed when a single user withdraws InvestmentToken that he/she has - full withdrawal", async function () {
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("3000", 6), this.user0.address, [])
-      await this.investmentToken.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
 
       const availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
+      await this.investmentToken.connect(this.user0).approve(this.portfolio.address, availableTokenBalance)
       await expect(this.portfolio.connect(this.user0).withdraw(availableTokenBalance, this.user0.address, []))
         .to.emit(this.portfolio, "Withdrawal")
         .withArgs(this.user0.address, this.user0.address, availableTokenBalance)

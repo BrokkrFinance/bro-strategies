@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "template for project setup",
   "main": "index.js",
-  "author": "block42",
+  "author": "brokkr",
   "license": "MIT",
   "devDependencies": {
     "@aave/core-v3": "^1.13.1",

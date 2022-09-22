@@ -11,7 +11,7 @@ contract PercentageAllocation is
 {
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
-        "block42.percentage_allocation_portfolio.percentage_allocation_portfolio_v1.0.1";
+        "brokkr.percentage_allocation_portfolio.percentage_allocation_portfolio_v1.0.1";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName =
         "Percentage allocation portfolio";

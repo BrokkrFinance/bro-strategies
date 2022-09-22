@@ -54,13 +54,13 @@ The most important thing is to bump the major version number at each breaking ch
 ### Git tagging
 
 Currently we have a very simple git workflow. New strategies are released from the main branch
-and tagged by part of the 'name' of the strategy. For example if a new version of the cash strategy is released, and the current 'name' property in the source code of that strategy has the value of **block42.cash_strategy.cash_strategy_v1.0.2**, then the following git commands has to be executed.
+and tagged by part of the 'name' of the strategy. For example if a new version of the cash strategy is released, and the current 'name' property in the source code of that strategy has the value of **brokkr.cash_strategy.cash_strategy_v1.0.2**, then the following git commands has to be executed.
 
 ```bash
 git checkout main
 git pull
 # the tag name will be the the string following the last dot of the name, in the example the name was
-# block42.cash_strategy.cash_strategy_v1.0.2
+# brokkr.cash_strategy.cash_strategy_v1.0.2
 git tag -a cash_strategy_v1.0.2
 # the command above will open a text editor, please write down how this version is different from the previuos one
 git push origin cash_strategy_v1.0.2

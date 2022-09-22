@@ -90,7 +90,7 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 lpBalanceBefore = strategyStorage.lpToken.balanceOf(
             address(this)
         );
-        strategyStorage.poolDepositToken.safeApprove(
+        strategyStorage.poolDepositToken.approve(
             address(strategyStorage.router),
             amount
         );
@@ -105,7 +105,7 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         uint256 lpBalanceIncrement = lpBalanceAfter - lpBalanceBefore;
 
-        strategyStorage.lpToken.safeApprove(
+        strategyStorage.lpToken.approve(
             address(strategyStorage.lpStaking),
             lpBalanceIncrement
         );
