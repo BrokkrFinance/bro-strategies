@@ -453,7 +453,7 @@ function testPercentageAllocationPortfolioUpgradeable() {
 
       // IInvestable.
       expect(await this.portfolio.name()).to.equal(
-        "block42.percentage_allocation_portfolio.percentage_allocation_portfolio_v2.0.0"
+        "brokkr.percentage_allocation_portfolio.percentage_allocation_portfolio_v2.0.0"
       )
       expect(await this.portfolio.humanReadableName()).to.equal("Percentage allocation portfolio")
       expect(await this.portfolio.version()).to.equal("2.0.0")

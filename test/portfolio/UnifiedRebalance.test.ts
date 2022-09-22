@@ -7,14 +7,14 @@ import { getErrorRange } from "../shared/utils"
 
 export function testRebalance() {
   describe("Rebalance", async function () {
-    it("should succeed when the owner user rebalances - [100%, 0%, 0%] -> [33%, 33%, 34%]", async function () {
+    it("should succeed when the owner user rebalances - for example [100%, 0%, 0%] -> [33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
       }
 
-      // Set target allocations 100% to the first investable and 0% to the others. [100%, 0%, 0%]
+      // Set target allocations 100% to the first investable and 0% to the others. for example [100%, 0%, 0%]
       let allocations: number[] = [100000]
       for (let i = 1; i < investableLength; i++) {
         allocations.push(0)
@@ -40,7 +40,7 @@ export function testRebalance() {
         getErrorRange(ethers.utils.parseUnits("10000", 6))
       )
 
-      // Set target allocations approximately equally. [33%, 33%, 34%]
+      // Set target allocations approximately equally. for example [33%, 33%, 34%]
       allocations = []
       const equalAllocation = Math.floor(100 / investableLength - 1)
       for (let i = 0; i < investableLength - 1; i++) {
@@ -93,14 +93,14 @@ export function testRebalance() {
       }
     })
 
-    it("should succeed when the owner user rebalances - [50%, 50%, 0%] -> [33%, 33%, 34%]", async function () {
+    it("should succeed when the owner user rebalances - for example [50%, 50%, 0%] -> [33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
         return
       }
 
-      // Set target allocations 50% to the first and second investable and 0% to the others. [50%, 50%, 0%]
+      // Set target allocations 50% to the first and second investable and 0% to the others. for example [50%, 50%, 0%]
       let allocations: number[] = [50000, 50000]
       for (let i = 2; i < investableLength; i++) {
         allocations.push(0)
@@ -126,7 +126,7 @@ export function testRebalance() {
         getErrorRange(ethers.utils.parseUnits("10000", 6))
       )
 
-      // Set target allocations approximately equally. [33%, 33%, 34%]
+      // Set target allocations approximately equally. for example [33%, 33%, 34%]
       allocations = []
       const equalAllocation = Math.floor(100 / investableLength - 1)
       for (let i = 0; i < investableLength - 1; i++) {
@@ -179,7 +179,7 @@ export function testRebalance() {
       }
     })
 
-    it("should succeed when the owner user rebalances and another user deposits into investable directly - [50%, 50%, 0%] -> [33%, 33%, 34%]", async function () {
+    it("should succeed when the owner user rebalances and another user deposits into investable directly -  for example [50%, 50%, 0%] -> [33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
@@ -194,7 +194,7 @@ export function testRebalance() {
       await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
         .not.to.be.reverted
 
-      // Set target allocations 50% to the first and second investable and 0% to the others. [50%, 50%, 0%]
+      // Set target allocations 50% to the first and second investable and 0% to the others. for example [50%, 50%, 0%]
       let allocations: number[] = [50000, 50000]
       for (let i = 2; i < investableLength; i++) {
         allocations.push(0)
@@ -220,7 +220,7 @@ export function testRebalance() {
         getErrorRange(ethers.utils.parseUnits("10000", 6))
       )
 
-      // Set target allocations approximately equally. [33%, 33%, 34%]
+      // Set target allocations approximately equally. for example [33%, 33%, 34%]
       allocations = []
       const equalAllocation = Math.floor(100 / investableLength - 1)
       for (let i = 0; i < investableLength - 1; i++) {
@@ -279,7 +279,7 @@ export function testRebalance() {
       }
     })
 
-    it("should succeed when the owner user rebalances and another user withdraws from investable directly - [50%, 50%, 0%] ->[33%, 33%, 34%]", async function () {
+    it("should succeed when the owner user rebalances and another user withdraws from investable directly - for example [50%, 50%, 0%] -> [33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length
 
       if (investableLength <= 1) {
@@ -294,7 +294,7 @@ export function testRebalance() {
       await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
         .not.to.be.reverted
 
-      // Set target allocations 50% to the first and second investable and 0% to the others. [50%, 50%, 0%]
+      // Set target allocations 50% to the first and second investable and 0% to the others. for example [50%, 50%, 0%]
       let allocations: number[] = [50000, 50000]
       for (let i = 2; i < investableLength; i++) {
         allocations.push(0)
@@ -326,7 +326,7 @@ export function testRebalance() {
       await expect(investable.connect(this.user2).withdraw(ethers.utils.parseUnits("1500", 6), this.user2.address, []))
         .not.to.be.reverted
 
-      // Set target allocations approximately equally. [33%, 33%, 34%]
+      // Set target allocations approximately equally. for example [33%, 33%, 34%]
       allocations = []
       const equalAllocation = Math.floor(100 / investableLength - 1)
       for (let i = 0; i < investableLength - 1; i++) {

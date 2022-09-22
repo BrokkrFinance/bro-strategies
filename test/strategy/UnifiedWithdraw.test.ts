@@ -227,13 +227,13 @@ export function testWithdraw() {
       await this.usdc.connect(this.user1).approve(this.strategy.address, ethers.utils.parseUnits("30", 6))
       await this.strategy.connect(this.user1).deposit(ethers.utils.parseUnits("30", 6), this.user1.address, [])
 
-      // The first user partial withdraws.
+      // The first user partially withdraws.
       await this.investmentToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("15", 6))
       await expect(this.strategy.connect(this.user0).withdraw(ethers.utils.parseUnits("15", 6), this.user0.address, []))
         .to.emit(this.strategy, "Withdrawal")
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("15", 6))
 
-      // The second user partial withdraws.
+      // The second user partially withdraws.
       const investmentTokenBalance = await this.investmentToken.balanceOf(this.user1.address)
       const investmentTokenBalanceHalf = Math.floor(investmentTokenBalance / 2)
       await this.investmentToken.connect(this.user1).approve(this.strategy.address, investmentTokenBalanceHalf)
@@ -276,22 +276,22 @@ export function testWithdraw() {
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("30", 6), this.user0.address, [])
 
       // The first user fully withdraws.
-      let investmentTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
-      await this.investmentToken.connect(this.user0).approve(this.strategy.address, investmentTokenBalance)
-      await expect(this.strategy.connect(this.user0).withdraw(investmentTokenBalance, this.user0.address, []))
+      let availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
+      await this.investmentToken.connect(this.user0).approve(this.strategy.address, availableTokenBalance)
+      await expect(this.strategy.connect(this.user0).withdraw(availableTokenBalance, this.user0.address, []))
         .to.emit(this.strategy, "Withdrawal")
-        .withArgs(this.user0.address, this.user0.address, investmentTokenBalance)
+        .withArgs(this.user0.address, this.user0.address, availableTokenBalance)
 
       // The second user deposits.
       await this.usdc.connect(this.user1).approve(this.strategy.address, ethers.utils.parseUnits("30", 6))
       await this.strategy.connect(this.user1).deposit(ethers.utils.parseUnits("30", 6), this.user1.address, [])
 
       // The second user fully withdraws.
-      investmentTokenBalance = await this.investmentToken.balanceOf(this.user1.address)
-      await this.investmentToken.connect(this.user1).approve(this.strategy.address, investmentTokenBalance)
-      await expect(this.strategy.connect(this.user1).withdraw(investmentTokenBalance, this.user1.address, []))
+      availableTokenBalance = await this.investmentToken.balanceOf(this.user1.address)
+      await this.investmentToken.connect(this.user1).approve(this.strategy.address, availableTokenBalance)
+      await expect(this.strategy.connect(this.user1).withdraw(availableTokenBalance, this.user1.address, []))
         .to.emit(this.strategy, "Withdrawal")
-        .withArgs(this.user1.address, this.user1.address, investmentTokenBalance)
+        .withArgs(this.user1.address, this.user1.address, availableTokenBalance)
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.be.approximately(
         ethers.utils.parseUnits("100", 6),

@@ -247,7 +247,7 @@ abstract contract PortfolioBaseUpgradeable is
                 Math.SHORT_FIXED_DECIMAL_FACTOR /
                 100;
             if (embeddedAmount == 0) continue;
-            depositToken.safeApprove(
+            depositToken.approve(
                 address(investableDescs[i].investable),
                 embeddedAmount
             );
@@ -294,7 +294,7 @@ abstract contract PortfolioBaseUpgradeable is
                 .getInvestmentTokenBalanceOf(address(this)) * amount) /
                 investmentTokenSupply;
             if (embeddedTokenAmountToBurn == 0) continue;
-            embeddedInvestable.getInvestmentToken().safeApprove(
+            embeddedInvestable.getInvestmentToken().approve(
                 address(embeddedInvestable),
                 embeddedTokenAmountToBurn
             );
@@ -366,7 +366,7 @@ abstract contract PortfolioBaseUpgradeable is
                         address(this)
                     ) * targetInvestableEquities[i]) /
                     currentInvestableEquities[i];
-                embeddedInvestable.getInvestmentToken().safeApprove(
+                embeddedInvestable.getInvestmentToken().approve(
                     address(embeddedInvestable),
                     withdrawAmount
                 );
@@ -392,7 +392,7 @@ abstract contract PortfolioBaseUpgradeable is
                 );
 
                 if (depositAmount != 0) {
-                    depositToken.safeApprove(
+                    depositToken.approve(
                         address(embeddedInvestable),
                         depositAmount
                     );
