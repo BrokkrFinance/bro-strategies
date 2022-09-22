@@ -34,6 +34,11 @@ const config: HardhatUserConfig = {
     apiKey: `${process.env.DEFENDER_TEAM_API_KEY}`,
     apiSecret: `${process.env.DEFENDER_TEAM_API_SECRET_KEY}`,
   },
+  etherscan: {
+    apiKey: {
+      avalanche: `${process.env.SNOWTRACE_API_KEY}`,
+    },
+  },
   networks: {
     hardhat: {
       allowUnlimitedContractSize: false,
