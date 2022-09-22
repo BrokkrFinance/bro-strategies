@@ -94,11 +94,11 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
         uint256 depositTokenDesired = amount - swapAmount;
 
-        strategyStorage.pairDepositToken.safeApprove(
+        strategyStorage.pairDepositToken.approve(
             address(strategyStorage.router),
             pairDepositTokenDesired
         );
-        depositToken.safeApprove(
+        depositToken.approve(
             address(strategyStorage.router),
             depositTokenDesired
         );
