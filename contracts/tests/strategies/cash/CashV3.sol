@@ -6,13 +6,13 @@ import "../../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract CashV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
+contract CashV3 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
-    string public constant name = "brokkr.cash_strategy.cash_strategy_initial";
+    string public constant name = "brokkr.cash_strategy.cash_strategy_v3.0.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Cash strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "2.0.0";
+    string public constant version = "3.0.0";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -21,7 +21,7 @@ contract CashV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function initialize(StrategyArgs calldata strategyArgs)
         external
-        reinitializer(2)
+        reinitializer(3)
     {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
     }

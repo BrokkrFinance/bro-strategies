@@ -9,7 +9,7 @@ import "../../../dependencies/stargate/IStargateRouter.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
+contract StargateV3 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -18,11 +18,11 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
-        "brokkr.stargate_strategy.stargate_strategy_v2.0.0";
+        "brokkr.stargate_strategy.stargate_strategy_v3.0.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "2.0.0";
+    string public constant version = "3.0.0";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -36,7 +36,7 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         IStargateLpStaking lpStaking,
         IERC20Upgradeable lpToken,
         IERC20Upgradeable stgToken
-    ) external reinitializer(2) {
+    ) external reinitializer(3) {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
         StargateStorage storage strategyStorage = StargateStorageLib

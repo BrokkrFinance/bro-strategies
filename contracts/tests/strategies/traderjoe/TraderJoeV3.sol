@@ -9,7 +9,7 @@ import "../../../dependencies/traderjoe/ITraderJoePair.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract TraderJoeV2 is
+contract TraderJoeV3 is
     UUPSUpgradeable,
     StrategyOwnablePausableBaseUpgradeable
 {
@@ -20,11 +20,11 @@ contract TraderJoeV2 is
 
     // solhint-disable-next-line const-name-snakecase
     string public constant name =
-        "brokkr.traderjoe_strategy.traderjoe_strategy_v2.0.0";
+        "brokkr.traderjoe_strategy.traderjoe_strategy_v3.0.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "TraderJoe Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "2.0.0";
+    string public constant version = "3.0.0";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -37,7 +37,7 @@ contract TraderJoeV2 is
         ITraderJoeMasterChef masterChef,
         ITraderJoePair lpToken,
         IERC20Upgradeable joeToken
-    ) external reinitializer(2) {
+    ) external reinitializer(3) {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib

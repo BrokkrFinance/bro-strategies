@@ -24,7 +24,7 @@ contract TestUpgradedPortfolio is
 
     function initialize(PortfolioArgs calldata portfolioArgs)
         external
-        reinitializer(2)
+        reinitializer(type(uint8).max)
     {
         __PortfolioOwnablePausableBaseUpgradeable_init(portfolioArgs);
     }

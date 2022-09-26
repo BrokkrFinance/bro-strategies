@@ -19,7 +19,7 @@ contract TestUpgradedStrategy is
 
     function initialize(StrategyArgs calldata strategyArgs)
         external
-        reinitializer(2)
+        reinitializer(type(uint8).max)
     {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
     }

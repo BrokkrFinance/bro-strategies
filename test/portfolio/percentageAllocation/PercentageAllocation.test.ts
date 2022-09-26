@@ -409,8 +409,8 @@ function testPercentageAllocationPortfolioUpgradeable() {
       const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
       const equityValuationBefore = await this.portfolio.getEquityValuation(true, false)
 
-      const PortfolioV2 = await ethers.getContractFactory("PercentageAllocationV2")
-      const portfolioV2 = await upgrades.upgradeProxy(this.portfolio.address, PortfolioV2, {
+      const PortfolioV3 = await ethers.getContractFactory("PercentageAllocationV3")
+      const portfolioV3 = await upgrades.upgradeProxy(this.portfolio.address, PortfolioV3, {
         call: {
           fn: "initialize",
           args: [
@@ -431,7 +431,7 @@ function testPercentageAllocationPortfolioUpgradeable() {
           ],
         },
       })
-      await portfolioV2.deployed()
+      await portfolioV3.deployed()
 
       // IAum.
       const assetBalancesAfter = await this.portfolio.getAssetBalances()
@@ -453,10 +453,10 @@ function testPercentageAllocationPortfolioUpgradeable() {
 
       // IInvestable.
       expect(await this.portfolio.name()).to.equal(
-        "brokkr.percentage_allocation_portfolio.percentage_allocation_portfolio_v2.0.0"
+        "brokkr.percentage_allocation_portfolio.percentage_allocation_portfolio_v3.0.0"
       )
       expect(await this.portfolio.humanReadableName()).to.equal("Percentage allocation portfolio")
-      expect(await this.portfolio.version()).to.equal("2.0.0")
+      expect(await this.portfolio.version()).to.equal("3.0.0")
     })
   })
 }

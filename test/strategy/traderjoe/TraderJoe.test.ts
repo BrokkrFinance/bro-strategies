@@ -135,8 +135,8 @@ function testTraderJoeUpgradeable() {
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
       const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
 
-      const TraderJoeV2 = await ethers.getContractFactory("TraderJoeV2")
-      const traderJoeV2 = await upgrades.upgradeProxy(this.strategy.address, TraderJoeV2, {
+      const TraderJoeV3 = await ethers.getContractFactory("TraderJoeV3")
+      const traderJoeV3 = await upgrades.upgradeProxy(this.strategy.address, TraderJoeV3, {
         call: {
           fn: "initialize",
           args: [
@@ -164,7 +164,7 @@ function testTraderJoeUpgradeable() {
           ],
         },
       })
-      await traderJoeV2.deployed()
+      await traderJoeV3.deployed()
 
       // IAum.
       const assetBalancesAfter = await this.strategy.getAssetBalances()
@@ -185,9 +185,9 @@ function testTraderJoeUpgradeable() {
       expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
 
       // IInvestable.
-      expect(await this.strategy.name()).to.equal("brokkr.traderjoe_strategy.traderjoe_strategy_v2.0.0")
+      expect(await this.strategy.name()).to.equal("brokkr.traderjoe_strategy.traderjoe_strategy_v3.0.0")
       expect(await this.strategy.humanReadableName()).to.equal("TraderJoe Strategy")
-      expect(await this.strategy.version()).to.equal("2.0.0")
+      expect(await this.strategy.version()).to.equal("3.0.0")
     })
   })
 }
