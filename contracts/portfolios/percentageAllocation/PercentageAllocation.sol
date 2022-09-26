@@ -25,7 +25,7 @@ contract PercentageAllocation is
 
     function initialize(PortfolioArgs calldata portfolioArgs)
         external
-        initializer
+        reinitializer(2)
     {
         __PortfolioOwnablePausableBaseUpgradeable_init(portfolioArgs);
     }

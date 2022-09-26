@@ -21,7 +21,7 @@ contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function initialize(StrategyArgs calldata strategyArgs)
         external
-        initializer
+        reinitializer(2)
     {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
     }

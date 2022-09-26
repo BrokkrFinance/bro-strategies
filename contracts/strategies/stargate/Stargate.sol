@@ -36,7 +36,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         IStargateLpStaking lpStaking,
         IERC20Upgradeable lpToken,
         IERC20Upgradeable stgToken
-    ) external initializer {
+    ) external reinitializer(2) {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
         StargateStorage storage strategyStorage = StargateStorageLib
