@@ -1,16 +1,16 @@
-import { ethers } from "hardhat"
 import { Contract } from "ethers"
+import { ethers } from "hardhat"
 import {
   ContractAddrs,
   contractAt,
+  deployPortfolio,
   deployPriceOracle,
   deployUpgradeableStrategy,
-  deployPortfolio,
-  retryUntilSuccess,
   getUsdcContract,
+  retryUntilSuccess,
 } from "./helper"
 
-import deploymentConfig from "./deploymentConfig.json"
+import deploymentConfig from "../configs/deploymentConfig.json"
 
 let priceOracle: Contract
 let usdc: Contract

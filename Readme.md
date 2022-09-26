@@ -1,13 +1,44 @@
 # Brotocol strategies
 
 ## Deployment
+
 To deploy the contracts, set the correct environment variables needed in `hardhat.config.ts`.
 Then, modify the config file `scripts/deploymentConfig.json`.
 
 Finally run:
+
 ```
 npx hardhat run scripts/deploy.ts
 ```
+
+## Releasing a new strategy
+
+The following section explains how the versioning of the strategies needs to be done in order to
+always be able to retrieve the source code of the deployed strategies, even if the strategy was not verified on the blockchain. Even if the strategy was verified, we would still need a way to easily find the git commit from which the deployed strategy was built.
+
+### Git
+
+Currently we have a very simple git workflow. New strategies are released from the main branch
+and tagged by part of the 'name' of the strategy. For example if a new version of the cash strategy is released, and the current 'name' property in the source code of that strategy has the value of **block42.cash_strategy.cash_strategy_v1.0.2**, then the following git commands has to be executed.
+
+```bash
+git checkout main
+git pull
+# the tag name will be the the string following the last dot of the name, in the example the name was
+# block42.cash_strategy.cash_strategy_v1.0.2
+git tag -a cash_strategy_v1.0.2
+# the command above will open a text editor, please write down how this version is different from the previuos one
+git push origin cash_strategy_v1.0.2
+```
+
+If you release multiple strategies at once, please create the tags for all strategies.
+
+### Versioning of strategies
+
+Each strategy has a version number in semver format: https://semver.org/. This version number has to be part of the git tag.
+
+The most important thing is to bump the major version number at each breaking changes for example if the current verstion was 2.3.1, and there was a breaking change, then the new version should be 3.0.0
+
 
 
 ## Pending tasks
@@ -48,36 +79,3 @@ npx hardhat run scripts/deploy.ts
 1. improve unified test performance
 1. write our own version of safeApprove: https://github.com/OpenZeppelin/openzeppelin-contracts/issues/2219
 
-## Versioning of strategies
-
-The following section explains how the versioning of the strategies needs to be done in order to
-always be able to retrieve the source code of the deployed strategies, even if the strategy was not verified on the blockchain. Even if the strategy was verified, we would still need a way to easily find the git commit from which the deployed strategy was built.
-
-### Version number
-
-Each strategy has a version number in semver format: https://semver.org/. This version number has to be part of the git tag.
-
-The most important thing is to bump the major version number at each breaking changes for example if the current verstion was 2.3.1, and there was a breaking change, then the new version should be 3.0.0
-
-## Post strategy release tasks
-
-### Git tagging
-
-Currently we have a very simple git workflow. New strategies are released from the main branch
-and tagged by part of the 'name' of the strategy. For example if a new version of the cash strategy is released, and the current 'name' property in the source code of that strategy has the value of **brokkr.cash_strategy.cash_strategy_v1.0.2**, then the following git commands has to be executed.
-
-```bash
-git checkout main
-git pull
-# the tag name will be the the string following the last dot of the name, in the example the name was
-# brokkr.cash_strategy.cash_strategy_v1.0.2
-git tag -a cash_strategy_v1.0.2
-# the command above will open a text editor, please write down how this version is different from the previuos one
-git push origin cash_strategy_v1.0.2
-```
-
-If you release multiple strategies at once, please create the tags for all strategies.
-
-### Verifying deployed contracts on Snowtrace
-
-Both the logic contract and the proxy contract should be verified after deploying them.
