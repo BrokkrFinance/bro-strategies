@@ -202,7 +202,7 @@ function testStargateUsdcUpgradeable() {
       expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
 
       // IInvestable.
-      expect(await this.strategy.name()).to.equal("brokkr.stargate_strategy.stargate_strategy_v2.0.0")
+      expect(await this.strategy.trackingName()).to.equal("brokkr.stargate_strategy.stargate_strategy_v2.0.0")
       expect(await this.strategy.humanReadableName()).to.equal("Stargate Strategy")
       expect(await this.strategy.version()).to.equal("2.0.0")
     })
@@ -378,7 +378,7 @@ function testStargateUsdtUpgradeable() {
       expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
 
       // IInvestable.
-      expect(await this.strategy.name()).to.equal("brokkr.stargate_strategy.stargate_strategy_v2.0.0")
+      expect(await this.strategy.trackingName()).to.equal("brokkr.stargate_strategy.stargate_strategy_v2.0.0")
       expect(await this.strategy.humanReadableName()).to.equal("Stargate Strategy")
       expect(await this.strategy.version()).to.equal("2.0.0")
     })
