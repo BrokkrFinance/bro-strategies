@@ -185,7 +185,7 @@ function testTraderJoeUpgradeable() {
       expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
 
       // IInvestable.
-      expect(await this.strategy.name()).to.equal("brokkr.traderjoe_strategy.traderjoe_strategy_v2.0.0")
+      expect(await this.strategy.trackingName()).to.equal("brokkr.traderjoe_strategy.traderjoe_strategy_v2.0.0")
       expect(await this.strategy.humanReadableName()).to.equal("TraderJoe Strategy")
       expect(await this.strategy.version()).to.equal("2.0.0")
     })
