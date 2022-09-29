@@ -17,12 +17,12 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     error NotEnoughDeltaCredit();
 
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
-        "brokkr.stargate_strategy.stargate_strategy_v1.0.1";
+    string public constant trackingName =
+        "brokkr.stargate_strategy.stargate_strategy_v1.0.2";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.1";
+    string public constant version = "1.0.2";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

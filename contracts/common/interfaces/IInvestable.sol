@@ -49,7 +49,7 @@ interface IInvestable is IAum, IFee {
     function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
         external;
 
-    function name() external pure returns (string memory);
+    function trackingName() external pure returns (string memory);
 
     function humanReadableName() external pure returns (string memory);
 

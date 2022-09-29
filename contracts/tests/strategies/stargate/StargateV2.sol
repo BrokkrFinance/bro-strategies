@@ -17,7 +17,7 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     error NotEnoughDeltaCredit();
 
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
+    string public constant trackingName =
         "brokkr.stargate_strategy.stargate_strategy_v2.0.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";

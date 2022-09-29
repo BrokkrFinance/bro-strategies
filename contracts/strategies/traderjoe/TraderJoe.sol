@@ -16,12 +16,12 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     error InvalidTraderJoeLpToken();
 
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
-        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.0.1";
+    string public constant trackingName =
+        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.0.2";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "TraderJoe Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.1";
+    string public constant version = "1.0.2";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
