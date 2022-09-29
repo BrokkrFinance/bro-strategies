@@ -19,7 +19,7 @@ contract TraderJoeV2 is
     error InvalidTraderJoeLpToken();
 
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
+    string public constant trackingName =
         "brokkr.traderjoe_strategy.traderjoe_strategy_v2.0.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "TraderJoe Strategy";

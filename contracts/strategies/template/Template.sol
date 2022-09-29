@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 
 contract Template is StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
+    string public constant trackingName =
         "brokkr.template_strategy.<insert git label here>";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Template strategy";

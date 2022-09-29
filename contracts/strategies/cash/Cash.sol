@@ -8,11 +8,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
-    string public constant name = "brokkr.cash_strategy.cash_strategy_v1.0.1";
+    string public constant trackingName =
+        "brokkr.cash_strategy.cash_strategy_v1.0.2";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Cash strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.1";
+    string public constant version = "1.0.2";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

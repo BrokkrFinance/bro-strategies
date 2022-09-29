@@ -10,7 +10,7 @@ contract PercentageAllocationV2 is
     PortfolioOwnablePausableBaseUpgradeable
 {
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
+    string public constant trackingName =
         "brokkr.percentage_allocation_portfolio.percentage_allocation_portfolio_v2.0.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName =
