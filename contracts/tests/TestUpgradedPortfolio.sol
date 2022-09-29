@@ -10,7 +10,7 @@ contract TestUpgradedPortfolio is
     PortfolioOwnablePausableBaseUpgradeable
 {
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
+    string public constant trackingName =
         "brokkr.test_portfolio.<insert git label here>";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Test portfolio";

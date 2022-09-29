@@ -5,7 +5,7 @@ import "../common/bases/PortfolioOwnableBaseUpgradeable.sol";
 
 contract MockPortfolio is PortfolioOwnableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
+    string public constant trackingName =
         "brokkr.mock_portfolio.<insert git label here>";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Mock portfolio";

@@ -10,7 +10,7 @@ contract TestUpgradedStrategy is
     StrategyOwnablePausableBaseUpgradeable
 {
     // solhint-disable-next-line const-name-snakecase
-    string public constant name =
+    string public constant trackingName =
         "brokkr.test_strategy.<insert git label here>";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Test Strategy";
