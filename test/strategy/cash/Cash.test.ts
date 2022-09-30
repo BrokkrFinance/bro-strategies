@@ -90,6 +90,7 @@ function testCashUpgradeable() {
               this.priceOracle.address,
               this.swapServiceProvider,
               this.swapServiceRouter,
+              [],
             ],
           ],
         },

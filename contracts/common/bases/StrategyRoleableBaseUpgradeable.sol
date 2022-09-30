@@ -9,6 +9,7 @@ abstract contract StrategyRoleableBaseUpgradeable is
     AccessControlEnumerableUpgradeable,
     StrategyBaseUpgradeable
 {
+    error MissingDefaultAdminRole();
     uint256[8] private futureFeaturesGap;
 
     // Manages sensitive parameters of the strategy for example fee swap service.
@@ -29,12 +30,23 @@ abstract contract StrategyRoleableBaseUpgradeable is
     ) internal onlyInitializing {
         __AccessControlEnumerable_init();
         __StrategyBaseUpgradeable_init(strategyArgs);
-        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _grantRole(GOVERNOR_ROLE, _msgSender());
-        _grantRole(STRATEGIST_ROLE, _msgSender());
-        _grantRole(MAINTAINER_ROLE, _msgSender());
-        _grantRole(UPGRADE_ROLE, _msgSender());
-        _grantRole(PAUSE_ROLE, _msgSender());
+
+        RoleToUsers[] memory roleToUsersArray = strategyArgs.roleToUsersArray;
+        uint256 roleToUsersArrayLength = roleToUsersArray.length;
+        bool hasDefaultAdminRole = false;
+        for (uint256 i = 0; i < roleToUsersArrayLength; i++) {
+            uint256 roleToUsersLength = roleToUsersArray[i].user.length;
+            for (uint256 j = 0; j < roleToUsersLength; j++) {
+                if (roleToUsersArray[i].role == DEFAULT_ADMIN_ROLE)
+                    hasDefaultAdminRole = true;
+
+                _grantRole(
+                    roleToUsersArray[i].role,
+                    roleToUsersArray[i].user[j]
+                );
+            }
+        }
+        if (!hasDefaultAdminRole) revert MissingDefaultAdminRole();
     }
 
     function setDepositFee(uint24 fee_, NameValuePair[] calldata params)
