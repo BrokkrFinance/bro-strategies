@@ -15,6 +15,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
+struct RoleToUsers {
+    bytes32 role;
+    address[] user;
+}
+
 struct StrategyArgs {
     IInvestmentToken investmentToken;
     IERC20Upgradeable depositToken;
@@ -31,6 +36,7 @@ struct StrategyArgs {
     IPriceOracle priceOracle;
     uint8 swapServiceProvider;
     address swapServiceRouter;
+    RoleToUsers[] roleToUsersArray;
 }
 
 abstract contract StrategyBaseUpgradeable is

@@ -37,6 +37,7 @@ async function deployRecursive(investable: any): Promise<any> {
         priceOracle.address,
         investable.swapServiceProvider,
         investable.swapServiceRouter,
+        [],
         investable.strategyExtraArgs
       )
     )
