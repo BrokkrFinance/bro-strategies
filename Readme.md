@@ -39,14 +39,13 @@ Each strategy has a version number in semver format: https://semver.org/. This v
 
 The most important thing is to bump the major version number at each breaking changes for example if the current verstion was 2.3.1, and there was a breaking change, then the new version should be 3.0.0
 
-
-
 ## Pending tasks
 
 ### High priority
 
 1. <s>create a cash strategy for the wrapper portfolio</s>
 1. <s>add a new price oracle supporting USDT</s>
+1. reinvest (all USDC that is the contract balance - unclaimed fee) during reap reward
 1. verify existing contracts using tenderly and analyze the gas cost
 1. mint non-recoverable tokens at the first deposit just like uniswap does
 1. create reusable tests for portfolios and strategies
@@ -78,4 +77,3 @@ The most important thing is to bump the major version number at each breaking ch
 1. add comments to unified test scripts
 1. improve unified test performance
 1. write our own version of safeApprove: https://github.com/OpenZeppelin/openzeppelin-contracts/issues/2219
-

@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { providers, Contract } from "ethers"
+import { Contract, providers } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import erc20abi from "./abi/erc20.json"
 type TransactionResponse = providers.TransactionResponse
@@ -82,6 +82,7 @@ export async function deployUpgradeableStrategy(
   priceOracle: string,
   swapServiceProvider: number,
   swapServiceRouter: string,
+  roleToUsersArray: any[],
   strategyExtraArgs: any[]
 ) {
   const investableToken = await retryUntilSuccess(
@@ -105,6 +106,7 @@ export async function deployUpgradeableStrategy(
         priceOracle,
         swapServiceProvider,
         swapServiceRouter,
+        roleToUsersArray,
       ],
       ...strategyExtraArgs,
     ])

@@ -106,6 +106,7 @@ export function testStrategy(
             this.priceOracle.address,
             this.swapServiceProvider,
             this.swapServiceRouter,
+            [],
           ],
           ...strategyExtraArgs,
         ],
