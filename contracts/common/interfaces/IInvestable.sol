@@ -12,6 +12,7 @@ interface IInvestable is IAum, IFee {
     error ZeroAmountWithdrawn();
     error ZeroInvestmentTokenReceiver();
     error ZeroDepositTokenReceiver();
+    error TooSmallDepositTokenAmountOut();
 
     event Deposit(
         address indexed initiator,
@@ -25,13 +26,15 @@ interface IInvestable is IAum, IFee {
     );
 
     function deposit(
-        uint256 amount,
+        uint256 depositTokenAmountIn,
+        uint256 minimumDepositTokenAmountOut,
         address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) external;
 
     function withdraw(
-        uint256 amount,
+        uint256 investmentTokenAmountIn,
+        uint256 minimumDepositTokenAmountOut,
         address depositTokenReceiver,
         NameValuePair[] calldata params
     ) external;

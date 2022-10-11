@@ -51,10 +51,15 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     }
 
     function rebalance(
+        uint256 minimumDepositTokenAmountOut,
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams
     ) public virtual override onlyOwner {
-        super._rebalance(depositParams, withdrawParams);
+        super._rebalance(
+            minimumDepositTokenAmountOut,
+            depositParams,
+            withdrawParams
+        );
     }
 
     function setDepositFee(uint24 fee_, NameValuePair[] calldata params)

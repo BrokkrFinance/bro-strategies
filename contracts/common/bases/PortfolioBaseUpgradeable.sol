@@ -208,11 +208,12 @@ abstract contract PortfolioBaseUpgradeable is
     }
 
     function deposit(
-        uint256 amount,
+        uint256 depositTokenAmountIn,
+        uint256 minimumDepositTokenAmountOut,
         address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override nonReentrant {
-        if (amount == 0) revert ZeroAmountDeposited();
+        if (depositTokenAmountIn == 0) revert ZeroAmountDeposited();
         if (investmentTokenReceiver == address(0))
             revert ZeroInvestmentTokenReceiver();
 
@@ -232,18 +233,29 @@ abstract contract PortfolioBaseUpgradeable is
                 (equityValuationBeforeInvestment * investmentTokenBalance) /
                 investmentTokenSupply;
         }
-        checkTotalInvestmentLimit(amount, equityValuationBeforeInvestment);
-        checkInvestmentLimitPerAddress(amount, userEquity);
+        checkTotalInvestmentLimit(
+            depositTokenAmountIn,
+            equityValuationBeforeInvestment
+        );
+        checkInvestmentLimitPerAddress(depositTokenAmountIn, userEquity);
 
         // transfering deposit tokens from the user
-        depositToken.safeTransferFrom(_msgSender(), address(this), amount);
+        depositToken.safeTransferFrom(
+            _msgSender(),
+            address(this),
+            depositTokenAmountIn
+        );
 
         // 1. emitting event for portfolios at the higher level first
         // 2. emitting the deposit amount versus the actual invested amount
-        emit Deposit(_msgSender(), investmentTokenReceiver, amount);
+        emit Deposit(
+            _msgSender(),
+            investmentTokenReceiver,
+            depositTokenAmountIn
+        );
 
         for (uint256 i = 0; i < investableDescs.length; i++) {
-            uint256 embeddedAmount = (amount *
+            uint256 embeddedAmount = (depositTokenAmountIn *
                 investableDescs[i].allocationPercentage) /
                 Math.SHORT_FIXED_DECIMAL_FACTOR /
                 100;
@@ -254,6 +266,7 @@ abstract contract PortfolioBaseUpgradeable is
             );
             investableDescs[i].investable.deposit(
                 embeddedAmount,
+                0,
                 address(this),
                 params
             );
@@ -267,6 +280,8 @@ abstract contract PortfolioBaseUpgradeable is
         uint256 actualInvested = equityValuationAfterInvestment -
             equityValuationBeforeInvestment;
         if (actualInvested == 0) revert ZeroAmountInvested();
+        if (actualInvested < minimumDepositTokenAmountOut)
+            revert TooSmallDepositTokenAmountOut();
 
         // minting should be based on the actual amount invested versus the deposited amount
         // to take defi fees and losses into consideration
@@ -281,22 +296,32 @@ abstract contract PortfolioBaseUpgradeable is
     }
 
     function withdraw(
-        uint256 amount,
+        uint256 investmentTokenAmountIn,
+        uint256 minimumDepositTokenAmountOut,
         address depositTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override nonReentrant {
-        if (amount == 0) revert ZeroAmountWithdrawn();
+        if (investmentTokenAmountIn == 0) revert ZeroAmountWithdrawn();
         if (depositTokenReceiver == address(0))
             revert ZeroDepositTokenReceiver();
 
+        // transferring investment tokens from the caller
+        uint256 withdrawnDepositTokenAmount = depositToken.balanceOf(
+            address(this)
+        );
+        emit Withdrawal(
+            _msgSender(),
+            depositTokenReceiver,
+            investmentTokenAmountIn
+        );
+
+        // withdrawing from underlying investables
         uint256 investmentTokenSupply = getInvestmentTokenSupply();
-        uint256 withdrewAmount = depositToken.balanceOf(address(this));
-        emit Withdrawal(_msgSender(), depositTokenReceiver, amount);
         for (uint256 i = 0; i < investableDescs.length; i++) {
             IInvestable embeddedInvestable = investableDescs[i].investable;
             uint256 embeddedTokenAmountToBurn = (embeddedInvestable
-                .getInvestmentTokenBalanceOf(address(this)) * amount) /
-                investmentTokenSupply;
+                .getInvestmentTokenBalanceOf(address(this)) *
+                investmentTokenAmountIn) / investmentTokenSupply;
             if (embeddedTokenAmountToBurn == 0) continue;
             embeddedInvestable.getInvestmentToken().approve(
                 address(embeddedInvestable),
@@ -304,33 +329,47 @@ abstract contract PortfolioBaseUpgradeable is
             );
             embeddedInvestable.withdraw(
                 embeddedTokenAmountToBurn,
+                0,
                 address(this),
                 params
             );
         }
-        withdrewAmount = depositToken.balanceOf(address(this)) - withdrewAmount;
-        investmentToken.burnFrom(_msgSender(), amount);
-        depositToken.safeTransfer(depositTokenReceiver, withdrewAmount);
+
+        // checking whether enough deposit token was withdrawn
+        withdrawnDepositTokenAmount =
+            depositToken.balanceOf(address(this)) -
+            withdrawnDepositTokenAmount;
+        if (withdrawnDepositTokenAmount < minimumDepositTokenAmountOut)
+            revert TooSmallDepositTokenAmountOut();
+
+        // burning investment tokens
+        investmentToken.burnFrom(_msgSender(), investmentTokenAmountIn);
+
+        //transferring deposit tokens to the depositTokenReceiver
+        depositToken.safeTransfer(
+            depositTokenReceiver,
+            withdrawnDepositTokenAmount
+        );
     }
 
     // workaround for 'stack too deep' error
     struct RebalanceLocalVars {
-        uint256 totalEquity;
+        uint256 totalEquityBeforeRebalance;
+        uint256 totalEquityAfterRebalance;
         uint256 withdrawnAmount;
         uint256 remainingAmount;
     }
 
-    function _rebalance(
-        NameValuePair[][] calldata depositParams,
-        NameValuePair[][] calldata withdrawParams
-    ) internal virtual nonReentrant {
-        RebalanceLocalVars memory rebalanceLocalVars;
-
-        // calculating current equity for investables
+    function getTotalEquity()
+        internal
+        view
+        returns (
+            uint256[] memory currentInvestableEquities,
+            uint256 totalEquity
+        )
+    {
         uint256 investableDescsLength = investableDescs.length;
-        uint256[] memory currentInvestableEquities = new uint256[](
-            investableDescs.length
-        );
+        currentInvestableEquities = new uint256[](investableDescs.length);
         for (uint256 i = 0; i < investableDescsLength; i++) {
             IInvestable embeddedInvestable = investableDescs[i].investable;
             if (embeddedInvestable.getInvestmentTokenSupply() != 0) {
@@ -340,10 +379,27 @@ abstract contract PortfolioBaseUpgradeable is
                             address(this)
                         )) /
                     embeddedInvestable.getInvestmentTokenSupply();
-                rebalanceLocalVars.totalEquity += currentInvestableEquities[i];
+                totalEquity += currentInvestableEquities[i];
             }
         }
-        if (rebalanceLocalVars.totalEquity == 0) {
+    }
+
+    function _rebalance(
+        uint256 minimumDepositTokenAmountOut,
+        NameValuePair[][] calldata depositParams,
+        NameValuePair[][] calldata withdrawParams
+    ) internal virtual nonReentrant {
+        RebalanceLocalVars memory rebalanceLocalVars;
+
+        // calculating current equity for investables
+        uint256 investableDescsLength = investableDescs.length;
+        uint256[] memory currentInvestableEquities;
+        (
+            currentInvestableEquities,
+            rebalanceLocalVars.totalEquityBeforeRebalance
+        ) = getTotalEquity();
+
+        if (rebalanceLocalVars.totalEquityBeforeRebalance == 0) {
             return;
         }
         // calculating target equities for investables
@@ -352,7 +408,7 @@ abstract contract PortfolioBaseUpgradeable is
         );
         for (uint256 i = 0; i < investableDescsLength; i++) {
             targetInvestableEquities[i] =
-                (rebalanceLocalVars.totalEquity *
+                (rebalanceLocalVars.totalEquityBeforeRebalance *
                     investableDescs[i].allocationPercentage) /
                 Math.SHORT_FIXED_DECIMAL_FACTOR /
                 100;
@@ -376,6 +432,7 @@ abstract contract PortfolioBaseUpgradeable is
                 );
                 embeddedInvestable.withdraw(
                     withdrawAmount,
+                    0,
                     address(this),
                     withdrawParams[i]
                 );
@@ -402,6 +459,7 @@ abstract contract PortfolioBaseUpgradeable is
                     );
                     embeddedInvestable.deposit(
                         depositAmount,
+                        0,
                         address(this),
                         depositParams[i]
                     );
@@ -409,6 +467,17 @@ abstract contract PortfolioBaseUpgradeable is
                 rebalanceLocalVars.remainingAmount -= depositAmount;
             }
         }
+
+        (
+            currentInvestableEquities,
+            rebalanceLocalVars.totalEquityAfterRebalance
+        ) = getTotalEquity();
+
+        if (
+            rebalanceLocalVars.totalEquityAfterRebalance <
+            minimumDepositTokenAmountOut
+        ) revert TooSmallDepositTokenAmountOut();
+
         emit Rebalance();
     }
 

@@ -28,18 +28,30 @@ abstract contract PortfolioOwnablePausableBaseUpgradeable is
     }
 
     function deposit(
-        uint256 amount,
+        uint256 depositTokenAmountIn,
+        uint256 minimumDepositTokenAmountOut,
         address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.deposit(amount, investmentTokenReceiver, params);
+        super.deposit(
+            depositTokenAmountIn,
+            minimumDepositTokenAmountOut,
+            investmentTokenReceiver,
+            params
+        );
     }
 
     function withdraw(
-        uint256 amount,
+        uint256 investmentTokenAmountIn,
+        uint256 minimumDepositTokenAmountOut,
         address depositTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.withdraw(amount, depositTokenReceiver, params);
+        super.withdraw(
+            investmentTokenAmountIn,
+            minimumDepositTokenAmountOut,
+            depositTokenReceiver,
+            params
+        );
     }
 }
