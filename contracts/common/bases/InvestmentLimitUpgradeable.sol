@@ -18,8 +18,8 @@ abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
         uint256 totalInvestmentLimit_,
         uint256 investmentLimitPerAddress_
     ) internal onlyInitializing {
-        setTotalInvestmentLimit(totalInvestmentLimit_);
-        setInvestmentLimitPerAddress(investmentLimitPerAddress_);
+        _setTotalInvestmentLimit(totalInvestmentLimit_);
+        _setInvestmentLimitPerAddress(investmentLimitPerAddress_);
     }
 
     function getTotalInvestmentLimit()
@@ -32,10 +32,9 @@ abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
         return totalInvestmentLimit;
     }
 
-    function setTotalInvestmentLimit(uint256 totalInvestmentLimit_)
-        public
+    function _setTotalInvestmentLimit(uint256 totalInvestmentLimit_)
+        internal
         virtual
-        override
     {
         totalInvestmentLimit = totalInvestmentLimit_;
     }
@@ -50,10 +49,9 @@ abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
         return investmentLimitPerAddress;
     }
 
-    function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress_)
-        public
+    function _setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress_)
+        internal
         virtual
-        override
     {
         investmentLimitPerAddress = investmentLimitPerAddress_;
     }

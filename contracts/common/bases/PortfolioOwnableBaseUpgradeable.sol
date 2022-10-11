@@ -24,21 +24,21 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         uint24[] calldata newAllocations,
         NameValuePair[] calldata params
     ) public virtual override onlyOwner {
-        super.addInvestable(investable, newAllocations, params);
+        super._addInvestable(investable, newAllocations, params);
     }
 
     function removeInvestable(
         IInvestable investable,
         uint24[] calldata newAllocations
     ) public virtual override onlyOwner {
-        super.removeInvestable(investable, newAllocations);
+        super._removeInvestable(investable, newAllocations);
     }
 
     function changeInvestable(
         IInvestable investable,
         NameValuePair[] calldata params
     ) public virtual override onlyOwner {
-        super.changeInvestable(investable, params);
+        super._changeInvestable(investable, params);
     }
 
     function setTargetInvestableAllocations(uint24[] calldata newAllocations)
@@ -47,14 +47,14 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setTargetInvestableAllocations(newAllocations);
+        super._setTargetInvestableAllocations(newAllocations);
     }
 
     function rebalance(
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams
     ) public virtual override onlyOwner {
-        super.rebalance(depositParams, withdrawParams);
+        super._rebalance(depositParams, withdrawParams);
     }
 
     function setDepositFee(uint24 fee_, NameValuePair[] calldata params)
@@ -63,7 +63,7 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setDepositFee(fee_, params);
+        super._setDepositFee(fee_, params);
     }
 
     function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
@@ -72,7 +72,7 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setWithdrawalFee(fee_, params);
+        super._setWithdrawalFee(fee_, params);
     }
 
     function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
@@ -81,14 +81,14 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setPerformanceFee(fee_, params);
+        super._setPerformanceFee(fee_, params);
     }
 
     function setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params
     ) public virtual override onlyOwner {
-        super.setFeeReceiver(feeReceiver_, params);
+        super._setFeeReceiver(feeReceiver_, params);
     }
 
     function setInvestmentToken(IInvestmentToken investmentToken)
@@ -97,7 +97,7 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setInvestmentToken(investmentToken);
+        super._setInvestmentToken(investmentToken);
     }
 
     function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
@@ -106,7 +106,7 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setTotalInvestmentLimit(totalInvestmentLimit);
+        super._setTotalInvestmentLimit(totalInvestmentLimit);
     }
 
     function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
@@ -115,6 +115,6 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setInvestmentLimitPerAddress(investmentLimitPerAddress);
+        super._setInvestmentLimitPerAddress(investmentLimitPerAddress);
     }
 }
