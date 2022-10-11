@@ -30,27 +30,6 @@ library InvestableLib {
     }
 
     function calculateMintAmount(
-        TokenDesc[] memory tokenDescs,
-        uint256 investableTokenSupply
-    ) internal pure returns (uint256) {
-        if (investableTokenSupply == 0) {
-            uint256 res = 1;
-            for (uint256 i = 0; i < tokenDescs.length; i++)
-                res *= tokenDescs[i].acquired;
-            return Math.sqrt(res);
-        } else {
-            uint256 res = type(uint256).max;
-            for (uint256 i = 0; i < tokenDescs.length; i++)
-                res = Math.min(
-                    res,
-                    (tokenDescs[i].acquired * investableTokenSupply) /
-                        tokenDescs[i].total
-                );
-            return res;
-        }
-    }
-
-    function calculateMintAmount(
         uint256 equitySoFar,
         uint256 amountInvestedNow,
         uint256 investmentTokenSupplySoFar
