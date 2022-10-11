@@ -27,6 +27,7 @@ contract PercentageAllocation is
         external
         initializer
     {
+        __UUPSUpgradeable_init();
         __PortfolioOwnablePausableBaseUpgradeable_init(portfolioArgs);
     }
 

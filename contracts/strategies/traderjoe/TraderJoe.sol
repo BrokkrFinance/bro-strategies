@@ -35,6 +35,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         ITraderJoePair lpToken,
         IERC20Upgradeable joeToken
     ) external initializer {
+        __UUPSUpgradeable_init();
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
