@@ -10,6 +10,8 @@ interface IInvestable is IAum, IFee {
     error ZeroAmountDeposited();
     error ZeroAmountInvested();
     error ZeroAmountWithdrawn();
+    error ZeroInvestmentTokenReceiver();
+    error ZeroDepositTokenReceiver();
 
     event Deposit(
         address indexed initiator,
