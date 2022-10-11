@@ -111,6 +111,8 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         address feeReceiver_,
         NameValuePair[] calldata params
     ) internal virtual {
+        if (feeReceiver_ == address(0)) revert ZeroFeeReceiver();
+
         feeReceiver = feeReceiver_;
         emit FeeReceiverChange(feeReceiver, params);
     }

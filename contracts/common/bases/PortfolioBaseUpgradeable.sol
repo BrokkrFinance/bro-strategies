@@ -213,6 +213,8 @@ abstract contract PortfolioBaseUpgradeable is
         NameValuePair[] calldata params
     ) public virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountDeposited();
+        if (investmentTokenReceiver == address(0))
+            revert ZeroInvestmentTokenReceiver();
 
         // check investment limits
         // the underlying defi protocols might take fees, but for limit check we can safely ignore it
@@ -284,6 +286,9 @@ abstract contract PortfolioBaseUpgradeable is
         NameValuePair[] calldata params
     ) public virtual override nonReentrant {
         if (amount == 0) revert ZeroAmountWithdrawn();
+        if (depositTokenReceiver == address(0))
+            revert ZeroDepositTokenReceiver();
+
         uint256 investmentTokenSupply = getInvestmentTokenSupply();
         uint256 withdrewAmount = depositToken.balanceOf(address(this));
         emit Withdrawal(_msgSender(), depositTokenReceiver, amount);

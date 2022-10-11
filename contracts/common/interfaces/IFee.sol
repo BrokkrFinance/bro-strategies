@@ -5,6 +5,7 @@ import "../Common.sol";
 
 interface IFee {
     error InvalidFeeError();
+    error ZeroFeeReceiver();
 
     event DepositFeeChange(uint256 fee, NameValuePair[] params);
     event WithdrawalFeeChange(uint256 fee, NameValuePair[] params);
