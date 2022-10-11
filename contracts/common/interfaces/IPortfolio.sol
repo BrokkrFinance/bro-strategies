@@ -55,6 +55,7 @@ interface IPortfolio is IInvestable {
         returns (InvestableDesc[] memory investableDescs);
 
     function rebalance(
+        uint256 minimumDepositTokenAmountOut,
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams
     ) external;

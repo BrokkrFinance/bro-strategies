@@ -103,11 +103,12 @@ abstract contract StrategyBaseUpgradeable is
         virtual;
 
     function deposit(
-        uint256 amount,
+        uint256 depositTokenAmountIn,
+        uint256 minimumDepositTokenAmountOut,
         address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override nonReentrant {
-        if (amount == 0) revert ZeroAmountDeposited();
+        if (depositTokenAmountIn == 0) revert ZeroAmountDeposited();
         if (investmentTokenReceiver == address(0))
             revert ZeroInvestmentTokenReceiver();
 
@@ -127,24 +128,32 @@ abstract contract StrategyBaseUpgradeable is
                 (equityValuationBeforeInvestment * investmentTokenBalance) /
                 investmentTokenSupply;
         }
-        checkTotalInvestmentLimit(amount, equityValuationBeforeInvestment);
-        checkInvestmentLimitPerAddress(amount, userEquity);
+        checkTotalInvestmentLimit(
+            depositTokenAmountIn,
+            equityValuationBeforeInvestment
+        );
+        checkInvestmentLimitPerAddress(depositTokenAmountIn, userEquity);
 
         // transfering deposit tokens from the user
-        depositToken.safeTransferFrom(_msgSender(), address(this), amount);
+        depositToken.safeTransferFrom(
+            _msgSender(),
+            address(this),
+            depositTokenAmountIn
+        );
 
         // investing into the underlying defi protocol
-        _deposit(amount, params);
+        _deposit(depositTokenAmountIn, params);
 
         // calculating the actual amount invested into the defi protocol
         uint256 equityValuationAfterInvestment = getEquityValuation(
             true,
             false
         );
-
         uint256 actualInvested = equityValuationAfterInvestment -
             equityValuationBeforeInvestment;
         if (actualInvested == 0) revert ZeroAmountInvested();
+        if (actualInvested < minimumDepositTokenAmountOut)
+            revert TooSmallDepositTokenAmountOut();
 
         // minting should be based on the actual amount invested versus the deposited amount
         // to take defi fees and losses into consideration
@@ -158,7 +167,11 @@ abstract contract StrategyBaseUpgradeable is
         );
 
         // emitting the deposit amount versus the actual invested amount
-        emit Deposit(_msgSender(), investmentTokenReceiver, amount);
+        emit Deposit(
+            _msgSender(),
+            investmentTokenReceiver,
+            depositTokenAmountIn
+        );
     }
 
     function _beforeWithdraw(
@@ -180,29 +193,52 @@ abstract contract StrategyBaseUpgradeable is
     }
 
     function withdraw(
-        uint256 amount,
+        uint256 investmentTokenAmountIn,
+        uint256 minimumDepositTokenAmountOut,
         address depositTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override nonReentrant {
-        if (amount == 0) revert ZeroAmountWithdrawn();
+        if (investmentTokenAmountIn == 0) revert ZeroAmountWithdrawn();
         if (depositTokenReceiver == address(0))
             revert ZeroDepositTokenReceiver();
 
-        uint256 depositTokenBalanceBefore = _beforeWithdraw(amount, params);
-        _withdraw(amount, params);
-        uint256 withdrewAmount = _afterWithdraw(amount, params) -
-            depositTokenBalanceBefore;
-        uint256 feeAmount = (withdrewAmount * getWithdrawalFee(params)) /
+        // withdrawing investments from the DeFi protocols
+        uint256 depositTokenBalanceBefore = _beforeWithdraw(
+            investmentTokenAmountIn,
+            params
+        );
+        _withdraw(investmentTokenAmountIn, params);
+        uint256 withdrawnDepositTokenAmount = _afterWithdraw(
+            investmentTokenAmountIn,
+            params
+        ) - depositTokenBalanceBefore;
+        uint256 feeDepositTokenAmount = (withdrawnDepositTokenAmount *
+            getWithdrawalFee(params)) /
             Math.SHORT_FIXED_DECIMAL_FACTOR /
             100;
 
-        investmentToken.burnFrom(_msgSender(), amount);
-        setCurrentAccumulatedFee(getCurrentAccumulatedFee() + feeAmount);
+        // checking whether enough deposit token was withdrawn
+        if (
+            (withdrawnDepositTokenAmount - feeDepositTokenAmount) <
+            minimumDepositTokenAmountOut
+        ) revert TooSmallDepositTokenAmountOut();
+
+        // burning investment tokens
+        investmentToken.burnFrom(_msgSender(), investmentTokenAmountIn);
+
+        // transferring deposit tokens to the depositTokenReceiver
+        setCurrentAccumulatedFee(
+            getCurrentAccumulatedFee() + feeDepositTokenAmount
+        );
         depositToken.safeTransfer(
             depositTokenReceiver,
-            withdrewAmount - feeAmount
+            withdrawnDepositTokenAmount - feeDepositTokenAmount
         );
-        emit Withdrawal(_msgSender(), depositTokenReceiver, amount);
+        emit Withdrawal(
+            _msgSender(),
+            depositTokenReceiver,
+            investmentTokenAmountIn
+        );
     }
 
     function _reapReward(NameValuePair[] calldata params) internal virtual;
