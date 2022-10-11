@@ -25,7 +25,7 @@ abstract contract StrategyOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setDepositFee(fee_, params);
+        super._setDepositFee(fee_, params);
     }
 
     function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
@@ -34,7 +34,7 @@ abstract contract StrategyOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setWithdrawalFee(fee_, params);
+        super._setWithdrawalFee(fee_, params);
     }
 
     function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
@@ -43,14 +43,14 @@ abstract contract StrategyOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setPerformanceFee(fee_, params);
+        super._setPerformanceFee(fee_, params);
     }
 
     function setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params
     ) public virtual override onlyOwner {
-        super.setFeeReceiver(feeReceiver_, params);
+        super._setFeeReceiver(feeReceiver_, params);
     }
 
     function setInvestmentToken(IInvestmentToken investmentToken)
@@ -59,7 +59,7 @@ abstract contract StrategyOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setInvestmentToken(investmentToken);
+        super._setInvestmentToken(investmentToken);
     }
 
     function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
@@ -68,7 +68,7 @@ abstract contract StrategyOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setTotalInvestmentLimit(totalInvestmentLimit);
+        super._setTotalInvestmentLimit(totalInvestmentLimit);
     }
 
     function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
@@ -77,24 +77,18 @@ abstract contract StrategyOwnableBaseUpgradeable is
         override
         onlyOwner
     {
-        super.setInvestmentLimitPerAddress(investmentLimitPerAddress);
+        super._setInvestmentLimitPerAddress(investmentLimitPerAddress);
     }
 
-    function setPriceOracle(IPriceOracle priceOracle)
-        public
-        virtual
-        override
-        onlyOwner
-    {
-        super.setPriceOracle(priceOracle);
+    function setPriceOracle(IPriceOracle priceOracle) public virtual onlyOwner {
+        super._setPriceOracle(priceOracle);
     }
 
     function setSwapService(SwapServiceProvider provider, address router)
         public
         virtual
-        override
         onlyOwner
     {
-        super.setSwapService(provider, router);
+        super._setSwapService(provider, router);
     }
 }

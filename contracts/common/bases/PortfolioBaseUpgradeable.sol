@@ -108,11 +108,11 @@ abstract contract PortfolioBaseUpgradeable is
         return findInvestableDescInd(investable) != type(uint256).max;
     }
 
-    function addInvestable(
+    function _addInvestable(
         IInvestable investable,
         uint24[] calldata newAllocations,
         NameValuePair[] calldata params
-    ) public virtual override {
+    ) internal virtual {
         if (containsInvestableDesc(investable)) revert InvestableAlreadyAdded();
 
         // workaround for 'Copying of type struct memory[] memory to storage not yet supported'
@@ -130,14 +130,14 @@ abstract contract PortfolioBaseUpgradeable is
             )
         );
 
-        setTargetInvestableAllocations(newAllocations);
+        _setTargetInvestableAllocations(newAllocations);
         emit InvestableAdd(investable, newAllocations, params);
     }
 
-    function removeInvestable(
+    function _removeInvestable(
         IInvestable investable,
         uint24[] calldata newAllocations
-    ) public virtual override {
+    ) internal virtual {
         uint256 investableDescInd = findInvestableDescInd(investable);
         if (investableDescInd == type(uint256).max)
             revert InvestableNotYetAdded();
@@ -150,14 +150,14 @@ abstract contract PortfolioBaseUpgradeable is
             investableDescs.length - 1
         ];
         investableDescs.pop();
-        setTargetInvestableAllocations(newAllocations);
+        _setTargetInvestableAllocations(newAllocations);
         emit InvestableRemove(investable, newAllocations);
     }
 
-    function changeInvestable(
+    function _changeInvestable(
         IInvestable investable,
         NameValuePair[] calldata params
-    ) public virtual override {
+    ) internal virtual {
         uint256 investableDescInd = findInvestableDescInd(investable);
         if (investableDescInd == type(uint256).max)
             revert InvestableNotYetAdded();
@@ -171,10 +171,9 @@ abstract contract PortfolioBaseUpgradeable is
         emit InvestableChange(investable, params);
     }
 
-    function setTargetInvestableAllocations(uint24[] calldata newAllocations)
-        public
+    function _setTargetInvestableAllocations(uint24[] calldata newAllocations)
+        internal
         virtual
-        override
     {
         uint256 totalPercentage;
         uint256 investableDescsLength = investableDescs.length;
@@ -316,10 +315,10 @@ abstract contract PortfolioBaseUpgradeable is
         uint256 remainingAmount;
     }
 
-    function rebalance(
+    function _rebalance(
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams
-    ) public virtual override nonReentrant {
+    ) internal virtual nonReentrant {
         RebalanceLocalVars memory rebalanceLocalVars;
 
         // calculating current equity for investables
@@ -628,10 +627,9 @@ abstract contract PortfolioBaseUpgradeable is
         return depositToken;
     }
 
-    function setInvestmentToken(IInvestmentToken investmentToken_)
-        public
+    function _setInvestmentToken(IInvestmentToken investmentToken_)
+        internal
         virtual
-        override
     {
         investmentToken = investmentToken_;
     }

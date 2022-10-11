@@ -55,7 +55,7 @@ abstract contract StrategyRoleableBaseUpgradeable is
         override
         onlyRole(GOVERNOR_ROLE)
     {
-        super.setDepositFee(fee_, params);
+        super._setDepositFee(fee_, params);
     }
 
     function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
@@ -64,7 +64,7 @@ abstract contract StrategyRoleableBaseUpgradeable is
         override
         onlyRole(GOVERNOR_ROLE)
     {
-        super.setWithdrawalFee(fee_, params);
+        super._setWithdrawalFee(fee_, params);
     }
 
     function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
@@ -73,14 +73,14 @@ abstract contract StrategyRoleableBaseUpgradeable is
         override
         onlyRole(GOVERNOR_ROLE)
     {
-        super.setPerformanceFee(fee_, params);
+        super._setPerformanceFee(fee_, params);
     }
 
     function setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params
     ) public virtual override onlyRole(GOVERNOR_ROLE) {
-        super.setFeeReceiver(feeReceiver_, params);
+        super._setFeeReceiver(feeReceiver_, params);
     }
 
     function setInvestmentToken(IInvestmentToken investmentToken)
@@ -89,7 +89,7 @@ abstract contract StrategyRoleableBaseUpgradeable is
         override
         onlyRole(GOVERNOR_ROLE)
     {
-        super.setInvestmentToken(investmentToken);
+        super._setInvestmentToken(investmentToken);
     }
 
     function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
@@ -98,7 +98,7 @@ abstract contract StrategyRoleableBaseUpgradeable is
         override
         onlyRole(STRATEGIST_ROLE)
     {
-        super.setTotalInvestmentLimit(totalInvestmentLimit);
+        super._setTotalInvestmentLimit(totalInvestmentLimit);
     }
 
     function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
@@ -107,25 +107,23 @@ abstract contract StrategyRoleableBaseUpgradeable is
         override
         onlyRole(STRATEGIST_ROLE)
     {
-        super.setInvestmentLimitPerAddress(investmentLimitPerAddress);
+        super._setInvestmentLimitPerAddress(investmentLimitPerAddress);
     }
 
     function setPriceOracle(IPriceOracle priceOracle)
         public
         virtual
-        override
         onlyRole(GOVERNOR_ROLE)
     {
-        super.setPriceOracle(priceOracle);
+        super._setPriceOracle(priceOracle);
     }
 
     function setSwapService(SwapServiceProvider provider, address router)
         public
         virtual
-        override
         onlyRole(GOVERNOR_ROLE)
     {
-        super.setSwapService(provider, router);
+        super._setSwapService(provider, router);
     }
 
     function supportsInterface(bytes4 interfaceId)

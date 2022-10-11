@@ -27,10 +27,10 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         address feeReceiver_,
         NameValuePair[] calldata feeReceiverParams_
     ) internal onlyInitializing {
-        setDepositFee(depositFee_, depositFeeParams_);
-        setWithdrawalFee(withdrawalFee_, withdrawFeeParams_);
-        setPerformanceFee(performanceFee_, performanceFeeParams_);
-        setFeeReceiver(feeReceiver_, feeReceiverParams_);
+        _setDepositFee(depositFee_, depositFeeParams_);
+        _setWithdrawalFee(withdrawalFee_, withdrawFeeParams_);
+        _setPerformanceFee(performanceFee_, performanceFeeParams_);
+        _setFeeReceiver(feeReceiver_, feeReceiverParams_);
     }
 
     modifier checkFee(uint24 fee) {
@@ -50,10 +50,9 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         return depositFee;
     }
 
-    function setDepositFee(uint24 fee, NameValuePair[] calldata params)
-        public
+    function _setDepositFee(uint24 fee, NameValuePair[] calldata params)
+        internal
         virtual
-        override
         checkFee(fee)
     {
         depositFee = fee;
@@ -70,10 +69,9 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         return withdrawalFee;
     }
 
-    function setWithdrawalFee(uint24 fee, NameValuePair[] calldata params)
-        public
+    function _setWithdrawalFee(uint24 fee, NameValuePair[] calldata params)
+        internal
         virtual
-        override
         checkFee(fee)
     {
         withdrawalFee = fee;
@@ -90,10 +88,9 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         return performanceFee;
     }
 
-    function setPerformanceFee(uint24 fee, NameValuePair[] calldata params)
-        public
+    function _setPerformanceFee(uint24 fee, NameValuePair[] calldata params)
+        internal
         virtual
-        override
         checkFee(fee)
     {
         performanceFee = fee;
@@ -110,10 +107,10 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         return feeReceiver;
     }
 
-    function setFeeReceiver(
+    function _setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params
-    ) public virtual override {
+    ) internal virtual {
         feeReceiver = feeReceiver_;
         emit FeeReceiverChange(feeReceiver, params);
     }

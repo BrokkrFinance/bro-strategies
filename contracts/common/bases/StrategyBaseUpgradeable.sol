@@ -91,8 +91,8 @@ abstract contract StrategyBaseUpgradeable is
         );
         investmentToken = strategyArgs.investmentToken;
         depositToken = strategyArgs.depositToken;
-        setPriceOracle(strategyArgs.priceOracle);
-        setSwapService(
+        _setPriceOracle(strategyArgs.priceOracle);
+        _setSwapService(
             SwapServiceProvider(strategyArgs.swapServiceProvider),
             strategyArgs.swapServiceRouter
         );
@@ -230,12 +230,12 @@ abstract contract StrategyBaseUpgradeable is
         override
     {}
 
-    function setPriceOracle(IPriceOracle priceOracle_) public virtual {
+    function _setPriceOracle(IPriceOracle priceOracle_) internal virtual {
         priceOracle = priceOracle_;
     }
 
-    function setSwapService(SwapServiceProvider provider, address router)
-        public
+    function _setSwapService(SwapServiceProvider provider, address router)
+        internal
         virtual
     {
         swapService = SwapService(provider, router);
@@ -350,10 +350,9 @@ abstract contract StrategyBaseUpgradeable is
         return investmentToken;
     }
 
-    function setInvestmentToken(IInvestmentToken investmentToken_)
-        public
+    function _setInvestmentToken(IInvestmentToken investmentToken_)
+        internal
         virtual
-        override
     {
         investmentToken = investmentToken_;
     }
