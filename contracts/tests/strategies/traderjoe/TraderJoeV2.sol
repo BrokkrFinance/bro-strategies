@@ -215,8 +215,8 @@ contract TraderJoeV2 is
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function getAssetValuations(bool, bool)
-        public
+    function _getAssetValuations(bool, bool)
+        internal
         view
         virtual
         override
@@ -233,8 +233,8 @@ contract TraderJoeV2 is
         );
     }
 
-    function getLiabilityValuations(bool, bool)
-        public
+    function _getLiabilityValuations(bool, bool)
+        internal
         view
         virtual
         override

@@ -94,11 +94,11 @@ contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function getAssetValuations(
+    function _getAssetValuations(
         bool, /*shouldMaximise*/
         bool /*shouldIncludeAmmPrice*/
     )
-        public
+        internal
         view
         virtual
         override
@@ -112,11 +112,11 @@ contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function getLiabilityValuations(
+    function _getLiabilityValuations(
         bool, /*shouldMaximise*/
         bool /*shouldIncludeAmmPrice*/
     )
-        public
+        internal
         view
         virtual
         override

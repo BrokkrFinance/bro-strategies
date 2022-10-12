@@ -16,12 +16,12 @@ interface IInvestable is IAum, IFee {
 
     event Deposit(
         address indexed initiator,
-        address indexed depositor,
+        address indexed investmentTokenReceiver,
         uint256 amount
     );
     event Withdrawal(
         address indexed initiator,
-        address indexed withdrawer,
+        address indexed depositTokenReceiver,
         uint256 amount
     );
 

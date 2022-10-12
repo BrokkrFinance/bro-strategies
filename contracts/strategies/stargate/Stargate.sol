@@ -205,8 +205,11 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function getAssetValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
-        public
+    function _getAssetValuations(
+        bool shouldMaximise,
+        bool shouldIncludeAmmPrice
+    )
+        internal
         view
         virtual
         override
@@ -234,8 +237,8 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         }
     }
 
-    function getLiabilityValuations(bool, bool)
-        public
+    function _getLiabilityValuations(bool, bool)
+        internal
         view
         virtual
         override
