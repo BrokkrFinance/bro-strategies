@@ -83,11 +83,15 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
+        uint256 pairDepositTokenBalanceBeforeSwap = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
+
+        // swapping depositToken to pairDepositToken
         uint256 swapAmount = amount / 2;
         address[] memory path = new address[](2);
         path[0] = address(depositToken);
         path[1] = address(strategyStorage.pairDepositToken);
-
         uint256 pairDepositTokenDesired = swapExactTokensForTokens(
             swapService,
             swapAmount,
@@ -95,6 +99,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
         uint256 depositTokenDesired = amount - swapAmount;
 
+        // providing liquidity to Trader Joe
         strategyStorage.pairDepositToken.approve(
             address(strategyStorage.router),
             pairDepositTokenDesired
@@ -115,6 +120,21 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             block.timestamp
         );
 
+        // swapping back extra pairDepositToken to depositToken
+        uint256 extraPairDepositTokenAmount = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this)) - pairDepositTokenBalanceBeforeSwap;
+        if (extraPairDepositTokenAmount != 0) {
+            path[0] = address(strategyStorage.pairDepositToken);
+            path[1] = address(depositToken);
+            swapExactTokensForTokens(
+                swapService,
+                extraPairDepositTokenAmount,
+                path
+            );
+        }
+
+        // staking LP tokens on Trader Joe
         strategyStorage.lpToken.approve(
             address(strategyStorage.masterChef),
             lpBalance
@@ -213,8 +233,8 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function getAssetValuations(bool, bool)
-        public
+    function _getAssetValuations(bool, bool)
+        internal
         view
         virtual
         override
@@ -231,8 +251,8 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function getLiabilityValuations(bool, bool)
-        public
+    function _getLiabilityValuations(bool, bool)
+        internal
         view
         virtual
         override

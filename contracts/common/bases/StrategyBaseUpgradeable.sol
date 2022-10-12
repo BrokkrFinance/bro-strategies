@@ -65,7 +65,8 @@ abstract contract StrategyBaseUpgradeable is
     IERC20Upgradeable internal depositToken;
     IPriceOracle public priceOracle;
     SwapService public swapService;
-    uint256[8] private futureFeaturesGap;
+    uint256 public uninvestedDepositTokenAmount;
+    uint256[7] private futureFeaturesGap;
 
     // solhint-disable-next-line
     function __StrategyBaseUpgradeable_init(StrategyArgs calldata strategyArgs)
@@ -142,17 +143,25 @@ abstract contract StrategyBaseUpgradeable is
         );
 
         // investing into the underlying defi protocol
+        uint256 depositTokenAmountBeforeInvestment = depositToken.balanceOf(
+            address(this)
+        );
         _deposit(depositTokenAmountIn, params);
+        uint256 depositTokenAmountChange = depositToken.balanceOf(
+            address(this)
+        ) - depositTokenAmountBeforeInvestment;
+        uninvestedDepositTokenAmount += depositTokenAmountChange;
 
-        // calculating the actual amount invested into the defi protocol
+        // calculating the total equity change including contract balance change
         uint256 equityValuationAfterInvestment = getEquityValuation(
             true,
             false
         );
-        uint256 actualInvested = equityValuationAfterInvestment -
+        uint256 totalEquityChange = equityValuationAfterInvestment -
             equityValuationBeforeInvestment;
-        if (actualInvested == 0) revert ZeroAmountInvested();
-        if (actualInvested < minimumDepositTokenAmountOut)
+
+        if (totalEquityChange == 0) revert ZeroAmountInvested();
+        if (totalEquityChange < minimumDepositTokenAmountOut)
             revert TooSmallDepositTokenAmountOut();
 
         // minting should be based on the actual amount invested versus the deposited amount
@@ -161,7 +170,7 @@ abstract contract StrategyBaseUpgradeable is
             investmentTokenReceiver,
             InvestableLib.calculateMintAmount(
                 equityValuationBeforeInvestment,
-                actualInvested,
+                totalEquityChange,
                 investmentTokenSupply
             )
         );
@@ -208,18 +217,27 @@ abstract contract StrategyBaseUpgradeable is
             params
         );
         _withdraw(investmentTokenAmountIn, params);
-        uint256 withdrawnDepositTokenAmount = _afterWithdraw(
+        uint256 withdrawnTotalDepositTokenAmount = _afterWithdraw(
             investmentTokenAmountIn,
             params
         ) - depositTokenBalanceBefore;
-        uint256 feeDepositTokenAmount = (withdrawnDepositTokenAmount *
+
+        // withdrawing from the uninvested balance
+        uint256 withdrawnUninvestedDepositTokenAmount = (uninvestedDepositTokenAmount *
+                investmentTokenAmountIn) /
+                investmentToken.balanceOf(address(this));
+        withdrawnTotalDepositTokenAmount += withdrawnUninvestedDepositTokenAmount;
+        uninvestedDepositTokenAmount -= withdrawnUninvestedDepositTokenAmount;
+
+        // calculating the withdrawal fee
+        uint256 feeDepositTokenAmount = (withdrawnTotalDepositTokenAmount *
             getWithdrawalFee(params)) /
             Math.SHORT_FIXED_DECIMAL_FACTOR /
             100;
 
         // checking whether enough deposit token was withdrawn
         if (
-            (withdrawnDepositTokenAmount - feeDepositTokenAmount) <
+            (withdrawnTotalDepositTokenAmount - feeDepositTokenAmount) <
             minimumDepositTokenAmountOut
         ) revert TooSmallDepositTokenAmountOut();
 
@@ -232,7 +250,7 @@ abstract contract StrategyBaseUpgradeable is
         );
         depositToken.safeTransfer(
             depositTokenReceiver,
-            withdrawnDepositTokenAmount - feeDepositTokenAmount
+            withdrawnTotalDepositTokenAmount - feeDepositTokenAmount
         );
         emit Withdrawal(
             _msgSender(),
@@ -255,6 +273,8 @@ abstract contract StrategyBaseUpgradeable is
 
         uint256 rewardAmount = depositToken.balanceOf(address(this)) -
             depositTokenBalanceBefore;
+        rewardAmount += uninvestedDepositTokenAmount;
+        uninvestedDepositTokenAmount = 0;
 
         emit RewardProcess(rewardAmount);
 
@@ -297,17 +317,54 @@ abstract contract StrategyBaseUpgradeable is
             super.supportsInterface(interfaceId);
     }
 
+    function _getAssetValuations(
+        bool shouldMaximise,
+        bool shouldIncludeAmmPrice
+    ) internal view virtual returns (Valuation[] memory);
+
     function getAssetValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
         public
         view
         virtual
         override
-        returns (Valuation[] memory);
+        returns (Valuation[] memory)
+    {
+        Valuation[] memory valuationsReturned = _getAssetValuations(
+            shouldMaximise,
+            shouldIncludeAmmPrice
+        );
+
+        // filling up the valuations array
+        // 1. It could be more gas efficient to pass the extra length to _getAssetValuations,
+        //    and let that method to allocate the array. However it would assume more knowledge from
+        //    the strategy writer
+        // 2. In the unlikely case that the strategy holds some depositToken assets apart
+        //    from the uninvested depositToken, then the depositToken might be added
+        //    twice to the array, so integrations should prepare for that.
+        uint256 valuationsLength = valuationsReturned.length + 1;
+        Valuation[] memory valuations = new Valuation[](valuationsLength);
+        for (uint256 i = 0; i < valuationsLength - 1; ++i) {
+            valuations[i] = valuationsReturned[i];
+        }
+        valuations[valuationsLength - 1] = Valuation(
+            InvestableLib.USDC,
+            uninvestedDepositTokenAmount
+        );
+
+        return valuations;
+    }
+
+    function _getLiabilityValuations(
+        bool shouldMaximise,
+        bool shouldIncludeAmmPrice
+    ) internal view virtual returns (Valuation[] memory);
 
     function getLiabilityValuations(
         bool shouldMaximise,
         bool shouldIncludeAmmPrice
-    ) public view virtual override returns (Valuation[] memory);
+    ) public view virtual override returns (Valuation[] memory) {
+        return _getLiabilityValuations(shouldMaximise, shouldIncludeAmmPrice);
+    }
 
     function getEquityValuation(bool shouldMaximise, bool shouldIncludeAmmPrice)
         public
