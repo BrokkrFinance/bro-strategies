@@ -35,7 +35,6 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
 
       // Signers.
       this.signers = await ethers.getSigners()
-      this.owner = this.signers[0]
       this.user0 = this.signers[1]
       this.user1 = this.signers[2]
       this.user2 = this.signers[3]
@@ -53,23 +52,28 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
           .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
       }
 
-      // Portfolio parameters.
-      this.depositFee = 0
-      this.depositFeeParams = []
-      this.withdrawalFee = 0
-      this.withdrawalFeeParams = []
-      this.performanceFee = 0
-      this.performanceFeeParams = []
-      this.feeReceiver = this.owner.address
-      this.feeReceiverParams = []
-      this.totalInvestmentLimit = BigInt(1e20)
-      this.investmentLimitPerAddress = BigInt(1e20)
-
       // Deploy portfolio and all its investables.
       this.portfolio = await deployPortfolio(this)
 
+      // Portfolio owner.
+      const ownerAddr = await this.portfolio.owner()
+      this.owner = await ethers.getSigner(ownerAddr)
+
+      // Portfolio token.
       const investmentTokenAddr = await this.portfolio.getInvestmentToken()
       this.investmentToken = await getTokenContract(investmentTokenAddr)
+
+      // Portfolio parameters.
+      this.depositFee = await this.portfolio.getDepositFee([])
+      this.depositFeeParams = [] // Not implemented yet.
+      this.withdrawalFee = await this.portfolio.getWithdrawalFee([])
+      this.withdrawalFeeParams = [] // Not implemented yet.
+      this.performanceFee = await this.portfolio.getPerformanceFee([])
+      this.performanceFeeParams = [] // Not implemented yet.
+      this.feeReceiver = await this.portfolio.getFeeReceiver([])
+      this.feeReceiverParams = [] // Not implemented yet.
+      this.totalInvestmentLimit = await this.portfolio.getTotalInvestmentLimit()
+      this.investmentLimitPerAddress = await this.portfolio.getInvestmentLimitPerAddress()
 
       // Take snapshot.
       this.snapshot = await takeSnapshot()

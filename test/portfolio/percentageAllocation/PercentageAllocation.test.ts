@@ -18,6 +18,10 @@ testPortfolio("PercentageAllocation Portfolio", deployPortfolio, [
 ])
 
 async function deployPortfolio(context: Mocha.Context) {
+  // Portfolios and strategies owner.
+  const signers = await ethers.getSigners()
+  const owner = signers[0]
+
   // Contract factories.
   const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
   const Cash = await ethers.getContractFactory("Cash")
@@ -52,7 +56,7 @@ async function deployPortfolio(context: Mocha.Context) {
         [],
         0,
         [],
-        context.owner.address,
+        owner.address,
         [],
         BigInt(1e20),
         BigInt(1e20),
@@ -81,7 +85,7 @@ async function deployPortfolio(context: Mocha.Context) {
         [],
         0,
         [],
-        context.owner.address,
+        owner.address,
         [],
         BigInt(1e20),
         BigInt(1e20),
@@ -103,22 +107,7 @@ async function deployPortfolio(context: Mocha.Context) {
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
   context.stargateUsdcPortfolio = await getUUPSUpgradeablePortfolio(
     PercentageAllocationPortfolio,
-    [
-      [
-        investmentToken.address,
-        TokenAddrs.usdc,
-        0,
-        [],
-        0,
-        [],
-        0,
-        [],
-        context.owner.address,
-        [],
-        BigInt(1e20),
-        BigInt(1e20),
-      ],
-    ],
+    [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
     investmentToken,
     [context.cash, context.stargateUsdc],
     [[100000], [0, 100000]]
@@ -140,7 +129,7 @@ async function deployPortfolio(context: Mocha.Context) {
         [],
         0,
         [],
-        context.owner.address,
+        owner.address,
         [],
         BigInt(1e20),
         BigInt(1e20),
@@ -162,22 +151,7 @@ async function deployPortfolio(context: Mocha.Context) {
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
   context.stargateUsdtPortfolio = await getUUPSUpgradeablePortfolio(
     PercentageAllocationPortfolio,
-    [
-      [
-        investmentToken.address,
-        TokenAddrs.usdc,
-        0,
-        [],
-        0,
-        [],
-        0,
-        [],
-        context.owner.address,
-        [],
-        BigInt(1e20),
-        BigInt(1e20),
-      ],
-    ],
+    [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
     investmentToken,
     [context.cash, context.stargateUsdt],
     [[100000], [0, 100000]]
@@ -199,7 +173,7 @@ async function deployPortfolio(context: Mocha.Context) {
         [],
         0,
         [],
-        context.owner.address,
+        owner.address,
         [],
         BigInt(1e20),
         BigInt(1e20),
@@ -220,22 +194,7 @@ async function deployPortfolio(context: Mocha.Context) {
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
   context.traderjoePortfolio = await getUUPSUpgradeablePortfolio(
     PercentageAllocationPortfolio,
-    [
-      [
-        investmentToken.address,
-        TokenAddrs.usdc,
-        0,
-        [],
-        0,
-        [],
-        0,
-        [],
-        context.owner.address,
-        [],
-        BigInt(1e20),
-        BigInt(1e20),
-      ],
-    ],
+    [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
     investmentToken,
     [context.cash, context.traderjoe],
     [[100000], [0, 100000]]
@@ -245,22 +204,7 @@ async function deployPortfolio(context: Mocha.Context) {
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
   const portfolio = await getUUPSUpgradeablePortfolio(
     PercentageAllocationPortfolio,
-    [
-      [
-        investmentToken.address,
-        TokenAddrs.usdc,
-        context.depositFee,
-        context.depositFeeParams,
-        context.withdrawalFee,
-        context.withdrawalFeeParams,
-        context.performanceFee,
-        context.performanceFeeParams,
-        context.feeReceiver,
-        context.feeReceiverParams,
-        context.totalInvestmentLimit,
-        context.investmentLimitPerAddress,
-      ],
-    ],
+    [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
     investmentToken,
     [context.stargateUsdcPortfolio, context.stargateUsdtPortfolio, context.traderjoePortfolio],
     [[100000], [50000, 50000], [30000, 30000, 40000]]
