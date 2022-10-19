@@ -20,12 +20,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.equityValuation))
       )
     })
 
@@ -43,12 +43,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3701.810393", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3701.810393", 6),
-        getErrorRange(ethers.utils.parseUnits("3701.810393", 6))
+        ethers.utils.parseUnits("3701.810393", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("32701.810393", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3701.810393", 6),
-        getErrorRange(ethers.utils.parseUnits("3701.810393", 6))
+        ethers.utils.parseUnits("3701.810393", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3701.810393", 6).add(this.equityValuation))
       )
     })
 
@@ -61,8 +61,8 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(0)
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(this.investmentTokenSupply)
+      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(this.equityValuation)
     })
 
     it("should fail when a single user deposits USDC that he/she doesn't have", async function () {
@@ -73,8 +73,8 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(0)
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(this.investmentTokenSupply)
+      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(this.equityValuation)
     })
 
     it("should fail when a single user deposits exceeding limit per address", async function () {
@@ -87,8 +87,8 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(0)
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(this.investmentTokenSupply)
+      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(this.equityValuation)
     })
 
     it("should fail when a single user deposits exceeding total limit", async function () {
@@ -101,8 +101,8 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(0)
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(this.investmentTokenSupply)
+      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(this.equityValuation)
     })
 
     it("should succeed when a single user deposits USDC that he/she has and another user deposited into investable directly before that", async function () {
@@ -110,6 +110,8 @@ export function testDeposit() {
       const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
       const investableAllocationPercentage = await investables[0].allocationPercentage
+      const investableInvestmentTokenSupply = await investable.getInvestmentTokenSupply()
+      const investableEquityValuation = await investable.getEquityValuation(true, false)
 
       await this.usdc.connect(this.user1).approve(investable.address, ethers.utils.parseUnits("3000", 6))
       await expect(investable.connect(this.user1).deposit(ethers.utils.parseUnits("3000", 6), this.user1.address, []))
@@ -135,35 +137,39 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await investable.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(investableInvestmentTokenSupply).add(investableDepositAmount),
+        getErrorRange(
+          ethers.utils.parseUnits("3000", 6).add(investableInvestmentTokenSupply).add(investableDepositAmount)
+        )
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await investable.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableEquityValuation).add(investableDepositAmount),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableEquityValuation).add(investableDepositAmount))
       )
     })
 
     it("should succeed when a single user deposits USDC that he/she has and another user deposits into investable directly after that", async function () {
+      const investables = await this.portfolio.getInvestables()
+      const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
+      const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
+      const investableAllocationPercentage = await investables[0].allocationPercentage
+      const investableInvestmentTokenSupply = await investable.getInvestmentTokenSupply()
+      const investableEquityValuation = await investable.getEquityValuation(true, false)
+
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
       await expect(
         this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("3000", 6), this.user0.address, [])
       )
         .to.emit(this.portfolio, "Deposit")
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("3000", 6))
-
-      const investables = await this.portfolio.getInvestables()
-      const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
-      const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
-      const investableAllocationPercentage = await investables[0].allocationPercentage
 
       await this.usdc.connect(this.user1).approve(investable.address, ethers.utils.parseUnits("3000", 6))
       await expect(investable.connect(this.user1).deposit(ethers.utils.parseUnits("3000", 6), this.user1.address, []))
@@ -182,20 +188,22 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await investable.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableInvestmentTokenSupply).add(investableDepositAmount),
+        getErrorRange(
+          ethers.utils.parseUnits("3000", 6).add(investableInvestmentTokenSupply).add(investableDepositAmount)
+        )
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.equityValuation))
       )
       expect(await investable.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableEquityValuation).add(investableDepositAmount),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableEquityValuation).add(investableDepositAmount))
       )
     })
 
@@ -212,12 +220,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("30", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("30", 6),
-        getErrorRange(ethers.utils.parseUnits("30", 6))
+        ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("30", 6),
-        getErrorRange(ethers.utils.parseUnits("30", 6))
+        ethers.utils.parseUnits("30", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("30", 6).add(this.equityValuation))
       )
 
       // The second user.
@@ -232,12 +240,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("30", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("60", 6),
-        getErrorRange(ethers.utils.parseUnits("60", 6))
+        ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("60", 6),
-        getErrorRange(ethers.utils.parseUnits("60", 6))
+        ethers.utils.parseUnits("60", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("60", 6).add(this.equityValuation))
       )
 
       // The third user.
@@ -252,12 +260,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("30", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("90", 6),
-        getErrorRange(ethers.utils.parseUnits("90", 6))
+        ethers.utils.parseUnits("90", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("90", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("90", 6),
-        getErrorRange(ethers.utils.parseUnits("90", 6))
+        ethers.utils.parseUnits("90", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("90", 6).add(this.equityValuation))
       )
     })
 
@@ -276,12 +284,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3701.810393", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3701.810393", 6),
-        getErrorRange(ethers.utils.parseUnits("3701.810393", 6))
+        ethers.utils.parseUnits("3701.810393", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3701.810393", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3701.810393", 6),
-        getErrorRange(ethers.utils.parseUnits("3701.810393", 6))
+        ethers.utils.parseUnits("3701.810393", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3701.810393", 6).add(this.equityValuation))
       )
 
       // The second user.
@@ -298,12 +306,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3701.810393", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("7403.620786", 6),
-        getErrorRange(ethers.utils.parseUnits("7403.620786", 6))
+        ethers.utils.parseUnits("7403.620786", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("7403.620786", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("7403.620786", 6),
-        getErrorRange(ethers.utils.parseUnits("7403.620786", 6))
+        ethers.utils.parseUnits("7403.620786", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("7403.620786", 6).add(this.equityValuation))
       )
 
       // The third user.
@@ -320,12 +328,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3701.810393", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("11105.431179", 6),
-        getErrorRange(ethers.utils.parseUnits("11105.431179", 6))
+        ethers.utils.parseUnits("11105.431179", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("11105.431179", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("11105.431179", 6),
-        getErrorRange(ethers.utils.parseUnits("11105.431179", 6))
+        ethers.utils.parseUnits("11105.431179", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("11105.431179", 6).add(this.equityValuation))
       )
     })
 
@@ -339,8 +347,8 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(0)
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(this.investmentTokenSupply)
+      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(this.equityValuation)
 
       // The second user.
       await this.usdc.connect(this.user1).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
@@ -356,12 +364,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.equityValuation))
       )
 
       // The third user.
@@ -374,12 +382,12 @@ export function testDeposit() {
       expect(await this.usdc.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user2.address)).to.equal(0)
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.equityValuation))
       )
     })
 
@@ -398,12 +406,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.equityValuation))
       )
 
       // The second user.
@@ -415,12 +423,12 @@ export function testDeposit() {
       expect(await this.usdc.balanceOf(this.user1.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user1.address)).to.equal(0)
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.equityValuation))
       )
     })
 
@@ -435,8 +443,8 @@ export function testDeposit() {
 
       expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(0)
+      expect(await this.portfolio.getInvestmentTokenSupply()).to.equal(this.investmentTokenSupply)
+      expect(await this.portfolio.getEquityValuation(true, false)).to.equal(this.equityValuation)
 
       // The second user.
       await this.usdc.connect(this.user1).approve(this.portfolio.address, ethers.utils.parseUnits("30", 6))
@@ -450,12 +458,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("30", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("30", 6),
-        getErrorRange(ethers.utils.parseUnits("30", 6))
+        ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("30", 6),
-        getErrorRange(ethers.utils.parseUnits("30", 6))
+        ethers.utils.parseUnits("30", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("30", 6).add(this.equityValuation))
       )
 
       // The third user.
@@ -467,17 +475,19 @@ export function testDeposit() {
       expect(await this.usdc.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user2.address)).to.equal(0)
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("30", 6),
-        getErrorRange(ethers.utils.parseUnits("30", 6))
+        ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("30", 6),
-        getErrorRange(ethers.utils.parseUnits("30", 6))
+        ethers.utils.parseUnits("30", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("30", 6).add(this.equityValuation))
       )
     })
 
     it("should fail when multiple users deposit exceeding total limit", async function () {
-      await this.portfolio.connect(this.owner).setTotalInvestmentLimit(ethers.utils.parseUnits("89", 6))
+      await this.portfolio
+        .connect(this.owner)
+        .setTotalInvestmentLimit(ethers.utils.parseUnits("89", 6).add(this.equityValuation))
 
       // The first user.
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("30", 6))
@@ -491,12 +501,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("30", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("30", 6),
-        getErrorRange(ethers.utils.parseUnits("30", 6))
+        ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("30", 6),
-        getErrorRange(ethers.utils.parseUnits("30", 6))
+        ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("30", 6).add(this.investmentTokenSupply))
       )
 
       // The second user.
@@ -511,12 +521,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("30", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("60", 6),
-        getErrorRange(ethers.utils.parseUnits("60", 6))
+        ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("60", 6),
-        getErrorRange(ethers.utils.parseUnits("60", 6))
+        ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply))
       )
 
       // The third user.
@@ -528,12 +538,12 @@ export function testDeposit() {
       expect(await this.usdc.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("10000", 6))
       expect(await this.investmentToken.balanceOf(this.user2.address)).to.equal(0)
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("60", 6),
-        getErrorRange(ethers.utils.parseUnits("60", 6))
+        ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("60", 6)).add(this.investmentTokenSupply)
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("60", 6),
-        getErrorRange(ethers.utils.parseUnits("60", 6))
+        ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("60", 6).add(this.investmentTokenSupply))
       )
     })
 
@@ -542,6 +552,8 @@ export function testDeposit() {
       const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
       const investableAllocationPercentage = await investables[0].allocationPercentage
+      const investableInvestmentTokenSupply = await investable.getInvestmentTokenSupply()
+      const investableEquityValuation = await investable.getEquityValuation(true, false)
 
       await this.usdc.connect(this.user2).approve(investable.address, ethers.utils.parseUnits("3000", 6))
       await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
@@ -568,20 +580,22 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await investable.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableInvestmentTokenSupply),
+        getErrorRange(
+          ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableInvestmentTokenSupply)
+        )
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.equityValuation))
       )
       expect(await investable.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableEquityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableEquityValuation))
       )
 
       // The second user.
@@ -605,24 +619,33 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("6000", 6),
-        getErrorRange(ethers.utils.parseUnits("6000", 6))
+        ethers.utils.parseUnits("6000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("6000", 6).add(this.investmentTokenSupply))
       )
       expect(await investable.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableInvestmentTokenSupply),
+        getErrorRange(
+          ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableInvestmentTokenSupply)
+        )
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("6000", 6),
-        getErrorRange(ethers.utils.parseUnits("6000", 6))
+        ethers.utils.parseUnits("6000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("6000", 6).add(this.equityValuation))
       )
       expect(await investable.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableEquityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableEquityValuation))
       )
     })
 
     it("should succeed when multiple users deposit USDC that they have and another user deposits into investable directly after that", async function () {
+      const investables = await this.portfolio.getInvestables()
+      const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
+      const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
+      const investableAllocationPercentage = await investables[0].allocationPercentage
+      const investableInvestmentTokenSupply = await investable.getInvestmentTokenSupply()
+      const investableEquityValuation = await investable.getEquityValuation(true, false)
+
       // The first user.
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
       await expect(
@@ -637,12 +660,12 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.investmentTokenSupply))
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
+        ethers.utils.parseUnits("3000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(this.equityValuation))
       )
 
       // The second user.
@@ -652,11 +675,6 @@ export function testDeposit() {
       )
         .to.emit(this.portfolio, "Deposit")
         .withArgs(this.user1.address, this.user1.address, ethers.utils.parseUnits("3000", 6))
-
-      const investables = await this.portfolio.getInvestables()
-      const investable = await ethers.getContractAt(investableAbi, await investables[0].investable)
-      const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
-      const investableAllocationPercentage = await investables[0].allocationPercentage
 
       await this.usdc.connect(this.user2).approve(investable.address, ethers.utils.parseUnits("3000", 6))
       await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
@@ -675,20 +693,22 @@ export function testDeposit() {
         getErrorRange(ethers.utils.parseUnits("3000", 6))
       )
       expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("6000", 6),
-        getErrorRange(ethers.utils.parseUnits("6000", 6))
+        ethers.utils.parseUnits("6000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("6000", 6).add(this.investmentTokenSupply))
       )
       expect(await investable.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableInvestmentTokenSupply),
+        getErrorRange(
+          ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableInvestmentTokenSupply)
+        )
       )
       expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("6000", 6),
-        getErrorRange(ethers.utils.parseUnits("6000", 6))
+        ethers.utils.parseUnits("6000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("6000", 6).add(this.equityValuation))
       )
       expect(await investable.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount),
-        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount))
+        ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableEquityValuation),
+        getErrorRange(ethers.utils.parseUnits("3000", 6).add(investableDepositAmount).add(investableEquityValuation))
       )
     })
   })

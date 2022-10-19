@@ -75,7 +75,7 @@ export function testOwnable() {
     })
 
     it("should succeed when the owner user sets withdrawal fee to 30%", async function () {
-      expect(await this.portfolio.setDepositFee(30000, []))
+      expect(await this.portfolio.connect(this.owner).setDepositFee(30000, []))
         .to.emit(this.portfolio, "DepositFeeChange")
         .withArgs(30000, [])
 
@@ -83,7 +83,7 @@ export function testOwnable() {
     })
 
     it("should succeed when the owner user sets deposit fee to 30%", async function () {
-      expect(await this.portfolio.setWithdrawalFee(30000, []))
+      expect(await this.portfolio.connect(this.owner).setWithdrawalFee(30000, []))
         .to.emit(this.portfolio, "WithdrawalFeeChange")
         .withArgs(30000, [])
 
@@ -91,7 +91,7 @@ export function testOwnable() {
     })
 
     it("should succeed when the owner user sets performance fee to 30%", async function () {
-      expect(await this.portfolio.setPerformanceFee(30000, []))
+      expect(await this.portfolio.connect(this.owner).setPerformanceFee(30000, []))
         .to.emit(this.portfolio, "PerformanceFeeChange")
         .withArgs(30000, [])
 
@@ -99,7 +99,7 @@ export function testOwnable() {
     })
 
     it("should succeed when the owner user sets fee receiver", async function () {
-      expect(await this.portfolio.setFeeReceiver(this.user0.address, []))
+      expect(await this.portfolio.connect(this.owner).setFeeReceiver(this.user0.address, []))
         .to.emit(this.portfolio, "FeeReceiverChange")
         .withArgs(this.user0.address, [])
 
@@ -107,19 +107,19 @@ export function testOwnable() {
     })
 
     it("should succeed when the owner user sets investment token", async function () {
-      expect(await this.portfolio.setInvestmentToken(this.usdc.address)).not.to.be.reverted
+      expect(await this.portfolio.connect(this.owner).setInvestmentToken(this.usdc.address)).not.to.be.reverted
 
       expect(await this.portfolio.getInvestmentToken()).to.equal(this.usdc.address)
     })
 
     it("should succeed when the owner user sets total investment limit", async function () {
-      expect(await this.portfolio.setTotalInvestmentLimit(0)).not.to.be.reverted
+      expect(await this.portfolio.connect(this.owner).setTotalInvestmentLimit(0)).not.to.be.reverted
 
       expect(await this.portfolio.getTotalInvestmentLimit()).to.equal(0)
     })
 
     it("should succeed when the owner user sets investment limit per address", async function () {
-      expect(await this.portfolio.setInvestmentLimitPerAddress(0)).not.to.be.reverted
+      expect(await this.portfolio.connect(this.owner).setInvestmentLimitPerAddress(0)).not.to.be.reverted
 
       expect(await this.portfolio.getInvestmentLimitPerAddress()).to.equal(0)
     })

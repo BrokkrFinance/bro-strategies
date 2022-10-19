@@ -9,10 +9,9 @@ export function testAllocations() {
         allocations.push(0)
       }
 
-      await expect(this.portfolio.setTargetInvestableAllocations(allocations)).to.be.revertedWithCustomError(
-        this.portfolio,
-        "RebalancePercentageNot100"
-      )
+      await expect(
+        this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
+      ).to.be.revertedWithCustomError(this.portfolio, "RebalancePercentageNot100")
     })
 
     it("should fail when the sum of target investable allocations is bigger than 100%", async function () {
@@ -22,10 +21,9 @@ export function testAllocations() {
         allocations.push(0)
       }
 
-      await expect(this.portfolio.setTargetInvestableAllocations(allocations)).to.be.revertedWithCustomError(
-        this.portfolio,
-        "RebalancePercentageNot100"
-      )
+      await expect(
+        this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
+      ).to.be.revertedWithCustomError(this.portfolio, "RebalancePercentageNot100")
     })
 
     it("should fail when the length of target investable allocations is shorter than the length of investables", async function () {
@@ -35,10 +33,9 @@ export function testAllocations() {
         allocations.push(0)
       }
 
-      await expect(this.portfolio.setTargetInvestableAllocations(allocations)).to.be.revertedWithCustomError(
-        this.portfolio,
-        "RebalanceIncorrectAllocationsLength"
-      )
+      await expect(
+        this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
+      ).to.be.revertedWithCustomError(this.portfolio, "RebalanceIncorrectAllocationsLength")
     })
 
     it("should fail when the length of target investable allocations is longer than the length of investables", async function () {
@@ -48,10 +45,9 @@ export function testAllocations() {
         allocations.push(0)
       }
 
-      await expect(this.portfolio.setTargetInvestableAllocations(allocations)).to.be.revertedWithCustomError(
-        this.portfolio,
-        "RebalanceIncorrectAllocationsLength"
-      )
+      await expect(
+        this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
+      ).to.be.revertedWithCustomError(this.portfolio, "RebalanceIncorrectAllocationsLength")
     })
 
     it("should succeed when the sum of target investable allocations equals to 100% and the length of target investable allocations equals to the length of investables", async function () {
@@ -60,7 +56,7 @@ export function testAllocations() {
       for (let i = 1; i < investableLength; i++) {
         allocations.push(0)
       }
-      expect(await this.portfolio.setTargetInvestableAllocations(allocations))
+      expect(await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations))
         .to.emit(this.portfolio, "TargetInvestableAllocationsSet")
         .withArgs(allocations)
 
