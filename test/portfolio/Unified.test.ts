@@ -75,6 +75,10 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
       this.totalInvestmentLimit = await this.portfolio.getTotalInvestmentLimit()
       this.investmentLimitPerAddress = await this.portfolio.getInvestmentLimitPerAddress()
 
+      // Store equity valuation and investment token supply to make tests also work for existing portfolios.
+      this.equityValuation = await this.portfolio.getEquityValuation(true, false)
+      this.investmentTokenSupply = await this.portfolio.getInvestmentTokenSupply()
+
       // Take snapshot.
       this.snapshot = await takeSnapshot()
     })
