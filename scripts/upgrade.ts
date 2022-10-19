@@ -2,9 +2,9 @@ import { execSync } from "child_process"
 import { readFileSync } from "fs"
 import path from "path"
 
-const PATH_CONFIG = "../configs/upgrade"
+const CONFIG_PATH = "../configs/upgrade"
 
-interface UpgradeConfig {
+export interface UpgradeConfig {
   proxy: string
   newImplementation: string
 }
@@ -26,7 +26,7 @@ async function main() {
 
   process.chdir(__dirname)
   const upgradeConfigs: UpgradeConfig[] = JSON.parse(
-    readFileSync(path.join(PATH_CONFIG, config), { encoding: "utf-8" })
+    readFileSync(path.join(CONFIG_PATH, config), { encoding: "utf-8" })
   )
   process.chdir("../")
 
