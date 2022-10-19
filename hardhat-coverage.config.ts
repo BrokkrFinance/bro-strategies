@@ -35,7 +35,7 @@ const config: HardhatUserConfig = {
       forking: {
         url: "https://api.avax.network/ext/bc/C/rpc",
         enabled: true,
-        blockNumber: 18191781,
+        blockNumber: 21250000,
       },
     },
   },
