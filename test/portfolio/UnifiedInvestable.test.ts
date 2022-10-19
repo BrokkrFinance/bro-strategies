@@ -12,10 +12,9 @@ export function testInvestable() {
         allocations.push(0)
       }
 
-      await expect(this.portfolio.addInvestable(investableAddr, allocations, [])).to.be.revertedWithCustomError(
-        this.portfolio,
-        "InvestableAlreadyAdded"
-      )
+      await expect(
+        this.portfolio.connect(this.owner).addInvestable(investableAddr, allocations, [])
+      ).to.be.revertedWithCustomError(this.portfolio, "InvestableAlreadyAdded")
     })
 
     it("should succeed to add when the investable not exists", async function () {
@@ -25,7 +24,7 @@ export function testInvestable() {
         allocations.push(0)
       }
 
-      expect(await this.portfolio.addInvestable(this.usdc.address, allocations, []))
+      expect(await this.portfolio.connect(this.owner).addInvestable(this.usdc.address, allocations, []))
         .to.emit(this.portfolio, "InvestableAdd")
         .withArgs(this.usdc.address, allocations, [])
 
@@ -43,10 +42,9 @@ export function testInvestable() {
         allocations.push(0)
       }
 
-      await expect(this.portfolio.removeInvestable(this.usdc.address, allocations, [])).to.be.revertedWithCustomError(
-        this.portfolio,
-        "InvestableNotYetAdded"
-      )
+      await expect(
+        this.portfolio.connect(this.owner).removeInvestable(this.usdc.address, allocations, [])
+      ).to.be.revertedWithCustomError(this.portfolio, "InvestableNotYetAdded")
     })
 
     it("should fail to remove when the investable has non-zero allocation", async function () {
@@ -59,10 +57,9 @@ export function testInvestable() {
       const investables = await this.portfolio.getInvestables()
       const investableAddr = await investables[0].investable
 
-      await expect(this.portfolio.removeInvestable(investableAddr, allocations, [])).to.be.revertedWithCustomError(
-        this.portfolio,
-        "InvestableHasNonZeroAllocation"
-      )
+      await expect(
+        this.portfolio.connect(this.owner).removeInvestable(investableAddr, allocations, [])
+      ).to.be.revertedWithCustomError(this.portfolio, "InvestableHasNonZeroAllocation")
     })
 
     it("should succeed to remove when the investable exists and has zero allocation", async function () {
@@ -78,7 +75,7 @@ export function testInvestable() {
       }
       allocations.push(100000)
 
-      expect(await this.portfolio.setTargetInvestableAllocations(allocations)).not.to.be.reverted
+      expect(await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)).not.to.be.reverted
 
       const investablesBefore = await this.portfolio.getInvestables()
       const investableAddr = await investablesBefore[0].investable
@@ -86,7 +83,7 @@ export function testInvestable() {
       allocations.pop()
       allocations[allocations.length - 1] = 100000
 
-      expect(await this.portfolio.removeInvestable(investableAddr, allocations, []))
+      expect(await this.portfolio.connect(this.owner).removeInvestable(investableAddr, allocations, []))
         .to.emit(this.portfolio, "InvestableRemove")
         .withArgs(investableAddr, allocations, [])
 
@@ -104,10 +101,9 @@ export function testInvestable() {
         allocations.push(0)
       }
 
-      await expect(this.portfolio.changeInvestable(this.usdc.address, [])).to.be.revertedWithCustomError(
-        this.portfolio,
-        "InvestableNotYetAdded"
-      )
+      await expect(
+        this.portfolio.connect(this.owner).changeInvestable(this.usdc.address, [])
+      ).to.be.revertedWithCustomError(this.portfolio, "InvestableNotYetAdded")
     })
 
     it("should succeed to change when the investable exists", async function () {
@@ -119,7 +115,7 @@ export function testInvestable() {
         allocations.push(await investablesBefore[i].allocationPercentage)
       }
 
-      expect(await this.portfolio.changeInvestable(investableAddr, []))
+      expect(await this.portfolio.connect(this.owner).changeInvestable(investableAddr, []))
         .to.emit(this.portfolio, "InvestableChange")
         .withArgs(investableAddr, [])
 

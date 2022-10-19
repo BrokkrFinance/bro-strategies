@@ -8,7 +8,7 @@ export function testPausable() {
     })
 
     it("should fail when any user deposits and the portfolio is paused", async function () {
-      expect(await this.portfolio.pause()).not.to.be.reverted
+      expect(await this.portfolio.connect(this.owner).pause()).not.to.be.reverted
 
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
       await expect(
@@ -22,7 +22,7 @@ export function testPausable() {
       await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
       await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("3000", 6), this.user0.address, [])
 
-      expect(await this.portfolio.pause()).not.to.be.reverted
+      expect(await this.portfolio.connect(this.owner).pause()).not.to.be.reverted
 
       await this.investmentToken.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
       await expect(

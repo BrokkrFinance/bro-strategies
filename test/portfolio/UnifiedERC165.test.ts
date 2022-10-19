@@ -2,13 +2,6 @@ import { expect } from "chai"
 
 export function testERC165() {
   describe("ERC165", async function () {
-    it("should succeed to support all interfaces that portfolio implements", async function () {
-      expect(await this.portfolio.supportsInterface("0x49147370")).to.equal(true) // IAum
-      expect(await this.portfolio.supportsInterface("0x52f3b8ca")).to.equal(true) // IFee
-      expect(await this.portfolio.supportsInterface("0x60145abe")).to.equal(true) // IInvestable
-      expect(await this.portfolio.supportsInterface("0x7461375e")).to.equal(true) // IPortfolio
-    })
-
     it("should fail to support any interface that portfolio doesn't implement", async function () {
       expect(await this.portfolio.supportsInterface("0xb7ac895f")).to.equal(false) // IReward
       expect(await this.portfolio.supportsInterface("0x00000000")).to.equal(false) // IStrategy
@@ -16,5 +9,7 @@ export function testERC165() {
       expect(await this.portfolio.supportsInterface("0xd9b67a26")).to.equal(false) // IERC 1155
       expect(await this.portfolio.supportsInterface("0x36372b07")).to.equal(false) // IERC 20
     })
+
+    // NOTE: Don't check success case since existing portfolio might implement interfaces of old version.
   })
 }
