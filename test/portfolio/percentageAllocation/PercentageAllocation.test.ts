@@ -12,13 +12,13 @@ import { SwapServices } from "../../shared/swaps"
 import { getErrorRange } from "../../shared/utils"
 import { testPortfolio } from "../Unified.test"
 
-testPortfolio("PercentageAllocation Portfolio", deployPortfolio, [
+testPortfolio("PercentageAllocation Portfolio", deployPercentageAllocationPortfolio, [
   testPercentageAllocationPortfolioAum,
   testPercentageAllocationPortfolioERC165,
   testPercentageAllocationPortfolioUpgradeable,
 ])
 
-async function deployPortfolio(context: Mocha.Context) {
+async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
   // Portfolios and strategies owner.
   const signers = await ethers.getSigners()
   const owner = signers[0]
