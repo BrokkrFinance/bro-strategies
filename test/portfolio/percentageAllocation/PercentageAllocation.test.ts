@@ -2,12 +2,9 @@ import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import investableAbi from "../../shared/abi/investable.json"
 import { StargateAddrs, TokenAddrs, TraderJoeAddrs } from "../../shared/addresses"
-import {
-  getUUPSUpgradeableContract,
-  getUUPSUpgradeablePortfolio,
-  getUUPSUpgradeableStrategy,
-} from "../../shared/contracts"
+import { getUUPSUpgradeablePortfolio, getUUPSUpgradeableStrategy } from "../../shared/contracts"
 import { Oracles } from "../../shared/oracles"
+import { PortfolioArgs, StrategyArgs } from "../../shared/parameters"
 import { SwapServices } from "../../shared/swaps"
 import { getErrorRange } from "../../shared/utils"
 import { testPortfolio } from "../Unified.test"
@@ -23,93 +20,48 @@ async function deployPercentageAllocationPortfolio() {
   const signers = await ethers.getSigners()
   const owner = signers[0]
 
-  // Contract factories.
-  const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
-  const Cash = await ethers.getContractFactory("Cash")
-  const Stargate = await ethers.getContractFactory("Stargate")
-  const TraderJoe = await ethers.getContractFactory("TraderJoe")
-  const PercentageAllocationPortfolio = await ethers.getContractFactory("PercentageAllocation")
+  // Strategy arguments.
+  const strategyArgs: StrategyArgs = {
+    depositFee: { amount: 0, params: [] },
+    withdrawalFee: { amount: 0, params: [] },
+    performanceFee: { amount: 0, params: [] },
+    feeReceiver: { address: owner.address, params: [] },
+    investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
+    oracle: Oracles.aave,
+    swapService: SwapServices.traderjoe,
+    roleToUsers: [],
+  }
 
-  // Price oracles.
-  const GmxOracle = await ethers.getContractFactory(Oracles.gmx.name)
-  const gmxOracle = await upgrades.deployProxy(GmxOracle, [Oracles.gmx.address, TokenAddrs.usdc], {
-    kind: "uups",
-  })
-  await gmxOracle.deployed()
-
-  const AaveOracle = await ethers.getContractFactory(Oracles.aave.name)
-  const aaveOracle = await upgrades.deployProxy(AaveOracle, [Oracles.aave.address, TokenAddrs.usdc], {
-    kind: "uups",
-  })
-  await aaveOracle.deployed()
+  // Portfolio arguments.
+  const portfolioArgs: PortfolioArgs = {
+    depositFee: { amount: 0, params: [] },
+    withdrawalFee: { amount: 0, params: [] },
+    performanceFee: { amount: 0, params: [] },
+    feeReceiver: { address: owner.address, params: [] },
+    investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
+  }
 
   // Cash strategy.
-  let investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  const cash = await getUUPSUpgradeableStrategy(
-    Cash,
-    [
-      [
-        investmentToken.address,
-        TokenAddrs.usdc,
-        0,
-        [],
-        0,
-        [],
-        0,
-        [],
-        owner.address,
-        [],
-        BigInt(1e20),
-        BigInt(1e20),
-        gmxOracle.address,
-        SwapServices.traderjoe.provider,
-        SwapServices.traderjoe.router,
-        [],
-      ],
-    ],
-    investmentToken
-  )
+  const cash = await getUUPSUpgradeableStrategy("Cash", strategyArgs, { extraArgs: [] })
 
   //////////////// Stargate USDC wrapper portfolio.
 
   // Stargate USDC strategy
-  investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  const stargateUsdc = await getUUPSUpgradeableStrategy(
-    Stargate,
-    [
-      [
-        investmentToken.address,
-        TokenAddrs.usdc,
-        0,
-        [],
-        0,
-        [],
-        0,
-        [],
-        owner.address,
-        [],
-        BigInt(1e20),
-        BigInt(1e20),
-        gmxOracle.address,
-        SwapServices.traderjoe.provider,
-        SwapServices.traderjoe.router,
-        [],
-      ],
+  const stargateUsdc = await getUUPSUpgradeableStrategy("Stargate", strategyArgs, {
+    extraArgs: [
       StargateAddrs.router,
       StargateAddrs.usdcPool,
       StargateAddrs.lpStaking,
       StargateAddrs.usdcLpToken,
       StargateAddrs.stgToken,
     ],
-    investmentToken
-  )
+  })
 
   // Stargate USDC wrapper portfolio
-  investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
   const stargateUsdcPortfolio = await getUUPSUpgradeablePortfolio(
-    PercentageAllocationPortfolio,
-    [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
-    investmentToken,
+    "PercentageAllocation",
+    portfolioArgs,
+    { extraArgs: [] },
     [cash, stargateUsdc],
     [[100000], [0, 100000]]
   )
@@ -117,43 +69,21 @@ async function deployPercentageAllocationPortfolio() {
   //////////////// Stargate USDT wrapper portfolio.
 
   // Stargate USDT strategy
-  investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  const stargateUsdt = await getUUPSUpgradeableStrategy(
-    Stargate,
-    [
-      [
-        investmentToken.address,
-        TokenAddrs.usdc,
-        0,
-        [],
-        0,
-        [],
-        0,
-        [],
-        owner.address,
-        [],
-        BigInt(1e20),
-        BigInt(1e20),
-        aaveOracle.address,
-        SwapServices.traderjoe.provider,
-        SwapServices.traderjoe.router,
-        [],
-      ],
+  const stargateUsdt = await getUUPSUpgradeableStrategy("Stargate", strategyArgs, {
+    extraArgs: [
       StargateAddrs.router,
       StargateAddrs.usdtPool,
       StargateAddrs.lpStaking,
       StargateAddrs.usdtLpToken,
       StargateAddrs.stgToken,
     ],
-    investmentToken
-  )
+  })
 
   // Stargate USDT wrapper portfolio
-  investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
   const stargateUsdtPortfolio = await getUUPSUpgradeablePortfolio(
-    PercentageAllocationPortfolio,
-    [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
-    investmentToken,
+    "PercentageAllocation",
+    portfolioArgs,
+    { extraArgs: [] },
     [cash, stargateUsdt],
     [[100000], [0, 100000]]
   )
@@ -161,52 +91,24 @@ async function deployPercentageAllocationPortfolio() {
   //////////////// TraderJoe USDC-USDC.e wrapper portfolio.
 
   // TraderJoe USDC-USDC.e strategy
-  investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  const traderjoe = await getUUPSUpgradeableStrategy(
-    TraderJoe,
-    [
-      [
-        investmentToken.address,
-        TokenAddrs.usdc,
-        0,
-        [],
-        0,
-        [],
-        0,
-        [],
-        owner.address,
-        [],
-        BigInt(1e20),
-        BigInt(1e20),
-        aaveOracle.address,
-        SwapServices.traderjoe.provider,
-        SwapServices.traderjoe.router,
-        [],
-      ],
-      TraderJoeAddrs.router,
-      TraderJoeAddrs.masterChef,
-      TraderJoeAddrs.lpToken,
-      TraderJoeAddrs.joeToken,
-    ],
-    investmentToken
-  )
+  const traderjoe = await getUUPSUpgradeableStrategy("TraderJoe", strategyArgs, {
+    extraArgs: [TraderJoeAddrs.router, TraderJoeAddrs.masterChef, TraderJoeAddrs.lpToken, TraderJoeAddrs.joeToken],
+  })
 
   // TraderJoe USDC-USDC.e wrapper portfolio
-  investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
   const traderjoePortfolio = await getUUPSUpgradeablePortfolio(
-    PercentageAllocationPortfolio,
-    [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
-    investmentToken,
+    "PercentageAllocation",
+    portfolioArgs,
+    { extraArgs: [] },
     [cash, traderjoe],
     [[100000], [0, 100000]]
   )
 
   // Top level portfolio.
-  investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
   const portfolio = await getUUPSUpgradeablePortfolio(
-    PercentageAllocationPortfolio,
-    [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
-    investmentToken,
+    "PercentageAllocation",
+    portfolioArgs,
+    { extraArgs: [] },
     [stargateUsdcPortfolio, stargateUsdtPortfolio, traderjoePortfolio],
     [[100000], [50000, 50000], [30000, 30000, 40000]]
   )
