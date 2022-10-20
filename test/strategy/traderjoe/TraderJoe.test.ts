@@ -2,17 +2,43 @@ import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import joePairAbi from "../../shared/abi/joePair.json"
 import { TraderJoeAddrs } from "../../shared/addresses"
+import { getUUPSUpgradeableStrategy } from "../../shared/contracts"
 import { Oracles } from "../../shared/oracles"
+import { SwapServices } from "../../shared/swaps"
 import { airdropToken, getErrorRange } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
-testStrategy(
-  "TraderJoe USDC-USDC.e Strategy",
-  "TraderJoe",
-  [TraderJoeAddrs.router, TraderJoeAddrs.masterChef, TraderJoeAddrs.lpToken, TraderJoeAddrs.joeToken],
-  Oracles.gmx,
-  [testTraderJoeAum, testTraderJoeInitialize, testTraderJoeUpgradeable]
-)
+testStrategy("TraderJoe USDC-USDC.e Strategy", deployTraderJoeStrategy, [
+  testTraderJoeAum,
+  testTraderJoeInitialize,
+  testTraderJoeUpgradeable,
+])
+
+async function deployTraderJoeStrategy() {
+  // Strategy owner.
+  const signers = await ethers.getSigners()
+  const owner = signers[0]
+
+  // Deploy strategy.
+  const strategy = await getUUPSUpgradeableStrategy(
+    "TraderJoe",
+    {
+      depositFee: { amount: 0, params: [] },
+      withdrawalFee: { amount: 0, params: [] },
+      performanceFee: { amount: 0, params: [] },
+      feeReceiver: { address: owner.address, params: [] },
+      investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
+      oracle: Oracles.aave,
+      swapService: SwapServices.traderjoe,
+      roleToUsers: [],
+    },
+    {
+      extraArgs: [TraderJoeAddrs.router, TraderJoeAddrs.masterChef, TraderJoeAddrs.lpToken, TraderJoeAddrs.joeToken],
+    }
+  )
+
+  return strategy
+}
 
 function testTraderJoeAum() {
   describe("AUM - TraderJoe Strategy Specific", async function () {
@@ -94,9 +120,11 @@ function testTraderJoeAum() {
 function testTraderJoeInitialize() {
   describe("Initialize - TraderJoe USDC Strategy Specific", async function () {
     it("should fail when passed wrong LP token address", async function () {
+      const Strategy = await ethers.getContractFactory("TraderJoe")
+
       await expect(
         upgrades.deployProxy(
-          this.Strategy,
+          Strategy,
           [
             [
               this.investmentToken.address,
@@ -111,7 +139,7 @@ function testTraderJoeInitialize() {
               this.feeReceiverParams,
               this.totalInvestmentLimit,
               this.investmentLimitPerAddress,
-              this.priceOracle.address,
+              this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
               [],
@@ -154,7 +182,7 @@ function testTraderJoeUpgradeable() {
               this.feeReceiverParams,
               this.totalInvestmentLimit,
               this.investmentLimitPerAddress,
-              this.priceOracle.address,
+              this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
               [],
