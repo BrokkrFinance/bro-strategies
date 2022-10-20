@@ -13,7 +13,7 @@ const CONFIG_FILE = "Calm.json"
 
 testPortfolio("Calm Portfolio", upgradeCalmPortfolio, [testCalmPortfolioERC165])
 
-async function upgradeCalmPortfolio(context: Mocha.Context) {
+async function upgradeCalmPortfolio() {
   const portfolio = await ethers.getContractAt("PercentageAllocation", "0x2eAf73F8E6BCf606f56E5cf201756C1f0565C068")
   const multisig = await ethers.getImpersonatedSigner("0xE8855828fEC29dc6860A4362BCb386CCf6C0c601")
 
