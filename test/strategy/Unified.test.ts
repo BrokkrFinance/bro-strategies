@@ -1,9 +1,7 @@
 import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
-import { ethers, network, upgrades } from "hardhat"
+import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../shared/addresses"
 import { getTokenContract } from "../shared/contracts"
-import { Oracle } from "../shared/oracles"
-import { SwapServices } from "../shared/swaps"
 import { testDeposit } from "./UnifiedDeposit.test"
 import { testERC165 } from "./UnifiedERC165.test"
 import { testFee } from "./UnifiedFee.test"
@@ -13,13 +11,7 @@ import { testReapReward } from "./UnifiedReapReward.test"
 import { testUpgradeable } from "./UnifiedUpgradeable.test"
 import { testWithdraw } from "./UnifiedWithdraw.test"
 
-export function testStrategy(
-  description: string,
-  strategyName: string,
-  strategyExtraArgs: any[],
-  oracle: Oracle,
-  strategySpecificTests: (() => any)[]
-) {
+export function testStrategy(description: string, deployStrategy: Function, strategySpecificTests: (() => any)[]) {
   describe(description, function () {
     before(async function () {
       await network.provider.request({
@@ -37,9 +29,11 @@ export function testStrategy(
         ],
       })
 
+      // Get ERC20 tokens.
+      this.usdc = await getTokenContract(TokenAddrs.usdc)
+
       // Signers.
       this.signers = await ethers.getSigners()
-      this.owner = this.signers[0]
       this.user0 = this.signers[1]
       this.user1 = this.signers[2]
       this.user2 = this.signers[3]
@@ -52,69 +46,43 @@ export function testStrategy(
           to: this.signers[i].address,
           value: ethers.utils.parseEther("100"),
         })
-        // TODO: Airdrop 10000 USDC to each signers.
         // TODO: Add USDC setter helper.
       }
 
-      // Contact factories.
-      this.PriceOracle = await ethers.getContractFactory(oracle.name)
-      this.InvestmentToken = await ethers.getContractFactory("InvestmentToken")
-      this.Strategy = await ethers.getContractFactory(strategyName)
+      // Deploy strategy.
+      this.strategy = await deployStrategy()
+
+      // Strategy owner.
+      const ownerAddr = await this.strategy.owner()
+      this.owner = await ethers.getSigner(ownerAddr)
+
+      // Strategy token.
+      const investmentTokenAddr = await this.strategy.getInvestmentToken()
+      this.investmentToken = await getTokenContract(investmentTokenAddr)
+
+      // Strategy price oracle.
+      this.priceOracle = await this.strategy.priceOracle()
+
+      // Strategy swap service.
+      const swapService = await this.strategy.swapService()
+      this.swapServiceProvider = swapService.provider
+      this.swapServiceRouter = swapService.router
 
       // Strategy parameters.
-      this.usdc = await getTokenContract(TokenAddrs.usdc)
-      this.depositFee = 0
-      this.depositFeeParams = []
-      this.withdrawalFee = 0
-      this.withdrawalFeeParams = []
-      this.performanceFee = 0
-      this.performanceFeeParams = []
-      this.feeReceiver = this.owner.address
-      this.feeReceiverParams = []
-      this.totalInvestmentLimit = BigInt(1e20)
-      this.investmentLimitPerAddress = BigInt(1e20)
-      this.swapServiceProvider = SwapServices.traderjoe.provider
-      this.swapServiceRouter = SwapServices.traderjoe.router
+      this.depositFee = await this.strategy.getDepositFee([])
+      this.depositFeeParams = [] // Not implemented yet.
+      this.withdrawalFee = await this.strategy.getWithdrawalFee([])
+      this.withdrawalFeeParams = [] // Not implemented yet.
+      this.performanceFee = await this.strategy.getPerformanceFee([])
+      this.performanceFeeParams = [] // Not implemented yet.
+      this.feeReceiver = await this.strategy.getFeeReceiver([])
+      this.feeReceiverParams = [] // Not implemented yet.
+      this.totalInvestmentLimit = await this.strategy.getTotalInvestmentLimit()
+      this.investmentLimitPerAddress = await this.strategy.getInvestmentLimitPerAddress()
 
-      // Deploy contracts.
-      this.priceOracle = await upgrades.deployProxy(this.PriceOracle, [oracle.address, this.usdc.address], {
-        kind: "uups",
-      })
-      await this.priceOracle.deployed()
-
-      this.investmentToken = await upgrades.deployProxy(this.InvestmentToken, ["InvestmentToken", "IVST"], {
-        kind: "uups",
-      })
-      await this.investmentToken.deployed()
-
-      this.strategy = await upgrades.deployProxy(
-        this.Strategy,
-        [
-          [
-            this.investmentToken.address,
-            this.usdc.address,
-            this.depositFee,
-            this.depositFeeParams,
-            this.withdrawalFee,
-            this.withdrawalFeeParams,
-            this.performanceFee,
-            this.performanceFeeParams,
-            this.feeReceiver,
-            this.feeReceiverParams,
-            this.totalInvestmentLimit,
-            this.investmentLimitPerAddress,
-            this.priceOracle.address,
-            this.swapServiceProvider,
-            this.swapServiceRouter,
-            [],
-          ],
-          ...strategyExtraArgs,
-        ],
-        { kind: "uups" }
-      )
-      await this.strategy.deployed()
-
-      await this.investmentToken.transferOwnership(this.strategy.address)
+      // Store equity valuation and investment token supply to make tests also work for existing strategies.
+      this.equityValuation = await this.strategy.getEquityValuation(true, false)
+      this.investmentTokenSupply = await this.strategy.getInvestmentTokenSupply()
 
       this.snapshot = await takeSnapshot()
     })

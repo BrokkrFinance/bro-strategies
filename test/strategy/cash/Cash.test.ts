@@ -1,10 +1,38 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
+import { getUUPSUpgradeableStrategy } from "../../shared/contracts"
 import { Oracles } from "../../shared/oracles"
 import { airdropToken } from "../../shared/utils"
+import { SwapServices } from "../../shared/swaps"
 import { testStrategy } from "../Unified.test"
 
-testStrategy("Cash Strategy", "Cash", [], Oracles.gmx, [testCashAum, testCashUpgradeable])
+testStrategy("Cash Strategy", deployCashStrategy, [testCashAum, testCashUpgradeable])
+
+async function deployCashStrategy() {
+  // Strategy owner.
+  const signers = await ethers.getSigners()
+  const owner = signers[0]
+
+  // Deploy strategy.
+  const strategy = await getUUPSUpgradeableStrategy(
+    "Cash",
+    {
+      depositFee: { amount: 0, params: [] },
+      withdrawalFee: { amount: 0, params: [] },
+      performanceFee: { amount: 0, params: [] },
+      feeReceiver: { address: owner.address, params: [] },
+      investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
+      oracle: Oracles.aave,
+      swapService: SwapServices.traderjoe,
+      roleToUsers: [],
+    },
+    {
+      extraArgs: [],
+    }
+  )
+
+  return strategy
+}
 
 function testCashAum() {
   describe("AUM - Cash Strategy Specific", async function () {
@@ -87,7 +115,7 @@ function testCashUpgradeable() {
               this.feeReceiverParams,
               this.totalInvestmentLimit,
               this.investmentLimitPerAddress,
-              this.priceOracle.address,
+              this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
               [],

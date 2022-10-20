@@ -1,37 +1,87 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import { StargateAddrs } from "../../shared/addresses"
+import { getUUPSUpgradeableStrategy } from "../../shared/contracts"
 import { Oracles } from "../../shared/oracles"
+import { SwapServices } from "../../shared/swaps"
 import { airdropToken, getErrorRange } from "../../shared/utils"
 import { testStrategy } from "../Unified.test"
 
-testStrategy(
-  "Stargate USDC Strategy",
-  "Stargate",
-  [
-    StargateAddrs.router,
-    StargateAddrs.usdcPool,
-    StargateAddrs.lpStaking,
-    StargateAddrs.usdcLpToken,
-    StargateAddrs.stgToken,
-  ],
-  Oracles.gmx,
-  [testStargateUsdcAum, testStargateUsdcInitialize, testStargateUsdcUpgradeable]
-)
+testStrategy("Stargate USDC Strategy", deployStargateUsdcStrategy, [
+  testStargateUsdcAum,
+  testStargateUsdcInitialize,
+  testStargateUsdcUpgradeable,
+])
 
-testStrategy(
-  "Stargate USDT Strategy",
-  "Stargate",
-  [
-    StargateAddrs.router,
-    StargateAddrs.usdtPool,
-    StargateAddrs.lpStaking,
-    StargateAddrs.usdtLpToken,
-    StargateAddrs.stgToken,
-  ],
-  Oracles.aave,
-  [testStargateUsdtAum, testStargateUsdtInitialize, testStargateUsdtUpgradeable]
-)
+testStrategy("Stargate USDT Strategy", deployStargateUsdtStrategy, [
+  testStargateUsdtAum,
+  testStargateUsdtInitialize,
+  testStargateUsdtUpgradeable,
+])
+
+async function deployStargateUsdcStrategy() {
+  // Strategy owner.
+  const signers = await ethers.getSigners()
+  const owner = signers[0]
+
+  // Deploy strategy.
+  const strategy = await getUUPSUpgradeableStrategy(
+    "Stargate",
+    {
+      depositFee: { amount: 0, params: [] },
+      withdrawalFee: { amount: 0, params: [] },
+      performanceFee: { amount: 0, params: [] },
+      feeReceiver: { address: owner.address, params: [] },
+      investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
+      oracle: Oracles.aave,
+      swapService: SwapServices.traderjoe,
+      roleToUsers: [],
+    },
+    {
+      extraArgs: [
+        StargateAddrs.router,
+        StargateAddrs.usdcPool,
+        StargateAddrs.lpStaking,
+        StargateAddrs.usdcLpToken,
+        StargateAddrs.stgToken,
+      ],
+    }
+  )
+
+  return strategy
+}
+
+async function deployStargateUsdtStrategy() {
+  // Strategy owner.
+  const signers = await ethers.getSigners()
+  const owner = signers[0]
+
+  // Deploy strategy.
+  const strategy = await getUUPSUpgradeableStrategy(
+    "Stargate",
+    {
+      depositFee: { amount: 0, params: [] },
+      withdrawalFee: { amount: 0, params: [] },
+      performanceFee: { amount: 0, params: [] },
+      feeReceiver: { address: owner.address, params: [] },
+      investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
+      oracle: Oracles.aave,
+      swapService: SwapServices.traderjoe,
+      roleToUsers: [],
+    },
+    {
+      extraArgs: [
+        StargateAddrs.router,
+        StargateAddrs.usdtPool,
+        StargateAddrs.lpStaking,
+        StargateAddrs.usdtLpToken,
+        StargateAddrs.stgToken,
+      ],
+    }
+  )
+
+  return strategy
+}
 
 function testStargateUsdcAum() {
   describe("AUM - Stargate USDC Strategy Specific", async function () {
@@ -109,9 +159,11 @@ function testStargateUsdcAum() {
 function testStargateUsdcInitialize() {
   describe("Initialize - Stargate USDC Strategy Specific", async function () {
     it("should fail when passed wrong LP token address", async function () {
+      const Strategy = await ethers.getContractFactory("Stargate")
+
       await expect(
         upgrades.deployProxy(
-          this.Strategy,
+          Strategy,
           [
             [
               this.investmentToken.address,
@@ -126,7 +178,7 @@ function testStargateUsdcInitialize() {
               this.feeReceiverParams,
               this.totalInvestmentLimit,
               this.investmentLimitPerAddress,
-              this.priceOracle.address,
+              this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
               [],
@@ -170,7 +222,7 @@ function testStargateUsdcUpgradeable() {
               this.feeReceiverParams,
               this.totalInvestmentLimit,
               this.investmentLimitPerAddress,
-              this.priceOracle.address,
+              this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
               [],
@@ -287,9 +339,11 @@ function testStargateUsdtAum() {
 function testStargateUsdtInitialize() {
   describe("Initialize - Stargate USDT Strategy Specific", async function () {
     it("should fail when passed wrong LP token address", async function () {
+      const Strategy = await ethers.getContractFactory("Stargate")
+
       await expect(
         upgrades.deployProxy(
-          this.Strategy,
+          Strategy,
           [
             [
               this.investmentToken.address,
@@ -304,7 +358,7 @@ function testStargateUsdtInitialize() {
               this.feeReceiverParams,
               this.totalInvestmentLimit,
               this.investmentLimitPerAddress,
-              this.priceOracle.address,
+              this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
               [],
@@ -348,7 +402,7 @@ function testStargateUsdtUpgradeable() {
               this.feeReceiverParams,
               this.totalInvestmentLimit,
               this.investmentLimitPerAddress,
-              this.priceOracle.address,
+              this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
               [],
