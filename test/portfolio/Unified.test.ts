@@ -53,7 +53,7 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
       }
 
       // Deploy portfolio and all its investables.
-      this.portfolio = await deployPortfolio(this)
+      this.portfolio = await deployPortfolio()
 
       // Portfolio owner.
       const ownerAddr = await this.portfolio.owner()

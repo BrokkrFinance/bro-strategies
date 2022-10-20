@@ -18,7 +18,7 @@ testPortfolio("PercentageAllocation Portfolio", deployPercentageAllocationPortfo
   testPercentageAllocationPortfolioUpgradeable,
 ])
 
-async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
+async function deployPercentageAllocationPortfolio() {
   // Portfolios and strategies owner.
   const signers = await ethers.getSigners()
   const owner = signers[0]
@@ -32,20 +32,20 @@ async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
 
   // Price oracles.
   const GmxOracle = await ethers.getContractFactory(Oracles.gmx.name)
-  const gmxOracle = await upgrades.deployProxy(GmxOracle, [Oracles.gmx.address, context.usdc.address], {
+  const gmxOracle = await upgrades.deployProxy(GmxOracle, [Oracles.gmx.address, TokenAddrs.usdc], {
     kind: "uups",
   })
   await gmxOracle.deployed()
 
   const AaveOracle = await ethers.getContractFactory(Oracles.aave.name)
-  const aaveOracle = await upgrades.deployProxy(AaveOracle, [Oracles.aave.address, context.usdc.address], {
+  const aaveOracle = await upgrades.deployProxy(AaveOracle, [Oracles.aave.address, TokenAddrs.usdc], {
     kind: "uups",
   })
   await aaveOracle.deployed()
 
   // Cash strategy.
   let investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  context.cash = await getUUPSUpgradeableStrategy(
+  const cash = await getUUPSUpgradeableStrategy(
     Cash,
     [
       [
@@ -74,7 +74,7 @@ async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
 
   // Stargate USDC strategy
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  context.stargateUsdc = await getUUPSUpgradeableStrategy(
+  const stargateUsdc = await getUUPSUpgradeableStrategy(
     Stargate,
     [
       [
@@ -106,11 +106,11 @@ async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
 
   // Stargate USDC wrapper portfolio
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  context.stargateUsdcPortfolio = await getUUPSUpgradeablePortfolio(
+  const stargateUsdcPortfolio = await getUUPSUpgradeablePortfolio(
     PercentageAllocationPortfolio,
     [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
     investmentToken,
-    [context.cash, context.stargateUsdc],
+    [cash, stargateUsdc],
     [[100000], [0, 100000]]
   )
 
@@ -118,7 +118,7 @@ async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
 
   // Stargate USDT strategy
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  context.stargateUsdt = await getUUPSUpgradeableStrategy(
+  const stargateUsdt = await getUUPSUpgradeableStrategy(
     Stargate,
     [
       [
@@ -150,11 +150,11 @@ async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
 
   // Stargate USDT wrapper portfolio
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  context.stargateUsdtPortfolio = await getUUPSUpgradeablePortfolio(
+  const stargateUsdtPortfolio = await getUUPSUpgradeablePortfolio(
     PercentageAllocationPortfolio,
     [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
     investmentToken,
-    [context.cash, context.stargateUsdt],
+    [cash, stargateUsdt],
     [[100000], [0, 100000]]
   )
 
@@ -162,7 +162,7 @@ async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
 
   // TraderJoe USDC-USDC.e strategy
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  context.traderjoe = await getUUPSUpgradeableStrategy(
+  const traderjoe = await getUUPSUpgradeableStrategy(
     TraderJoe,
     [
       [
@@ -193,11 +193,11 @@ async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
 
   // TraderJoe USDC-USDC.e wrapper portfolio
   investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "IVST"])
-  context.traderjoePortfolio = await getUUPSUpgradeablePortfolio(
+  const traderjoePortfolio = await getUUPSUpgradeablePortfolio(
     PercentageAllocationPortfolio,
     [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
     investmentToken,
-    [context.cash, context.traderjoe],
+    [cash, traderjoe],
     [[100000], [0, 100000]]
   )
 
@@ -207,7 +207,7 @@ async function deployPercentageAllocationPortfolio(context: Mocha.Context) {
     PercentageAllocationPortfolio,
     [[investmentToken.address, TokenAddrs.usdc, 0, [], 0, [], 0, [], owner.address, [], BigInt(1e20), BigInt(1e20)]],
     investmentToken,
-    [context.stargateUsdcPortfolio, context.stargateUsdtPortfolio, context.traderjoePortfolio],
+    [stargateUsdcPortfolio, stargateUsdtPortfolio, traderjoePortfolio],
     [[100000], [50000, 50000], [30000, 30000, 40000]]
   )
 
