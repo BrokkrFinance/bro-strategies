@@ -1,3 +1,8 @@
+export interface SwapService {
+  provider: number
+  router: string
+}
+
 export const SwapServices = {
   traderjoe: {
     provider: 0,
