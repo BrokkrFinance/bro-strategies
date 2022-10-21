@@ -1,11 +1,23 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
-import { deployUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { deployUUPSUpgradeableStrategy, upgradeStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { testStrategy } from "../Strategy.test"
 
-testStrategy("Cash Strategy", deployCashStrategy, [testCashAum, testCashUpgradeable])
+testStrategy("Cash Strategy - Deploy", deployCashStrategy, [testCashAum, testCashUpgradeable])
+testStrategy("Cash with Stargate USDC Strategy - Upgrade After Deploy", upgradeCashWithStargateUsdcStrategy, [
+  testCashAum,
+  testCashUpgradeable,
+])
+testStrategy("Cash with Stargate USDT Strategy - Upgrade After Deploy", upgradeCashWithStargateUsdtStrategy, [
+  testCashAum,
+  testCashUpgradeable,
+])
+testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, [
+  testCashAum,
+  testCashUpgradeable,
+])
 
 async function deployCashStrategy() {
   // Strategy owner.
@@ -31,6 +43,18 @@ async function deployCashStrategy() {
   )
 
   return strategy
+}
+
+async function upgradeCashWithStargateUsdcStrategy() {
+  return await upgradeStrategy("strategy/CashWithStargateUsdc.json")
+}
+
+async function upgradeCashWithStargateUsdtStrategy() {
+  return await upgradeStrategy("strategy/CashWithStargateUsdt.json")
+}
+
+async function upgradeCashWithTraderJoeStrategy() {
+  return await upgradeStrategy("strategy/CashWithTraderJoe.json")
 }
 
 function testCashAum() {
