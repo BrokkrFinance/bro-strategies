@@ -5,7 +5,7 @@ import erc20Abi from "../helper/abi/erc20.json"
 import investableAbi from "../helper/abi/investable.json"
 import { getErrorRange } from "../helper/utils"
 
-export function testRebalance() {
+export function testPortfolioRebalance() {
   describe("Rebalance", async function () {
     it("should succeed when the owner user rebalances - for example [100%, 0%, 0%] -> [33%, 33%, 34%]", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length

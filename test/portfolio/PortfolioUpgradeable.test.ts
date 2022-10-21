@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 
-export function testUpgradeable() {
+export function testPortfolioUpgradeable() {
   describe("Upgradeable", async function () {
     it("should succeed when the owner user upgrades", async function () {
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.portfolio.address)

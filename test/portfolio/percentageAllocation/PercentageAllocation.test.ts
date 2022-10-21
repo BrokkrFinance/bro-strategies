@@ -11,7 +11,6 @@ import { testPortfolio } from "../Portfolio.test"
 
 testPortfolio("PercentageAllocation Portfolio", deployPercentageAllocationPortfolio, [
   testPercentageAllocationPortfolioAum,
-  testPercentageAllocationPortfolioERC165,
   testPercentageAllocationPortfolioUpgradeable,
 ])
 
@@ -257,17 +256,6 @@ function testPercentageAllocationPortfolioAum() {
         ethers.utils.parseUnits("7000", 6),
         getErrorRange(ethers.utils.parseUnits("7000", 6))
       )
-    })
-  })
-}
-
-function testPercentageAllocationPortfolioERC165() {
-  describe("ERC165 - PercentageAllocation Portfolio Specific", async function () {
-    it("should succeed to support all interfaces that portfolio implements", async function () {
-      expect(await this.portfolio.supportsInterface("0x49147370")).to.equal(true) // IAum
-      expect(await this.portfolio.supportsInterface("0x52f3b8ca")).to.equal(true) // IFee
-      expect(await this.portfolio.supportsInterface("0x60145abe")).to.equal(true) // IInvestable
-      expect(await this.portfolio.supportsInterface("0x7461375e")).to.equal(true) // IPortfolio
     })
   })
 }

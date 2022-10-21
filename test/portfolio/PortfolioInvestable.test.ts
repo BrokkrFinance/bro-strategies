@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-export function testInvestable() {
+export function testPortfolioInvestable() {
   describe("Investable", async function () {
     it("should fail to add when the investable already exists", async function () {
       const investables = await this.portfolio.getInvestables()
