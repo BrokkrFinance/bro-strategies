@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
-import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { deployUUPSUpgradeableStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { testStrategy } from "../Strategy.test"
@@ -13,7 +13,7 @@ async function deployCashStrategy() {
   const owner = signers[0]
 
   // Deploy strategy.
-  const strategy = await getUUPSUpgradeableStrategy(
+  const strategy = await deployUUPSUpgradeableStrategy(
     "Cash",
     {
       depositFee: { amount: 0, params: [] },

@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import { StargateAddrs } from "../../helper/addresses"
-import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { deployUUPSUpgradeableStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
@@ -25,7 +25,7 @@ async function deployStargateUsdcStrategy() {
   const owner = signers[0]
 
   // Deploy strategy.
-  const strategy = await getUUPSUpgradeableStrategy(
+  const strategy = await deployUUPSUpgradeableStrategy(
     "Stargate",
     {
       depositFee: { amount: 0, params: [] },
@@ -57,7 +57,7 @@ async function deployStargateUsdtStrategy() {
   const owner = signers[0]
 
   // Deploy strategy.
-  const strategy = await getUUPSUpgradeableStrategy(
+  const strategy = await deployUUPSUpgradeableStrategy(
     "Stargate",
     {
       depositFee: { amount: 0, params: [] },

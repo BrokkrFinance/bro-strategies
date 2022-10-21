@@ -8,7 +8,7 @@ export async function getTokenContract(address: string) {
   return await ethers.getContractAt(erc20Abi, address)
 }
 
-export async function getUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {
+export async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {
   const contract = await upgrades.deployProxy(factory, args, {
     kind: "uups",
   })
@@ -17,50 +17,7 @@ export async function getUUPSUpgradeableContract(factory: ContractFactory, args:
   return contract
 }
 
-export async function getUUPSUpgradeableStrategy(
-  strategyName: string,
-  strategyArgs: StrategyArgs,
-  strategyExtraArgs: StrategyExtraArgs
-) {
-  // Contact factories.
-  const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
-  const PriceOracle = await ethers.getContractFactory(strategyArgs.oracle.name)
-  const Strategy = await ethers.getContractFactory(strategyName)
-
-  // Deploy strategy token.
-  const investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "Strategy Token"])
-  const priceOracle = await getUUPSUpgradeableContract(PriceOracle, [strategyArgs.oracle.address, TokenAddrs.usdc])
-
-  // Deploy strategy.
-  const strategy = await getUUPSUpgradeableContract(Strategy, [
-    [
-      investmentToken.address,
-      TokenAddrs.usdc,
-      strategyArgs.depositFee.amount,
-      strategyArgs.depositFee.params,
-      strategyArgs.withdrawalFee.amount,
-      strategyArgs.withdrawalFee.params,
-      strategyArgs.performanceFee.amount,
-      strategyArgs.performanceFee.params,
-      strategyArgs.feeReceiver.address,
-      strategyArgs.feeReceiver.params,
-      strategyArgs.investmentLimit.total,
-      strategyArgs.investmentLimit.perAddress,
-      priceOracle.address,
-      strategyArgs.swapService.provider,
-      strategyArgs.swapService.router,
-      strategyArgs.roleToUsers,
-    ],
-    ...strategyExtraArgs.extraArgs,
-  ])
-
-  // Transfer ownership of strategy token to strategy.
-  await investmentToken.transferOwnership(strategy.address)
-
-  return strategy
-}
-
-export async function getUUPSUpgradeablePortfolio(
+export async function deployUUPSUpgradeablePortfolio(
   portfolioName: string,
   portfolioArgs: PortfolioArgs,
   portfolioExtraArgs: PortfolioExtraArgs,
@@ -72,10 +29,10 @@ export async function getUUPSUpgradeablePortfolio(
   const Portfolio = await ethers.getContractFactory(portfolioName)
 
   // Deploy portfolio token.
-  const investmentToken = await getUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "Portfolio Token"])
+  const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "Portfolio Token"])
 
   // Deploy portfolio.
-  const portfolio = await getUUPSUpgradeableContract(Portfolio, [
+  const portfolio = await deployUUPSUpgradeableContract(Portfolio, [
     [
       investmentToken.address,
       TokenAddrs.usdc,
@@ -102,4 +59,47 @@ export async function getUUPSUpgradeablePortfolio(
   await investmentToken.transferOwnership(portfolio.address)
 
   return portfolio
+}
+
+export async function deployUUPSUpgradeableStrategy(
+  strategyName: string,
+  strategyArgs: StrategyArgs,
+  strategyExtraArgs: StrategyExtraArgs
+) {
+  // Contact factories.
+  const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
+  const PriceOracle = await ethers.getContractFactory(strategyArgs.oracle.name)
+  const Strategy = await ethers.getContractFactory(strategyName)
+
+  // Deploy strategy token.
+  const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "Strategy Token"])
+  const priceOracle = await deployUUPSUpgradeableContract(PriceOracle, [strategyArgs.oracle.address, TokenAddrs.usdc])
+
+  // Deploy strategy.
+  const strategy = await deployUUPSUpgradeableContract(Strategy, [
+    [
+      investmentToken.address,
+      TokenAddrs.usdc,
+      strategyArgs.depositFee.amount,
+      strategyArgs.depositFee.params,
+      strategyArgs.withdrawalFee.amount,
+      strategyArgs.withdrawalFee.params,
+      strategyArgs.performanceFee.amount,
+      strategyArgs.performanceFee.params,
+      strategyArgs.feeReceiver.address,
+      strategyArgs.feeReceiver.params,
+      strategyArgs.investmentLimit.total,
+      strategyArgs.investmentLimit.perAddress,
+      priceOracle.address,
+      strategyArgs.swapService.provider,
+      strategyArgs.swapService.router,
+      strategyArgs.roleToUsers,
+    ],
+    ...strategyExtraArgs.extraArgs,
+  ])
+
+  // Transfer ownership of strategy token to strategy.
+  await investmentToken.transferOwnership(strategy.address)
+
+  return strategy
 }

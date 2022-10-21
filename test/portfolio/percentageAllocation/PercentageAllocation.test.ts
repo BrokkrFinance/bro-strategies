@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import investableAbi from "../../helper/abi/investable.json"
 import { StargateAddrs, TokenAddrs, TraderJoeAddrs } from "../../helper/addresses"
-import { getUUPSUpgradeablePortfolio, getUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { deployUUPSUpgradeablePortfolio, deployUUPSUpgradeableStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { PortfolioArgs, StrategyArgs } from "../../helper/parameters"
 import { SwapServices } from "../../helper/swaps"
@@ -41,12 +41,12 @@ async function deployPercentageAllocationPortfolio() {
   }
 
   // Cash strategy.
-  const cash = await getUUPSUpgradeableStrategy("Cash", strategyArgs, { extraArgs: [] })
+  const cash = await deployUUPSUpgradeableStrategy("Cash", strategyArgs, { extraArgs: [] })
 
   //////////////// Stargate USDC wrapper portfolio.
 
   // Stargate USDC strategy
-  const stargateUsdc = await getUUPSUpgradeableStrategy("Stargate", strategyArgs, {
+  const stargateUsdc = await deployUUPSUpgradeableStrategy("Stargate", strategyArgs, {
     extraArgs: [
       StargateAddrs.router,
       StargateAddrs.usdcPool,
@@ -57,7 +57,7 @@ async function deployPercentageAllocationPortfolio() {
   })
 
   // Stargate USDC wrapper portfolio
-  const stargateUsdcPortfolio = await getUUPSUpgradeablePortfolio(
+  const stargateUsdcPortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
     portfolioArgs,
     { extraArgs: [] },
@@ -68,7 +68,7 @@ async function deployPercentageAllocationPortfolio() {
   //////////////// Stargate USDT wrapper portfolio.
 
   // Stargate USDT strategy
-  const stargateUsdt = await getUUPSUpgradeableStrategy("Stargate", strategyArgs, {
+  const stargateUsdt = await deployUUPSUpgradeableStrategy("Stargate", strategyArgs, {
     extraArgs: [
       StargateAddrs.router,
       StargateAddrs.usdtPool,
@@ -79,7 +79,7 @@ async function deployPercentageAllocationPortfolio() {
   })
 
   // Stargate USDT wrapper portfolio
-  const stargateUsdtPortfolio = await getUUPSUpgradeablePortfolio(
+  const stargateUsdtPortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
     portfolioArgs,
     { extraArgs: [] },
@@ -90,12 +90,12 @@ async function deployPercentageAllocationPortfolio() {
   //////////////// TraderJoe USDC-USDC.e wrapper portfolio.
 
   // TraderJoe USDC-USDC.e strategy
-  const traderjoe = await getUUPSUpgradeableStrategy("TraderJoe", strategyArgs, {
+  const traderjoe = await deployUUPSUpgradeableStrategy("TraderJoe", strategyArgs, {
     extraArgs: [TraderJoeAddrs.router, TraderJoeAddrs.masterChef, TraderJoeAddrs.lpToken, TraderJoeAddrs.joeToken],
   })
 
   // TraderJoe USDC-USDC.e wrapper portfolio
-  const traderjoePortfolio = await getUUPSUpgradeablePortfolio(
+  const traderjoePortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
     portfolioArgs,
     { extraArgs: [] },
@@ -104,7 +104,7 @@ async function deployPercentageAllocationPortfolio() {
   )
 
   // Top level portfolio.
-  const portfolio = await getUUPSUpgradeablePortfolio(
+  const portfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
     portfolioArgs,
     { extraArgs: [] },
