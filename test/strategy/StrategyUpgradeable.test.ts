@@ -6,7 +6,7 @@ export function testStrategyUpgradeable() {
     it("should succeed when the owner user upgrades", async function () {
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.strategy.address)
 
-      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy")
+      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy", this.owner)
       const testUpgradedStrategy = await upgrades.upgradeProxy(this.strategy.address, TestUpgradedStrategy, {
         call: {
           fn: "initialize",
@@ -40,11 +40,11 @@ export function testStrategyUpgradeable() {
     })
 
     it("should succeed when the strategy is paused", async function () {
-      expect(await this.strategy.pause()).not.to.be.reverted
+      expect(await this.strategy.connect(this.owner).pause()).not.to.be.reverted
 
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.strategy.address)
 
-      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy")
+      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy", this.owner)
       const testUpgradedStrategy = await upgrades.upgradeProxy(this.strategy.address, TestUpgradedStrategy, {
         call: {
           fn: "initialize",
@@ -140,7 +140,7 @@ export function testStrategyUpgradeable() {
       // Swap service.
       const swapServiceBefore = await this.strategy.swapService()
 
-      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy")
+      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy", this.owner)
       const testUpgradedStrategy = await upgrades.upgradeProxy(this.strategy.address, TestUpgradedStrategy, {
         call: {
           fn: "initialize",

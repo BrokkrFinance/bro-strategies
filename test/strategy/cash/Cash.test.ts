@@ -116,7 +116,7 @@ function testCashUpgradeable() {
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
       const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
 
-      const CashV2 = await ethers.getContractFactory("CashV2")
+      const CashV2 = await ethers.getContractFactory("CashV2", this.owner)
       const cashV2 = await upgrades.upgradeProxy(this.strategy.address, CashV2, {
         call: {
           fn: "initialize",

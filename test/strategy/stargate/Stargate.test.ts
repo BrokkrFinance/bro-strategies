@@ -103,14 +103,16 @@ async function upgradeStargateUsdtStrategy() {
 function testStargateUsdcAum() {
   describe("AUM - Stargate USDC Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
       const assetBalances = await this.strategy.getAssetBalances()
       expect(assetBalances[0].asset.toLowerCase()).to.equal(StargateAddrs.usdcLpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(
-        ethers.utils.parseUnits("100", 6),
-        getErrorRange(ethers.utils.parseUnits("100", 6))
+        ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance))
       )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
@@ -118,19 +120,21 @@ function testStargateUsdcAum() {
       const assetValuations = await this.strategy.getAssetValuations(true, false)
       expect(assetValuations[0].asset.toLowerCase()).to.equal(StargateAddrs.usdcLpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
-        ethers.utils.parseUnits("100", 6),
-        getErrorRange(ethers.utils.parseUnits("100", 6))
+        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("100", 6),
-        getErrorRange(ethers.utils.parseUnits("100", 6))
+        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
       )
     })
 
     it("should succeed after multiple deposits and withdrawals", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("50", 6), this.user0.address, [])
 
@@ -146,8 +150,8 @@ function testStargateUsdcAum() {
       const assetBalances = await this.strategy.getAssetBalances()
       expect(assetBalances[0].asset.toLowerCase()).to.equal(StargateAddrs.usdcLpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(
-        ethers.utils.parseUnits("70", 6),
-        getErrorRange(ethers.utils.parseUnits("70", 6))
+        ethers.utils.parseUnits("70", 6).add(assetBalancesBefore[0].balance),
+        getErrorRange(ethers.utils.parseUnits("70", 6).add(assetBalancesBefore[0].balance))
       )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
@@ -155,15 +159,15 @@ function testStargateUsdcAum() {
       const assetValuations = await this.strategy.getAssetValuations(true, false)
       expect(assetValuations[0].asset.toLowerCase()).to.equal(StargateAddrs.usdcLpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
-        ethers.utils.parseUnits("70", 6),
-        getErrorRange(ethers.utils.parseUnits("70", 6))
+        ethers.utils.parseUnits("70", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("70", 6).add(this.equityValuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("70", 6),
-        getErrorRange(ethers.utils.parseUnits("70", 6))
+        ethers.utils.parseUnits("70", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("70", 6).add(this.equityValuation))
       )
     })
   })
@@ -217,7 +221,7 @@ function testStargateUsdcUpgradeable() {
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
       const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
 
-      const StargateV2 = await ethers.getContractFactory("StargateV2")
+      const StargateV2 = await ethers.getContractFactory("StargateV2", this.owner)
       const stargateV2 = await upgrades.upgradeProxy(this.strategy.address, StargateV2, {
         call: {
           fn: "initialize",
@@ -279,14 +283,16 @@ function testStargateUsdcUpgradeable() {
 function testStargateUsdtAum() {
   describe("AUM - Stargate USDT Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
       const assetBalances = await this.strategy.getAssetBalances()
       expect(assetBalances[0].asset.toLowerCase()).to.equal(StargateAddrs.usdtLpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(
-        ethers.utils.parseUnits("100", 6),
-        getErrorRange(ethers.utils.parseUnits("100", 6))
+        ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance))
       )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
@@ -294,19 +300,21 @@ function testStargateUsdtAum() {
       const assetValuations = await this.strategy.getAssetValuations(true, false)
       expect(assetValuations[0].asset.toLowerCase()).to.equal(StargateAddrs.usdtLpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
-        ethers.utils.parseUnits("100", 6),
-        getErrorRange(ethers.utils.parseUnits("100", 6))
+        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("100", 6),
-        getErrorRange(ethers.utils.parseUnits("100", 6))
+        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
       )
     })
 
     it("should succeed after multiple deposits and withdrawals", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("50", 6), this.user0.address, [])
 
@@ -322,8 +330,8 @@ function testStargateUsdtAum() {
       const assetBalances = await this.strategy.getAssetBalances()
       expect(assetBalances[0].asset.toLowerCase()).to.equal(StargateAddrs.usdtLpToken.toLowerCase())
       expect(assetBalances[0].balance).to.approximately(
-        ethers.utils.parseUnits("70", 6),
-        getErrorRange(ethers.utils.parseUnits("70", 6))
+        ethers.utils.parseUnits("70", 6).add(assetBalancesBefore[0].balance),
+        getErrorRange(ethers.utils.parseUnits("70", 6).add(assetBalancesBefore[0].balance))
       )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
@@ -331,15 +339,15 @@ function testStargateUsdtAum() {
       const assetValuations = await this.strategy.getAssetValuations(true, false)
       expect(assetValuations[0].asset.toLowerCase()).to.equal(StargateAddrs.usdtLpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
-        ethers.utils.parseUnits("70", 6),
-        getErrorRange(ethers.utils.parseUnits("70", 6))
+        ethers.utils.parseUnits("70", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("70", 6).add(this.equityValuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("70", 6),
-        getErrorRange(ethers.utils.parseUnits("70", 6))
+        ethers.utils.parseUnits("70", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("70", 6).add(this.equityValuation))
       )
     })
   })
@@ -393,7 +401,7 @@ function testStargateUsdtUpgradeable() {
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
       const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
 
-      const StargateV2 = await ethers.getContractFactory("StargateV2")
+      const StargateV2 = await ethers.getContractFactory("StargateV2", this.owner)
       const stargateV2 = await upgrades.upgradeProxy(this.strategy.address, StargateV2, {
         call: {
           fn: "initialize",
