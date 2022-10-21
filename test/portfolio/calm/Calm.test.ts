@@ -6,7 +6,7 @@ import { ethers, upgrades } from "hardhat"
 import path from "path"
 import { UpgradeConfig } from "../../../scripts/upgrade"
 import investableAbi from "../../helper/abi/investable.json"
-import { testPortfolio } from "../Unified.test"
+import { testPortfolio } from "../Portfolio.test"
 
 const CONFIG_PATH = "../../../configs/upgrade"
 const CONFIG_FILE = "Calm.json"

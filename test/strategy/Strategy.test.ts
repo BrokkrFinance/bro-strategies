@@ -2,17 +2,16 @@ import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
 import { getTokenContract } from "../helper/contracts"
-import { testAllocations } from "./UnifiedAllocations.test"
-import { testDeposit } from "./UnifiedDeposit.test"
-import { testERC165 } from "./UnifiedERC165.test"
-import { testInvestable } from "./UnifiedInvestable.test"
-import { testOwnable } from "./UnifiedOwnable.test"
-import { testPausable } from "./UnifiedPausable.test"
-import { testRebalance } from "./UnifiedRebalance.test"
-import { testUpgradeable } from "./UnifiedUpgradeable.test"
-import { testWithdraw } from "./UnifiedWithdraw.test"
+import { testDeposit } from "./StrategyDeposit.test"
+import { testERC165 } from "./StrategyERC165.test"
+import { testFee } from "./StrategyFee.test"
+import { testOwnable } from "./StrategyOwnable.test"
+import { testPausable } from "./StrategyPausable.test"
+import { testReapReward } from "./StrategyReapReward.test"
+import { testUpgradeable } from "./StrategyUpgradeable.test"
+import { testWithdraw } from "./StrategyWithdraw.test"
 
-export function testPortfolio(description: string, deployPortfolio: Function, portfolioSpecificTests: (() => any)[]) {
+export function testStrategy(description: string, deployStrategy: Function, strategySpecificTests: (() => any)[]) {
   describe(description, function () {
     before(async function () {
       await network.provider.request({
@@ -47,59 +46,62 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
           to: this.signers[i].address,
           value: ethers.utils.parseEther("100"),
         })
-        await this.usdc
-          .connect(this.impersonatedSigner)
-          .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
+        // TODO: Add USDC setter helper.
       }
 
-      // Deploy portfolio and all its investables.
-      this.portfolio = await deployPortfolio()
+      // Deploy strategy.
+      this.strategy = await deployStrategy()
 
-      // Portfolio owner.
-      const ownerAddr = await this.portfolio.owner()
+      // Strategy owner.
+      const ownerAddr = await this.strategy.owner()
       this.owner = await ethers.getSigner(ownerAddr)
 
-      // Portfolio token.
-      const investmentTokenAddr = await this.portfolio.getInvestmentToken()
+      // Strategy token.
+      const investmentTokenAddr = await this.strategy.getInvestmentToken()
       this.investmentToken = await getTokenContract(investmentTokenAddr)
 
-      // Portfolio parameters.
-      this.depositFee = await this.portfolio.getDepositFee([])
+      // Strategy price oracle.
+      this.priceOracle = await this.strategy.priceOracle()
+
+      // Strategy swap service.
+      const swapService = await this.strategy.swapService()
+      this.swapServiceProvider = swapService.provider
+      this.swapServiceRouter = swapService.router
+
+      // Strategy parameters.
+      this.depositFee = await this.strategy.getDepositFee([])
       this.depositFeeParams = [] // Not implemented yet.
-      this.withdrawalFee = await this.portfolio.getWithdrawalFee([])
+      this.withdrawalFee = await this.strategy.getWithdrawalFee([])
       this.withdrawalFeeParams = [] // Not implemented yet.
-      this.performanceFee = await this.portfolio.getPerformanceFee([])
+      this.performanceFee = await this.strategy.getPerformanceFee([])
       this.performanceFeeParams = [] // Not implemented yet.
-      this.feeReceiver = await this.portfolio.getFeeReceiver([])
+      this.feeReceiver = await this.strategy.getFeeReceiver([])
       this.feeReceiverParams = [] // Not implemented yet.
-      this.totalInvestmentLimit = await this.portfolio.getTotalInvestmentLimit()
-      this.investmentLimitPerAddress = await this.portfolio.getInvestmentLimitPerAddress()
+      this.totalInvestmentLimit = await this.strategy.getTotalInvestmentLimit()
+      this.investmentLimitPerAddress = await this.strategy.getInvestmentLimitPerAddress()
 
-      // Store equity valuation and investment token supply to make tests also work for existing portfolios.
-      this.equityValuation = await this.portfolio.getEquityValuation(true, false)
-      this.investmentTokenSupply = await this.portfolio.getInvestmentTokenSupply()
+      // Store equity valuation and investment token supply to make tests also work for existing strategies.
+      this.equityValuation = await this.strategy.getEquityValuation(true, false)
+      this.investmentTokenSupply = await this.strategy.getInvestmentTokenSupply()
 
-      // Take snapshot.
       this.snapshot = await takeSnapshot()
     })
 
     beforeEach(async function () {
-      // Restore snapshot.
       await this.snapshot.restore()
     })
 
-    testAllocations()
     testDeposit()
     testERC165()
-    testInvestable()
+    testFee()
     testOwnable()
     testPausable()
-    testRebalance()
+    testReapReward()
     testUpgradeable()
     testWithdraw()
 
-    for (const portfolioSpecificTest of portfolioSpecificTests) {
-      portfolioSpecificTest()
+    for (const strategySpecificTest of strategySpecificTests) {
+      strategySpecificTest()
     }
 
     after(async function () {
