@@ -1,7 +1,7 @@
 import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
-import { getTokenContract } from "../helper/contracts"
+import { getTokenContract, removePortfolioInvestmentLimitsAndFees } from "../helper/contracts"
 import { testPortfolioAllocations } from "./PortfolioAllocations.test"
 import { testPortfolioDeposit } from "./PortfolioDeposit.test"
 import { testPortfolioERC165 } from "./PortfolioERC165.test"
@@ -63,6 +63,10 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
       // Portfolio token.
       const investmentTokenAddr = await this.portfolio.getInvestmentToken()
       this.investmentToken = await getTokenContract(investmentTokenAddr)
+
+      // Set investment limits of portfolio and all its investables to big enough value
+      // and all kinds of fee to zero to prevent any test being affected by the limits.
+      await removePortfolioInvestmentLimitsAndFees(this.portfolio, this.owner)
 
       // Portfolio parameters.
       this.depositFee = await this.portfolio.getDepositFee([])

@@ -1,7 +1,7 @@
 import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
-import { getTokenContract } from "../helper/contracts"
+import { getTokenContract, removeStrategyInvestmentLimitsAndFees } from "../helper/contracts"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyERC165 } from "./StrategyERC165.test"
 import { testStrategyFee } from "./StrategyFee.test"
@@ -70,6 +70,10 @@ export function testStrategy(description: string, deployStrategy: Function, stra
       const swapService = await this.strategy.swapService()
       this.swapServiceProvider = swapService.provider
       this.swapServiceRouter = swapService.router
+
+      // Set investment limits of strategy to big enough value and all kinds of fee to zero
+      // to prevent any test being affected by the limits.
+      await removeStrategyInvestmentLimitsAndFees(this.strategy, this.owner)
 
       // Strategy parameters.
       this.depositFee = await this.strategy.getDepositFee([])
