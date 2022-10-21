@@ -1,7 +1,7 @@
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { airdropToken, getDaysInSeconds, getMonthsInSeconds, getYearsInSeconds } from "../shared/utils"
+import { airdropToken, getDaysInSeconds, getMonthsInSeconds, getYearsInSeconds } from "../helper/utils"
 
 export function testReapReward() {
   describe("ReapReward", async function () {

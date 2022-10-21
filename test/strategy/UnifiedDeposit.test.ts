@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { airdropToken, getErrorRange } from "../shared/utils"
+import { airdropToken, getErrorRange } from "../helper/utils"
 
 export function testDeposit() {
   describe("Deposit", async function () {

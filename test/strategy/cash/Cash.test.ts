@@ -1,9 +1,9 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
-import { getUUPSUpgradeableStrategy } from "../../shared/contracts"
-import { Oracles } from "../../shared/oracles"
-import { airdropToken } from "../../shared/utils"
-import { SwapServices } from "../../shared/swaps"
+import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { Oracles } from "../../helper/oracles"
+import { airdropToken } from "../../helper/utils"
+import { SwapServices } from "../../helper/swaps"
 import { testStrategy } from "../Unified.test"
 
 testStrategy("Cash Strategy", deployCashStrategy, [testCashAum, testCashUpgradeable])

@@ -1,10 +1,10 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
-import { StargateAddrs } from "../../shared/addresses"
-import { getUUPSUpgradeableStrategy } from "../../shared/contracts"
-import { Oracles } from "../../shared/oracles"
-import { SwapServices } from "../../shared/swaps"
-import { airdropToken, getErrorRange } from "../../shared/utils"
+import { StargateAddrs } from "../../helper/addresses"
+import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { Oracles } from "../../helper/oracles"
+import { SwapServices } from "../../helper/swaps"
+import { airdropToken, getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Unified.test"
 
 testStrategy("Stargate USDC Strategy", deployStargateUsdcStrategy, [

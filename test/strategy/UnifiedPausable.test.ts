@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { airdropToken } from "../shared/utils"
+import { airdropToken } from "../helper/utils"
 
 export function testPausable() {
   describe("Pausable", async function () {
