@@ -9,7 +9,7 @@ import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
 import { testPortfolio } from "../Portfolio.test"
 
-testPortfolio("PercentageAllocation Portfolio", deployPercentageAllocationPortfolio, [
+testPortfolio("PercentageAllocation Portfolio - Deploy", deployPercentageAllocationPortfolio, [
   testPercentageAllocationPortfolioAum,
   testPercentageAllocationPortfolioUpgradeable,
 ])
