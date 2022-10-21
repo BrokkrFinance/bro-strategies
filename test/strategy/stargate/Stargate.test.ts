@@ -1,19 +1,28 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import { StargateAddrs } from "../../helper/addresses"
-import { deployUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { deployUUPSUpgradeableStrategy, upgradeStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-testStrategy("Stargate USDC Strategy", deployStargateUsdcStrategy, [
+testStrategy("Stargate USDC Strategy - Deploy", deployStargateUsdcStrategy, [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
   testStargateUsdcUpgradeable,
 ])
-
-testStrategy("Stargate USDT Strategy", deployStargateUsdtStrategy, [
+testStrategy("Stargate USDT Strategy - Deploy", deployStargateUsdtStrategy, [
+  testStargateUsdtAum,
+  testStargateUsdtInitialize,
+  testStargateUsdtUpgradeable,
+])
+testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUsdcStrategy, [
+  testStargateUsdcAum,
+  testStargateUsdcInitialize,
+  testStargateUsdcUpgradeable,
+])
+testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUsdtStrategy, [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
   testStargateUsdtUpgradeable,
@@ -81,6 +90,14 @@ async function deployStargateUsdtStrategy() {
   )
 
   return strategy
+}
+
+async function upgradeStargateUsdcStrategy() {
+  return await upgradeStrategy("strategy/StargateUsdc.json")
+}
+
+async function upgradeStargateUsdtStrategy() {
+  return await upgradeStrategy("strategy/StargateUsdt.json")
 }
 
 function testStargateUsdcAum() {
