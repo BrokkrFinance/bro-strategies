@@ -2,13 +2,18 @@ import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import joePairAbi from "../../helper/abi/joePair.json"
 import { TraderJoeAddrs } from "../../helper/addresses"
-import { deployUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { deployUUPSUpgradeableStrategy, upgradeStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-testStrategy("TraderJoe USDC-USDC.e Strategy", deployTraderJoeStrategy, [
+testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, [
+  testTraderJoeAum,
+  testTraderJoeInitialize,
+  testTraderJoeUpgradeable,
+])
+testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, [
   testTraderJoeAum,
   testTraderJoeInitialize,
   testTraderJoeUpgradeable,
@@ -38,6 +43,10 @@ async function deployTraderJoeStrategy() {
   )
 
   return strategy
+}
+
+async function upgradeTraderJoeStrategy() {
+  return upgradeStrategy("strategy/TraderJoe.json")
 }
 
 function testTraderJoeAum() {
