@@ -5,7 +5,7 @@ import { readFileSync } from "fs"
 import { ethers, upgrades } from "hardhat"
 import path from "path"
 import { UpgradeConfig } from "../../../scripts/upgrade"
-import investableAbi from "../../shared/abi/investable.json"
+import investableAbi from "../../helper/abi/investable.json"
 import { testPortfolio } from "../Unified.test"
 
 const CONFIG_PATH = "../../../configs/upgrade"

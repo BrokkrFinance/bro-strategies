@@ -1,8 +1,8 @@
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import erc20Abi from "../shared/abi/erc20.json"
-import investableAbi from "../shared/abi/investable.json"
-import { getErrorRange } from "../shared/utils"
+import erc20Abi from "../helper/abi/erc20.json"
+import investableAbi from "../helper/abi/investable.json"
+import { getErrorRange } from "../helper/utils"
 
 export function testWithdraw() {
   describe("Withdraw", async function () {

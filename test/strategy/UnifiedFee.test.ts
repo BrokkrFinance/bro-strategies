@@ -1,7 +1,7 @@
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { airdropToken, getErrorRange, getMonthsInSeconds } from "../shared/utils"
+import { airdropToken, getErrorRange, getMonthsInSeconds } from "../helper/utils"
 
 export function testFee() {
   describe("Fee", async function () {

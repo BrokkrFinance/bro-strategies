@@ -1,11 +1,11 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
-import joePairAbi from "../../shared/abi/joePair.json"
-import { TraderJoeAddrs } from "../../shared/addresses"
-import { getUUPSUpgradeableStrategy } from "../../shared/contracts"
-import { Oracles } from "../../shared/oracles"
-import { SwapServices } from "../../shared/swaps"
-import { airdropToken, getErrorRange } from "../../shared/utils"
+import joePairAbi from "../../helper/abi/joePair.json"
+import { TraderJoeAddrs } from "../../helper/addresses"
+import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { Oracles } from "../../helper/oracles"
+import { SwapServices } from "../../helper/swaps"
+import { airdropToken, getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Unified.test"
 
 testStrategy("TraderJoe USDC-USDC.e Strategy", deployTraderJoeStrategy, [
