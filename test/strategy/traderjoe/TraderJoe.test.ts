@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
 import joePairAbi from "../../helper/abi/joePair.json"
 import { TraderJoeAddrs } from "../../helper/addresses"
-import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
+import { deployUUPSUpgradeableStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
@@ -20,7 +20,7 @@ async function deployTraderJoeStrategy() {
   const owner = signers[0]
 
   // Deploy strategy.
-  const strategy = await getUUPSUpgradeableStrategy(
+  const strategy = await deployUUPSUpgradeableStrategy(
     "TraderJoe",
     {
       depositFee: { amount: 0, params: [] },
