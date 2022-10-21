@@ -10,7 +10,7 @@ export function testStrategyPausable() {
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("3000", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("3000", 6), this.user0.address, [])
 
-      expect(await this.strategy.pause()).not.to.be.reverted
+      expect(await this.strategy.connect(this.owner).pause()).not.to.be.reverted
 
       await expect(this.strategy.connect(this.user0).withdrawReward([])).to.be.revertedWith("Pausable: paused")
 

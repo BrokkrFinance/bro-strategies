@@ -29,21 +29,21 @@ export function testStrategyFee() {
     })
 
     it("should fail when the owner user sets deposit fee greater than or equal to 100%", async function () {
-      await expect(this.strategy.setDepositFee(100000, [])).to.be.revertedWithCustomError(
+      await expect(this.strategy.connect(this.owner).setDepositFee(100000, [])).to.be.revertedWithCustomError(
         this.strategy,
         "InvalidFeeError"
       )
     })
 
     it("should fail when the owner user sets withdrawal fee greater than or equal to 100%", async function () {
-      await expect(this.strategy.setWithdrawalFee(100000, [])).to.be.revertedWithCustomError(
+      await expect(this.strategy.connect(this.owner).setWithdrawalFee(100000, [])).to.be.revertedWithCustomError(
         this.strategy,
         "InvalidFeeError"
       )
     })
 
     it("should fail when the owner user sets performance fee greater than or equal to 100%", async function () {
-      await expect(this.strategy.setPerformanceFee(100000, [])).to.be.revertedWithCustomError(
+      await expect(this.strategy.connect(this.owner).setPerformanceFee(100000, [])).to.be.revertedWithCustomError(
         this.strategy,
         "InvalidFeeError"
       )
@@ -66,8 +66,14 @@ export function testStrategyFee() {
         getErrorRange(ethers.utils.parseUnits("7000", 6))
       )
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.strategy.getInvestmentTokenSupply()).to.equal(0)
-      expect(await this.strategy.getEquityValuation(true, false)).to.equal(0)
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
+        this.investmentTokenSupply,
+        getErrorRange(this.investmentTokenSupply)
+      )
+      expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
+        this.equityValuation,
+        getErrorRange(this.equityValuation)
+      )
     })
 
     it("should succeed when multiple users withdraw and withdrawal fee is 30%", async function () {
@@ -135,12 +141,12 @@ export function testStrategyFee() {
         getErrorRange(ethers.utils.parseUnits("4000", 6))
       )
       expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("12000", 6),
-        getErrorRange(ethers.utils.parseUnits("12000", 6))
+        ethers.utils.parseUnits("12000", 6).add(this.investmentTokenSupply),
+        getErrorRange(ethers.utils.parseUnits("12000", 6).add(this.investmentTokenSupply))
       )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("12000", 6),
-        getErrorRange(ethers.utils.parseUnits("12000", 6))
+        ethers.utils.parseUnits("12000", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("12000", 6).add(this.equityValuation))
       )
     })
   })

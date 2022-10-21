@@ -52,6 +52,8 @@ async function upgradeTraderJoeStrategy() {
 function testTraderJoeAum() {
   describe("AUM - TraderJoe Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
@@ -62,26 +64,31 @@ function testTraderJoeAum() {
 
       const assetBalances = await this.strategy.getAssetBalances()
       expect(assetBalances[0].asset.toLowerCase()).to.equal(TraderJoeAddrs.lpToken.toLowerCase())
-      expect(assetBalances[0].balance).to.approximately(lpBalance, getErrorRange(lpBalance))
+      expect(assetBalances[0].balance).to.approximately(
+        lpBalance.add(assetBalancesBefore[0].balance),
+        getErrorRange(lpBalance.add(assetBalancesBefore[0].balance))
+      )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuations = await this.strategy.getAssetValuations(true, false)
       expect(assetValuations[0].asset.toLowerCase()).to.equal(TraderJoeAddrs.lpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
-        ethers.utils.parseUnits("100", 6),
-        getErrorRange(ethers.utils.parseUnits("100", 6))
+        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("100", 6),
-        getErrorRange(ethers.utils.parseUnits("100", 6))
+        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
       )
     })
 
     it("should succeed after multiple deposits and withdrawals", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("50", 6), this.user0.address, [])
 
@@ -101,22 +108,25 @@ function testTraderJoeAum() {
 
       const assetBalances = await this.strategy.getAssetBalances()
       expect(assetBalances[0].asset.toLowerCase()).to.equal(TraderJoeAddrs.lpToken.toLowerCase())
-      expect(assetBalances[0].balance).to.approximately(lpBalance, getErrorRange(lpBalance))
+      expect(assetBalances[0].balance).to.approximately(
+        lpBalance.add(assetBalancesBefore[0].balance),
+        getErrorRange(lpBalance.add(assetBalancesBefore[0].balance))
+      )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuations = await this.strategy.getAssetValuations(true, false)
       expect(assetValuations[0].asset.toLowerCase()).to.equal(TraderJoeAddrs.lpToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
-        ethers.utils.parseUnits("70", 6),
-        getErrorRange(ethers.utils.parseUnits("70", 6))
+        ethers.utils.parseUnits("70", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("70", 6).add(this.equityValuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("70", 6),
-        getErrorRange(ethers.utils.parseUnits("70", 6))
+        ethers.utils.parseUnits("70", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("70", 6).add(this.equityValuation))
       )
     })
   })
@@ -169,7 +179,7 @@ function testTraderJoeUpgradeable() {
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
       const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
 
-      const TraderJoeV2 = await ethers.getContractFactory("TraderJoeV2")
+      const TraderJoeV2 = await ethers.getContractFactory("TraderJoeV2", this.owner)
       const traderJoeV2 = await upgrades.upgradeProxy(this.strategy.address, TraderJoeV2, {
         call: {
           fn: "initialize",

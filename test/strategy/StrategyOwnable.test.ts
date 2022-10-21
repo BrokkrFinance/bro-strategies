@@ -18,17 +18,17 @@ export function testStrategyOwnable() {
     })
 
     it("should succeed when the owner user sets investment limit per address", async function () {
-      expect(await this.strategy.setInvestmentLimitPerAddress(0)).not.to.be.reverted
+      expect(await this.strategy.connect(this.owner).setInvestmentLimitPerAddress(0)).not.to.be.reverted
 
       expect(await this.strategy.getInvestmentLimitPerAddress()).to.equal(0)
     })
 
     it("should succeed when the owner user sets price oracle", async function () {
-      expect(await this.strategy.setPriceOracle(this.user0.address)).not.to.be.reverted
+      expect(await this.strategy.connect(this.owner).setPriceOracle(this.user0.address)).not.to.be.reverted
     })
 
     it("should succeed when the owner user sets swap service", async function () {
-      expect(await this.strategy.setSwapService(0, this.user0.address)).not.to.be.reverted
+      expect(await this.strategy.connect(this.owner).setSwapService(0, this.user0.address)).not.to.be.reverted
     })
   })
 }
