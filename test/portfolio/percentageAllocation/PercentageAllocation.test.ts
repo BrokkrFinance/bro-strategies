@@ -7,7 +7,7 @@ import { Oracles } from "../../helper/oracles"
 import { PortfolioArgs, StrategyArgs } from "../../helper/parameters"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
-import { testPortfolio } from "../Unified.test"
+import { testPortfolio } from "../Portfolio.test"
 
 testPortfolio("PercentageAllocation Portfolio", deployPercentageAllocationPortfolio, [
   testPercentageAllocationPortfolioAum,

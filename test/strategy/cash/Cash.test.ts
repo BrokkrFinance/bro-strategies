@@ -4,7 +4,7 @@ import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { airdropToken } from "../../helper/utils"
 import { SwapServices } from "../../helper/swaps"
-import { testStrategy } from "../Unified.test"
+import { testStrategy } from "../Strategy.test"
 
 testStrategy("Cash Strategy", deployCashStrategy, [testCashAum, testCashUpgradeable])
 

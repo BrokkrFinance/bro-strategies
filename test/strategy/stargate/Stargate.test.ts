@@ -5,7 +5,7 @@ import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { airdropToken, getErrorRange } from "../../helper/utils"
-import { testStrategy } from "../Unified.test"
+import { testStrategy } from "../Strategy.test"
 
 testStrategy("Stargate USDC Strategy", deployStargateUsdcStrategy, [
   testStargateUsdcAum,
