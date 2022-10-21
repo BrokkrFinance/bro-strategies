@@ -15,7 +15,7 @@ async function main() {
   if (args.length != 3) {
     console.log("Upgrade: Wrong arguments. The arguments must be network, config filename and multisig address.")
     console.log(
-      "Upgrade: ts-node ./scripts/upgrade.ts avax_mainnet Calm.json 0xE8855828fEC29dc6860A4362BCb386CCf6C0c601"
+      "Upgrade: ts-node ./scripts/upgrade.ts avax_mainnet portfolio/Calm.json 0xE8855828fEC29dc6860A4362BCb386CCf6C0c601"
     )
     return
   }
