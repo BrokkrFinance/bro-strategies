@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-export function testAllocations() {
+export function testPortfolioAllocations() {
   describe("Allocations", async function () {
     it("should fail when the sum of target investable allocations is less than 100%", async function () {
       const investableLength = (await this.portfolio.getInvestables()).length

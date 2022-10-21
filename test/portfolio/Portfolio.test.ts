@@ -2,15 +2,15 @@ import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
 import { getTokenContract } from "../helper/contracts"
-import { testAllocations } from "./PortfolioAllocations.test"
-import { testDeposit } from "./PortfolioDeposit.test"
-import { testERC165 } from "./PortfolioERC165.test"
-import { testInvestable } from "./PortfolioInvestable.test"
-import { testOwnable } from "./PortfolioOwnable.test"
-import { testPausable } from "./PortfolioPausable.test"
-import { testRebalance } from "./PortfolioRebalance.test"
-import { testUpgradeable } from "./PortfolioUpgradeable.test"
-import { testWithdraw } from "./PortfolioWithdraw.test"
+import { testPortfolioAllocations } from "./PortfolioAllocations.test"
+import { testPortfolioDeposit } from "./PortfolioDeposit.test"
+import { testPortfolioERC165 } from "./PortfolioERC165.test"
+import { testPortfolioInvestable } from "./PortfolioInvestable.test"
+import { testPortfolioOwnable } from "./PortfolioOwnable.test"
+import { testPortfolioPausable } from "./PortfolioPausable.test"
+import { testPortfolioRebalance } from "./PortfolioRebalance.test"
+import { testPortfolioUpgradeable } from "./PortfolioUpgradeable.test"
+import { testPortfolioWithdraw } from "./PortfolioWithdraw.test"
 
 export function testPortfolio(description: string, deployPortfolio: Function, portfolioSpecificTests: (() => any)[]) {
   describe(description, function () {
@@ -50,6 +50,7 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
         await this.usdc
           .connect(this.impersonatedSigner)
           .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
+        // TODO: Add USDC setter helper.
       }
 
       // Deploy portfolio and all its investables.
@@ -79,6 +80,9 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
       this.equityValuation = await this.portfolio.getEquityValuation(true, false)
       this.investmentTokenSupply = await this.portfolio.getInvestmentTokenSupply()
 
+      // Set investable to portfolio for shared tests.
+      this.investable = this.portfolio
+
       // Take snapshot.
       this.snapshot = await takeSnapshot()
     })
@@ -88,15 +92,15 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
       await this.snapshot.restore()
     })
 
-    testAllocations()
-    testDeposit()
-    testERC165()
-    testInvestable()
-    testOwnable()
-    testPausable()
-    testRebalance()
-    testUpgradeable()
-    testWithdraw()
+    testPortfolioAllocations()
+    testPortfolioDeposit()
+    testPortfolioERC165()
+    testPortfolioInvestable()
+    testPortfolioOwnable()
+    testPortfolioPausable()
+    testPortfolioRebalance()
+    testPortfolioUpgradeable()
+    testPortfolioWithdraw()
 
     for (const portfolioSpecificTest of portfolioSpecificTests) {
       portfolioSpecificTest()

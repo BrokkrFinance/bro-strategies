@@ -1,13 +1,11 @@
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { airdropToken, getDaysInSeconds, getMonthsInSeconds, getYearsInSeconds } from "../helper/utils"
+import { getDaysInSeconds, getMonthsInSeconds, getYearsInSeconds } from "../helper/utils"
 
-export function testReapReward() {
+export function testStrategyReapReward() {
   describe("ReapReward", async function () {
     it("should succeed when any user processes reward", async function () {
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("10000", 6))
-
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
 
@@ -21,8 +19,6 @@ export function testReapReward() {
       if ((await this.strategy.humanReadableName()) == "Cash strategy") {
         return
       }
-
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("10000", 6))
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])

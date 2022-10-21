@@ -1,5 +1,4 @@
-import { BigNumber, Contract } from "ethers"
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
+import { BigNumber } from "ethers"
 
 const ERROR_RANGE = 5 // ±5%
 const ERROR_RANGE_PRECISION = 1e2
@@ -20,9 +19,4 @@ export function getMonthsInSeconds(months: number) {
 
 export function getYearsInSeconds(years: number) {
   return getDaysInSeconds(365) * years
-}
-
-// TODO: To be deleted.
-export async function airdropToken(from: SignerWithAddress, to: SignerWithAddress, token: Contract, amount: BigNumber) {
-  await token.connect(from).transfer(to.address, amount)
 }

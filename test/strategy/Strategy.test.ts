@@ -2,14 +2,14 @@ import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
 import { getTokenContract } from "../helper/contracts"
-import { testDeposit } from "./StrategyDeposit.test"
-import { testERC165 } from "./StrategyERC165.test"
-import { testFee } from "./StrategyFee.test"
-import { testOwnable } from "./StrategyOwnable.test"
-import { testPausable } from "./StrategyPausable.test"
-import { testReapReward } from "./StrategyReapReward.test"
-import { testUpgradeable } from "./StrategyUpgradeable.test"
-import { testWithdraw } from "./StrategyWithdraw.test"
+import { testStrategyDeposit } from "./StrategyDeposit.test"
+import { testStrategyERC165 } from "./StrategyERC165.test"
+import { testStrategyFee } from "./StrategyFee.test"
+import { testStrategyOwnable } from "./StrategyOwnable.test"
+import { testStrategyPausable } from "./StrategyPausable.test"
+import { testStrategyReapReward } from "./StrategyReapReward.test"
+import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
+import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
 export function testStrategy(description: string, deployStrategy: Function, strategySpecificTests: (() => any)[]) {
   describe(description, function () {
@@ -46,6 +46,9 @@ export function testStrategy(description: string, deployStrategy: Function, stra
           to: this.signers[i].address,
           value: ethers.utils.parseEther("100"),
         })
+        await this.usdc
+          .connect(this.impersonatedSigner)
+          .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
         // TODO: Add USDC setter helper.
       }
 
@@ -84,6 +87,9 @@ export function testStrategy(description: string, deployStrategy: Function, stra
       this.equityValuation = await this.strategy.getEquityValuation(true, false)
       this.investmentTokenSupply = await this.strategy.getInvestmentTokenSupply()
 
+      // Set investable to strategy for shared tests.
+      this.investable = this.strategy
+
       this.snapshot = await takeSnapshot()
     })
 
@@ -91,14 +97,14 @@ export function testStrategy(description: string, deployStrategy: Function, stra
       await this.snapshot.restore()
     })
 
-    testDeposit()
-    testERC165()
-    testFee()
-    testOwnable()
-    testPausable()
-    testReapReward()
-    testUpgradeable()
-    testWithdraw()
+    testStrategyDeposit()
+    testStrategyERC165()
+    testStrategyFee()
+    testStrategyOwnable()
+    testStrategyPausable()
+    testStrategyReapReward()
+    testStrategyUpgradeable()
+    testStrategyWithdraw()
 
     for (const strategySpecificTest of strategySpecificTests) {
       strategySpecificTest()

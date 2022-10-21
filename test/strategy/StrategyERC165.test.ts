@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-export function testERC165() {
+export function testStrategyERC165() {
   describe("ERC165", async function () {
     it("should succeed to support all interfaces that strategy implements", async function () {
       expect(await this.strategy.supportsInterface("0x49147370")).to.equal(true) // IAum

@@ -4,7 +4,7 @@ import { StargateAddrs } from "../../helper/addresses"
 import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
-import { airdropToken, getErrorRange } from "../../helper/utils"
+import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
 testStrategy("Stargate USDC Strategy", deployStargateUsdcStrategy, [
@@ -86,8 +86,6 @@ async function deployStargateUsdtStrategy() {
 function testStargateUsdcAum() {
   describe("AUM - Stargate USDC Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
-
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
@@ -116,8 +114,6 @@ function testStargateUsdcAum() {
     })
 
     it("should succeed after multiple deposits and withdrawals", async function () {
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
-
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("50", 6), this.user0.address, [])
 
@@ -266,8 +262,6 @@ function testStargateUsdcUpgradeable() {
 function testStargateUsdtAum() {
   describe("AUM - Stargate USDT Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
-
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
@@ -296,8 +290,6 @@ function testStargateUsdtAum() {
     })
 
     it("should succeed after multiple deposits and withdrawals", async function () {
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
-
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("50", 6), this.user0.address, [])
 

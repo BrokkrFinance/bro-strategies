@@ -5,7 +5,7 @@ import { TraderJoeAddrs } from "../../helper/addresses"
 import { getUUPSUpgradeableStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
-import { airdropToken, getErrorRange } from "../../helper/utils"
+import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
 testStrategy("TraderJoe USDC-USDC.e Strategy", deployTraderJoeStrategy, [
@@ -43,8 +43,6 @@ async function deployTraderJoeStrategy() {
 function testTraderJoeAum() {
   describe("AUM - TraderJoe Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
-
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
 
@@ -75,8 +73,6 @@ function testTraderJoeAum() {
     })
 
     it("should succeed after multiple deposits and withdrawals", async function () {
-      airdropToken(this.impersonatedSigner, this.user0, this.usdc, ethers.utils.parseUnits("100", 6))
-
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
       await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("50", 6), this.user0.address, [])
 
