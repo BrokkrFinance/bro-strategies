@@ -8,7 +8,7 @@ import investableAbi from "../../helper/abi/investable.json"
 import { testPortfolio } from "../Portfolio.test"
 
 const CONFIG_PATH = "../../../configs/upgrade"
-const CONFIG_FILE = "Calm.json"
+const CONFIG_FILE = "portfolio/Calm.json"
 
 testPortfolio("Calm Portfolio", upgradeCalmPortfolio, [])
 
