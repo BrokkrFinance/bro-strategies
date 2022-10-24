@@ -2,8 +2,7 @@ import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
 import { getTokenContract, removePortfolioInvestmentLimitsAndFees } from "../helper/contracts"
-import { DepositHelper } from "../helper/deposit"
-import { WithdrawHelper } from "../helper/withdraw"
+import { InvestHelper } from "../helper/invest"
 import { testPortfolioAllocations } from "./PortfolioAllocations.test"
 import { testPortfolioDeposit } from "./PortfolioDeposit.test"
 import { testPortfolioERC165 } from "./PortfolioERC165.test"
@@ -89,9 +88,8 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
       // Set investable to portfolio for shared tests.
       this.investable = this.portfolio
 
-      // Set deposit and withdraw helpers.
-      this.depositHelper = new DepositHelper(this.usdc)
-      this.withdrawHelper = new WithdrawHelper(this.usdc)
+      // Set invest helper.
+      this.investHelper = new InvestHelper(this.usdc)
 
       // Take snapshot.
       this.snapshot = await takeSnapshot()

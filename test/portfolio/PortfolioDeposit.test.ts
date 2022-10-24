@@ -13,7 +13,7 @@ export function testPortfolioDeposit() {
       const investable = await ethers.getContractAt(investableAbi, await investableDecs[0].investable)
 
       // The second user deposits directly.
-      await this.depositHelper
+      await this.investHelper
         .deposit(investable, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
@@ -22,7 +22,7 @@ export function testPortfolioDeposit() {
         .success()
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -36,7 +36,7 @@ export function testPortfolioDeposit() {
       const investable = await ethers.getContractAt(investableAbi, await investableDecs[0].investable)
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -45,7 +45,7 @@ export function testPortfolioDeposit() {
         .success()
 
       // The second user deposits directly.
-      await this.depositHelper
+      await this.investHelper
         .deposit(investable, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
@@ -59,7 +59,7 @@ export function testPortfolioDeposit() {
       const investable = await ethers.getContractAt(investableAbi, await investableDecs[0].investable)
 
       // The third user deposits directly.
-      await this.depositHelper
+      await this.investHelper
         .deposit(investable, this.user2, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user2.address,
@@ -68,7 +68,7 @@ export function testPortfolioDeposit() {
         .success()
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -77,7 +77,7 @@ export function testPortfolioDeposit() {
         .success()
 
       // The second user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
@@ -91,7 +91,7 @@ export function testPortfolioDeposit() {
       const investable = await ethers.getContractAt(investableAbi, await investableDecs[0].investable)
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -100,7 +100,7 @@ export function testPortfolioDeposit() {
         .success()
 
       // The second user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
@@ -109,7 +109,7 @@ export function testPortfolioDeposit() {
         .success()
 
       // The third user deposits directly.
-      await this.depositHelper
+      await this.investHelper
         .deposit(investable, this.user2, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user2.address,
@@ -122,7 +122,7 @@ export function testPortfolioDeposit() {
       const assetBalancesBefore = await this.portfolio.getAssetBalances()
       const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
 
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -161,7 +161,7 @@ export function testPortfolioDeposit() {
       const assetBalancesBefore = await this.portfolio.getAssetBalances()
       const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
 
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("5000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -170,7 +170,7 @@ export function testPortfolioDeposit() {
         .success()
 
       const availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.portfolio, this.user0, {
           amount: availableTokenBalance.div(2),
           depositTokenReceiver: this.user0.address,
@@ -178,7 +178,7 @@ export function testPortfolioDeposit() {
         })
         .success()
 
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("5000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -186,7 +186,7 @@ export function testPortfolioDeposit() {
         })
         .success()
 
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.portfolio, this.user0, {
           amount: availableTokenBalance.div(2),
           depositTokenReceiver: this.user0.address,

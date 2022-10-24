@@ -54,6 +54,12 @@ export interface PortfolioExtraArgs {
   extraArgs: any[]
 }
 
+export interface InvestArgs {
+  amount: BigNumber
+  tokenReceiver: string
+  params: any[]
+}
+
 export interface DepositArgs {
   amount: BigNumber
   investmentTokenReceiver: string

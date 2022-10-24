@@ -55,7 +55,7 @@ function testTraderJoeAum() {
       const assetBalancesBefore = await this.strategy.getAssetBalances()
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
 
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("100", 6),
           investmentTokenReceiver: this.user0.address,
@@ -97,7 +97,7 @@ function testTraderJoeAum() {
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("50", 6),
           investmentTokenReceiver: this.user0.address,
@@ -107,7 +107,7 @@ function testTraderJoeAum() {
 
       // The first user withdraws.
       const availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.strategy, this.user0, {
           amount: availableTokenBalance.div(2),
           depositTokenReceiver: this.user0.address,
@@ -116,7 +116,7 @@ function testTraderJoeAum() {
         .success()
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("50", 6),
           investmentTokenReceiver: this.user0.address,
@@ -125,7 +125,7 @@ function testTraderJoeAum() {
         .success()
 
       // The first user withdraws.
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.strategy, this.user0, {
           amount: availableTokenBalance.div(2),
           depositTokenReceiver: this.user0.address,

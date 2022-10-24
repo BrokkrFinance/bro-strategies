@@ -9,7 +9,7 @@ export function testPausable() {
   it("should fail when any user deposits and the investable is paused", async function () {
     expect(await this.investable.connect(this.owner).pause()).not.to.be.reverted
 
-    await this.depositHelper
+    await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
         investmentTokenReceiver: this.user0.address,
@@ -24,7 +24,7 @@ export function testPausable() {
 
     expect(await this.investable.connect(this.owner).pause()).not.to.be.reverted
 
-    await this.depositHelper
+    await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
         investmentTokenReceiver: this.user0.address,
