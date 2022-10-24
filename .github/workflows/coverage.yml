@@ -20,8 +20,12 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Copy network config file
+        run: cp .openzeppelin/avalanche.json .openzeppelin/unknown-31337.json
+
       - name: Run Coverage Check
         run: yarn coverage
+
       - uses: VeryGoodOpenSource/very_good_coverage@v1
         with:
           path: "./coverage/lcov.info"
