@@ -6,7 +6,7 @@ import { getDaysInSeconds, getMonthsInSeconds, getYearsInSeconds } from "../help
 export function testStrategyReapReward() {
   describe("ReapReward", async function () {
     it("should succeed when any user processes reward", async function () {
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.investable, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -25,7 +25,7 @@ export function testStrategyReapReward() {
         return
       }
 
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.investable, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
           investmentTokenReceiver: this.user0.address,

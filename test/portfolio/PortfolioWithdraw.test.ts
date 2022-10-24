@@ -15,7 +15,7 @@ export function testPortfolioWithdraw() {
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
 
       // The second user deposits directly.
-      await this.depositHelper
+      await this.investHelper
         .deposit(investable, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
@@ -24,7 +24,7 @@ export function testPortfolioWithdraw() {
         .success()
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.investable, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -34,7 +34,7 @@ export function testPortfolioWithdraw() {
 
       // The second user withdraws directly.
       let availableTokenBalance = await investableInvestmentToken.balanceOf(this.user1.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(investable, this.user1, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user1.address,
@@ -44,7 +44,7 @@ export function testPortfolioWithdraw() {
 
       // The first user withdraws.
       availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.investable, this.user0, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user0.address,
@@ -59,7 +59,7 @@ export function testPortfolioWithdraw() {
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.investable, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -68,7 +68,7 @@ export function testPortfolioWithdraw() {
         .success()
 
       // The second user deposits directly.
-      await this.depositHelper
+      await this.investHelper
         .deposit(investable, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
@@ -78,7 +78,7 @@ export function testPortfolioWithdraw() {
 
       // The first user withdraws.
       let availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.investable, this.user0, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user0.address,
@@ -88,7 +88,7 @@ export function testPortfolioWithdraw() {
 
       // The second user withdraws directly.
       availableTokenBalance = await investableInvestmentToken.balanceOf(this.user1.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(investable, this.user1, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user1.address,
@@ -103,7 +103,7 @@ export function testPortfolioWithdraw() {
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
 
       // The third user deposits directly.
-      await this.depositHelper
+      await this.investHelper
         .deposit(investable, this.user2, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user2.address,
@@ -112,7 +112,7 @@ export function testPortfolioWithdraw() {
         .success()
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.investable, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -121,7 +121,7 @@ export function testPortfolioWithdraw() {
         .success()
 
       // The second user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.investable, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
@@ -131,7 +131,7 @@ export function testPortfolioWithdraw() {
 
       // The third user withdraws directly.
       let availableTokenBalance = await investableInvestmentToken.balanceOf(this.user2.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(investable, this.user2, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user2.address,
@@ -141,7 +141,7 @@ export function testPortfolioWithdraw() {
 
       // The first user withdraws.
       availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.investable, this.user0, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user0.address,
@@ -151,7 +151,7 @@ export function testPortfolioWithdraw() {
 
       // The second user withdraws.
       availableTokenBalance = await this.investmentToken.balanceOf(this.user1.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.investable, this.user1, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user1.address,
@@ -166,7 +166,7 @@ export function testPortfolioWithdraw() {
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
 
       // The first user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.investable, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
@@ -175,7 +175,7 @@ export function testPortfolioWithdraw() {
         .success()
 
       // The second user deposits.
-      await this.depositHelper
+      await this.investHelper
         .deposit(this.investable, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
@@ -184,7 +184,7 @@ export function testPortfolioWithdraw() {
         .success()
 
       // The third user deposits directly.
-      await this.depositHelper
+      await this.investHelper
         .deposit(investable, this.user2, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user2.address,
@@ -194,7 +194,7 @@ export function testPortfolioWithdraw() {
 
       // The first user withdraws.
       let availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.investable, this.user0, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user0.address,
@@ -204,7 +204,7 @@ export function testPortfolioWithdraw() {
 
       // The second user withdraws.
       availableTokenBalance = await this.investmentToken.balanceOf(this.user1.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(this.investable, this.user1, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user1.address,
@@ -214,7 +214,7 @@ export function testPortfolioWithdraw() {
 
       // The third user withdraws directly.
       availableTokenBalance = await investableInvestmentToken.balanceOf(this.user2.address)
-      await this.withdrawHelper
+      await this.investHelper
         .withdraw(investable, this.user2, {
           amount: availableTokenBalance,
           depositTokenReceiver: this.user2.address,
