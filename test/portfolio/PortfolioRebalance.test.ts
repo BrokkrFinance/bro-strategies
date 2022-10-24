@@ -22,7 +22,7 @@ export function testPortfolioRebalance() {
 
       await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
 
-      // Deposit.
+      // The first user deposits.
       await this.depositHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
@@ -92,7 +92,7 @@ export function testPortfolioRebalance() {
 
       await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
 
-      // Deposit.
+      // The first user deposits.
       await this.depositHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
@@ -158,9 +158,14 @@ export function testPortfolioRebalance() {
       const investable = await ethers.getContractAt(investableAbi, await investablesBefore[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
 
-      await this.usdc.connect(this.user2).approve(investable.address, ethers.utils.parseUnits("3000", 6))
-      await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
-        .not.to.be.reverted
+      // The third user deposits directly.
+      await this.depositHelper
+        .deposit(investable, this.user2, {
+          amount: ethers.utils.parseUnits("3000", 6),
+          investmentTokenReceiver: this.user2.address,
+          params: [],
+        })
+        .success()
 
       // Set target allocations 50% to the first and second investable and 0% to the others. for example [50%, 50%, 0%]
       let allocations: number[] = [50000, 50000]
@@ -170,7 +175,7 @@ export function testPortfolioRebalance() {
 
       await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
 
-      // Deposit.
+      // The first user deposits.
       await this.depositHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
@@ -237,9 +242,14 @@ export function testPortfolioRebalance() {
       const investable = await ethers.getContractAt(investableAbi, await investablesBefore[0].investable)
       const investableInvestmentToken = await ethers.getContractAt(erc20Abi, await investable.getInvestmentToken())
 
-      await this.usdc.connect(this.user2).approve(investable.address, ethers.utils.parseUnits("3000", 6))
-      await expect(investable.connect(this.user2).deposit(ethers.utils.parseUnits("3000", 6), this.user2.address, []))
-        .not.to.be.reverted
+      // The third user deposits directly.
+      await this.depositHelper
+        .deposit(investable, this.user2, {
+          amount: ethers.utils.parseUnits("3000", 6),
+          investmentTokenReceiver: this.user2.address,
+          params: [],
+        })
+        .success()
 
       // Set target allocations 50% to the first and second investable and 0% to the others. for example [50%, 50%, 0%]
       let allocations: number[] = [50000, 50000]
@@ -249,7 +259,7 @@ export function testPortfolioRebalance() {
 
       await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
 
-      // Deposit.
+      // The first user deposits.
       await this.depositHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
@@ -258,12 +268,15 @@ export function testPortfolioRebalance() {
         })
         .success()
 
-      // Withdraw.
-      await investableInvestmentToken
-        .connect(this.user2)
-        .approve(investable.address, ethers.utils.parseUnits("1500", 6))
-      await expect(investable.connect(this.user2).withdraw(ethers.utils.parseUnits("1500", 6), this.user2.address, []))
-        .not.to.be.reverted
+      // The third user withdraws directly.
+      const availableTokenBalance = await investableInvestmentToken.balanceOf(this.user2.address)
+      await this.withdrawHelper
+        .withdraw(investable, this.user2, {
+          amount: availableTokenBalance.div(2),
+          depositTokenReceiver: this.user2.address,
+          params: [],
+        })
+        .success()
 
       // Set target allocations approximately equally. for example [33%, 33%, 34%]
       allocations = []

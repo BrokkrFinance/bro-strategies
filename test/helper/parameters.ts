@@ -59,3 +59,9 @@ export interface DepositArgs {
   investmentTokenReceiver: string
   params: any[]
 }
+
+export interface WithdrawArgs {
+  amount: BigNumber
+  depositTokenReceiver: string
+  params: any[]
+}

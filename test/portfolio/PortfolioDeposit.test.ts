@@ -1,5 +1,7 @@
+import { expect } from "chai"
 import { ethers } from "hardhat"
 import investableAbi from "../helper/abi/investable.json"
+import { getErrorRange } from "../helper/utils"
 import { testDeposit } from "../shared/Deposit.test"
 
 export function testPortfolioDeposit() {
@@ -21,7 +23,7 @@ export function testPortfolioDeposit() {
 
       // The first user deposits.
       await this.depositHelper
-        .deposit(this.investable, this.user0, {
+        .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -35,7 +37,7 @@ export function testPortfolioDeposit() {
 
       // The first user deposits.
       await this.depositHelper
-        .deposit(this.investable, this.user0, {
+        .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -67,7 +69,7 @@ export function testPortfolioDeposit() {
 
       // The first user deposits.
       await this.depositHelper
-        .deposit(this.investable, this.user0, {
+        .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -76,7 +78,7 @@ export function testPortfolioDeposit() {
 
       // The second user deposits.
       await this.depositHelper
-        .deposit(this.investable, this.user1, {
+        .deposit(this.portfolio, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -90,7 +92,7 @@ export function testPortfolioDeposit() {
 
       // The first user deposits.
       await this.depositHelper
-        .deposit(this.investable, this.user0, {
+        .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -99,7 +101,7 @@ export function testPortfolioDeposit() {
 
       // The second user deposits.
       await this.depositHelper
-        .deposit(this.investable, this.user1, {
+        .deposit(this.portfolio, this.user1, {
           amount: ethers.utils.parseUnits("3000", 6),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -114,6 +116,109 @@ export function testPortfolioDeposit() {
           params: [],
         })
         .success()
+    })
+
+    it("should succeed after a single deposit", async function () {
+      const assetBalancesBefore = await this.portfolio.getAssetBalances()
+      const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
+
+      await this.depositHelper
+        .deposit(this.portfolio, this.user0, {
+          amount: ethers.utils.parseUnits("3000", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      const assetBalancesAfter = await this.portfolio.getAssetBalances()
+      const assetValuationsAfter = await this.portfolio.getAssetValuations(true, false)
+
+      const investableDescs = await this.portfolio.getInvestables()
+
+      for (const [i, investableDesc] of investableDescs.entries()) {
+        const investableAddr = await investableDesc.investable
+        const allocationPercentage = await investableDesc.allocationPercentage
+
+        const investable = await ethers.getContractAt(investableAbi, investableAddr)
+        const investableDepositAmount = ethers.utils.parseUnits("3000", 6).mul(allocationPercentage).div(1e5)
+
+        expect(assetBalancesAfter[i].asset).to.equal(await investable.getInvestmentToken())
+        expect(assetBalancesAfter[i].balance).to.approximately(
+          investableDepositAmount.add(assetBalancesBefore[i].balance),
+          getErrorRange(investableDepositAmount.add(assetBalancesBefore[i].balance))
+        )
+        expect(assetValuationsAfter[i].asset).to.equal(investableAddr)
+        expect(assetValuationsAfter[i].valuation).to.approximately(
+          investableDepositAmount.add(assetValuationsBefore[i].valuation),
+          getErrorRange(investableDepositAmount.add(assetValuationsBefore[i].valuation))
+        )
+      }
+
+      expect(await this.portfolio.getLiabilityBalances()).to.be.an("array").that.is.empty
+    })
+
+    it("should succeed after multiple deposits and withdrawals", async function () {
+      const assetBalancesBefore = await this.portfolio.getAssetBalances()
+      const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
+
+      await this.depositHelper
+        .deposit(this.portfolio, this.user0, {
+          amount: ethers.utils.parseUnits("5000", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      const availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
+      await this.withdrawHelper
+        .withdraw(this.portfolio, this.user0, {
+          amount: availableTokenBalance.div(2),
+          depositTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      await this.depositHelper
+        .deposit(this.portfolio, this.user0, {
+          amount: ethers.utils.parseUnits("5000", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      await this.withdrawHelper
+        .withdraw(this.portfolio, this.user0, {
+          amount: availableTokenBalance.div(2),
+          depositTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      const assetBalancesAfter = await this.portfolio.getAssetBalances()
+      const assetValuationsAfter = await this.portfolio.getAssetValuations(true, false)
+
+      const investableDescs = await this.portfolio.getInvestables()
+
+      for (const [i, investableDesc] of investableDescs.entries()) {
+        const investableAddr = await investableDesc.investable
+        const allocationPercentage = await investableDesc.allocationPercentage
+
+        const investable = await ethers.getContractAt(investableAbi, investableAddr)
+        const investableDepositAmount = ethers.utils.parseUnits("5000", 6).mul(allocationPercentage).div(1e5)
+
+        expect(assetBalancesAfter[i].asset).to.equal(await investable.getInvestmentToken())
+        expect(assetBalancesAfter[i].balance).to.approximately(
+          investableDepositAmount.add(assetBalancesBefore[i].balance),
+          getErrorRange(investableDepositAmount.add(assetBalancesBefore[i].balance))
+        )
+        expect(assetValuationsAfter[i].asset).to.equal(investableAddr)
+        expect(assetValuationsAfter[i].valuation).to.approximately(
+          investableDepositAmount.add(assetValuationsBefore[i].valuation),
+          getErrorRange(investableDepositAmount.add(assetValuationsBefore[i].valuation))
+        )
+      }
+
+      expect(await this.portfolio.getLiabilityBalances()).to.be.an("array").that.is.empty
     })
   })
 }

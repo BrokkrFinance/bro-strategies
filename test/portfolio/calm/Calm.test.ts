@@ -1,19 +1,14 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
-import investableAbi from "../../helper/abi/investable.json"
 import { StargateAddrs, TokenAddrs, TraderJoeAddrs } from "../../helper/addresses"
 import { deployUUPSUpgradeablePortfolio, deployUUPSUpgradeableStrategy, upgradePortfolio } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { PortfolioArgs, StrategyArgs } from "../../helper/parameters"
 import { SwapServices } from "../../helper/swaps"
-import { getErrorRange } from "../../helper/utils"
 import { testPortfolio } from "../Portfolio.test"
 
-testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, [testCalmPortfolioAum, testCalmPortfolioUpgradeable])
-testPortfolio("Calm Portfolio - Upgrade After Deploy", upgradeCalmPortfolio, [
-  testCalmPortfolioAum,
-  testCalmPortfolioUpgradeable,
-])
+testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, [testCalmPortfolioUpgradeable])
+testPortfolio("Calm Portfolio - Upgrade After Deploy", upgradeCalmPortfolio, [testCalmPortfolioUpgradeable])
 
 async function deployCalmPortfolio() {
   // Portfolios and strategies owner.
@@ -118,87 +113,6 @@ async function deployCalmPortfolio() {
 
 async function upgradeCalmPortfolio() {
   return await upgradePortfolio("portfolio/Calm.json")
-}
-
-function testCalmPortfolioAum() {
-  describe("AUM - PercentageAllocation Portfolio Specific", async function () {
-    it("should succeed after a single deposit", async function () {
-      const assetBalancesBefore = await this.portfolio.getAssetBalances()
-      const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
-
-      await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("3000", 6))
-      await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("3000", 6), this.user0.address, [])
-
-      const assetBalancesAfter = await this.portfolio.getAssetBalances()
-      const assetValuationsAfter = await this.portfolio.getAssetValuations(true, false)
-
-      const investableDescs = await this.portfolio.getInvestables()
-
-      for (const [i, investableDesc] of investableDescs.entries()) {
-        const investableAddr = await investableDesc.investable
-        const allocationPercentage = await investableDesc.allocationPercentage
-
-        const investable = await ethers.getContractAt(investableAbi, investableAddr)
-        const investableDepositAmount = ethers.utils.parseUnits("3000", 6).mul(allocationPercentage).div(1e5)
-
-        expect(assetBalancesAfter[i].asset).to.equal(await investable.getInvestmentToken())
-        expect(assetBalancesAfter[i].balance).to.approximately(
-          investableDepositAmount.add(assetBalancesBefore[i].balance),
-          getErrorRange(investableDepositAmount.add(assetBalancesBefore[i].balance))
-        )
-        expect(assetValuationsAfter[i].asset).to.equal(investableAddr)
-        expect(assetValuationsAfter[i].valuation).to.approximately(
-          investableDepositAmount.add(assetValuationsBefore[i].valuation),
-          getErrorRange(investableDepositAmount.add(assetValuationsBefore[i].valuation))
-        )
-      }
-
-      expect(await this.portfolio.getLiabilityBalances()).to.be.an("array").that.is.empty
-    })
-
-    it("should succeed after multiple deposits and withdrawals", async function () {
-      const assetBalancesBefore = await this.portfolio.getAssetBalances()
-      const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
-
-      await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("5000", 6))
-      await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("5000", 6), this.user0.address, [])
-
-      await this.investmentToken.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("2000", 6))
-      await this.portfolio.connect(this.user0).withdraw(ethers.utils.parseUnits("2000", 6), this.user0.address, [])
-
-      await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("5000", 6))
-      await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("5000", 6), this.user0.address, [])
-
-      await this.investmentToken.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("1000", 6))
-      await this.portfolio.connect(this.user0).withdraw(ethers.utils.parseUnits("1000", 6), this.user0.address, [])
-
-      const assetBalancesAfter = await this.portfolio.getAssetBalances()
-      const assetValuationsAfter = await this.portfolio.getAssetValuations(true, false)
-
-      const investableDescs = await this.portfolio.getInvestables()
-
-      for (const [i, investableDesc] of investableDescs.entries()) {
-        const investableAddr = await investableDesc.investable
-        const allocationPercentage = await investableDesc.allocationPercentage
-
-        const investable = await ethers.getContractAt(investableAbi, investableAddr)
-        const investableDepositAmount = ethers.utils.parseUnits("7000", 6).mul(allocationPercentage).div(1e5)
-
-        expect(assetBalancesAfter[i].asset).to.equal(await investable.getInvestmentToken())
-        expect(assetBalancesAfter[i].balance).to.approximately(
-          investableDepositAmount.add(assetBalancesBefore[i].balance),
-          getErrorRange(investableDepositAmount.add(assetBalancesBefore[i].balance))
-        )
-        expect(assetValuationsAfter[i].asset).to.equal(investableAddr)
-        expect(assetValuationsAfter[i].valuation).to.approximately(
-          investableDepositAmount.add(assetValuationsBefore[i].valuation),
-          getErrorRange(investableDepositAmount.add(assetValuationsBefore[i].valuation))
-        )
-      }
-
-      expect(await this.portfolio.getLiabilityBalances()).to.be.an("array").that.is.empty
-    })
-  })
 }
 
 function testCalmPortfolioUpgradeable() {
