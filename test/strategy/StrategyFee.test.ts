@@ -1,5 +1,6 @@
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
+import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { getErrorRange, getMonthsInSeconds } from "../helper/utils"
 
@@ -116,6 +117,13 @@ export function testStrategyFee() {
         .to.emit(this.strategy, "Withdrawal")
         .withArgs(this.user2.address, this.user2.address, ethers.utils.parseUnits("1000", 6))
 
+      const userInvestmentTokenBalance = BigNumber.from(
+        Math.floor(ethers.utils.parseUnits("4000", 6).toNumber() / this.investmentTokenPrice)
+      )
+      const strategyInvestmentTokenBalance = BigNumber.from(
+        Math.floor(ethers.utils.parseUnits("12000", 6).toNumber() / this.investmentTokenPrice)
+      )
+
       expect(await this.usdc.balanceOf(this.user0.address)).to.be.approximately(
         ethers.utils.parseUnits("6000", 6),
         getErrorRange(ethers.utils.parseUnits("6000", 6))
@@ -129,20 +137,20 @@ export function testStrategyFee() {
         getErrorRange(ethers.utils.parseUnits("5700", 6))
       )
       expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("4000", 6),
-        getErrorRange(ethers.utils.parseUnits("4000", 6))
+        userInvestmentTokenBalance,
+        getErrorRange(userInvestmentTokenBalance)
       )
       expect(await this.investmentToken.balanceOf(this.user1.address)).to.be.approximately(
-        ethers.utils.parseUnits("4000", 6),
-        getErrorRange(ethers.utils.parseUnits("4000", 6))
+        userInvestmentTokenBalance,
+        getErrorRange(userInvestmentTokenBalance)
       )
       expect(await this.investmentToken.balanceOf(this.user2.address)).to.be.approximately(
-        ethers.utils.parseUnits("4000", 6),
-        getErrorRange(ethers.utils.parseUnits("4000", 6))
+        userInvestmentTokenBalance,
+        getErrorRange(userInvestmentTokenBalance)
       )
       expect(await this.strategy.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("12000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("12000", 6).add(this.investmentTokenSupply))
+        strategyInvestmentTokenBalance.add(this.investmentTokenSupply),
+        getErrorRange(strategyInvestmentTokenBalance.add(this.investmentTokenSupply))
       )
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
         ethers.utils.parseUnits("12000", 6).add(this.equityValuation),

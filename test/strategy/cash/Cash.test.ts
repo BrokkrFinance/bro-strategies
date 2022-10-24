@@ -3,6 +3,7 @@ import { ethers, upgrades } from "hardhat"
 import { deployUUPSUpgradeableStrategy, upgradeStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
+import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
 testStrategy("Cash Strategy - Deploy", deployCashStrategy, [testCashAum, testCashUpgradeable])
@@ -60,50 +61,104 @@ async function upgradeCashWithTraderJoeStrategy() {
 function testCashAum() {
   describe("AUM - Cash Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
-      await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
-      await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("100", 6), this.user0.address, [])
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
 
-      const assetBalances = await this.strategy.getAssetBalances()
-      expect(assetBalances[0].asset).to.equal(this.usdc.address)
-      expect(assetBalances[0].balance).to.equal(ethers.utils.parseUnits("100", 6))
+      await this.depositHelper
+        .deposit(this.strategy, this.user0, {
+          amount: ethers.utils.parseUnits("100", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      const assetBalancesAfter = await this.strategy.getAssetBalances()
+      expect(assetBalancesAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetBalancesAfter[0].balance).to.approximately(
+        ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance))
+      )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
-      const assetValuations = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuations[0].asset).to.equal(this.usdc.address)
-      expect(assetValuations[0].valuation).to.equal(ethers.utils.parseUnits("100", 6))
+      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
+      expect(assetValuationsAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetValuationsAfter[0].valuation).to.be.approximately(
+        ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation))
+      )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
-      expect(await this.strategy.getEquityValuation(true, false)).to.equal(ethers.utils.parseUnits("100", 6))
+      expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
+        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
+      )
     })
 
     it("should succeed after multiple deposits and withdrawals", async function () {
-      await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
-      await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("50", 6), this.user0.address, [])
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
 
-      await this.investmentToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("20", 6))
-      await this.strategy.connect(this.user0).withdraw(ethers.utils.parseUnits("20", 6), this.user0.address, [])
+      // The first user deposits.
+      await this.depositHelper
+        .deposit(this.strategy, this.user0, {
+          amount: ethers.utils.parseUnits("50", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
 
-      await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("50", 6))
-      await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("50", 6), this.user0.address, [])
+      // The first user withdraws.
+      const availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
+      await this.withdrawHelper
+        .withdraw(this.investable, this.user0, {
+          amount: availableTokenBalance.div(2),
+          depositTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
 
-      await this.investmentToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10", 6))
-      await this.strategy.connect(this.user0).withdraw(ethers.utils.parseUnits("10", 6), this.user0.address, [])
+      // The first user deposits.
+      await this.depositHelper
+        .deposit(this.strategy, this.user0, {
+          amount: ethers.utils.parseUnits("50", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
 
-      const assetBalances = await this.strategy.getAssetBalances()
-      expect(assetBalances[0].asset).to.equal(this.usdc.address)
-      expect(assetBalances[0].balance).to.equal(ethers.utils.parseUnits("70", 6))
+      // The first user withdraws.
+      await this.withdrawHelper
+        .withdraw(this.investable, this.user0, {
+          amount: availableTokenBalance.div(2),
+          depositTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      const assetBalancesAfter = await this.strategy.getAssetBalances()
+      expect(assetBalancesAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetBalancesAfter[0].balance).to.approximately(
+        ethers.utils.parseUnits("50", 6).add(assetBalancesBefore[0].balance),
+        getErrorRange(ethers.utils.parseUnits("50", 6).add(assetBalancesBefore[0].balance))
+      )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
-      const assetValuations = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuations[0].asset).to.equal(this.usdc.address)
-      expect(assetValuations[0].valuation).to.equal(ethers.utils.parseUnits("70", 6))
+      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
+      expect(assetValuationsAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetValuationsAfter[0].valuation).to.approximately(
+        ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation),
+        getErrorRange(ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation))
+      )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
-      expect(await this.strategy.getEquityValuation(true, false)).to.equal(ethers.utils.parseUnits("70", 6))
+      expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
+        ethers.utils.parseUnits("50", 6).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
+      )
     })
   })
 }

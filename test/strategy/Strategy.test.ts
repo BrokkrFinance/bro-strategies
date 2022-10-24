@@ -93,6 +93,10 @@ export function testStrategy(description: string, deployStrategy: Function, stra
       this.equityValuation = await this.strategy.getEquityValuation(true, false)
       this.investmentTokenSupply = await this.strategy.getInvestmentTokenSupply()
 
+      // Store investment token price for fee tests.
+      this.investmentTokenPrice =
+        this.investmentTokenSupply == 0 ? 1 : this.equityValuation / this.investmentTokenSupply
+
       // Set investable to strategy for shared tests.
       this.investable = this.strategy
 
