@@ -2,6 +2,7 @@ import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
 import { getTokenContract, removeStrategyInvestmentLimitsAndFees } from "../helper/contracts"
+import { DepositHelper } from "../helper/deposit"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyERC165 } from "./StrategyERC165.test"
 import { testStrategyFee } from "./StrategyFee.test"
@@ -93,6 +94,9 @@ export function testStrategy(description: string, deployStrategy: Function, stra
 
       // Set investable to strategy for shared tests.
       this.investable = this.strategy
+
+      // Set deposit helper.
+      this.depositHelper = new DepositHelper(this.usdc)
 
       this.snapshot = await takeSnapshot()
     })
