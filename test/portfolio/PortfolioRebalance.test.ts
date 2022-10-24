@@ -23,22 +23,13 @@ export function testPortfolioRebalance() {
       await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
 
       // Deposit.
-      await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("10000", 6))
-      await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
-
-      expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6),
-        getErrorRange(ethers.utils.parseUnits("10000", 6))
-      )
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply))
-      )
-      expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.equityValuation))
-      )
+      await this.depositHelper
+        .deposit(this.portfolio, this.user0, {
+          amount: ethers.utils.parseUnits("10000", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
 
       // Set target allocations approximately equally. for example [33%, 33%, 34%]
       allocations = []
@@ -62,20 +53,6 @@ export function testPortfolioRebalance() {
       expect(await this.portfolio.connect(this.owner).rebalance(depositParams, withdrawParams)).to.emit(
         this.portfolio,
         "Rebalance"
-      )
-
-      expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6),
-        getErrorRange(ethers.utils.parseUnits("10000", 6))
-      )
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply))
-      )
-      expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.equityValuation))
       )
 
       // Check if equity valuations of investables corresponds to the target allocations.
@@ -116,22 +93,13 @@ export function testPortfolioRebalance() {
       await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
 
       // Deposit.
-      await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("10000", 6))
-      await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
-
-      expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6),
-        getErrorRange(ethers.utils.parseUnits("10000", 6))
-      )
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply))
-      )
-      expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.equityValuation))
-      )
+      await this.depositHelper
+        .deposit(this.portfolio, this.user0, {
+          amount: ethers.utils.parseUnits("10000", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
 
       // Set target allocations approximately equally. for example [33%, 33%, 34%]
       allocations = []
@@ -155,20 +123,6 @@ export function testPortfolioRebalance() {
       expect(await this.portfolio.connect(this.owner).rebalance(depositParams, withdrawParams)).to.emit(
         this.portfolio,
         "Rebalance"
-      )
-
-      expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6),
-        getErrorRange(ethers.utils.parseUnits("10000", 6))
-      )
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply))
-      )
-      expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.equityValuation))
       )
 
       // Check if equity valuations of investables corresponds to the target allocations.
@@ -217,22 +171,13 @@ export function testPortfolioRebalance() {
       await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
 
       // Deposit.
-      await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("10000", 6))
-      await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
-
-      expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6),
-        getErrorRange(ethers.utils.parseUnits("10000", 6))
-      )
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply))
-      )
-      expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.equityValuation))
-      )
+      await this.depositHelper
+        .deposit(this.portfolio, this.user0, {
+          amount: ethers.utils.parseUnits("10000", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
 
       // Set target allocations approximately equally. for example [33%, 33%, 34%]
       allocations = []
@@ -256,25 +201,6 @@ export function testPortfolioRebalance() {
       expect(await this.portfolio.connect(this.owner).rebalance(depositParams, withdrawParams)).to.emit(
         this.portfolio,
         "Rebalance"
-      )
-
-      expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.usdc.balanceOf(this.user2.address)).to.equal(ethers.utils.parseUnits("7000", 6))
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6),
-        getErrorRange(ethers.utils.parseUnits("10000", 6))
-      )
-      expect(await investableInvestmentToken.balanceOf(this.user2.address)).to.be.approximately(
-        ethers.utils.parseUnits("3000", 6),
-        getErrorRange(ethers.utils.parseUnits("3000", 6))
-      )
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply))
-      )
-      expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.equityValuation))
       )
 
       // Check if equity valuations of investables corresponds to the target allocations.
@@ -324,23 +250,15 @@ export function testPortfolioRebalance() {
       await this.portfolio.connect(this.owner).setTargetInvestableAllocations(allocations)
 
       // Deposit.
-      await this.usdc.connect(this.user0).approve(this.portfolio.address, ethers.utils.parseUnits("10000", 6))
-      await this.portfolio.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
+      await this.depositHelper
+        .deposit(this.portfolio, this.user0, {
+          amount: ethers.utils.parseUnits("10000", 6),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
 
-      expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6),
-        getErrorRange(ethers.utils.parseUnits("10000", 6))
-      )
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply))
-      )
-      expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.equityValuation))
-      )
-
+      // Withdraw.
       await investableInvestmentToken
         .connect(this.user2)
         .approve(investable.address, ethers.utils.parseUnits("1500", 6))
@@ -369,28 +287,6 @@ export function testPortfolioRebalance() {
       expect(await this.portfolio.connect(this.owner).rebalance(depositParams, withdrawParams)).to.emit(
         this.portfolio,
         "Rebalance"
-      )
-
-      expect(await this.usdc.balanceOf(this.user0.address)).to.equal(0)
-      expect(await this.usdc.balanceOf(this.user2.address)).to.be.approximately(
-        ethers.utils.parseUnits("8500", 6),
-        getErrorRange(ethers.utils.parseUnits("8500", 6))
-      )
-      expect(await this.investmentToken.balanceOf(this.user0.address)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6),
-        getErrorRange(ethers.utils.parseUnits("10000", 6))
-      )
-      expect(await investableInvestmentToken.balanceOf(this.user2.address)).to.be.approximately(
-        ethers.utils.parseUnits("1500", 6),
-        getErrorRange(ethers.utils.parseUnits("1500", 6))
-      )
-      expect(await this.portfolio.getInvestmentTokenSupply()).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.investmentTokenSupply))
-      )
-      expect(await this.portfolio.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("10000", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("10000", 6).add(this.equityValuation))
       )
 
       // Check if equity valuations of investables corresponds to the target allocations.

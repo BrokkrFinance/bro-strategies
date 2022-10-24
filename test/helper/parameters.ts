@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers"
 import { Oracle } from "./oracles"
 import { SwapService } from "./swaps"
 
@@ -51,4 +52,10 @@ export interface PortfolioArgs {
 
 export interface PortfolioExtraArgs {
   extraArgs: any[]
+}
+
+export interface DepositArgs {
+  amount: BigNumber
+  investmentTokenReceiver: string
+  params: any[]
 }
