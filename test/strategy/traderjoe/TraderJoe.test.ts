@@ -8,11 +8,13 @@ import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
+import { testStrategyReapUninvestedReward } from "../StrategyReapUninvestedReward.test"
 
 testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, [
   testTraderJoeAum,
   testTraderJoeInitialize,
   testTraderJoeUpgradeable,
+  testStrategyReapUninvestedReward,
 ])
 testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, [
   testTraderJoeAum,

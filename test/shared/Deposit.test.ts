@@ -24,6 +24,17 @@ export function testDeposit() {
       .success()
   })
 
+  it("should succeed when a single user deposits USDC, and expect a reasonable investment value", async function () {
+    await this.investHelper
+      .deposit(this.investable, this.user0, {
+        amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: ethers.utils.parseUnits("1500", 6),
+        investmentTokenReceiver: this.user0.address,
+        params: [],
+      })
+      .success()
+  })
+
   it("should fail when a single user deposits zero amount", async function () {
     await this.investHelper
       .deposit(this.investable, this.user0, {
@@ -33,6 +44,17 @@ export function testDeposit() {
         params: [],
       })
       .revertedWithCustomError("ZeroAmountDeposited")
+  })
+
+  it("should fail when a single user deposits and expects too high investment value", async function () {
+    await this.investHelper
+      .deposit(this.investable, this.user0, {
+        amount: ethers.utils.parseUnits("1000", 6),
+        minimumDepositTokenAmountOut: ethers.utils.parseUnits("1001", 6),
+        investmentTokenReceiver: this.user0.address,
+        params: [],
+      })
+      .revertedWithCustomError("TooSmallDepositTokenAmountOut")
   })
 
   it("should fail when a single user deposits USDC that he/she doesn't have", async function () {

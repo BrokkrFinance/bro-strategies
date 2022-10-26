@@ -43,7 +43,7 @@ The most important thing is to bump the major version number at each breaking ch
 
 ### High priority
 
-1. Remove unsafeSkipStorageCheck in the next release:
+1. remove unsafeSkipStorageCheck in the next release:
 1. <s>create a cash strategy for the wrapper portfolio</s>
 1. <s>add a new price oracle supporting USDT</s>
 1. <s>reinvest (all USDC that is the contract balance - unclaimed fee) during reap reward</s>
