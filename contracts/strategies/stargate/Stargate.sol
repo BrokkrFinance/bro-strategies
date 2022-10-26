@@ -18,11 +18,11 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.stargate_strategy.stargate_strategy_v1.0.2";
+        "brokkr.stargate_strategy.stargate_strategy_v1.1.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.2";
+    string public constant version = "1.1.0";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -180,8 +180,8 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function getAssetBalances()
-        external
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
@@ -197,8 +197,8 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override

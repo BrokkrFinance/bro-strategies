@@ -9,7 +9,7 @@ abstract contract StrategyOwnableBaseUpgradeable is
     OwnableUpgradeable,
     StrategyBaseUpgradeable
 {
-    uint256[8] private futureFeaturesGap;
+    uint256[8] private __gap;
 
     // solhint-disable-next-line
     function __StrategyOwnableBaseUpgradeable_init(

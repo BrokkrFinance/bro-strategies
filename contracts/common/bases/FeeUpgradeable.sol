@@ -14,7 +14,7 @@ abstract contract FeeUpgradeable is Initializable, IFee {
     uint256 internal currentAccumulatedFee;
     uint256 internal claimedFee;
     address internal feeReceiver;
-    uint256[40] private futureFeaturesGap;
+    uint256[40] private __gap;
 
     // solhint-disable-next-line func-name-mixedcase
     function __FeeUpgradeable_init(

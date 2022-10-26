@@ -26,6 +26,7 @@ export function testPortfolioRebalance() {
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -50,10 +51,9 @@ export function testPortfolioRebalance() {
         withdrawParams.push([])
       }
 
-      expect(await this.portfolio.connect(this.owner).rebalance(depositParams, withdrawParams)).to.emit(
-        this.portfolio,
-        "Rebalance"
-      )
+      expect(
+        await this.portfolio.connect(this.owner).rebalance(BigNumber.from(0), depositParams, withdrawParams)
+      ).to.emit(this.portfolio, "Rebalance")
 
       // Check if equity valuations of investables corresponds to the target allocations.
       const investables = await this.portfolio.getInvestables()
@@ -96,6 +96,7 @@ export function testPortfolioRebalance() {
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -120,10 +121,9 @@ export function testPortfolioRebalance() {
         withdrawParams.push([])
       }
 
-      expect(await this.portfolio.connect(this.owner).rebalance(depositParams, withdrawParams)).to.emit(
-        this.portfolio,
-        "Rebalance"
-      )
+      expect(
+        await this.portfolio.connect(this.owner).rebalance(BigNumber.from(0), depositParams, withdrawParams)
+      ).to.emit(this.portfolio, "Rebalance")
 
       // Check if equity valuations of investables corresponds to the target allocations.
       const investables = await this.portfolio.getInvestables()
@@ -162,6 +162,7 @@ export function testPortfolioRebalance() {
       await this.investHelper
         .deposit(investable, this.user2, {
           amount: ethers.utils.parseUnits("3000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user2.address,
           params: [],
         })
@@ -179,6 +180,7 @@ export function testPortfolioRebalance() {
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -203,10 +205,9 @@ export function testPortfolioRebalance() {
         withdrawParams.push([])
       }
 
-      expect(await this.portfolio.connect(this.owner).rebalance(depositParams, withdrawParams)).to.emit(
-        this.portfolio,
-        "Rebalance"
-      )
+      expect(
+        await this.portfolio.connect(this.owner).rebalance(BigNumber.from(0), depositParams, withdrawParams)
+      ).to.emit(this.portfolio, "Rebalance")
 
       // Check if equity valuations of investables corresponds to the target allocations.
       const investablesAfter = await this.portfolio.getInvestables()
@@ -246,6 +247,7 @@ export function testPortfolioRebalance() {
       await this.investHelper
         .deposit(investable, this.user2, {
           amount: ethers.utils.parseUnits("3000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user2.address,
           params: [],
         })
@@ -263,6 +265,7 @@ export function testPortfolioRebalance() {
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -273,6 +276,7 @@ export function testPortfolioRebalance() {
       await this.investHelper
         .withdraw(investable, this.user2, {
           amount: availableTokenBalance.div(2),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           depositTokenReceiver: this.user2.address,
           params: [],
         })
@@ -297,10 +301,9 @@ export function testPortfolioRebalance() {
         withdrawParams.push([])
       }
 
-      expect(await this.portfolio.connect(this.owner).rebalance(depositParams, withdrawParams)).to.emit(
-        this.portfolio,
-        "Rebalance"
-      )
+      expect(
+        await this.portfolio.connect(this.owner).rebalance(BigNumber.from(0), depositParams, withdrawParams)
+      ).to.emit(this.portfolio, "Rebalance")
 
       // Check if equity valuations of investables corresponds to the target allocations.
       const investablesAfter = await this.portfolio.getInvestables()

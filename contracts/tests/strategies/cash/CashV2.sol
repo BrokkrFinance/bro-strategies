@@ -29,13 +29,11 @@ contract CashV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function _deposit(
-        uint256 amount,
-        NameValuePair[] calldata /* params */
-    ) internal virtual override {
-        CashStorage storage strategyStorage = CashStorageLib.getStorage();
-        strategyStorage.balance += amount;
-    }
+    function _deposit(uint256 amount, NameValuePair[] calldata)
+        internal
+        virtual
+        override
+    {}
 
     function _beforeWithdraw(uint256, NameValuePair[] calldata)
         internal
@@ -50,10 +48,7 @@ contract CashV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         internal
         virtual
         override
-    {
-        CashStorage storage strategyStorage = CashStorageLib.getStorage();
-        strategyStorage.balance -= amount;
-    }
+    {}
 
     function _afterWithdraw(uint256 amount, NameValuePair[] calldata)
         internal
@@ -70,51 +65,41 @@ contract CashV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         override
     {}
 
-    function getAssetBalances()
-        external
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
         returns (Balance[] memory assetBalances)
+    {}
+
+    function processReward(NameValuePair[] calldata, NameValuePair[] calldata)
+        external
+        virtual
+        override
+        nonReentrant
     {
-        CashStorage storage strategyStorage = CashStorageLib.getStorage();
-        assetBalances = new Balance[](1);
-        assetBalances[0] = Balance(
-            address(depositToken),
-            strategyStorage.balance
-        );
+        emit RewardProcess(0);
+        emit Deposit(address(this), address(0), 0);
     }
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function _getAssetValuations(
-        bool, /*shouldMaximise*/
-        bool /*shouldIncludeAmmPrice*/
-    )
+    function _getAssetValuations(bool, bool)
         internal
         view
         virtual
         override
         returns (Valuation[] memory assetValuations)
-    {
-        CashStorage storage strategyStorage = CashStorageLib.getStorage();
-        assetValuations = new Valuation[](1);
-        assetValuations[0] = Valuation(
-            address(depositToken),
-            strategyStorage.balance
-        );
-    }
+    {}
 
-    function _getLiabilityValuations(
-        bool, /*shouldMaximise*/
-        bool /*shouldIncludeAmmPrice*/
-    )
+    function _getLiabilityValuations(bool, bool)
         internal
         view
         virtual

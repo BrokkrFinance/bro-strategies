@@ -234,7 +234,7 @@ describe("Unified strategy interface and base implementation", function () {
     await printState("Withdraw 0.2 portfolio token by Alice", depositToken, portfolio, strategy1, strategy2, strategy3)
 
     await expectSuccess(portfolio.setTargetInvestableAllocations([90000, 10000, 0]))
-    await expectSuccess(portfolio.rebalance([[], [], []], [[], [], []]))
+    await expectSuccess(portfolio.rebalance(BigNumber.from(0), [[], [], []], [[], [], []]))
     await printState("Rebalance to 90% - 10%", depositToken, portfolio, strategy1, strategy2, strategy3)
 
     // get withdrawal fee after deposit and rebalance
@@ -242,7 +242,7 @@ describe("Unified strategy interface and base implementation", function () {
     console.log("portfolio withdrawal fee after deposit and rebalance: ", await portfolio.getTotalWithdrawalFee([]))
 
     await expectSuccess(portfolio.setTargetInvestableAllocations([0, 100000, 0]))
-    await expectSuccess(portfolio.rebalance([[], [], []], [[], [], []]))
+    await expectSuccess(portfolio.rebalance(BigNumber.from(0), [[], [], []], [[], [], []]))
     await printState("Rebalance to 0% - 100%", depositToken, portfolio, strategy1, strategy2, strategy3)
 
     // console.log("------------------------------------------")

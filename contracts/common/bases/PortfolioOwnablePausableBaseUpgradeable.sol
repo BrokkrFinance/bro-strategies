@@ -9,7 +9,7 @@ abstract contract PortfolioOwnablePausableBaseUpgradeable is
     PausableUpgradeable,
     PortfolioOwnableBaseUpgradeable
 {
-    uint256[4] private futureFeaturesGap;
+    uint256[4] private __gap;
 
     // solhint-disable-next-line
     function __PortfolioOwnablePausableBaseUpgradeable_init(

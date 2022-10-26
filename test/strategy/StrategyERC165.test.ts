@@ -5,7 +5,7 @@ export function testStrategyERC165() {
     it("should succeed to support all interfaces that strategy implements", async function () {
       expect(await this.strategy.supportsInterface("0x49147370")).to.equal(true) // IAum
       expect(await this.strategy.supportsInterface("0x52f3b8ca")).to.equal(true) // IFee
-      expect(await this.strategy.supportsInterface("0x60145abe")).to.equal(true) // IInvestable
+      expect(await this.strategy.supportsInterface("0x1a6153f3")).to.equal(true) // IInvestable
       expect(await this.strategy.supportsInterface("0xb7ac895f")).to.equal(true) // IReward
       expect(await this.strategy.supportsInterface("0x00000000")).to.equal(true) // IStrategy
     })

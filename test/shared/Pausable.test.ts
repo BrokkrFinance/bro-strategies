@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 
 export function testPausable() {
@@ -12,6 +13,7 @@ export function testPausable() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -20,13 +22,16 @@ export function testPausable() {
 
   it("should fail when any user withdraws and the investable is paused", async function () {
     await this.usdc.connect(this.user0).approve(this.investable.address, ethers.utils.parseUnits("3000", 6))
-    await this.investable.connect(this.user0).deposit(ethers.utils.parseUnits("3000", 6), this.user0.address, [])
+    await this.investable
+      .connect(this.user0)
+      .deposit(ethers.utils.parseUnits("3000", 6), BigNumber.from(0), this.user0.address, [])
 
     expect(await this.investable.connect(this.owner).pause()).not.to.be.reverted
 
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })

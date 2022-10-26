@@ -55,16 +55,16 @@ contract Template is StrategyOwnablePausableBaseUpgradeable {
         // contains the interaction with DEFI protocols to reap the rewards
     }
 
-    function getAssetBalances()
-        external
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
         returns (Balance[] memory assetBalances)
     {}
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override

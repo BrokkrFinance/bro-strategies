@@ -11,7 +11,7 @@ abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
 
     uint256 private totalInvestmentLimit;
     uint256 private investmentLimitPerAddress;
-    uint256[8] private futureFeaturesGap;
+    uint256[8] private __gap;
 
     // solhint-disable-next-line func-name-mixedcase
     function __InvestmentLimitUpgradeable_init(

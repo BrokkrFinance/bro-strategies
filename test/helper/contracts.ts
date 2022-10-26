@@ -131,7 +131,10 @@ export async function upgradeInvestable(config: string) {
   const owner = await ethers.getImpersonatedSigner(liveConfig.owner)
   for (let upgradeConfig of upgradeConfigs) {
     const NewImplementation = await ethers.getContractFactory(upgradeConfig.newImplementation, owner)
-    const newImplementation = await upgrades.upgradeProxy(upgradeConfig.proxy, NewImplementation, { kind: "uups" })
+    const newImplementation = await upgrades.upgradeProxy(upgradeConfig.proxy, NewImplementation, {
+      kind: "uups",
+      unsafeSkipStorageCheck: true,
+    })
     await newImplementation.deployed()
   }
 
