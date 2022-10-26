@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import { deployUUPSUpgradeableStrategy, upgradeStrategy } from "../../helper/contracts"
 import { Oracles } from "../../helper/oracles"
@@ -67,6 +68,7 @@ function testCashAum() {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("100", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -104,6 +106,7 @@ function testCashAum() {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("50", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -114,6 +117,7 @@ function testCashAum() {
       await this.investHelper
         .withdraw(this.investable, this.user0, {
           amount: availableTokenBalance.div(2),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           depositTokenReceiver: this.user0.address,
           params: [],
         })
@@ -123,6 +127,7 @@ function testCashAum() {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("50", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -132,6 +137,7 @@ function testCashAum() {
       await this.investHelper
         .withdraw(this.investable, this.user0, {
           amount: availableTokenBalance.div(2),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           depositTokenReceiver: this.user0.address,
           params: [],
         })

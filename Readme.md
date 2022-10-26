@@ -43,12 +43,13 @@ The most important thing is to bump the major version number at each breaking ch
 
 ### High priority
 
+1. Remove unsafeSkipStorageCheck in the next release:
 1. <s>create a cash strategy for the wrapper portfolio</s>
 1. <s>add a new price oracle supporting USDT</s>
-1. reinvest (all USDC that is the contract balance - unclaimed fee) during reap reward
+1. <s>reinvest (all USDC that is the contract balance - unclaimed fee) during reap reward</s>
 1. verify existing contracts using tenderly and analyze the gas cost
 1. mint non-recoverable tokens at the first deposit just like uniswap does
-1. create reusable tests for portfolios and strategies
+1. <s>create reusable tests for portfolios and strategies</s>
 1. deposits on the portfolio should respect the caps on the the embedded investables
 1. deposits on the portfolio should respect the pausability of the embedded investables
 1. rebalancing of portfolios should respect the caps on the embedded investables
@@ -77,3 +78,4 @@ The most important thing is to bump the major version number at each breaking ch
 1. add comments to unified test scripts
 1. improve unified test performance
 1. write our own version of safeApprove: https://github.com/OpenZeppelin/openzeppelin-contracts/issues/2219
+1. In the current implementation a strategy cannot hold depositToken assets apart from the uninvested depositToken.

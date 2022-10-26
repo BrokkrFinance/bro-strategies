@@ -40,16 +40,16 @@ contract TestUpgradedStrategy is
 
     function _reapReward(NameValuePair[] calldata) internal virtual override {}
 
-    function getAssetBalances()
-        external
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
         returns (Balance[] memory assetBalances)
     {}
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override

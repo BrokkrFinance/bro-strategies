@@ -10,7 +10,7 @@ abstract contract StrategyRoleableBaseUpgradeable is
     StrategyBaseUpgradeable
 {
     error MissingDefaultAdminRole();
-    uint256[8] private futureFeaturesGap;
+    uint256[8] private __gap;
 
     // Manages sensitive parameters of the strategy for example fee swap service.
     // Any parameter change that can result in stolen or lost funds should be managed by the governor role.

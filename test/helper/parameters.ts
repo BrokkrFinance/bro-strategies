@@ -56,18 +56,21 @@ export interface PortfolioExtraArgs {
 
 export interface InvestArgs {
   amount: BigNumber
+  minimumDepositTokenAmountOut: BigNumber
   tokenReceiver: string
   params: any[]
 }
 
 export interface DepositArgs {
   amount: BigNumber
+  minimumDepositTokenAmountOut: BigNumber
   investmentTokenReceiver: string
   params: any[]
 }
 
 export interface WithdrawArgs {
   amount: BigNumber
+  minimumDepositTokenAmountOut: BigNumber
   depositTokenReceiver: string
   params: any[]
 }

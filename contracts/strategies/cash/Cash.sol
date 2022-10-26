@@ -9,11 +9,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.cash_strategy.cash_strategy_v1.0.2";
+        "brokkr.cash_strategy.cash_strategy_v1.1.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Cash strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.2";
+    string public constant version = "1.1.0";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -30,13 +30,11 @@ contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function _deposit(
-        uint256 amount,
-        NameValuePair[] calldata /* params */
-    ) internal virtual override {
-        CashStorage storage strategyStorage = CashStorageLib.getStorage();
-        strategyStorage.balance += amount;
-    }
+    function _deposit(uint256 amount, NameValuePair[] calldata)
+        internal
+        virtual
+        override
+    {}
 
     function _beforeWithdraw(uint256, NameValuePair[] calldata)
         internal
@@ -51,18 +49,15 @@ contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         internal
         virtual
         override
-    {
-        CashStorage storage strategyStorage = CashStorageLib.getStorage();
-        strategyStorage.balance -= amount;
-    }
+    {}
 
-    function _afterWithdraw(uint256 amount, NameValuePair[] calldata)
+    function _afterWithdraw(uint256, NameValuePair[] calldata)
         internal
         virtual
         override
         returns (uint256)
     {
-        return amount;
+        return 0;
     }
 
     function _reapReward(NameValuePair[] calldata params)
@@ -71,51 +66,41 @@ contract Cash is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         override
     {}
 
-    function getAssetBalances()
+    function processReward(NameValuePair[] calldata, NameValuePair[] calldata)
         external
+        virtual
+        override
+        nonReentrant
+    {
+        emit RewardProcess(0);
+        emit Deposit(address(this), address(0), 0);
+    }
+
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
         returns (Balance[] memory assetBalances)
-    {
-        CashStorage storage strategyStorage = CashStorageLib.getStorage();
-        assetBalances = new Balance[](1);
-        assetBalances[0] = Balance(
-            address(depositToken),
-            strategyStorage.balance
-        );
-    }
+    {}
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override
         returns (Balance[] memory liabilityBalances)
     {}
 
-    function _getAssetValuations(
-        bool, /*shouldMaximise*/
-        bool /*shouldIncludeAmmPrice*/
-    )
+    function _getAssetValuations(bool, bool)
         internal
         view
         virtual
         override
         returns (Valuation[] memory assetValuations)
-    {
-        CashStorage storage strategyStorage = CashStorageLib.getStorage();
-        assetValuations = new Valuation[](1);
-        assetValuations[0] = Valuation(
-            address(depositToken),
-            strategyStorage.balance
-        );
-    }
+    {}
 
-    function _getLiabilityValuations(
-        bool, /*shouldMaximise*/
-        bool /*shouldIncludeAmmPrice*/
-    )
+    function _getLiabilityValuations(bool, bool)
         internal
         view
         virtual

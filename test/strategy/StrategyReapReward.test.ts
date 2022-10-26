@@ -1,5 +1,6 @@
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
+import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { getDaysInSeconds, getMonthsInSeconds, getYearsInSeconds } from "../helper/utils"
 
@@ -9,6 +10,7 @@ export function testStrategyReapReward() {
       await this.investHelper
         .deposit(this.investable, this.user0, {
           amount: ethers.utils.parseUnits("10000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -27,7 +29,8 @@ export function testStrategyReapReward() {
 
       await this.investHelper
         .deposit(this.investable, this.user0, {
-          amount: ethers.utils.parseUnits("10000", 6),
+          amount: ethers.utils.parseUnits("1000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -42,6 +45,25 @@ export function testStrategyReapReward() {
       const reciptBefore = await txBefore.wait()
       const eventBefore = reciptBefore.events.filter(filterRewardProcess)[0]
       const rewardAmountBefore = eventBefore.args.amount.toBigInt()
+
+      // uninvested deposit tokens caused by using AMMs could affect reward amount
+      await this.investHelper
+        .withdraw(this.investable, this.user0, {
+          amount: await this.strategy.getInvestmentTokenBalanceOf(this.user0.address),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
+          depositTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      await this.investHelper
+        .deposit(this.investable, this.user0, {
+          amount: ethers.utils.parseUnits("1000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
 
       // Wait another 1 year more.
       await mine(getYearsInSeconds(1))

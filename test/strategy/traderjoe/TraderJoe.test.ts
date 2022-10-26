@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import traderjoeLpTokenAbi from "../../helper/abi/traderjoeLpToken.json"
 import { TraderJoeAddrs } from "../../helper/addresses"
@@ -58,6 +59,7 @@ function testTraderJoeAum() {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("100", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -100,6 +102,7 @@ function testTraderJoeAum() {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("50", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -110,6 +113,7 @@ function testTraderJoeAum() {
       await this.investHelper
         .withdraw(this.strategy, this.user0, {
           amount: availableTokenBalance.div(2),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           depositTokenReceiver: this.user0.address,
           params: [],
         })
@@ -119,6 +123,7 @@ function testTraderJoeAum() {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("50", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
         })
@@ -128,6 +133,7 @@ function testTraderJoeAum() {
       await this.investHelper
         .withdraw(this.strategy, this.user0, {
           amount: availableTokenBalance.div(2),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
           depositTokenReceiver: this.user0.address,
           params: [],
         })

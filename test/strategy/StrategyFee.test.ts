@@ -8,7 +8,9 @@ export function testStrategyFee() {
   describe("Fee", async function () {
     it("should succeed when any user calls claim fee", async function () {
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
-      await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
+      await this.strategy
+        .connect(this.user0)
+        .deposit(ethers.utils.parseUnits("10000", 6), BigNumber.from(0), this.user0.address, [])
 
       // Wait 1 month to reward get accrued.
       await mine(getMonthsInSeconds(1))
@@ -54,11 +56,15 @@ export function testStrategyFee() {
       await this.strategy.connect(this.owner).setWithdrawalFee(30000, [])
 
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
-      await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("10000", 6), this.user0.address, [])
+      await this.strategy
+        .connect(this.user0)
+        .deposit(ethers.utils.parseUnits("10000", 6), BigNumber.from(0), this.user0.address, [])
 
       const availableTokenBalance = await this.investmentToken.connect(this.user0).balanceOf(this.user0.address)
       await this.investmentToken.connect(this.user0).approve(this.strategy.address, availableTokenBalance)
-      await expect(this.strategy.connect(this.user0).withdraw(availableTokenBalance, this.user0.address, []))
+      await expect(
+        this.strategy.connect(this.user0).withdraw(availableTokenBalance, BigNumber.from(0), this.user0.address, [])
+      )
         .to.emit(this.strategy, "Withdrawal")
         .withArgs(this.user0.address, this.user0.address, availableTokenBalance)
 
@@ -80,12 +86,16 @@ export function testStrategyFee() {
     it("should succeed when multiple users withdraw and withdrawal fee is 30%", async function () {
       // The first user deposits.
       await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
-      await this.strategy.connect(this.user0).deposit(ethers.utils.parseUnits("5000", 6), this.user0.address, [])
+      await this.strategy
+        .connect(this.user0)
+        .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user0.address, [])
 
       // The first user withdraws.
       await this.investmentToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await expect(
-        this.strategy.connect(this.user0).withdraw(ethers.utils.parseUnits("1000", 6), this.user0.address, [])
+        this.strategy
+          .connect(this.user0)
+          .withdraw(ethers.utils.parseUnits("1000", 6), BigNumber.from(0), this.user0.address, [])
       )
         .to.emit(this.strategy, "Withdrawal")
         .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("1000", 6))
@@ -95,24 +105,32 @@ export function testStrategyFee() {
 
       // The second user deposits.
       await this.usdc.connect(this.user1).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
-      await this.strategy.connect(this.user1).deposit(ethers.utils.parseUnits("5000", 6), this.user1.address, [])
+      await this.strategy
+        .connect(this.user1)
+        .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user1.address, [])
 
       // The second user withdraws.
       await this.investmentToken.connect(this.user1).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await expect(
-        this.strategy.connect(this.user1).withdraw(ethers.utils.parseUnits("1000", 6), this.user1.address, [])
+        this.strategy
+          .connect(this.user1)
+          .withdraw(ethers.utils.parseUnits("1000", 6), BigNumber.from(0), this.user1.address, [])
       )
         .to.emit(this.strategy, "Withdrawal")
         .withArgs(this.user1.address, this.user1.address, ethers.utils.parseUnits("1000", 6))
 
       // The third user deposits.
       await this.usdc.connect(this.user2).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
-      await this.strategy.connect(this.user2).deposit(ethers.utils.parseUnits("5000", 6), this.user2.address, [])
+      await this.strategy
+        .connect(this.user2)
+        .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user2.address, [])
 
       // The third user withdraws.
       await this.investmentToken.connect(this.user2).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await expect(
-        this.strategy.connect(this.user2).withdraw(ethers.utils.parseUnits("1000", 6), this.user2.address, [])
+        this.strategy
+          .connect(this.user2)
+          .withdraw(ethers.utils.parseUnits("1000", 6), BigNumber.from(0), this.user2.address, [])
       )
         .to.emit(this.strategy, "Withdrawal")
         .withArgs(this.user2.address, this.user2.address, ethers.utils.parseUnits("1000", 6))

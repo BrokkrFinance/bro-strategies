@@ -11,12 +11,12 @@ contract PercentageAllocation is
 {
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.percentage_allocation_portfolio.percentage_allocation_portfolio_v1.0.2";
+        "brokkr.percentage_allocation_portfolio.percentage_allocation_portfolio_v1.1.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName =
         "Percentage allocation portfolio";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.2";
+    string public constant version = "1.1.0";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

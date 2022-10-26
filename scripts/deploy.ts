@@ -102,11 +102,11 @@ async function main() {
 
   await usdc.connect(Alice).approve(topLevelPortfolio.address, "2000000")
   console.log(`after approving deposit`)
-  await topLevelPortfolio.connect(Alice).deposit("2000000", Alice.address, [])
+  await topLevelPortfolio.connect(Alice).deposit("2000000", "0", Alice.address, [])
   console.log("Alice investing 2 usdc into the portfolio", usdc.address, topLevelPortfolio.address)
   await topLevelPortfolioToken.connect(Alice).approve(topLevelPortfolio.address, "1000000")
   console.log(`after approving withdrawal`)
-  await topLevelPortfolio.connect(Alice).withdraw("1000000", Alice.address, [])
+  await topLevelPortfolio.connect(Alice).withdraw("1000000", "0", Alice.address, [])
 
   console.log(`Alice successfully withdrew 1 Portfolio token`)
 }

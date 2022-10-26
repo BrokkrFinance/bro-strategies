@@ -180,8 +180,8 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function getAssetBalances()
-        external
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
@@ -197,8 +197,8 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override

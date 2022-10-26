@@ -2,7 +2,8 @@
 pragma solidity ^0.8.0;
 
 struct CashStorage {
-    uint256 balance;
+    // the storage slot might already have been initialized to non-zero for previously deployed contracts
+    uint256 unused;
 }
 
 library CashStorageLib {

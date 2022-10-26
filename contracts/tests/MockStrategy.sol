@@ -62,16 +62,16 @@ contract MockStrategy is
         freeMoneyProvider.giveMeMoney(10**18, depositToken);
     }
 
-    function getAssetBalances()
-        external
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
         returns (Balance[] memory assetBalances)
     {}
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override

@@ -6,6 +6,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -15,6 +16,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: availableTokenBalance,
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user0.address,
         params: [],
       })
@@ -25,6 +27,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("10000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -34,6 +37,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: availableTokenBalance.div(2),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user0.address,
         params: [],
       })
@@ -44,6 +48,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("5000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -53,6 +58,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: availableTokenBalance.div(2),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user1.address,
         params: [],
       })
@@ -63,6 +69,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("10000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -72,6 +79,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user1, {
         amount: availableTokenBalance,
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user1.address,
         params: [],
       })
@@ -82,6 +90,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -90,6 +99,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user1, {
         amount: BigNumber.from(0),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user1.address,
         params: [],
       })
@@ -100,6 +110,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -109,6 +120,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: availableTokenBalance.add(1),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user0.address,
         params: [],
       })
@@ -120,6 +132,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -129,6 +142,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -139,6 +153,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: availableTokenBalance,
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user0.address,
         params: [],
       })
@@ -149,6 +164,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user1, {
         amount: availableTokenBalance,
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user1.address,
         params: [],
       })
@@ -160,6 +176,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -169,6 +186,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -179,6 +197,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: availableTokenBalance.div(2),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user0.address,
         params: [],
       })
@@ -189,6 +208,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user1, {
         amount: availableTokenBalance.div(2),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user1.address,
         params: [],
       })
@@ -200,6 +220,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -210,6 +231,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: availableTokenBalance,
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user0.address,
         params: [],
       })
@@ -219,6 +241,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -229,6 +252,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user1, {
         amount: availableTokenBalance,
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user1.address,
         params: [],
       })
@@ -240,6 +264,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -249,6 +274,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: BigNumber.from(0),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user0.address,
         params: [],
       })
@@ -258,6 +284,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -268,6 +295,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user1, {
         amount: availableTokenBalance,
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user1.address,
         params: [],
       })
@@ -279,6 +307,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -288,6 +317,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -298,6 +328,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user0, {
         amount: availableTokenBalance.div(2),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user0.address,
         params: [],
       })
@@ -308,6 +339,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user1, {
         amount: availableTokenBalance.add(1),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user1.address,
         params: [],
       })
@@ -317,6 +349,7 @@ export function testWithdraw() {
     await this.investHelper
       .deposit(this.investable, this.user2, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user2.address,
         params: [],
       })
@@ -327,6 +360,7 @@ export function testWithdraw() {
     await this.investHelper
       .withdraw(this.investable, this.user2, {
         amount: availableTokenBalance.div(2),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         depositTokenReceiver: this.user2.address,
         params: [],
       })

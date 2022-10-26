@@ -45,7 +45,7 @@ abstract contract PortfolioBaseUpgradeable is
 
     IInvestmentToken internal investmentToken;
     IERC20Upgradeable internal depositToken;
-    uint256[20] private futureFeaturesGap;
+    uint256[20] private __gap;
 
     enum FeeType {
         Deposit,

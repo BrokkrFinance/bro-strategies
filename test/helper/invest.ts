@@ -99,6 +99,7 @@ export class InvestHelper {
     this.investor = depositor
     this.investArgs = {
       amount: depositArgs.amount,
+      minimumDepositTokenAmountOut: depositArgs.minimumDepositTokenAmountOut,
       tokenReceiver: depositArgs.investmentTokenReceiver,
       params: depositArgs.params,
     }
@@ -113,6 +114,7 @@ export class InvestHelper {
     this.investor = withdrawer
     this.investArgs = {
       amount: withdrawArgs.amount,
+      minimumDepositTokenAmountOut: withdrawArgs.minimumDepositTokenAmountOut,
       tokenReceiver: withdrawArgs.depositTokenReceiver,
       params: withdrawArgs.params,
     }
@@ -157,7 +159,12 @@ export class InvestHelper {
     await expect(
       this.investable
         .connect(this.investor)
-        .deposit(this.investArgs.amount, this.investArgs.tokenReceiver, this.investArgs.params)
+        .deposit(
+          this.investArgs.amount,
+          this.investArgs.minimumDepositTokenAmountOut,
+          this.investArgs.tokenReceiver,
+          this.investArgs.params
+        )
     )
       .to.emit(this.investable, "Deposit")
       .withArgs(this.investor.address, this.investArgs.tokenReceiver, this.investArgs.amount)
@@ -167,7 +174,12 @@ export class InvestHelper {
     await expect(
       this.investable
         .connect(this.investor)
-        .deposit(this.investArgs.amount, this.investArgs.tokenReceiver, this.investArgs.params)
+        .deposit(
+          this.investArgs.amount,
+          this.investArgs.minimumDepositTokenAmountOut,
+          this.investArgs.tokenReceiver,
+          this.investArgs.params
+        )
     ).to.be.reverted
   }
 
@@ -175,7 +187,12 @@ export class InvestHelper {
     await expect(
       this.investable
         .connect(this.investor)
-        .deposit(this.investArgs.amount, this.investArgs.tokenReceiver, this.investArgs.params)
+        .deposit(
+          this.investArgs.amount,
+          this.investArgs.minimumDepositTokenAmountOut,
+          this.investArgs.tokenReceiver,
+          this.investArgs.params
+        )
     ).to.be.revertedWith(reason)
   }
 
@@ -183,7 +200,12 @@ export class InvestHelper {
     await expect(
       this.investable
         .connect(this.investor)
-        .deposit(this.investArgs.amount, this.investArgs.tokenReceiver, this.investArgs.params)
+        .deposit(
+          this.investArgs.amount,
+          this.investArgs.minimumDepositTokenAmountOut,
+          this.investArgs.tokenReceiver,
+          this.investArgs.params
+        )
     ).to.be.revertedWithCustomError(this.investable, reason)
   }
 
@@ -191,7 +213,12 @@ export class InvestHelper {
     await expect(
       this.investable
         .connect(this.investor)
-        .withdraw(this.investArgs.amount, this.investArgs.tokenReceiver, this.investArgs.params)
+        .withdraw(
+          this.investArgs.amount,
+          this.investArgs.minimumDepositTokenAmountOut,
+          this.investArgs.tokenReceiver,
+          this.investArgs.params
+        )
     )
       .to.emit(this.investable, "Withdrawal")
       .withArgs(this.investor.address, this.investArgs.tokenReceiver, this.investArgs.amount)
@@ -201,7 +228,12 @@ export class InvestHelper {
     await expect(
       this.investable
         .connect(this.investor)
-        .withdraw(this.investArgs.amount, this.investArgs.tokenReceiver, this.investArgs.params)
+        .withdraw(
+          this.investArgs.amount,
+          this.investArgs.minimumDepositTokenAmountOut,
+          this.investArgs.tokenReceiver,
+          this.investArgs.params
+        )
     ).to.be.reverted
   }
 
@@ -209,7 +241,12 @@ export class InvestHelper {
     await expect(
       this.investable
         .connect(this.investor)
-        .withdraw(this.investArgs.amount, this.investArgs.tokenReceiver, this.investArgs.params)
+        .withdraw(
+          this.investArgs.amount,
+          this.investArgs.minimumDepositTokenAmountOut,
+          this.investArgs.tokenReceiver,
+          this.investArgs.params
+        )
     ).to.be.revertedWith(reason)
   }
 
@@ -217,7 +254,12 @@ export class InvestHelper {
     await expect(
       this.investable
         .connect(this.investor)
-        .withdraw(this.investArgs.amount, this.investArgs.tokenReceiver, this.investArgs.params)
+        .withdraw(
+          this.investArgs.amount,
+          this.investArgs.minimumDepositTokenAmountOut,
+          this.investArgs.tokenReceiver,
+          this.investArgs.params
+        )
     ).to.be.revertedWithCustomError(this.investable, reason)
   }
 

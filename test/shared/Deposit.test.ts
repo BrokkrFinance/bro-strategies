@@ -6,6 +6,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -16,6 +17,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3701.810393", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -26,6 +28,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: BigNumber.from(0),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -36,6 +39,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("10001", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -48,6 +52,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("50", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -62,6 +67,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("50", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -73,6 +79,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("30", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -82,6 +89,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("30", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -91,6 +99,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user2, {
         amount: ethers.utils.parseUnits("30", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user2.address,
         params: [],
       })
@@ -102,6 +111,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3701.810393", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -111,6 +121,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("3701.810393", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -120,6 +131,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user2, {
         amount: ethers.utils.parseUnits("3701.810393", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user2.address,
         params: [],
       })
@@ -131,6 +143,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: BigNumber.from(0),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -140,6 +153,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -149,6 +163,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user2, {
         amount: BigNumber.from(0),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user2.address,
         params: [],
       })
@@ -160,6 +175,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("3000", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -169,6 +185,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("10001", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -182,6 +199,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("50", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -191,6 +209,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("30", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -200,6 +219,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user2, {
         amount: ethers.utils.parseUnits("50", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user2.address,
         params: [],
       })
@@ -215,6 +235,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user0, {
         amount: ethers.utils.parseUnits("30", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user0.address,
         params: [],
       })
@@ -224,6 +245,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user1, {
         amount: ethers.utils.parseUnits("30", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user1.address,
         params: [],
       })
@@ -233,6 +255,7 @@ export function testDeposit() {
     await this.investHelper
       .deposit(this.investable, this.user2, {
         amount: ethers.utils.parseUnits("30", 6),
+        minimumDepositTokenAmountOut: BigNumber.from(0),
         investmentTokenReceiver: this.user2.address,
         params: [],
       })

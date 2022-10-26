@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import { BigNumber } from "ethers"
 import { testOwnable } from "../shared/Ownable.test"
 
 export function testPortfolioOwnable() {
@@ -30,7 +31,7 @@ export function testPortfolioOwnable() {
     })
 
     it("should fail when the non-owner user rebalances", async function () {
-      await expect(this.portfolio.connect(this.user0).rebalance([], [])).to.be.revertedWith(
+      await expect(this.portfolio.connect(this.user0).rebalance(BigNumber.from(0), [], [])).to.be.revertedWith(
         "Ownable: caller is not the owner"
       )
     })

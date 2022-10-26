@@ -190,8 +190,8 @@ contract TraderJoeV2 is
         );
     }
 
-    function getAssetBalances()
-        external
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
@@ -207,8 +207,8 @@ contract TraderJoeV2 is
         );
     }
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override

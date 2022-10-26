@@ -66,7 +66,7 @@ abstract contract StrategyBaseUpgradeable is
     IPriceOracle public priceOracle;
     SwapService public swapService;
     uint256 public uninvestedDepositTokenAmount;
-    uint256[7] private futureFeaturesGap;
+    uint256[7] private __gap;
 
     // solhint-disable-next-line
     function __StrategyBaseUpgradeable_init(StrategyArgs calldata strategyArgs)
@@ -135,6 +135,10 @@ abstract contract StrategyBaseUpgradeable is
         );
         checkInvestmentLimitPerAddress(depositTokenAmountIn, userEquity);
 
+        uint256 depositTokenAmountBeforeInvestment = depositToken.balanceOf(
+            address(this)
+        );
+
         // transfering deposit tokens from the user
         depositToken.safeTransferFrom(
             _msgSender(),
@@ -143,9 +147,6 @@ abstract contract StrategyBaseUpgradeable is
         );
 
         // investing into the underlying defi protocol
-        uint256 depositTokenAmountBeforeInvestment = depositToken.balanceOf(
-            address(this)
-        );
         _deposit(depositTokenAmountIn, params);
         uint256 depositTokenAmountChange = depositToken.balanceOf(
             address(this)
@@ -224,9 +225,9 @@ abstract contract StrategyBaseUpgradeable is
 
         // withdrawing from the uninvested balance
         uint256 withdrawnUninvestedDepositTokenAmount = (uninvestedDepositTokenAmount *
-                investmentTokenAmountIn) /
-                investmentToken.balanceOf(address(this));
+                investmentTokenAmountIn) / investmentToken.totalSupply();
         withdrawnTotalDepositTokenAmount += withdrawnUninvestedDepositTokenAmount;
+
         uninvestedDepositTokenAmount -= withdrawnUninvestedDepositTokenAmount;
 
         // calculating the withdrawal fee
@@ -269,18 +270,26 @@ abstract contract StrategyBaseUpgradeable is
             address(this)
         );
 
+        // reaping the rewards, and increasing the depositToken balance of this contract
         _reapReward(reapRewardParams);
 
+        // calculating the reward amount as
+        // the sum of balance change and the uninvestedDepositTokenAmount
         uint256 rewardAmount = depositToken.balanceOf(address(this)) -
             depositTokenBalanceBefore;
         rewardAmount += uninvestedDepositTokenAmount;
-        uninvestedDepositTokenAmount = 0;
-
         emit RewardProcess(rewardAmount);
-
         if (rewardAmount == 0) return;
 
+        // depositing the reward amount back into the strategy
+        depositTokenBalanceBefore = depositToken.balanceOf(address(this));
         _deposit(rewardAmount, depositParams);
+        uint256 depositTokenBalanceChange = depositTokenBalanceBefore -
+            depositToken.balanceOf(address(this));
+
+        // calculating the remnants amount after the deposit that can come from AMM interactions
+        uninvestedDepositTokenAmount = rewardAmount - depositTokenBalanceChange;
+
         emit Deposit(address(this), address(0), rewardAmount);
     }
 
@@ -317,6 +326,47 @@ abstract contract StrategyBaseUpgradeable is
             super.supportsInterface(interfaceId);
     }
 
+    function _getAssetBalances()
+        internal
+        view
+        virtual
+        returns (Balance[] memory balances);
+
+    function getAssetBalances()
+        external
+        view
+        virtual
+        override
+        returns (Balance[] memory balances)
+    {
+        Balance[] memory balancesReturned = _getAssetBalances();
+
+        uint256 balancesLength = balancesReturned.length + 1;
+        balances = new Balance[](balancesLength);
+        for (uint256 i = 0; i < balancesLength - 1; ++i) {
+            balances[i] = balancesReturned[i];
+        }
+        balances[balancesLength - 1] = Balance(
+            InvestableLib.USDC,
+            uninvestedDepositTokenAmount
+        );
+    }
+
+    function _getLiabilityBalances()
+        internal
+        view
+        virtual
+        returns (Balance[] memory balances);
+
+    function getLiabilityBalances()
+        external
+        view
+        virtual
+        returns (Balance[] memory balances)
+    {
+        return _getLiabilityBalances();
+    }
+
     function _getAssetValuations(
         bool shouldMaximise,
         bool shouldIncludeAmmPrice
@@ -327,7 +377,7 @@ abstract contract StrategyBaseUpgradeable is
         view
         virtual
         override
-        returns (Valuation[] memory)
+        returns (Valuation[] memory valuations)
     {
         Valuation[] memory valuationsReturned = _getAssetValuations(
             shouldMaximise,
@@ -338,11 +388,11 @@ abstract contract StrategyBaseUpgradeable is
         // 1. It could be more gas efficient to pass the extra length to _getAssetValuations,
         //    and let that method to allocate the array. However it would assume more knowledge from
         //    the strategy writer
-        // 2. In the unlikely case that the strategy holds some depositToken assets apart
-        //    from the uninvested depositToken, then the depositToken might be added
-        //    twice to the array, so integrations should prepare for that.
+        // 2. In the current implementation a strategy cannot hold depositToken assets apart
+        //    from the uninvested depositToken. This limitation will likely be lifted in future releases.
+
         uint256 valuationsLength = valuationsReturned.length + 1;
-        Valuation[] memory valuations = new Valuation[](valuationsLength);
+        valuations = new Valuation[](valuationsLength);
         for (uint256 i = 0; i < valuationsLength - 1; ++i) {
             valuations[i] = valuationsReturned[i];
         }
@@ -350,8 +400,6 @@ abstract contract StrategyBaseUpgradeable is
             InvestableLib.USDC,
             uninvestedDepositTokenAmount
         );
-
-        return valuations;
     }
 
     function _getLiabilityValuations(

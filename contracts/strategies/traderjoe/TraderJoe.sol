@@ -17,11 +17,11 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.0.2";
+        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.1.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "TraderJoe Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.2";
+    string public constant version = "1.1.0";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -208,8 +208,8 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function getAssetBalances()
-        external
+    function _getAssetBalances()
+        internal
         view
         virtual
         override
@@ -225,8 +225,8 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function getLiabilityBalances()
-        external
+    function _getLiabilityBalances()
+        internal
         view
         virtual
         override
