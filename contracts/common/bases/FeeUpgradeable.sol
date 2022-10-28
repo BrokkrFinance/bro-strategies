@@ -44,7 +44,6 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         public
         view
         virtual
-        override
         returns (uint24)
     {
         return depositFee;
@@ -63,7 +62,6 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         public
         view
         virtual
-        override
         returns (uint24)
     {
         return withdrawalFee;
@@ -82,7 +80,6 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         public
         view
         virtual
-        override
         returns (uint24)
     {
         return performanceFee;
@@ -101,7 +98,6 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         external
         view
         virtual
-        override
         returns (address)
     {
         return feeReceiver;
@@ -117,17 +113,11 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         emit FeeReceiverChange(feeReceiver, params);
     }
 
-    function getCurrentAccumulatedFee()
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function getCurrentAccumulatedFee() public view virtual returns (uint256) {
         return currentAccumulatedFee;
     }
 
-    function getClaimedFee() public view virtual override returns (uint256) {
+    function getClaimedFee() public view virtual returns (uint256) {
         return claimedFee;
     }
 

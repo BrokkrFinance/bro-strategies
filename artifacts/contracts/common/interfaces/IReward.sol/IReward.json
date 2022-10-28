@@ -1,0 +1,110 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IReward",
+  "sourceName": "contracts/common/interfaces/IReward.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "RewardProcess",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "withdrawer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "RewardWithdraw",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "key",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct NameValuePair[]",
+          "name": "depositParams",
+          "type": "tuple[]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "key",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct NameValuePair[]",
+          "name": "reapRewardParams",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "processReward",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "key",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct NameValuePair[]",
+          "name": "withdrawParams",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "withdrawReward",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

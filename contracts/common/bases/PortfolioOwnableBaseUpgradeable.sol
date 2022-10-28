@@ -23,28 +23,27 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         IInvestable investable,
         uint24[] calldata newAllocations,
         NameValuePair[] calldata params
-    ) public virtual override onlyOwner {
+    ) public virtual onlyOwner {
         super._addInvestable(investable, newAllocations, params);
     }
 
     function removeInvestable(
         IInvestable investable,
         uint24[] calldata newAllocations
-    ) public virtual override onlyOwner {
+    ) public virtual onlyOwner {
         super._removeInvestable(investable, newAllocations);
     }
 
     function changeInvestable(
         IInvestable investable,
         NameValuePair[] calldata params
-    ) public virtual override onlyOwner {
+    ) public virtual onlyOwner {
         super._changeInvestable(investable, params);
     }
 
     function setTargetInvestableAllocations(uint24[] calldata newAllocations)
         public
         virtual
-        override
         onlyOwner
     {
         super._setTargetInvestableAllocations(newAllocations);
@@ -54,7 +53,7 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         uint256 minimumDepositTokenAmountOut,
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams
-    ) public virtual override onlyOwner {
+    ) public virtual onlyOwner {
         super._rebalance(
             minimumDepositTokenAmountOut,
             depositParams,
@@ -65,7 +64,6 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     function setDepositFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
-        override
         onlyOwner
     {
         super._setDepositFee(fee_, params);
@@ -74,7 +72,6 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
-        override
         onlyOwner
     {
         super._setWithdrawalFee(fee_, params);
@@ -83,7 +80,6 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
-        override
         onlyOwner
     {
         super._setPerformanceFee(fee_, params);
@@ -92,14 +88,13 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     function setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params
-    ) public virtual override onlyOwner {
+    ) public virtual onlyOwner {
         super._setFeeReceiver(feeReceiver_, params);
     }
 
     function setInvestmentToken(IInvestmentToken investmentToken)
         public
         virtual
-        override
         onlyOwner
     {
         super._setInvestmentToken(investmentToken);
@@ -108,7 +103,6 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
         public
         virtual
-        override
         onlyOwner
     {
         super._setTotalInvestmentLimit(totalInvestmentLimit);
@@ -117,7 +111,6 @@ abstract contract PortfolioOwnableBaseUpgradeable is
     function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
         public
         virtual
-        override
         onlyOwner
     {
         super._setInvestmentLimitPerAddress(investmentLimitPerAddress);

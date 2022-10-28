@@ -4,6 +4,10 @@ import { ethers, upgrades } from "hardhat"
 import erc20abi from "./abi/erc20.json"
 type TransactionResponse = providers.TransactionResponse
 
+export async function sleepForMilliseconds(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 export async function retryUntilSuccess<T>(fut: Promise<T>) {
   while (true) {
     try {
@@ -12,9 +16,11 @@ export async function retryUntilSuccess<T>(fut: Promise<T>) {
         return resolved
       } else {
         console.log(`Error because resolved promise is undefined`)
+        await sleepForMilliseconds(500)
       }
     } catch (e: unknown) {
       console.log(`Error when expecting Success: ${e}`)
+      await sleepForMilliseconds(500)
     }
   }
 }
@@ -113,8 +119,8 @@ export async function deployUpgradeableStrategy(
   )
   await retryUntilSuccess(investableToken.transferOwnership(strategy.address))
 
-  console.log(`Successfully deployed strategy. Strategy address: ${strategy.address}`)
-  console.log(`Strategy token address: ${investableToken.address}`)
+  logBlue(`Successfully deployed strategy. Strategy address: ${strategy.address}`)
+  logBlue(`Strategy token address: ${investableToken.address}`)
   return strategy
 }
 
@@ -186,8 +192,8 @@ export async function deployPortfolio(
     await retryUntilSuccess(portfolio.addInvestable(investable.address, allocations[index], []))
   }
 
-  console.log(`Successfully deployed portfolio. Portfolio address: ${portfolio.address}`)
-  console.log(`Portfolio token address: ${investableToken.address}`)
+  logBlue(`Successfully deployed portfolio. Portfolio address: ${portfolio.address}`)
+  logBlue(`Portfolio token address: ${investableToken.address}`)
   return portfolio
 }
 
@@ -204,7 +210,7 @@ export async function deployContract(name: string, args: any[], label?: string, 
     contract = await contractFactory.deploy(...args)
   }
   const argStr = args.map((i) => `"${i}"`).join(" ")
-  console.info(`Deploying ${info} ${contract.address} ${argStr}`)
+  logGrey(`Deploying ${info} ${contract.address} ${argStr}`)
   await contract.deployTransaction.wait()
   return contract
 }
@@ -222,7 +228,7 @@ export async function deployProxyContract(name: string, args: any[], label?: str
     contract = await upgrades.deployProxy(contractFactory, args)
   }
   const argStr = args.map((i) => `"${i}"`).join(" ")
-  console.info(`Deploying proxy ${info} ${contract.address} ${argStr}`)
+  logGrey(`Deploying proxy -> name: ${info} || address: ${contract.address} || arguments: ${argStr}`)
   await contract.deployTransaction.wait()
   return contract
 }
@@ -265,6 +271,10 @@ export const ContractAddrs = {
   aaveOracle: "0xEBd36016B3eD09D4693Ed4251c67Bd858c3c7C9C",
   gmxRewardRouter: "0x82147C5A7E850eA4E28155DF107F2590fD4ba327",
   gmxOracle: "0x81b7e71a1d9e08a6ca016a0f4d6fa50dbce89ee3",
+}
+
+export function logGrey(text: string) {
+  console.log("\x1b[90m%s\x1b[0m", text)
 }
 
 export function logCyan(text: string) {

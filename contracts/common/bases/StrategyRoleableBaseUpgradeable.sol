@@ -61,7 +61,6 @@ abstract contract StrategyRoleableBaseUpgradeable is
     function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
-        override
         onlyRole(GOVERNOR_ROLE)
     {
         super._setWithdrawalFee(fee_, params);
@@ -70,7 +69,6 @@ abstract contract StrategyRoleableBaseUpgradeable is
     function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
-        override
         onlyRole(GOVERNOR_ROLE)
     {
         super._setPerformanceFee(fee_, params);
@@ -79,14 +77,13 @@ abstract contract StrategyRoleableBaseUpgradeable is
     function setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params
-    ) public virtual override onlyRole(GOVERNOR_ROLE) {
+    ) public virtual onlyRole(GOVERNOR_ROLE) {
         super._setFeeReceiver(feeReceiver_, params);
     }
 
     function setInvestmentToken(IInvestmentToken investmentToken)
         public
         virtual
-        override
         onlyRole(GOVERNOR_ROLE)
     {
         super._setInvestmentToken(investmentToken);
@@ -95,7 +92,6 @@ abstract contract StrategyRoleableBaseUpgradeable is
     function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
         public
         virtual
-        override
         onlyRole(STRATEGIST_ROLE)
     {
         super._setTotalInvestmentLimit(totalInvestmentLimit);
@@ -104,7 +100,6 @@ abstract contract StrategyRoleableBaseUpgradeable is
     function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
         public
         virtual
-        override
         onlyRole(STRATEGIST_ROLE)
     {
         super._setInvestmentLimitPerAddress(investmentLimitPerAddress);
