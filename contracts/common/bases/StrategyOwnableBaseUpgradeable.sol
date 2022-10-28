@@ -22,7 +22,6 @@ abstract contract StrategyOwnableBaseUpgradeable is
     function setDepositFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
-        override
         onlyOwner
     {
         super._setDepositFee(fee_, params);
@@ -31,7 +30,6 @@ abstract contract StrategyOwnableBaseUpgradeable is
     function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
-        override
         onlyOwner
     {
         super._setWithdrawalFee(fee_, params);
@@ -40,7 +38,6 @@ abstract contract StrategyOwnableBaseUpgradeable is
     function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
         public
         virtual
-        override
         onlyOwner
     {
         super._setPerformanceFee(fee_, params);
@@ -49,14 +46,13 @@ abstract contract StrategyOwnableBaseUpgradeable is
     function setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params
-    ) public virtual override onlyOwner {
+    ) public virtual onlyOwner {
         super._setFeeReceiver(feeReceiver_, params);
     }
 
     function setInvestmentToken(IInvestmentToken investmentToken)
         public
         virtual
-        override
         onlyOwner
     {
         super._setInvestmentToken(investmentToken);
@@ -65,7 +61,6 @@ abstract contract StrategyOwnableBaseUpgradeable is
     function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
         public
         virtual
-        override
         onlyOwner
     {
         super._setTotalInvestmentLimit(totalInvestmentLimit);
@@ -74,7 +69,6 @@ abstract contract StrategyOwnableBaseUpgradeable is
     function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
         public
         virtual
-        override
         onlyOwner
     {
         super._setInvestmentLimitPerAddress(investmentLimitPerAddress);

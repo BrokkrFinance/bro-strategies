@@ -1,0 +1,58 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IPriceOracle",
+  "sourceName": "contracts/common/interfaces/IPriceOracle.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "InvalidAssetPrice",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "shouldMaximise",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "includeAmmPrice",
+          "type": "bool"
+        }
+      ],
+      "name": "getPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "vendorFeed_",
+          "type": "address"
+        }
+      ],
+      "name": "setVendorFeed",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,15 +1,25 @@
-deployments
 node_modules
 .env
 coverage
 coverage.json
-typechain
-typechain-types
 .vscode
-yarn-error.log
+
+# Temporary files
 *.swp
 
-#Hardhat files
+# Logs
+yarn-*.log
+
+# Generated files
+typechain
+typechain-types
 cache
-artifacts
 .openzeppelin/unknown-*
+deployments
+artifacts/@aave
+artifacts/@mangrovedao
+artifacts/@openzeppelin
+artifacts/@traderjoe-xyz
+artifacts/build-info
+artifacts/hardhat
+

@@ -7,9 +7,11 @@ import {
   deployPriceOracle,
   deployUpgradeableStrategy,
   getUsdcContract,
+  logRed,
   retryUntilSuccess,
 } from "./helper"
 
+import { exit } from "process"
 import deploymentConfig from "../configs/deploymentConfig.json"
 
 let priceOracle: Contract
@@ -41,11 +43,13 @@ async function deployRecursive(investable: any): Promise<any> {
         investable.strategyExtraArgs
       )
     )
+
     await retryUntilSuccess(strategy.transferOwnership(investable.transferOwnershipTo))
-    console.log(`Strategy successfully deployed ${investable.contractName} with ${investable.investmentTokenName}`)
+    logRed(
+      `Strategy '${investable.contractName}' successfully deployed with investment token name '${investable.investmentTokenName}' \n`
+    )
     return strategy
   } else if (investable.type === "alreadyDeployedInvestable") {
-    console.log(`Getting an already deployed Investable`)
     return await contractAt(investable.contractName, investable.contractAddress)
   } else if (investable.type === "portfolio") {
     const deployedInvestables = []
@@ -53,7 +57,7 @@ async function deployRecursive(investable: any): Promise<any> {
       // deploy recursively the strats/portfolios
       deployedInvestables.push(await deployRecursive(investable.investables[index]))
     }
-    // then -> deploy portfolio
+    // deploy portfolio
     const portfolio = await retryUntilSuccess(
       deployPortfolio(
         true,
@@ -61,7 +65,7 @@ async function deployRecursive(investable: any): Promise<any> {
         investable.investmentTokenName,
         investable.investmentTokenTicker,
         usdc,
-        deployedInvestables, // investables (strategies / portfolios of this portfolio)
+        deployedInvestables,
         investable.depositFee,
         investable.depositFeeParams,
         investable.withdrawalFee,
@@ -72,14 +76,18 @@ async function deployRecursive(investable: any): Promise<any> {
         investable.feeReceiverParams,
         BigInt(investable.totalInvestmentLimit),
         BigInt(investable.investmentLimitPerAddress),
-        investable.allocations // allocations
+        investable.allocations
       )
     )
+
     await retryUntilSuccess(portfolio.transferOwnership(investable.transferOwnershipTo))
-    console.log(`Portfolio successfully deployed ${investable.contractName} with ${investable.investmentTokenName}`)
+    logRed(
+      `Portfolio '${investable.contractName}' successfully deployed with investment token name '${investable.investmentTokenName}' \n`
+    )
     return portfolio
   } else {
     console.error("Wrong investable type. Neither portfolio nor strategy")
+    exit(1)
   }
 }
 
@@ -90,25 +98,17 @@ async function main() {
 
   const topLevelPortfolio = await deployRecursive(deploymentConfig)
   const topLevelPortfolioToken = await contractAt("InvestmentToken", await topLevelPortfolio.getInvestmentToken())
-  console.log(`Calm portfolio address: ${topLevelPortfolio.address}`)
-  console.log(`Calm portfolio token address: ${topLevelPortfolioToken.address}`)
 
+  // testing the deployed portfolio and leaving 1 USDC permanently invested in the strategy
   const accounts = await ethers.getSigners()
-  const Alice = accounts[1]
-  console.log(`Alice address: ${Alice.address}`)
-
-  console.log(`topLevelPortfolioToken address: ${topLevelPortfolioToken.address}`)
-  console.log(`topLevelPortfolio address: ${topLevelPortfolio.address}`)
-
-  await usdc.connect(Alice).approve(topLevelPortfolio.address, "2000000")
+  const deployer = accounts[0]
+  await usdc.approve(topLevelPortfolio.address, "2000000")
   console.log(`after approving deposit`)
-  await topLevelPortfolio.connect(Alice).deposit("2000000", "0", Alice.address, [])
+  await topLevelPortfolio.deposit("2000000", "0", deployer.address, [])
   console.log("Alice investing 2 usdc into the portfolio", usdc.address, topLevelPortfolio.address)
-  await topLevelPortfolioToken.connect(Alice).approve(topLevelPortfolio.address, "1000000")
+  await topLevelPortfolioToken.approve(topLevelPortfolio.address, "1000000")
   console.log(`after approving withdrawal`)
-  await topLevelPortfolio.connect(Alice).withdraw("1000000", "0", Alice.address, [])
-
-  console.log(`Alice successfully withdrew 1 Portfolio token`)
+  await topLevelPortfolio.withdraw("1000000", "0", deployer.address, [])
 }
 
 main().catch((error) => {
