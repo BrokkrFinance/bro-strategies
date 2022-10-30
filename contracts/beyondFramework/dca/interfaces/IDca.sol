@@ -6,13 +6,19 @@ import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interface
 interface IDca {
     function deposit(uint256 amount, uint8 amountSplit) external;
 
-    function withdrawAll() external;
+    function withdrawAll(bool convertBluechipIntoDepositAsset) external;
 
-    function withdrawAll(uint256 positionIndex) external;
+    function withdrawAll(
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) external;
 
-    function withdrawBluechip() external;
+    function withdrawBluechip(bool convertBluechipIntoDepositAsset) external;
 
-    function withdrawBluechip(uint256 positionIndex) external;
+    function withdrawBluechip(
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) external;
 
     function depositToken() external view returns (IERC20Upgradeable);
 }

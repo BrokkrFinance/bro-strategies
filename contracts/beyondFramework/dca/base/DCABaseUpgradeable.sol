@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import { InvestQueueLib } from "../libraries/InvestQueueLib.sol";
 import { DcaHistoryLib } from "../libraries/DcaHistoryLib.sol";
 import { IDcaStrategy } from "../interfaces/IDcaStrategy.sol";
+import { SwapLib } from "../libraries/SwapLib.sol";
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -19,12 +20,15 @@ abstract contract DCABaseUpgradeable is
 {
     using InvestQueueLib for InvestQueueLib.InvestQueue;
     using DcaHistoryLib for DcaHistoryLib.DcaHistory;
+    using SwapLib for SwapLib.Router;
     using SafeERC20Upgradeable for IERC20Upgradeable;
+
+    DepositFee public depositFee;
 
     address public dcaInvestor;
     address[] public portfolios;
 
-    IERC20Upgradeable public depositToken;
+    TokenInfo public depositTokenInfo;
     uint256 private depositTokenScale;
 
     uint256 public investmentPeriod;
@@ -32,8 +36,19 @@ abstract contract DCABaseUpgradeable is
 
     uint16 public positionsLimit;
 
-    InvestQueueLib.InvestQueue private globalInvestQueue;
-    DcaHistoryLib.DcaHistory private dcaHistory;
+    address[] public depositToBluechipSwapPath;
+    address[] public bluechipToDepositSwapPath;
+
+    BluechipInvestmentState public bluechipInvestmentState;
+
+    InvestQueueLib.InvestQueue public globalInvestQueue;
+    DcaHistoryLib.DcaHistory public dcaHistory;
+    SwapLib.Router public router;
+
+    TokenInfo public emergencyExitDepositToken;
+    uint256 public emergencySellDepositPrice;
+    TokenInfo public emergencyExitBluechipToken;
+    uint256 public emergencySellBluechipPrice;
 
     mapping(address => DcaDepositor) private depositors;
 
@@ -46,12 +61,18 @@ abstract contract DCABaseUpgradeable is
         __Pausable_init();
         __ReentrancyGuard_init();
 
+        // TODO: declare setters
+        depositFee = args.depositFee;
         dcaInvestor = args.dcaInvestor;
-        depositToken = args.depositToken;
-        depositTokenScale = 10**6; // TODO: pass or calculate?
+        depositTokenInfo = args.depositTokenInfo;
+        depositTokenScale = 10**args.depositTokenInfo.decimals;
         investmentPeriod = args.investmentPeriod;
         lastInvestmentTimestamp = args.lastInvestmentTimestamp;
         positionsLimit = args.positionsLimit;
+        bluechipInvestmentState = BluechipInvestmentState.Investing;
+        router = args.router;
+        depositToBluechipSwapPath = args.depositToBluechipSwapPath;
+        bluechipToDepositSwapPath = args.bluechipToDepositSwapPath;
     }
 
     modifier onlyDcaInvestor() {
@@ -71,11 +92,30 @@ abstract contract DCABaseUpgradeable is
         _;
     }
 
+    modifier nonEmergencyExited() {
+        require(
+            bluechipInvestmentState != BluechipInvestmentState.EmergencyExited,
+            "Strategy is blocked due to emergency exit"
+        );
+        _;
+    }
+
+    modifier emergencyWithdrawOnEmergencyExitedStatus(address sender) {
+        // if emergency exited then user should receive everything in deposit asset
+        if (isEmergencyExited()) {
+            _emergencyWithdrawUserDeposit(sender);
+            return;
+        }
+
+        _;
+    }
+
     // ----- Base Class Methods -----
     function deposit(uint256 amount, uint8 amountSplit)
         public
         virtual
         nonReentrant
+        nonEmergencyExited
     {
         _deposit(_msgSender(), amount, amountSplit);
     }
@@ -84,7 +124,7 @@ abstract contract DCABaseUpgradeable is
         address sender,
         uint256 amount,
         uint8 amountSplit
-    ) public virtual onlyPortfolio nonReentrant {
+    ) public virtual onlyPortfolio nonReentrant nonEmergencyExited {
         _deposit(sender, amount, amountSplit);
     }
 
@@ -98,6 +138,16 @@ abstract contract DCABaseUpgradeable is
             revert ZeroDeposit();
         }
 
+        // transfer deposit token from portfolio
+        depositTokenInfo.token.safeTransferFrom(
+            _msgSender(),
+            address(this),
+            amount
+        );
+
+        // compute actual deposit and transfer fee to receiver
+        amount = _takeFee(amount);
+
         DcaDepositor storage depositor = depositors[sender];
 
         // assert positions limit is not reached
@@ -108,9 +158,6 @@ abstract contract DCABaseUpgradeable is
         // add splitted amounts to the queue
         globalInvestQueue.splitUserInvestmentAmount(amount, amountSplit);
 
-        // transfer deposit token from portfolio
-        depositToken.safeTransferFrom(_msgSender(), address(this), amount);
-
         // if not started position with the same split exists - increase deposit amount
         for (uint256 i = 0; i < depositor.positions.length; i++) {
             // calculate amount of passed investment epochs
@@ -119,12 +166,12 @@ abstract contract DCABaseUpgradeable is
 
             bool isInvestmentStarted = passedInvestPeriods != 0 ? true : false;
             if (
-                isInvestmentStarted ||
-                depositor.positions[i].amountSplit != amountSplit
-            ) continue;
-
-            depositor.positions[i].depositAmount += amount;
-            return;
+                !isInvestmentStarted ||
+                depositor.positions[i].amountSplit == amountSplit
+            ) {
+                depositor.positions[i].depositAmount += amount;
+                return;
+            }
         }
 
         // otherwise create new position
@@ -143,6 +190,7 @@ abstract contract DCABaseUpgradeable is
         virtual
         onlyDcaInvestor
         nonReentrant
+        nonEmergencyExited
     {
         // assert triggered at valid period
         uint256 passedInvestPeriods = _getPassedInvestPeriods();
@@ -155,125 +203,151 @@ abstract contract DCABaseUpgradeable is
             uint256 depositedAmount = globalInvestQueue
                 .getCurrentInvestmentAmountAndMoveNext();
 
-            // nobody invested in the queue, just skip this periods
+            // nobody invested in the queue, just skip this period
             if (depositedAmount == 0) {
-                break;
+                continue;
             }
 
             // swap deposit amount into invest token
-            uint256 receivedBluechip = _swapIntoBluechipAsset(
-                depositToken,
-                depositedAmount
-            );
+            uint256 receivedBluechip = _swapIntoBluechipAsset(depositedAmount);
 
-            // invest exchanged amount
-            _investRewards(receivedBluechip);
+            if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
+                // invest exchanged amount
+                _invest(receivedBluechip);
+            }
 
             // make historical gauge
             dcaHistory.addHistoricalGauge(depositedAmount, receivedBluechip);
         }
 
-        // claim rewards
-        uint256 claimedBluechipRewards = _claimRewards();
+        if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
+            // claim rewards
+            uint256 claimedBluechipRewards = _claimRewards();
 
-        // invest rewards and increase current gauge
-        _investRewards(claimedBluechipRewards);
-        dcaHistory.increaseCurrentGauge(claimedBluechipRewards);
+            // if something was claimed invest rewards and increase current gauge
+            if (claimedBluechipRewards > 0) {
+                _invest(claimedBluechipRewards);
+                dcaHistory.increaseCurrentGauge(claimedBluechipRewards);
+            }
+        }
 
         // update last invest timestamp
         lastInvestmentTimestamp += passedInvestPeriods * investmentPeriod;
     }
 
-    function withdrawAll() public virtual nonReentrant {
-        _withdrawAll(_msgSender());
+    function withdrawAll(bool convertBluechipIntoDepositAsset)
+        public
+        virtual
+        nonReentrant
+        emergencyWithdrawOnEmergencyExitedStatus(_msgSender())
+    {
+        _withdrawAll(_msgSender(), convertBluechipIntoDepositAsset);
     }
 
-    function withdrawAllFor(address sender)
+    function withdrawAllFor(
+        address sender,
+        bool convertBluechipIntoDepositAsset
+    )
         public
         virtual
         onlyPortfolio
         nonReentrant
+        emergencyWithdrawOnEmergencyExitedStatus(sender)
     {
-        _withdrawAll(sender);
+        _withdrawAll(sender, convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawAll(address sender) private {
+    function _withdrawAll(address sender, bool convertBluechipIntoDepositAsset)
+        private
+    {
         uint256 notInvestedYet;
         uint256 investedIntoBluechip;
 
         DcaDepositor storage depositor = depositors[sender];
         for (uint256 i = 0; i < depositor.positions.length; i++) {
-            // calculate amount of passed investment epochs
-            uint256 passedInvestPeriods = (lastInvestmentTimestamp -
-                depositor.positions[i].investedAt) / investmentPeriod;
+            (
+                uint256 positionBluechipInvestment,
+                uint256 positionNotInvestedYet
+            ) = _computePositionWithdrawAll(depositor.positions[i]);
 
-            // compute per period investment - depositAmount / split
-            uint256 perPeriodInvestment = depositor.positions[i].depositAmount /
-                depositor.positions[i].amountSplit;
-
-            uint8 futureInvestmentsToRemove = depositor
-                .positions[i]
-                .amountSplit - uint8(passedInvestPeriods);
-
-            // remove not invested yet amount from invest queue
-            globalInvestQueue.removeUserInvestment(
-                perPeriodInvestment,
-                futureInvestmentsToRemove
-            );
-
-            // if investment is not started yet we remove whole deposit token amount
-            if (passedInvestPeriods == 0) {
-                notInvestedYet += depositor.positions[i].depositAmount;
-            } else {
-                // otherwise we need to additionally calculate bluechip investment
-                (
-                    uint256 bluechipInvestment,
-                    uint256 depositAssetInvestment
-                ) = _removeUserInvestmentFromHistory(
-                        depositor.positions[i],
-                        passedInvestPeriods,
-                        perPeriodInvestment
-                    );
-
-                investedIntoBluechip += bluechipInvestment;
-                notInvestedYet +=
-                    depositor.positions[i].depositAmount -
-                    depositAssetInvestment;
-            }
+            investedIntoBluechip += positionBluechipInvestment;
+            notInvestedYet += positionNotInvestedYet;
         }
 
         // since depositor withdraws everything
         // we can remove his data completely
         delete depositors[sender];
 
-        if (investedIntoBluechip != 0) {
-            // withdraw bluechip asset and transfer to depositor
-            _withdrawDepositorBluechip(sender, investedIntoBluechip);
-        }
-
-        if (notInvestedYet != 0) {
-            // transfer not invested yet deposit asset back to depositor
-            depositToken.safeTransfer(sender, notInvestedYet);
-        }
+        // withdraw user deposit
+        _withdrawDepositorInvestment(
+            sender,
+            notInvestedYet,
+            investedIntoBluechip,
+            convertBluechipIntoDepositAsset
+        );
     }
 
-    function withdrawAll(uint256 positionIndex) public virtual nonReentrant {
-        _withdrawAll(_msgSender(), positionIndex);
+    function withdrawAll(
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    )
+        public
+        virtual
+        nonReentrant
+        emergencyWithdrawOnEmergencyExitedStatus(_msgSender())
+    {
+        _withdrawAll(
+            _msgSender(),
+            positionIndex,
+            convertBluechipIntoDepositAsset
+        );
     }
 
-    function withdrawAllFor(address sender, uint256 positionIndex)
+    function withdrawAllFor(
+        address sender,
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    )
         public
         virtual
         onlyPortfolio
         nonReentrant
+        emergencyWithdrawOnEmergencyExitedStatus(sender)
     {
-        _withdrawAll(sender, positionIndex);
+        _withdrawAll(sender, positionIndex, convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawAll(address sender, uint256 positionIndex) private {
+    function _withdrawAll(
+        address sender,
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) private {
         DcaDepositor storage depositor = depositors[sender];
-        Position memory position = depositor.positions[positionIndex];
 
+        (
+            uint256 positionBluechipInvestment,
+            uint256 positionNotInvestedYet
+        ) = _computePositionWithdrawAll(depositor.positions[positionIndex]);
+
+        // remove position from user data
+        depositor.positions[positionIndex] = depositor.positions[
+            depositor.positions.length - 1
+        ];
+        depositor.positions.pop();
+
+        // withdraw user deposit
+        _withdrawDepositorInvestment(
+            sender,
+            positionNotInvestedYet,
+            positionBluechipInvestment,
+            convertBluechipIntoDepositAsset
+        );
+    }
+
+    function _computePositionWithdrawAll(Position memory position)
+        private
+        returns (uint256 investedIntoBluechip, uint256 notInvestedYet)
+    {
         // calculate amount of passed investment epochs
         uint256 passedInvestPeriods = (lastInvestmentTimestamp -
             position.investedAt) / investmentPeriod;
@@ -291,11 +365,11 @@ abstract contract DCABaseUpgradeable is
             futureInvestmentsToRemove
         );
 
-        uint256 notInvestedYet;
-        uint256 investedIntoBluechip;
+        // if investment is not started yet we remove whole deposit token amount
         if (passedInvestPeriods == 0) {
-            notInvestedYet = position.depositAmount;
+            notInvestedYet += position.depositAmount;
         } else {
+            // otherwise we need to additionally calculate bluechip investment
             (
                 uint256 bluechipInvestment,
                 uint256 depositAssetInvestment
@@ -305,82 +379,61 @@ abstract contract DCABaseUpgradeable is
                     perPeriodInvestment
                 );
 
-            investedIntoBluechip = bluechipInvestment;
-            notInvestedYet = position.depositAmount - depositAssetInvestment;
-        }
-
-        // remove position from user data
-        depositor.positions[positionIndex] = depositor.positions[
-            depositor.positions.length - 1
-        ];
-        depositor.positions.pop();
-
-        if (investedIntoBluechip != 0) {
-            // withdraw bluechip asset and transfer to depositor
-            _withdrawDepositorBluechip(sender, investedIntoBluechip);
-        }
-
-        if (notInvestedYet != 0) {
-            // transfer not invested yet deposit asset back to depositor
-            depositToken.safeTransfer(sender, notInvestedYet);
+            investedIntoBluechip += bluechipInvestment;
+            notInvestedYet += position.depositAmount - depositAssetInvestment;
         }
     }
 
-    function withdrawBluechip() public virtual nonReentrant {
-        _withdrawBluechip(_msgSender());
+    function withdrawBluechip(bool convertBluechipIntoDepositAsset)
+        public
+        virtual
+        nonReentrant
+        emergencyWithdrawOnEmergencyExitedStatus(_msgSender())
+    {
+        _withdrawBluechip(_msgSender(), convertBluechipIntoDepositAsset);
     }
 
-    function withdrawBluechipFor(address sender)
+    function withdrawBluechipFor(
+        address sender,
+        bool convertBluechipIntoDepositAsset
+    )
         public
         virtual
         onlyPortfolio
         nonReentrant
+        emergencyWithdrawOnEmergencyExitedStatus(sender)
     {
-        _withdrawBluechip(sender);
+        _withdrawBluechip(sender, convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawBluechip(address sender) private {
+    function _withdrawBluechip(
+        address sender,
+        bool convertBluechipIntoDepositAsset
+    ) private {
         uint256 investedIntoBluechip;
         uint256 i = 0;
 
         DcaDepositor storage depositor = depositors[sender];
+
+        // since we might remove position we use while loop to iterate over all positions
         while (i < depositor.positions.length) {
-            // calculate amount of passed investment epochs
-            uint256 passedInvestPeriods = (lastInvestmentTimestamp -
-                depositor.positions[i].investedAt) / investmentPeriod;
-
-            if (passedInvestPeriods == 0) continue;
-
-            // compute per period investment - depositAmount / split
-            uint256 perPeriodInvestment = depositor.positions[i].depositAmount /
-                depositor.positions[i].amountSplit;
-
             (
-                uint256 bluechipInvestment,
-                uint256 depositAssetInvestment
-            ) = _removeUserInvestmentFromHistory(
-                    depositor.positions[i],
-                    passedInvestPeriods,
-                    perPeriodInvestment
-                );
+                uint256 positionInvestedIntoBluechip,
+                uint256 positionNotInvestedYet,
+                uint8 newPositionSplit
+            ) = _computePositionWithdrawBluechip(depositor.positions[i]);
 
-            uint8 newPositionSplit = depositor.positions[i].amountSplit -
-                uint8(passedInvestPeriods);
+            // investment not started yet, skip
+            if (positionInvestedIntoBluechip == 0) {
+                i++;
+                continue;
+            }
 
-            // remove not invested yet amount from invest queue
-            globalInvestQueue.removeUserInvestment(
-                perPeriodInvestment,
-                newPositionSplit
-            );
-
-            investedIntoBluechip += bluechipInvestment;
-            uint256 notInvestedYet = depositor.positions[i].depositAmount -
-                depositAssetInvestment;
-
+            investedIntoBluechip += positionInvestedIntoBluechip;
             _updateOrRemovePosition(
                 depositor,
                 i,
-                notInvestedYet,
+                positionNotInvestedYet,
                 newPositionSplit
             );
 
@@ -392,72 +445,258 @@ abstract contract DCABaseUpgradeable is
         }
 
         // withdraw bluechip asset and transfer to depositor
-        _withdrawDepositorBluechip(sender, investedIntoBluechip);
+        _withdrawDepositorInvestment(
+            sender,
+            0,
+            investedIntoBluechip,
+            convertBluechipIntoDepositAsset
+        );
     }
 
-    function withdrawBluechip(uint256 positionIndex)
+    function withdrawBluechip(
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    )
         public
         virtual
         nonReentrant
+        emergencyWithdrawOnEmergencyExitedStatus(_msgSender())
     {
-        _withdrawBluechip(_msgSender(), positionIndex);
+        _withdrawBluechip(
+            _msgSender(),
+            positionIndex,
+            convertBluechipIntoDepositAsset
+        );
     }
 
-    function withdrawBluechipFor(address sender, uint256 positionIndex)
+    function withdrawBluechipFor(
+        address sender,
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    )
         public
         virtual
         onlyPortfolio
         nonReentrant
+        emergencyWithdrawOnEmergencyExitedStatus(sender)
     {
-        _withdrawBluechip(sender, positionIndex);
+        _withdrawBluechip(
+            sender,
+            positionIndex,
+            convertBluechipIntoDepositAsset
+        );
     }
 
-    function _withdrawBluechip(address sender, uint256 positionIndex) private {
+    function _withdrawBluechip(
+        address sender,
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) private {
         DcaDepositor storage depositor = depositors[sender];
-        Position storage position = depositor.positions[positionIndex];
-
-        // calculate amount of passed investment epochs
-        uint256 passedInvestPeriods = (lastInvestmentTimestamp -
-            position.investedAt) / investmentPeriod;
-
-        if (passedInvestPeriods == 0) {
-            revert NothingToWithdraw();
-        }
-
-        // compute per period investment - depositAmount / split
-        uint256 perPeriodInvestment = position.depositAmount /
-            position.amountSplit;
 
         (
-            uint256 bluechipInvestment,
-            uint256 depositAssetInvestment
-        ) = _removeUserInvestmentFromHistory(
-                position,
-                passedInvestPeriods,
-                perPeriodInvestment
+            uint256 positionInvestedIntoBluechip,
+            uint256 positionNotInvestedYet,
+            uint8 newPositionSplit
+        ) = _computePositionWithdrawBluechip(
+                depositor.positions[positionIndex]
             );
 
-        uint8 newPositionSplit = position.amountSplit -
-            uint8(passedInvestPeriods);
-
-        // remove not invested yet amount from invest queue
-        globalInvestQueue.removeUserInvestment(
-            perPeriodInvestment,
-            newPositionSplit
-        );
-
-        uint256 notInvestedYet = position.depositAmount -
-            depositAssetInvestment;
+        if (positionInvestedIntoBluechip == 0) {
+            revert NothingToWithdraw();
+        }
 
         _updateOrRemovePosition(
             depositor,
             positionIndex,
-            notInvestedYet,
+            positionNotInvestedYet,
             newPositionSplit
         );
 
         // withdraw bluechip asset and transfer to depositor
-        _withdrawDepositorBluechip(sender, bluechipInvestment);
+        _withdrawDepositorInvestment(
+            sender,
+            0,
+            positionInvestedIntoBluechip,
+            convertBluechipIntoDepositAsset
+        );
+    }
+
+    function _computePositionWithdrawBluechip(Position memory position)
+        private
+        returns (
+            uint256 investedIntoBluechip,
+            uint256 notInvestedYet,
+            uint8 newPositionSplit
+        )
+    {
+        // calculate amount of passed investment epochs
+        uint256 passedInvestPeriods = (lastInvestmentTimestamp -
+            position.investedAt) / investmentPeriod;
+
+        if (passedInvestPeriods != 0) {
+            // compute per period investment - depositAmount / split
+            uint256 perPeriodInvestment = position.depositAmount /
+                position.amountSplit;
+
+            (
+                uint256 bluechipInvestment,
+                uint256 depositAssetInvestment
+            ) = _removeUserInvestmentFromHistory(
+                    position,
+                    passedInvestPeriods,
+                    perPeriodInvestment
+                );
+
+            newPositionSplit =
+                position.amountSplit -
+                uint8(passedInvestPeriods);
+
+            // remove not invested yet amount from invest queue
+            globalInvestQueue.removeUserInvestment(
+                perPeriodInvestment,
+                newPositionSplit
+            );
+
+            investedIntoBluechip = bluechipInvestment;
+            notInvestedYet = position.depositAmount - depositAssetInvestment;
+        }
+    }
+
+    function withdrawBluechipFromPool() external onlyOwner {
+        require(
+            bluechipInvestmentState == BluechipInvestmentState.Investing,
+            "Invalid investment state"
+        );
+
+        _withdrawInvestedBluechip(_totalBluechipInvested());
+        bluechipInvestmentState = BluechipInvestmentState.Withdrawn;
+    }
+
+    function reInvestBluchipIntoPool() external onlyOwner {
+        require(
+            bluechipInvestmentState == BluechipInvestmentState.Withdrawn,
+            "Invalid investment state"
+        );
+
+        _invest(_totalBluechipInvested());
+        bluechipInvestmentState = BluechipInvestmentState.Investing;
+    }
+
+    function emergencyWithdrawIntoDepositAsset(
+        TokenInfo calldata emergencyExitDepositToken_,
+        address[] calldata depositSwapPath,
+        TokenInfo calldata emergencyExitBluechipToken_,
+        address[] calldata bluechipSwapPath
+    ) external onlyOwner nonEmergencyExited {
+        // if status Investing we should first withdraw bluechip from pool
+        uint256 currentBluechipBalance;
+        if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
+            currentBluechipBalance = _totalBluechipInvested();
+            _withdrawInvestedBluechip(currentBluechipBalance);
+        }
+
+        // set status to withdrawn to refetch actual bluechip balance
+        bluechipInvestmentState = BluechipInvestmentState.Withdrawn;
+        currentBluechipBalance = _totalBluechipInvested();
+
+        // store emergency exit token info
+        emergencyExitDepositToken = emergencyExitDepositToken_;
+        emergencyExitBluechipToken = emergencyExitBluechipToken_;
+
+        // if deposit token != emergency exit token then swap it
+        if (depositTokenInfo.token != emergencyExitDepositToken.token) {
+            // swap deposit into emergency exit token
+            uint256 depositTokenBalance = depositTokenInfo.token.balanceOf(
+                address(this)
+            );
+            uint256 receivedEmergencyExitDepositAsset = router
+                .swapTokensForTokens(depositTokenBalance, depositSwapPath);
+
+            // store token price for future conversions
+            emergencySellDepositPrice =
+                (_scaleAmount(
+                    receivedEmergencyExitDepositAsset,
+                    emergencyExitDepositToken.decimals,
+                    depositTokenInfo.decimals
+                ) * depositTokenScale) /
+                depositTokenBalance;
+        }
+
+        // if bluechip token != emergency exit token then swap it
+        if (_bluechipAddress() != address(emergencyExitBluechipToken.token)) {
+            // swap bluechip into emergency exit token
+            uint256 receivedEmergencyExitBluechipAsset = router
+                .swapTokensForTokens(currentBluechipBalance, bluechipSwapPath);
+
+            // store token price for future conversions
+            emergencySellBluechipPrice =
+                (_scaleAmount(
+                    receivedEmergencyExitBluechipAsset,
+                    emergencyExitBluechipToken.decimals,
+                    _bluechipDecimals()
+                ) * _bluechipTokenScale()) /
+                currentBluechipBalance;
+        }
+
+        // set proper strategy state
+        bluechipInvestmentState = BluechipInvestmentState.EmergencyExited;
+    }
+
+    function _emergencyWithdrawUserDeposit(address sender) private {
+        uint256 notInvestedYet;
+        uint256 investedIntoBluechip;
+
+        DcaDepositor storage depositor = depositors[sender];
+        for (uint256 i = 0; i < depositor.positions.length; i++) {
+            (
+                uint256 positionBluechipInvestment,
+                uint256 positionNotInvestedYet
+            ) = _computePositionWithdrawAll(depositor.positions[i]);
+
+            investedIntoBluechip += positionBluechipInvestment;
+            notInvestedYet += positionNotInvestedYet;
+        }
+
+        // since depositor withdraws everything
+        // we can remove his data completely
+        delete depositors[sender];
+
+        // if deposit token != emergency exit token compute share
+        if (depositTokenInfo.token != emergencyExitDepositToken.token) {
+            uint256 convertedDepositShare = (notInvestedYet *
+                emergencySellDepositPrice) / depositTokenScale;
+
+            if (convertedDepositShare != 0) {
+                emergencyExitDepositToken.token.safeTransfer(
+                    sender,
+                    convertedDepositShare
+                );
+            }
+        } else {
+            // otherwise send deposit token
+            if (notInvestedYet != 0) {
+                depositTokenInfo.token.safeTransfer(sender, notInvestedYet);
+            }
+        }
+
+        // if bluechip != emergency exit token compute share
+        if (_bluechipAddress() != address(emergencyExitBluechipToken.token)) {
+            uint256 convertedBluechipShare = (investedIntoBluechip *
+                emergencySellBluechipPrice) / _bluechipTokenScale();
+
+            if (convertedBluechipShare != 0) {
+                emergencyExitBluechipToken.token.safeTransfer(
+                    sender,
+                    convertedBluechipShare
+                );
+            }
+        } else {
+            // otherwise send bluechip token
+            if (investedIntoBluechip != 0) {
+                _transferBluechip(sender, investedIntoBluechip);
+            }
+        }
     }
 
     // ----- Base Class Setters -----
@@ -467,6 +706,8 @@ abstract contract DCABaseUpgradeable is
                 revert PortfolioAlreadyWhitelisted();
             }
         }
+
+        portfolios.push(newPortfolio);
     }
 
     function removePortfolio(address portfolio) public virtual onlyOwner {
@@ -493,10 +734,57 @@ abstract contract DCABaseUpgradeable is
 
     // ----- Query Methods -----
     function canInvest() public view virtual returns (bool) {
-        return _getPassedInvestPeriods() > 0;
+        return _getPassedInvestPeriods() > 0 && !isEmergencyExited();
+    }
+
+    function depositorInfo(address depositor)
+        public
+        view
+        virtual
+        returns (DcaDepositor memory)
+    {
+        return depositors[depositor];
+    }
+
+    function isEmergencyExited() public view virtual returns (bool) {
+        return
+            bluechipInvestmentState == BluechipInvestmentState.EmergencyExited;
+    }
+
+    function depositToken() public view returns (IERC20Upgradeable) {
+        return depositTokenInfo.token;
     }
 
     // ----- Private Base Class Helper Functions -----
+    function _takeFee(uint256 amount) private returns (uint256 actualDeposit) {
+        // if fee is set to 0 then skip it
+        if (depositFee.fee == 0) {
+            return amount;
+        }
+
+        // actual deposit = amount * (100% - fee%)
+        actualDeposit = (amount * (100 - depositFee.fee)) / 100;
+
+        uint256 feeAmount = amount - actualDeposit;
+        if (feeAmount != 0) {
+            depositTokenInfo.token.safeTransfer(
+                depositFee.feeReceiver,
+                feeAmount
+            );
+        }
+    }
+
+    function _swapIntoBluechipAsset(uint256 amountIn)
+        private
+        returns (uint256)
+    {
+        return router.swapTokensForTokens(amountIn, depositToBluechipSwapPath);
+    }
+
+    function _swapIntoDepositAsset(uint256 amountIn) private returns (uint256) {
+        return router.swapTokensForTokens(amountIn, bluechipToDepositSwapPath);
+    }
+
     function _getPassedInvestPeriods() private view returns (uint256) {
         // solhint-disable-next-line not-rely-on-time
         return (block.timestamp - lastInvestmentTimestamp) / investmentPeriod;
@@ -572,17 +860,61 @@ abstract contract DCABaseUpgradeable is
         }
     }
 
-    // ----- Functions For Child Contract -----
-    function _swapIntoBluechipAsset(
-        IERC20Upgradeable depositToken,
-        uint256 amount
-    ) internal virtual returns (uint256);
+    function _withdrawDepositorInvestment(
+        address sender,
+        uint256 depositAssetAmount,
+        uint256 bluechipAssetAmount,
+        bool convertBluechipIntoDepositAsset
+    ) private {
+        // if state is Withdrawn then bluechip is already on the contract balance
+        if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
+            _withdrawInvestedBluechip(bluechipAssetAmount);
+        }
 
-    function _investRewards(uint256 amount) internal virtual;
+        // if convertion requested swap bluechip -> deposit asset
+        if (convertBluechipIntoDepositAsset) {
+            depositAssetAmount += _swapIntoDepositAsset(bluechipAssetAmount);
+            bluechipAssetAmount = 0;
+        }
+
+        if (depositAssetAmount != 0) {
+            depositTokenInfo.token.safeTransfer(sender, depositAssetAmount);
+        }
+
+        if (bluechipAssetAmount != 0) {
+            _transferBluechip(sender, bluechipAssetAmount);
+        }
+    }
+
+    function _bluechipTokenScale() private view returns (uint256) {
+        return 10**_bluechipDecimals();
+    }
+
+    function _scaleAmount(
+        uint256 amount,
+        uint8 decimals,
+        uint8 scaleToDecimals
+    ) internal pure returns (uint256) {
+        if (decimals < scaleToDecimals) {
+            return amount * uint256(10**uint256(scaleToDecimals - decimals));
+        } else if (decimals > scaleToDecimals) {
+            return amount / uint256(10**uint256(decimals - scaleToDecimals));
+        }
+        return amount;
+    }
+
+    // ----- Functions For Child Contract -----
+    function _invest(uint256 amount) internal virtual;
 
     function _claimRewards() internal virtual returns (uint256);
 
-    function _withdrawDepositorBluechip(address depositor, uint256 amount)
-        internal
-        virtual;
+    function _withdrawInvestedBluechip(uint256 amount) internal virtual;
+
+    function _transferBluechip(address to, uint256 amount) internal virtual;
+
+    function _totalBluechipInvested() internal view virtual returns (uint256);
+
+    function _bluechipAddress() internal view virtual returns (address);
+
+    function _bluechipDecimals() internal view virtual returns (uint8);
 }
