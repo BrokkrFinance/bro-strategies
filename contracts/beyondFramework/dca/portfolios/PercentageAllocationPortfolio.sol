@@ -103,75 +103,124 @@ contract PercentageAllocationPortfolio is
         }
     }
 
-    function withdrawAll() external nonReentrant {
-        _withdrawAll(_msgSender());
-    }
-
-    function withdrawAllFor(address sender)
+    function withdrawAll(bool convertBluechipIntoDepositAsset)
         external
-        onlyPortfolio
         nonReentrant
     {
-        _withdrawAll(sender);
+        _withdrawAll(_msgSender(), convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawAll(address sender) private {
+    function withdrawAllFor(
+        address sender,
+        bool convertBluechipIntoDepositAsset
+    ) external onlyPortfolio nonReentrant {
+        _withdrawAll(sender, convertBluechipIntoDepositAsset);
+    }
+
+    function _withdrawAll(address sender, bool convertBluechipIntoDepositAsset)
+        private
+    {
         for (uint256 i = 0; i < strategies.length; i++) {
-            strategies[i].dca.withdrawAllFor(sender);
+            strategies[i].dca.withdrawAllFor(
+                sender,
+                convertBluechipIntoDepositAsset
+            );
         }
     }
 
-    function withdrawAll(uint256 positionIndex) external nonReentrant {
-        _withdrawAll(_msgSender(), positionIndex);
+    function withdrawAll(
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) external nonReentrant {
+        _withdrawAll(
+            _msgSender(),
+            positionIndex,
+            convertBluechipIntoDepositAsset
+        );
     }
 
-    function withdrawAllFor(address sender, uint256 positionIndex)
-        external
-        onlyPortfolio
-        nonReentrant
-    {
-        _withdrawAll(sender, positionIndex);
+    function withdrawAllFor(
+        address sender,
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) external onlyPortfolio nonReentrant {
+        _withdrawAll(sender, positionIndex, convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawAll(address sender, uint256 positionIndex) private {
+    function _withdrawAll(
+        address sender,
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) private {
         for (uint256 i = 0; i < strategies.length; i++) {
-            strategies[i].dca.withdrawAllFor(sender, positionIndex);
+            strategies[i].dca.withdrawAllFor(
+                sender,
+                positionIndex,
+                convertBluechipIntoDepositAsset
+            );
         }
     }
 
-    function withdrawBluechip() external nonReentrant {
-        _withdrawBluechip(_msgSender());
-    }
-
-    function withdrawBluechipFor(address sender)
+    function withdrawBluechip(bool convertBluechipIntoDepositAsset)
         external
-        onlyPortfolio
         nonReentrant
     {
-        _withdrawBluechip(sender);
+        _withdrawBluechip(_msgSender(), convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawBluechip(address sender) private {
+    function withdrawBluechipFor(
+        address sender,
+        bool convertBluechipIntoDepositAsset
+    ) external onlyPortfolio nonReentrant {
+        _withdrawBluechip(sender, convertBluechipIntoDepositAsset);
+    }
+
+    function _withdrawBluechip(
+        address sender,
+        bool convertBluechipIntoDepositAsset
+    ) private {
         for (uint256 i = 0; i < strategies.length; i++) {
-            strategies[i].dca.withdrawBluechipFor(sender);
+            strategies[i].dca.withdrawBluechipFor(
+                sender,
+                convertBluechipIntoDepositAsset
+            );
         }
     }
 
-    function withdrawBluechip(uint256 positionIndex) external nonReentrant {
-        _withdrawBluechip(_msgSender(), positionIndex);
+    function withdrawBluechip(
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) external nonReentrant {
+        _withdrawBluechip(
+            _msgSender(),
+            positionIndex,
+            convertBluechipIntoDepositAsset
+        );
     }
 
-    function withdrawBluechipFor(address sender, uint256 positionIndex)
-        external
-        onlyPortfolio
-        nonReentrant
-    {
-        _withdrawBluechip(sender, positionIndex);
+    function withdrawBluechipFor(
+        address sender,
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) external onlyPortfolio nonReentrant {
+        _withdrawBluechip(
+            sender,
+            positionIndex,
+            convertBluechipIntoDepositAsset
+        );
     }
 
-    function _withdrawBluechip(address sender, uint256 positionIndex) private {
+    function _withdrawBluechip(
+        address sender,
+        uint256 positionIndex,
+        bool convertBluechipIntoDepositAsset
+    ) private {
         for (uint256 i = 0; i < strategies.length; i++) {
-            strategies[i].dca.withdrawBluechipFor(sender, positionIndex);
+            strategies[i].dca.withdrawBluechipFor(
+                sender,
+                positionIndex,
+                convertBluechipIntoDepositAsset
+            );
         }
     }
 
@@ -182,6 +231,8 @@ contract PercentageAllocationPortfolio is
                 revert PortfolioAlreadyWhitelisted();
             }
         }
+
+        portfolios.push(newPortfolio);
     }
 
     function removePortfolio(address portfolio) public virtual onlyOwner {
@@ -206,5 +257,3 @@ contract PercentageAllocationPortfolio is
         super._unpause();
     }
 }
-// portfolio wont rebalance
-// just invest tokens for the user - introduce depositFor/withdrawFor methods
