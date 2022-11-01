@@ -1,8 +1,8 @@
-node_modules
 .env
+.vscode
 coverage
 coverage.json
-.vscode
+node_modules
 
 # Temporary files
 *.swp
@@ -11,15 +11,9 @@ coverage.json
 yarn-*.log
 
 # Generated files
+.openzeppelin/unknown-*
+artifacts
+cache
+deployments
 typechain
 typechain-types
-cache
-.openzeppelin/unknown-*
-deployments
-artifacts/@aave
-artifacts/@mangrovedao
-artifacts/@openzeppelin
-artifacts/@traderjoe-xyz
-artifacts/build-info
-artifacts/hardhat
-
