@@ -25,7 +25,7 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
             forking: {
               jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
               enabled: true,
-              blockNumber: 21250000,
+              blockNumber: 21777750,
             },
           },
         ],

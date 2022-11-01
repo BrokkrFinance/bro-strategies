@@ -24,7 +24,7 @@ export function testStrategy(description: string, deployStrategy: Function, stra
             forking: {
               jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
               enabled: true,
-              blockNumber: 21250000,
+              blockNumber: 21777750,
             },
           },
         ],
