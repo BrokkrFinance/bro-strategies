@@ -59,7 +59,7 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
 
       // Portfolio owner.
       const ownerAddr = await this.portfolio.owner()
-      this.owner = await ethers.getSigner(ownerAddr)
+      this.owner = await ethers.getImpersonatedSigner(ownerAddr)
 
       // Portfolio token.
       const investmentTokenAddr = await this.portfolio.getInvestmentToken()

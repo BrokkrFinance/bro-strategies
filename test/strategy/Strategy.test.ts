@@ -58,7 +58,7 @@ export function testStrategy(description: string, deployStrategy: Function, stra
 
       // Strategy owner.
       const ownerAddr = await this.strategy.owner()
-      this.owner = await ethers.getSigner(ownerAddr)
+      this.owner = await ethers.getImpersonatedSigner(ownerAddr)
 
       // Strategy token.
       const investmentTokenAddr = await this.strategy.getInvestmentToken()
