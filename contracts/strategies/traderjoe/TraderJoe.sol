@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./TraderJoeStorageLib.sol";
 import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
+import "../../common/libraries/SwapServiceLib.sol";
 import "../../dependencies/traderjoe/ITraderJoeMasterChef.sol";
 import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
 import "../../dependencies/traderjoe/ITraderJoePair.sol";
@@ -17,11 +18,11 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.1.0";
+        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.1.1";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "TraderJoe Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.1.0";
+    string public constant version = "1.1.1";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -92,11 +93,9 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         address[] memory path = new address[](2);
         path[0] = address(depositToken);
         path[1] = address(strategyStorage.pairDepositToken);
-        uint256 pairDepositTokenDesired = swapExactTokensForTokens(
-            swapService,
-            swapAmount,
-            path
-        );
+
+        uint256 pairDepositTokenDesired = SwapServiceLib
+            .swapExactTokensForTokens(swapService, swapAmount, 0, path);
         uint256 depositTokenDesired = amount - swapAmount;
 
         // providing liquidity to Trader Joe
@@ -127,9 +126,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         if (extraPairDepositTokenAmount != 0) {
             path[0] = address(strategyStorage.pairDepositToken);
             path[1] = address(depositToken);
-            swapExactTokensForTokens(
+            SwapServiceLib.swapExactTokensForTokens(
                 swapService,
                 extraPairDepositTokenAmount,
+                0,
                 path
             );
         }
@@ -184,9 +184,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         path[0] = address(strategyStorage.pairDepositToken);
         path[1] = address(depositToken);
 
-        swapExactTokensForTokens(
+        SwapServiceLib.swapExactTokensForTokens(
             swapService,
             pairDepositTokenBalanceIncrement,
+            0,
             path
         );
     }
@@ -201,9 +202,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         path[0] = address(strategyStorage.joeToken);
         path[1] = address(depositToken);
 
-        swapExactTokensForTokens(
+        SwapServiceLib.swapExactTokensForTokens(
             swapService,
             strategyStorage.joeToken.balanceOf(address(this)),
+            0,
             path
         );
     }

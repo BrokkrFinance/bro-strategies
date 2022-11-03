@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+struct Balance {
+    address asset;
+    uint256 balance;
+}
+
+struct Valuation {
+    address asset;
+    uint256 valuation;
+}
+
 interface IAum {
-    struct Balance {
-        address asset;
-        uint256 balance;
-    }
-
-    struct Valuation {
-        address asset;
-        uint256 valuation;
-    }
-
     function getAssetBalances() external view returns (Balance[] memory);
 
     function getLiabilityBalances() external view returns (Balance[] memory);

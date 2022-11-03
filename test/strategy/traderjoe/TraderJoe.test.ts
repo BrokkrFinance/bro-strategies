@@ -8,6 +8,7 @@ import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
+import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 import { testStrategyReapUninvestedReward } from "../StrategyReapUninvestedReward.test"
 
 testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, [
@@ -15,11 +16,14 @@ testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy,
   testTraderJoeInitialize,
   testTraderJoeUpgradeable,
   testStrategyReapUninvestedReward,
+  testStrategyReapRewardExtra,
 ])
 testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, [
   testTraderJoeAum,
   testTraderJoeInitialize,
   testTraderJoeUpgradeable,
+  testStrategyReapUninvestedReward,
+  testStrategyReapRewardExtra,
 ])
 
 async function deployTraderJoeStrategy() {
@@ -42,14 +46,15 @@ async function deployTraderJoeStrategy() {
     },
     {
       extraArgs: [TraderJoeAddrs.router, TraderJoeAddrs.masterChef, TraderJoeAddrs.lpToken, TraderJoeAddrs.joeToken],
-    }
+    },
+    []
   )
 
-  return strategy
+  return { investable: strategy, ownerAddr: owner.address, upgradeClassName: "TestUpgradedOwnableStrategy" }
 }
 
 async function upgradeTraderJoeStrategy() {
-  return upgradeStrategy("strategy/TraderJoe.json")
+  return upgradeStrategy("strategy/TraderJoe.json", "TestUpgradedOwnableStrategy")
 }
 
 function testTraderJoeAum() {

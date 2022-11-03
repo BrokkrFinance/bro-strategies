@@ -3,10 +3,10 @@ import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
 import { getTokenContract, removeStrategyInvestmentLimitsAndFees } from "../helper/contracts"
 import { InvestHelper } from "../helper/invest"
+import { testStrategyAccessControl } from "./StrategyAccessControl.test"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyERC165 } from "./StrategyERC165.test"
 import { testStrategyFee } from "./StrategyFee.test"
-import { testStrategyOwnable } from "./StrategyOwnable.test"
 import { testStrategyPausable } from "./StrategyPausable.test"
 import { testStrategyReapReward } from "./StrategyReapReward.test"
 import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
@@ -54,11 +54,10 @@ export function testStrategy(description: string, deployStrategy: Function, stra
       }
 
       // Deploy strategy.
-      this.strategy = await deployStrategy()
-
-      // Strategy owner.
-      const ownerAddr = await this.strategy.owner()
-      this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+      const deployedStrategyConfig = await deployStrategy()
+      this.owner = await ethers.getImpersonatedSigner(deployedStrategyConfig.ownerAddr)
+      this.strategy = deployedStrategyConfig.investable
+      this.upgradeClassName = deployedStrategyConfig.upgradeClassName
 
       // Strategy token.
       const investmentTokenAddr = await this.strategy.getInvestmentToken()
@@ -112,7 +111,7 @@ export function testStrategy(description: string, deployStrategy: Function, stra
     testStrategyDeposit()
     testStrategyERC165()
     testStrategyFee()
-    testStrategyOwnable()
+    testStrategyAccessControl()
     testStrategyPausable()
     testStrategyReapReward()
     testStrategyUpgradeable()

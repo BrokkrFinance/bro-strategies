@@ -16,6 +16,15 @@ export const WhaleAddrs = {
   usdc: "0x42d6ce661bb2e5f5cc639e7befe74ff9fd649541",
 }
 
+export const AaveAddrs = {
+  aavePool: "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
+  aaveProtocolDataProvider: "0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654",
+}
+
+export const Vector = {
+  poolHelperJoe: "0x9ef319429c4d32bc98957881723070dbca036b39",
+}
+
 export const StargateAddrs = {
   router: "0x45a01e4e04f14f7a4a6702c74187c5f6222033cd",
   usdcPool: "0x1205f31718499dbf1fca446663b532ef87481fe1",
@@ -31,4 +40,5 @@ export const TraderJoeAddrs = {
   masterChef: "0x4483f0b6e2f5486d06958c20f8c39a7abe87bf8f",
   lpToken: "0x2A8A315e82F85D1f0658C5D66A452Bbdd9356783",
   joeToken: "0x6e84a6216ea6dacc71ee8e6b0a5b7322eebc0fdd",
+  usdcWAvaxLpToken: "0xf4003F4efBE8691B60249E6afbD307aBE7758adb",
 }

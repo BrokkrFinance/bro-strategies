@@ -8,26 +8,31 @@ import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
+import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
 testStrategy("Stargate USDC Strategy - Deploy", deployStargateUsdcStrategy, [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
   testStargateUsdcUpgradeable,
+  testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDT Strategy - Deploy", deployStargateUsdtStrategy, [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
   testStargateUsdtUpgradeable,
+  testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUsdcStrategy, [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
   testStargateUsdcUpgradeable,
+  testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUsdtStrategy, [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
   testStargateUsdtUpgradeable,
+  testStrategyReapRewardExtra,
 ])
 
 async function deployStargateUsdcStrategy() {
@@ -56,10 +61,11 @@ async function deployStargateUsdcStrategy() {
         StargateAddrs.usdcLpToken,
         StargateAddrs.stgToken,
       ],
-    }
+    },
+    []
   )
 
-  return strategy
+  return { investable: strategy, ownerAddr: owner.address, upgradeClassName: "TestUpgradedOwnableStrategy" }
 }
 
 async function deployStargateUsdtStrategy() {
@@ -88,18 +94,19 @@ async function deployStargateUsdtStrategy() {
         StargateAddrs.usdtLpToken,
         StargateAddrs.stgToken,
       ],
-    }
+    },
+    []
   )
 
-  return strategy
+  return { investable: strategy, ownerAddr: owner.address, upgradeClassName: "TestUpgradedOwnableStrategy" }
 }
 
 async function upgradeStargateUsdcStrategy() {
-  return await upgradeStrategy("strategy/StargateUsdc.json")
+  return await upgradeStrategy("strategy/StargateUsdc.json", "TestUpgradedOwnableStrategy")
 }
 
 async function upgradeStargateUsdtStrategy() {
-  return await upgradeStrategy("strategy/StargateUsdt.json")
+  return await upgradeStrategy("strategy/StargateUsdt.json", "TestUpgradedOwnableStrategy")
 }
 
 function testStargateUsdcAum() {

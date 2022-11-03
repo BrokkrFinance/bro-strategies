@@ -84,7 +84,12 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             path[1] = address(InvestableLib.WAVAX);
             path[2] = address(strategyStorage.poolDepositToken);
 
-            amount = swapExactTokensForTokens(swapService, amount, path);
+            amount = SwapServiceLib.swapExactTokensForTokens(
+                swapService,
+                amount,
+                0,
+                path
+            );
         }
 
         uint256 lpBalanceBefore = strategyStorage.lpToken.balanceOf(
@@ -154,9 +159,10 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             path[1] = address(InvestableLib.WAVAX);
             path[2] = address(depositToken);
 
-            swapExactTokensForTokens(
+            SwapServiceLib.swapExactTokensForTokens(
                 swapService,
                 poolDepositTokenBalanceIncrement,
+                0,
                 path
             );
         }
@@ -173,9 +179,10 @@ contract StargateV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         path[1] = address(InvestableLib.WAVAX);
         path[2] = address(depositToken);
 
-        swapExactTokensForTokens(
+        SwapServiceLib.swapExactTokensForTokens(
             swapService,
             strategyStorage.stgToken.balanceOf(address(this)),
+            0,
             path
         );
     }

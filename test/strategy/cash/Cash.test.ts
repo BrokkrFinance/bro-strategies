@@ -6,19 +6,27 @@ import { Oracles } from "../../helper/oracles"
 import { SwapServices } from "../../helper/swaps"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
+import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Cash Strategy - Deploy", deployCashStrategy, [testCashAum, testCashUpgradeable])
+testStrategy("Cash Strategy - Deploy", deployCashStrategy, [
+  testCashAum,
+  testCashUpgradeable,
+  testStrategyReapRewardExtra,
+])
 testStrategy("Cash with Stargate USDC Strategy - Upgrade After Deploy", upgradeCashWithStargateUsdcStrategy, [
   testCashAum,
   testCashUpgradeable,
+  testStrategyReapRewardExtra,
 ])
 testStrategy("Cash with Stargate USDT Strategy - Upgrade After Deploy", upgradeCashWithStargateUsdtStrategy, [
   testCashAum,
   testCashUpgradeable,
+  testStrategyReapRewardExtra,
 ])
 testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, [
   testCashAum,
   testCashUpgradeable,
+  testStrategyReapRewardExtra,
 ])
 
 async function deployCashStrategy() {
@@ -41,22 +49,23 @@ async function deployCashStrategy() {
     },
     {
       extraArgs: [],
-    }
+    },
+    []
   )
 
-  return strategy
+  return { investable: strategy, ownerAddr: owner.address, upgradeClassName: "TestUpgradedOwnableStrategy" }
 }
 
 async function upgradeCashWithStargateUsdcStrategy() {
-  return await upgradeStrategy("strategy/CashWithStargateUsdc.json")
+  return await upgradeStrategy("strategy/CashWithStargateUsdc.json", "TestUpgradedOwnableStrategy")
 }
 
 async function upgradeCashWithStargateUsdtStrategy() {
-  return await upgradeStrategy("strategy/CashWithStargateUsdt.json")
+  return await upgradeStrategy("strategy/CashWithStargateUsdt.json", "TestUpgradedOwnableStrategy")
 }
 
 async function upgradeCashWithTraderJoeStrategy() {
-  return await upgradeStrategy("strategy/CashWithTraderJoe.json")
+  return await upgradeStrategy("strategy/CashWithTraderJoe.json", "TestUpgradedOwnableStrategy")
 }
 
 function testCashAum() {

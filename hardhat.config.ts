@@ -7,7 +7,7 @@ import "@openzeppelin/hardhat-defender"
 import "@openzeppelin/hardhat-upgrades"
 import "@typechain/hardhat"
 import * as dotenv from "dotenv"
-//import "hardhat-contract-sizer"
+// import "hardhat-contract-sizer"
 import "hardhat-deploy"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
@@ -77,7 +77,7 @@ const config: HardhatUserConfig = {
     currency: "USD",
   },
   mocha: {
-    timeout: 90000,
+    timeout: 120000,
   },
   // contractSizer: {
   //   alphaSort: true,

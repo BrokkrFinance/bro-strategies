@@ -1,46 +1,32 @@
 import { expect } from "chai"
 
-export function testOwnable() {
+export function testAccessControl() {
   it("should fail when the non-owner user sets deposit fee", async function () {
-    await expect(this.investable.connect(this.user0).setDepositFee(0, [])).to.be.revertedWith(
-      "Ownable: caller is not the owner"
-    )
+    await expect(this.investable.connect(this.user0).setDepositFee(0, [])).to.be.reverted
   })
 
   it("should fail when the non-owner user sets withdrawal fee", async function () {
-    await expect(this.investable.connect(this.user0).setWithdrawalFee(0, [])).to.be.revertedWith(
-      "Ownable: caller is not the owner"
-    )
+    await expect(this.investable.connect(this.user0).setWithdrawalFee(0, [])).to.be.reverted
   })
 
   it("should fail when the non-owner user sets performance fee", async function () {
-    await expect(this.investable.connect(this.user0).setPerformanceFee(0, [])).to.be.revertedWith(
-      "Ownable: caller is not the owner"
-    )
+    await expect(this.investable.connect(this.user0).setPerformanceFee(0, [])).to.be.reverted
   })
 
   it("should fail when the non-owner user sets fee receiver", async function () {
-    await expect(this.investable.connect(this.user0).setFeeReceiver(this.user0.address, [])).to.be.revertedWith(
-      "Ownable: caller is not the owner"
-    )
+    await expect(this.investable.connect(this.user0).setFeeReceiver(this.user0.address, [])).to.be.reverted
   })
 
   it("should fail when the non-owner user sets investment token", async function () {
-    await expect(this.investable.connect(this.user0).setInvestmentToken(this.usdc.address)).to.be.revertedWith(
-      "Ownable: caller is not the owner"
-    )
+    await expect(this.investable.connect(this.user0).setInvestmentToken(this.usdc.address)).to.be.reverted
   })
 
   it("should fail when the non-owner user sets total investment limit", async function () {
-    await expect(this.investable.connect(this.user0).setTotalInvestmentLimit(0)).to.be.revertedWith(
-      "Ownable: caller is not the owner"
-    )
+    await expect(this.investable.connect(this.user0).setTotalInvestmentLimit(0)).to.be.reverted
   })
 
   it("should fail when the non-owner user sets investment limit per address", async function () {
-    await expect(this.investable.connect(this.user0).setInvestmentLimitPerAddress(0)).to.be.revertedWith(
-      "Ownable: caller is not the owner"
-    )
+    await expect(this.investable.connect(this.user0).setInvestmentLimitPerAddress(0)).to.be.reverted
   })
 
   it("should succeed when the owner user sets withdrawal fee to 30%", async function () {

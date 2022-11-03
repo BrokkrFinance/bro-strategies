@@ -5,7 +5,7 @@ import "../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract TestUpgradedStrategy is
+contract TestUpgradedOwnableStrategy is
     UUPSUpgradeable,
     StrategyOwnablePausableBaseUpgradeable
 {

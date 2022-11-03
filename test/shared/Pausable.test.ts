@@ -4,7 +4,7 @@ import { ethers } from "hardhat"
 
 export function testPausable() {
   it("should fail when the non-owner user pauses", async function () {
-    await expect(this.investable.connect(this.user0).pause()).to.be.revertedWith("Ownable: caller is not the owner")
+    await expect(this.investable.connect(this.user0).pause()).to.be.reverted
   })
 
   it("should fail when any user deposits and the investable is paused", async function () {

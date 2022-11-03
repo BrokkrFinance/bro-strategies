@@ -1,12 +1,13 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
+import { createRolesArray } from "../helper/utils"
 
 export function testStrategyUpgradeable() {
   describe("Upgradeable", async function () {
     it("should succeed when the owner user upgrades", async function () {
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.strategy.address)
 
-      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy", this.owner)
+      const TestUpgradedStrategy = await ethers.getContractFactory(this.upgradeClassName, this.owner)
       const testUpgradedStrategy = await upgrades.upgradeProxy(this.strategy.address, TestUpgradedStrategy, {
         call: {
           fn: "initialize",
@@ -27,7 +28,7 @@ export function testStrategyUpgradeable() {
               this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
-              [],
+              createRolesArray(this.owner.address),
             ],
           ],
         },
@@ -44,7 +45,7 @@ export function testStrategyUpgradeable() {
 
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.strategy.address)
 
-      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy", this.owner)
+      const TestUpgradedStrategy = await ethers.getContractFactory(this.upgradeClassName, this.owner)
       const testUpgradedStrategy = await upgrades.upgradeProxy(this.strategy.address, TestUpgradedStrategy, {
         call: {
           fn: "initialize",
@@ -65,7 +66,7 @@ export function testStrategyUpgradeable() {
               this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
-              [],
+              createRolesArray(this.owner.address),
             ],
           ],
         },
@@ -78,7 +79,7 @@ export function testStrategyUpgradeable() {
     })
 
     it("should fail when the non-owner user upgrades", async function () {
-      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy", this.user0)
+      const TestUpgradedStrategy = await ethers.getContractFactory(this.upgradeClassName, this.user0)
       await expect(
         upgrades.upgradeProxy(this.strategy.address, TestUpgradedStrategy, {
           call: {
@@ -100,12 +101,12 @@ export function testStrategyUpgradeable() {
                 this.priceOracle,
                 this.swapServiceProvider,
                 this.swapServiceRouter,
-                [],
+                createRolesArray(this.owner.address),
               ],
             ],
           },
         })
-      ).to.be.revertedWith("Ownable: caller is not the owner")
+      ).to.be.reverted
     })
 
     it("should succeed to leave all common state variables' value intact", async function () {
@@ -140,7 +141,7 @@ export function testStrategyUpgradeable() {
       // Swap service.
       const swapServiceBefore = await this.strategy.swapService()
 
-      const TestUpgradedStrategy = await ethers.getContractFactory("TestUpgradedStrategy", this.owner)
+      const TestUpgradedStrategy = await ethers.getContractFactory(this.upgradeClassName, this.owner)
       const testUpgradedStrategy = await upgrades.upgradeProxy(this.strategy.address, TestUpgradedStrategy, {
         call: {
           fn: "initialize",
@@ -161,7 +162,7 @@ export function testStrategyUpgradeable() {
               this.priceOracle,
               this.swapServiceProvider,
               this.swapServiceRouter,
-              [],
+              createRolesArray(this.owner.address),
             ],
           ],
         },
