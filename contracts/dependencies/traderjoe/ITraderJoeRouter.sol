@@ -51,4 +51,9 @@ interface ITraderJoeRouter {
         address to,
         uint256 deadline
     ) external returns (uint256 amountA, uint256 amountB);
+
+    function getAmountsOut(uint256 amountIn, address[] calldata path)
+        external
+        view
+        returns (uint256[] memory amounts);
 }
