@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import { DCABaseUpgradeable } from "../base/DCABaseUpgradeable.sol";
 import { IAltPool } from "../../../dependencies/platypus/IAltPool.sol";
 import { IMasterPlatypusV4 } from "../../../dependencies/platypus/IMasterPlatypusV4.sol";
-import { InvestableLib } from "../../../common/libraries/InvestableLib.sol";
 import { SwapLib } from "../libraries/SwapLib.sol";
+import { InvestableLib } from "../../../common/libraries/InvestableLib.sol";
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -38,26 +38,90 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
     function initialize(
         DcaStrategyInitArgs calldata args,
         TokenInfo calldata bluechipTokenInfo_,
-        PlatypusInfo calldata platypusInfo_
+        PlatypusInfo calldata platypusInfo_,
+        address[] calldata ptpIntoBluechipSwapPath_,
+        address[] calldata avaxIntoBluechipSwapPath_
     ) external initializer {
         __UUPSUpgradeable_init();
         __DCABaseUpgradeable_init(args);
 
-        bluechipTokenInfo = bluechipTokenInfo_;
-        platypusInfo = platypusInfo_;
+        setBluechipTokenInfo(bluechipTokenInfo_);
+        setPlatypusInfo(platypusInfo_);
+        _setRewardsSwapPath(
+            ptpIntoBluechipSwapPath_,
+            avaxIntoBluechipSwapPath_
+        );
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function _invest(uint256 amount) internal virtual override {
+    // ----- Setter Functions -----
+    function setBluechipTokenInfo(TokenInfo memory newBluechipTokenInfo)
+        private
+    {
+        require(
+            address(newBluechipTokenInfo.token) != address(0),
+            "Invalid bluechip token address"
+        );
+        bluechipTokenInfo = newBluechipTokenInfo;
+    }
+
+    function setPlatypusInfo(PlatypusInfo memory newPlatypusInfo) private {
+        require(
+            address(newPlatypusInfo.altPoolBTC) != address(0) &&
+                address(newPlatypusInfo.masterPlatypusV4) != address(0) &&
+                address(newPlatypusInfo.altBtcLpToken) != address(0) &&
+                address(newPlatypusInfo.platypusToken) != address(0),
+            "Invalid Platypus info"
+        );
+        platypusInfo = newPlatypusInfo;
+    }
+
+    function setRewardsSwapPath(
+        address[] memory newPtpIntoAvaxSwapPath,
+        address[] memory newAvaxIntoBluechipSwapPath
+    ) external onlyOwner {
+        _setRewardsSwapPath(
+            newPtpIntoAvaxSwapPath,
+            newAvaxIntoBluechipSwapPath
+        );
+    }
+
+    function _setRewardsSwapPath(
+        address[] memory newPtpIntoAvaxSwapPath,
+        address[] memory newAvaxIntoBluechipSwapPath
+    ) private {
+        require(
+            newPtpIntoAvaxSwapPath[0] == address(platypusInfo.platypusToken) &&
+                newPtpIntoAvaxSwapPath[newPtpIntoAvaxSwapPath.length - 1] ==
+                address(bluechipTokenInfo.token) &&
+                newAvaxIntoBluechipSwapPath[0] == InvestableLib.WAVAX &&
+                newAvaxIntoBluechipSwapPath[
+                    newAvaxIntoBluechipSwapPath.length - 1
+                ] ==
+                address(bluechipTokenInfo.token),
+            "Invalid swap path"
+        );
+
+        ptpIntoBluechipSwapPath = newPtpIntoAvaxSwapPath;
+        avaxIntoBluechipSwapPath = newAvaxIntoBluechipSwapPath;
+    }
+
+    // ----- Base Contract Overrides -----
+    function _invest(uint256 amount)
+        internal
+        virtual
+        override
+        returns (uint256 receivedAltLp)
+    {
         // 1. Approve bluechip to alt pool
-        bluechipTokenInfo.token.safeApprove(
+        bluechipTokenInfo.token.safeIncreaseAllowance(
             address(platypusInfo.altPoolBTC),
             amount
         );
 
         // 2. Deposit bluechip into alt pool. Receive minted alt pool lp token
-        uint256 receivedAltLp = platypusInfo.altPoolBTC.deposit(
+        receivedAltLp = platypusInfo.altPoolBTC.deposit(
             address(bluechipTokenInfo.token),
             amount,
             address(this),
@@ -66,7 +130,7 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
         );
 
         // 3. Approve alt lp token to master platypus
-        platypusInfo.altBtcLpToken.safeApprove(
+        platypusInfo.altBtcLpToken.safeIncreaseAllowance(
             address(platypusInfo.masterPlatypusV4),
             receivedAltLp
         );
@@ -79,6 +143,22 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
     }
 
     function _claimRewards() internal virtual override returns (uint256) {
+        // fetch earned rewards
+        (
+            uint256 pendingPtp,
+            ,
+            ,
+            uint256[] memory pendingBonusTokens
+        ) = platypusInfo.masterPlatypusV4.pendingTokens(
+                platypusInfo.poolId,
+                address(this)
+            );
+
+        // check if we can claim something
+        if (pendingPtp == 0 && pendingBonusTokens[0] == 0) {
+            return 0;
+        }
+
         uint256[] memory pids = new uint256[](1);
         pids[0] = platypusInfo.poolId;
 
@@ -98,18 +178,19 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
         internal
         virtual
         override
+        returns (uint256 receivedBluechip)
     {
         // 1. Unstake alp lp from master platypus
         platypusInfo.masterPlatypusV4.withdraw(platypusInfo.poolId, amount);
 
         // 2. Approve alt lp to alt pool btc
-        platypusInfo.altBtcLpToken.safeApprove(
+        platypusInfo.altBtcLpToken.safeIncreaseAllowance(
             address(platypusInfo.altPoolBTC),
             amount
         );
 
         // 3. Withdraw bluechip from alt pool btc
-        platypusInfo.altPoolBTC.withdraw(
+        receivedBluechip = platypusInfo.altPoolBTC.withdraw(
             address(bluechipTokenInfo.token),
             amount,
             0,
@@ -135,6 +216,7 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
         returns (uint256)
     {
         if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
+            // in case of investing all bluechip funds are invested into master platypus
             return
                 platypusInfo
                     .masterPlatypusV4
@@ -143,6 +225,7 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
         }
 
         if (bluechipInvestmentState == BluechipInvestmentState.Withdrawn) {
+            // in case of withdrawn all bluechip is hodling on contract balance
             return bluechipTokenInfo.token.balanceOf(address(this));
         }
 
@@ -171,15 +254,31 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
         return bluechipTokenInfo.decimals;
     }
 
-    function _swapRewards(uint256 ptpReward) private returns (uint256) {
-        // swap ptp into avax
-        router.swapTokensForAvax(ptpReward, ptpIntoBluechipSwapPath);
+    // ----- Private Helper Functions -----
+    function _swapRewards(uint256 ptpReward)
+        private
+        returns (uint256 receivedBleuchip)
+    {
+        uint256 ptpToBluechip = router.getAmountOut(
+            ptpReward,
+            ptpIntoBluechipSwapPath
+        );
+        if (ptpToBluechip > 0) {
+            receivedBleuchip += router.swapTokensForTokens(
+                ptpReward,
+                ptpIntoBluechipSwapPath
+            );
+        }
 
-        // swap whole avax amount into bluechip
-        return
-            router.swapAvaxForTokens(
+        uint256 avaxToBluechip = router.getAmountOut(
+            address(this).balance,
+            avaxIntoBluechipSwapPath
+        );
+        if (avaxToBluechip > 0) {
+            receivedBleuchip += router.swapAvaxForTokens(
                 address(this).balance,
                 avaxIntoBluechipSwapPath
             );
+        }
     }
 }
