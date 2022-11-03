@@ -27,18 +27,28 @@ contract MockDcaStrategy is DCABaseUpgradeable {
         bluechipTokenDecimals = bluechipTokenDecimals_;
     }
 
-    function _invest(uint256) internal virtual override {}
+    function _invest(uint256 amount)
+        internal
+        virtual
+        override
+        returns (uint256)
+    {
+        return amount;
+    }
 
     function _claimRewards() internal virtual override returns (uint256) {
         // always claim 1 ether
-        return 1e18;
+        return 1e8;
     }
 
     function _withdrawInvestedBluechip(uint256 amount)
         internal
         virtual
         override
-    {}
+        returns (uint256)
+    {
+        return amount;
+    }
 
     function _transferBluechip(address to, uint256 amount)
         internal

@@ -9,14 +9,30 @@ import { SwapLib } from "../libraries/SwapLib.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 
 interface IDcaStrategy is IDca, IDcaFor, IDcaInvesting {
-    error ZeroDeposit();
+    error TooSmallDeposit();
     error PositionsLimitReached();
     error NothingToInvest();
     error NothingToWithdraw();
     error PortfolioAlreadyWhitelisted();
     error PortfolioNotFound();
 
-    // TODO: declare events
+    event Deposit(address indexed sender, uint256 amount, uint256 amountSplit);
+    event Invest(
+        uint256 depositAmountSpent,
+        uint256 bluechipReceived,
+        uint256 investedAt
+    );
+    event Withdraw(
+        address indexed sender,
+        uint256 withdrawnDeposit,
+        uint256 withdrawnBluechip
+    );
+    event StatusChanged(
+        BluechipInvestmentState indexed prevStatus,
+        BluechipInvestmentState indexed newStatus
+    );
+    event PortfolioAdded(address indexed newPortfolio);
+    event PortfolioRemoved(address indexed removedPortfolio);
 
     struct DcaStrategyInitArgs {
         DepositFee depositFee;
@@ -24,6 +40,7 @@ interface IDcaStrategy is IDca, IDcaFor, IDcaInvesting {
         TokenInfo depositTokenInfo;
         uint256 investmentPeriod;
         uint256 lastInvestmentTimestamp;
+        uint256 minDepositAmount;
         uint16 positionsLimit;
         SwapLib.Router router;
         address[] depositToBluechipSwapPath;

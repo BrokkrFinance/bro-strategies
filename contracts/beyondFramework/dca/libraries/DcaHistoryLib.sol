@@ -21,10 +21,12 @@ library DcaHistoryLib {
         history.current++;
     }
 
-    function increaseCurrentGauge(DcaHistory storage history, uint256 rewards)
-        internal
-    {
-        history.gauges[history.current].amountExchanged += rewards;
+    function increaseGaugeAt(
+        DcaHistory storage history,
+        uint256 rewards,
+        uint256 index
+    ) internal {
+        history.gauges[index].amountExchanged += rewards;
     }
 
     function decreaseGaugeByIndex(
@@ -50,7 +52,7 @@ library DcaHistoryLib {
         view
         returns (uint256, uint256)
     {
-        require(history.current <= index, "Out of bounds");
+        require(index <= history.current, "InvestQueueLib: Out of bounds");
         return (
             history.gauges[index].amountSpent,
             history.gauges[index].amountExchanged

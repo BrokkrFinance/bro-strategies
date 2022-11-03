@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import { ITraderJoeRouter } from "../../../dependencies/traderjoe/ITraderJoeRouter.sol";
+
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
@@ -25,7 +26,7 @@ library SwapLib {
         if (router.dex == Dex.TraderJoeV2) {
             ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(router.router);
 
-            IERC20Upgradeable(path[0]).safeApprove(
+            IERC20Upgradeable(path[0]).safeIncreaseAllowance(
                 address(traderjoeRouter),
                 amountIn
             );
@@ -71,7 +72,7 @@ library SwapLib {
         if (router.dex == Dex.TraderJoeV2) {
             ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(router.router);
 
-            IERC20Upgradeable(path[0]).safeApprove(
+            IERC20Upgradeable(path[0]).safeIncreaseAllowance(
                 address(traderjoeRouter),
                 amountIn
             );
@@ -84,6 +85,21 @@ library SwapLib {
                 // solhint-disable-next-line not-rely-on-time
                 block.timestamp
             )[path.length - 1];
+        } else {
+            revert("Invalid swap service provider");
+        }
+    }
+
+    function getAmountOut(
+        Router memory router,
+        uint256 amountIn,
+        address[] memory path
+    ) internal view returns (uint256) {
+        if (router.dex == Dex.TraderJoeV2) {
+            return
+                ITraderJoeRouter(router.router).getAmountsOut(amountIn, path)[
+                    path.length - 1
+                ];
         } else {
             revert("Invalid swap service provider");
         }
