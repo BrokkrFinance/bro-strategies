@@ -93,7 +93,7 @@ export function testPortfolioUpgradeable() {
             ],
           },
         })
-      ).to.be.revertedWith("Ownable: caller is not the owner")
+      ).to.be.reverted
     })
 
     it("should succeed to leave all common state variables' value intact", async function () {

@@ -7,7 +7,7 @@ import "../interfaces/IInvestmentToken.sol";
 import "../interfaces/IPriceOracle.sol";
 import "../interfaces/IStrategy.sol";
 import "../libraries/InvestableLib.sol";
-import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
+import "../libraries/SwapServiceLib.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -17,7 +17,7 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeabl
 
 struct RoleToUsers {
     bytes32 role;
-    address[] user;
+    address[] users;
 }
 
 struct StrategyArgs {
@@ -34,7 +34,7 @@ struct StrategyArgs {
     uint256 totalInvestmentLimit;
     uint256 investmentLimitPerAddress;
     IPriceOracle priceOracle;
-    uint8 swapServiceProvider;
+    SwapServiceProvider swapServiceProvider;
     address swapServiceRouter;
     RoleToUsers[] roleToUsersArray;
 }
@@ -49,17 +49,6 @@ abstract contract StrategyBaseUpgradeable is
 {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
-
-    error InvalidSwapServiceProvider();
-
-    enum SwapServiceProvider {
-        TraderJoe
-    }
-
-    struct SwapService {
-        SwapServiceProvider provider;
-        address router;
-    }
 
     IInvestmentToken internal investmentToken;
     IERC20Upgradeable internal depositToken;
@@ -520,33 +509,5 @@ abstract contract StrategyBaseUpgradeable is
         returns (uint256)
     {
         return investmentToken.totalSupply();
-    }
-
-    function swapExactTokensForTokens(
-        SwapService memory swapService_,
-        uint256 amountIn,
-        address[] memory path
-    ) internal returns (uint256 amountOut) {
-        if (swapService_.provider == SwapServiceProvider.TraderJoe) {
-            ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(
-                swapService_.router
-            );
-
-            IERC20Upgradeable(path[0]).approve(
-                address(traderjoeRouter),
-                amountIn
-            );
-
-            amountOut = traderjoeRouter.swapExactTokensForTokens(
-                amountIn,
-                0,
-                path,
-                address(this),
-                // solhint-disable-next-line not-rely-on-time
-                block.timestamp
-            )[path.length - 1];
-        } else {
-            revert InvalidSwapServiceProvider();
-        }
     }
 }

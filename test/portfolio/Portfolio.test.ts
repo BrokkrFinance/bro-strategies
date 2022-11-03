@@ -3,11 +3,11 @@ import { ethers, network } from "hardhat"
 import { TokenAddrs, WhaleAddrs } from "../helper/addresses"
 import { getTokenContract, removePortfolioInvestmentLimitsAndFees } from "../helper/contracts"
 import { InvestHelper } from "../helper/invest"
+import { testPortfolioAccessControl } from "./PortfolioAccessControl.test"
 import { testPortfolioAllocations } from "./PortfolioAllocations.test"
 import { testPortfolioDeposit } from "./PortfolioDeposit.test"
 import { testPortfolioERC165 } from "./PortfolioERC165.test"
 import { testPortfolioInvestable } from "./PortfolioInvestable.test"
-import { testPortfolioOwnable } from "./PortfolioOwnable.test"
 import { testPortfolioPausable } from "./PortfolioPausable.test"
 import { testPortfolioRebalance } from "./PortfolioRebalance.test"
 import { testPortfolioUpgradeable } from "./PortfolioUpgradeable.test"
@@ -55,7 +55,8 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
       }
 
       // Deploy portfolio and all its investables.
-      this.portfolio = await deployPortfolio()
+      this.portfolioConfig = await deployPortfolio()
+      this.portfolio = this.portfolioConfig.investable
 
       // Portfolio owner.
       const ownerAddr = await this.portfolio.owner()
@@ -104,7 +105,7 @@ export function testPortfolio(description: string, deployPortfolio: Function, po
     testPortfolioDeposit()
     testPortfolioERC165()
     testPortfolioInvestable()
-    testPortfolioOwnable()
+    testPortfolioAccessControl()
     testPortfolioPausable()
     testPortfolioRebalance()
     testPortfolioUpgradeable()

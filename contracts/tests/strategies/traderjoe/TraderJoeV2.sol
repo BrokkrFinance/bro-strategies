@@ -90,11 +90,8 @@ contract TraderJoeV2 is
         path[0] = address(depositToken);
         path[1] = address(strategyStorage.pairDepositToken);
 
-        uint256 pairDepositTokenDesired = swapExactTokensForTokens(
-            swapService,
-            swapAmount,
-            path
-        );
+        uint256 pairDepositTokenDesired = SwapServiceLib
+            .swapExactTokensForTokens(swapService, swapAmount, 0, path);
         uint256 depositTokenDesired = amount - swapAmount;
 
         strategyStorage.pairDepositToken.approve(
@@ -166,9 +163,10 @@ contract TraderJoeV2 is
         path[0] = address(strategyStorage.pairDepositToken);
         path[1] = address(depositToken);
 
-        swapExactTokensForTokens(
+        SwapServiceLib.swapExactTokensForTokens(
             swapService,
             pairDepositTokenBalanceIncrement,
+            0,
             path
         );
     }
@@ -183,9 +181,10 @@ contract TraderJoeV2 is
         path[0] = address(strategyStorage.joeToken);
         path[1] = address(depositToken);
 
-        swapExactTokensForTokens(
+        SwapServiceLib.swapExactTokensForTokens(
             swapService,
             strategyStorage.joeToken.balanceOf(address(this)),
+            0,
             path
         );
     }

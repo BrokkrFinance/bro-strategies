@@ -12,7 +12,7 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
     const NewImplementation = await hre.ethers.getContractFactory(taskArgs.newImplementation)
     const proposal = await hre.defender.proposeUpgrade(taskArgs.proxy, NewImplementation, {
       multisig: taskArgs.multisig,
-      unsafeSkipStorageCheck: true,
+      // unsafeSkipStorageCheck: true,
     })
 
     console.log(`The upgrade proposal is created at ${proposal.url}\n`)

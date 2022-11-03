@@ -37,20 +37,25 @@ async function deployCalmPortfolio() {
   }
 
   // Cash strategy.
-  const cash = await deployUUPSUpgradeableStrategy("Cash", strategyArgs, { extraArgs: [] })
+  const cash = await deployUUPSUpgradeableStrategy("Cash", strategyArgs, { extraArgs: [] }, [])
 
   //////////////// Stargate USDC wrapper portfolio.
 
   // Stargate USDC strategy
-  const stargateUsdc = await deployUUPSUpgradeableStrategy("Stargate", strategyArgs, {
-    extraArgs: [
-      StargateAddrs.router,
-      StargateAddrs.usdcPool,
-      StargateAddrs.lpStaking,
-      StargateAddrs.usdcLpToken,
-      StargateAddrs.stgToken,
-    ],
-  })
+  const stargateUsdc = await deployUUPSUpgradeableStrategy(
+    "Stargate",
+    strategyArgs,
+    {
+      extraArgs: [
+        StargateAddrs.router,
+        StargateAddrs.usdcPool,
+        StargateAddrs.lpStaking,
+        StargateAddrs.usdcLpToken,
+        StargateAddrs.stgToken,
+      ],
+    },
+    []
+  )
 
   // Stargate USDC wrapper portfolio
   const stargateUsdcPortfolio = await deployUUPSUpgradeablePortfolio(
@@ -64,15 +69,20 @@ async function deployCalmPortfolio() {
   //////////////// Stargate USDT wrapper portfolio.
 
   // Stargate USDT strategy
-  const stargateUsdt = await deployUUPSUpgradeableStrategy("Stargate", strategyArgs, {
-    extraArgs: [
-      StargateAddrs.router,
-      StargateAddrs.usdtPool,
-      StargateAddrs.lpStaking,
-      StargateAddrs.usdtLpToken,
-      StargateAddrs.stgToken,
-    ],
-  })
+  const stargateUsdt = await deployUUPSUpgradeableStrategy(
+    "Stargate",
+    strategyArgs,
+    {
+      extraArgs: [
+        StargateAddrs.router,
+        StargateAddrs.usdtPool,
+        StargateAddrs.lpStaking,
+        StargateAddrs.usdtLpToken,
+        StargateAddrs.stgToken,
+      ],
+    },
+    []
+  )
 
   // Stargate USDT wrapper portfolio
   const stargateUsdtPortfolio = await deployUUPSUpgradeablePortfolio(
@@ -86,9 +96,14 @@ async function deployCalmPortfolio() {
   //////////////// TraderJoe USDC-USDC.e wrapper portfolio.
 
   // TraderJoe USDC-USDC.e strategy
-  const traderjoe = await deployUUPSUpgradeableStrategy("TraderJoe", strategyArgs, {
-    extraArgs: [TraderJoeAddrs.router, TraderJoeAddrs.masterChef, TraderJoeAddrs.lpToken, TraderJoeAddrs.joeToken],
-  })
+  const traderjoe = await deployUUPSUpgradeableStrategy(
+    "TraderJoe",
+    strategyArgs,
+    {
+      extraArgs: [TraderJoeAddrs.router, TraderJoeAddrs.masterChef, TraderJoeAddrs.lpToken, TraderJoeAddrs.joeToken],
+    },
+    []
+  )
 
   // TraderJoe USDC-USDC.e wrapper portfolio
   const traderjoePortfolio = await deployUUPSUpgradeablePortfolio(
@@ -108,11 +123,11 @@ async function deployCalmPortfolio() {
     [[100000], [50000, 50000], [30000, 30000, 40000]]
   )
 
-  return portfolio
+  return { investable: portfolio, ownerAddr: owner.address }
 }
 
 async function upgradeCalmPortfolio() {
-  return await upgradePortfolio("portfolio/Calm.json")
+  return await upgradePortfolio("portfolio/Calm.json", "")
 }
 
 function testCalmPortfolioUpgradeable() {

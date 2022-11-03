@@ -22,6 +22,7 @@ export async function getTokenContract(address: string) {
 export async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {
   const contract = await upgrades.deployProxy(factory, args, {
     kind: "uups",
+    unsafeAllow: ["external-library-linking"],
   })
   await contract.deployed()
 
@@ -75,16 +76,26 @@ export async function deployUUPSUpgradeablePortfolio(
 export async function deployUUPSUpgradeableStrategy(
   strategyName: string,
   strategyArgs: StrategyArgs,
-  strategyExtraArgs: StrategyExtraArgs
+  strategyExtraArgs: StrategyExtraArgs,
+  librariesStructs: { libraryContractName: string; libraryDependencies: string[] }[]
 ) {
   // Contact factories.
   const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
   const PriceOracle = await ethers.getContractFactory(strategyArgs.oracle.name)
-  const Strategy = await ethers.getContractFactory(strategyName)
 
   // Deploy strategy token.
   const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "Strategy Token"])
   const priceOracle = await deployUUPSUpgradeableContract(PriceOracle, [strategyArgs.oracle.address, TokenAddrs.usdc])
+
+  // Deploying libraries
+  // The functionality of libraries depending on other libraries is not yet supported
+  let libraries: any = {}
+  for (const librarySturct of librariesStructs) {
+    const libraryContractFactory = await ethers.getContractFactory(librarySturct.libraryContractName)
+    const library = await libraryContractFactory.deploy()
+    libraries[librarySturct.libraryContractName] = library.address
+  }
+  const Strategy = await ethers.getContractFactory(strategyName, { libraries })
 
   // Deploy strategy.
   const strategy = await deployUUPSUpgradeableContract(Strategy, [
@@ -118,7 +129,7 @@ export async function deployUUPSUpgradeableStrategy(
 export const upgradePortfolio = upgradeInvestable
 export const upgradeStrategy = upgradeInvestable
 
-export async function upgradeInvestable(config: string) {
+export async function upgradeInvestable(config: string, upgradeClassName: string) {
   process.chdir(__dirname)
   const liveConfig: LiveConfig = JSON.parse(
     readFileSync(path.join("../../configs/live", config), { encoding: "utf-8" })
@@ -133,12 +144,13 @@ export async function upgradeInvestable(config: string) {
     const NewImplementation = await ethers.getContractFactory(upgradeConfig.newImplementation, owner)
     const newImplementation = await upgrades.upgradeProxy(upgradeConfig.proxy, NewImplementation, {
       kind: "uups",
-      unsafeSkipStorageCheck: true,
+      // unsafeSkipStorageCheck: true,
     })
     await newImplementation.deployed()
   }
 
-  return await ethers.getContractAt(liveConfig.name, liveConfig.address)
+  const investable = await ethers.getContractAt(liveConfig.name, liveConfig.address)
+  return { investable: investable, ownerAddr: liveConfig.owner, upgradeClassName }
 }
 
 export async function removePortfolioInvestmentLimitsAndFees(portfolio: Contract, owner: SignerWithAddress) {

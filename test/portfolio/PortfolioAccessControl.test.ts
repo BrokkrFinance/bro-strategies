@@ -1,39 +1,29 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
-import { testOwnable } from "../shared/Ownable.test"
+import { testAccessControl } from "../shared/AccessControl.test"
 
-export function testPortfolioOwnable() {
+export function testPortfolioAccessControl() {
   describe("Ownable", async function () {
-    testOwnable()
+    testAccessControl()
 
     it("should fail when the non-owner user adds investable", async function () {
-      await expect(this.portfolio.connect(this.user0).addInvestable(this.usdc.address, [], [])).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      )
+      await expect(this.portfolio.connect(this.user0).addInvestable(this.usdc.address, [], [])).to.be.reverted
     })
 
     it("should fail when the non-owner user removes investable", async function () {
-      await expect(this.portfolio.connect(this.user0).removeInvestable(this.usdc.address, [], [])).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      )
+      await expect(this.portfolio.connect(this.user0).removeInvestable(this.usdc.address, [], [])).to.be.reverted
     })
 
     it("should fail when the non-owner user changes investable", async function () {
-      await expect(this.portfolio.connect(this.user0).changeInvestable(this.usdc.address, [], [])).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      )
+      await expect(this.portfolio.connect(this.user0).changeInvestable(this.usdc.address, [], [])).to.be.reverted
     })
 
     it("should fail when the non-owner user sets target investable allocations", async function () {
-      await expect(this.portfolio.connect(this.user0).setTargetInvestableAllocations([])).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      )
+      await expect(this.portfolio.connect(this.user0).setTargetInvestableAllocations([])).to.be.reverted
     })
 
     it("should fail when the non-owner user rebalances", async function () {
-      await expect(this.portfolio.connect(this.user0).rebalance(BigNumber.from(0), [], [])).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      )
+      await expect(this.portfolio.connect(this.user0).rebalance(BigNumber.from(0), [], [])).to.be.reverted
     })
 
     // NOTE: Success case when the owner user adds investable is in UnifiedInvestable.

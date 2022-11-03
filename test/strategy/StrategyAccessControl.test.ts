@@ -1,20 +1,16 @@
 import { expect } from "chai"
-import { testOwnable } from "../shared/Ownable.test"
+import { testAccessControl } from "../shared/AccessControl.test"
 
-export function testStrategyOwnable() {
+export function testStrategyAccessControl() {
   describe("Ownable", async function () {
-    testOwnable()
+    testAccessControl()
 
     it("should fail when the non-owner user sets price oracle", async function () {
-      await expect(this.strategy.connect(this.user0).setPriceOracle(this.user0.address)).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      )
+      await expect(this.strategy.connect(this.user0).setPriceOracle(this.user0.address)).to.be.reverted
     })
 
     it("should fail when the non-owner user sets swap service", async function () {
-      await expect(this.strategy.connect(this.user0).setSwapService(0, this.user0.address)).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      )
+      await expect(this.strategy.connect(this.user0).setSwapService(0, this.user0.address)).to.be.reverted
     })
 
     it("should succeed when the owner user sets investment limit per address", async function () {

@@ -4,7 +4,7 @@ import { BigNumber, Contract } from "ethers"
 import { ethers } from "hardhat"
 import erc20Abi from "../helper/abi/erc20.json"
 import { DepositArgs, InvestArgs, WithdrawArgs } from "./parameters"
-import { getErrorRange } from "./utils"
+import { getErrorRange, getErrorRangeGeneral } from "./utils"
 
 enum InvestType {
   DEPOSIT,
@@ -318,7 +318,12 @@ export class InvestHelper {
     ) {
       expect(this.statesAfter.depositTokenBalance.sub(this.statesBefore.depositTokenBalance)).to.equal(0)
       expect(this.statesAfter.investmentTokenBalance.sub(this.statesBefore.investmentTokenBalance)).to.equal(0)
-      expect(this.statesAfter.equityValuation.sub(this.statesBefore.equityValuation)).to.equal(0)
+      // Some asset balances like aUSDC or vAvax are time depenedent, so even if the transaction
+      // is reverted the new block timestamp will influence the equity valuation.
+      expect(this.statesAfter.equityValuation.sub(this.statesBefore.equityValuation)).to.be.approximately(
+        0,
+        getErrorRangeGeneral(this.statesAfter.equityValuation, BigNumber.from(5), BigNumber.from(1000))
+      )
       expect(this.statesAfter.investmentTokenSupply.sub(this.statesBefore.investmentTokenSupply)).to.equal(0)
     } else {
       expect.fail("Unexpected deposit result")
@@ -354,7 +359,12 @@ export class InvestHelper {
     ) {
       expect(this.statesBefore.depositTokenBalance.sub(this.statesAfter.depositTokenBalance)).to.equal(0)
       expect(this.statesBefore.investmentTokenBalance.sub(this.statesAfter.investmentTokenBalance)).to.equal(0)
-      expect(this.statesBefore.equityValuation.sub(this.statesAfter.equityValuation)).to.equal(0)
+      // Some asset balances like aUSDC or vAvax are time depenedent, so even if the transaction
+      // is reverted the new block timestamp will influence the equity valuation.
+      expect(this.statesAfter.equityValuation.sub(this.statesBefore.equityValuation)).to.be.approximately(
+        0,
+        getErrorRangeGeneral(this.statesAfter.equityValuation, BigNumber.from(5), BigNumber.from(1000))
+      )
       expect(this.statesBefore.investmentTokenSupply.sub(this.statesAfter.investmentTokenSupply)).to.equal(0)
     } else {
       expect.fail("Unexpected withdraw result")

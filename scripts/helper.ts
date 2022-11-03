@@ -66,8 +66,8 @@ export async function increaseEvmTimeBySeconds(seconds: number) {
   await expectSuccess(ethers.provider.send("evm_mine", []))
 }
 
-export async function deployPriceOracle(vendorFeed: string, baseCurrency: string) {
-  return await deployProxyContract("AaveOracle", [vendorFeed, baseCurrency])
+export async function deployPriceOracle(oracleType: string, vendorFeed: string, baseCurrency: string) {
+  return await deployProxyContract(oracleType, [vendorFeed, baseCurrency], {})
 }
 
 export async function deployUpgradeableStrategy(
@@ -89,33 +89,40 @@ export async function deployUpgradeableStrategy(
   swapServiceProvider: number,
   swapServiceRouter: string,
   roleToUsersArray: any[],
-  strategyExtraArgs: any[]
+  strategyExtraArgs: any[],
+  libraries: {}
 ) {
   const investableToken = await retryUntilSuccess(
-    deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker])
+    deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker], {})
   )
   const strategy = await retryUntilSuccess(
-    deployProxyContract(strategyContractName, [
+    deployProxyContract(
+      strategyContractName,
       [
-        investableToken.address,
-        depositToken.address,
-        depositFee,
-        depositFeeParams,
-        withdrawalFee,
-        withdrawalFeeParams,
-        performanceFee,
-        performanceFeeParams,
-        feeReceiver,
-        feeReceiverParams,
-        totalInvestmentLimit,
-        investmentLimitPerAddress,
-        priceOracle,
-        swapServiceProvider,
-        swapServiceRouter,
-        roleToUsersArray,
+        [
+          investableToken.address,
+          depositToken.address,
+          depositFee,
+          depositFeeParams,
+          withdrawalFee,
+          withdrawalFeeParams,
+          performanceFee,
+          performanceFeeParams,
+          feeReceiver,
+          feeReceiverParams,
+          totalInvestmentLimit,
+          investmentLimitPerAddress,
+          priceOracle,
+          swapServiceProvider,
+          swapServiceRouter,
+          roleToUsersArray,
+        ],
+        ...strategyExtraArgs,
       ],
-      ...strategyExtraArgs,
-    ])
+      libraries,
+      "",
+      { unsafeAllow: ["external-library-linking"] }
+    )
   )
   await retryUntilSuccess(investableToken.transferOwnership(strategy.address))
 
@@ -144,27 +151,31 @@ export async function deployPortfolio(
   allocations: number[][]
 ) {
   const investableToken = await retryUntilSuccess(
-    deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker])
+    deployProxyContract("InvestmentToken", [investmentTokenName, investmentTokenTicker], {})
   )
   let portfolio: Contract
   if (isUpgradable) {
     portfolio = await retryUntilSuccess(
-      deployProxyContract(portfolioContractName, [
+      deployProxyContract(
+        portfolioContractName,
         [
-          investableToken.address,
-          depositToken.address,
-          depositFee,
-          depositFeeParams,
-          withdrawalFee,
-          withdrawalFeeParams,
-          performanceFee,
-          performanceFeeParams,
-          feeReceiver,
-          feeReceiverParams,
-          totalInvestmentLimit,
-          investmentLimitPerAddress,
+          [
+            investableToken.address,
+            depositToken.address,
+            depositFee,
+            depositFeeParams,
+            withdrawalFee,
+            withdrawalFeeParams,
+            performanceFee,
+            performanceFeeParams,
+            feeReceiver,
+            feeReceiverParams,
+            totalInvestmentLimit,
+            investmentLimitPerAddress,
+          ],
         ],
-      ])
+        {}
+      )
     )
   } else {
     portfolio = await retryUntilSuccess(deployContract(portfolioContractName, []))
@@ -215,12 +226,12 @@ export async function deployContract(name: string, args: any[], label?: string, 
   return contract
 }
 
-export async function deployProxyContract(name: string, args: any[], label?: string, options?: any) {
+export async function deployProxyContract(name: string, args: any[], libraries: any, label?: string, options?: any) {
   let info = name
   if (label != undefined) {
     info = name + ":" + label
   }
-  const contractFactory = await ethers.getContractFactory(name)
+  const contractFactory = await ethers.getContractFactory(name, { libraries })
   let contract
   if (options != undefined) {
     contract = await upgrades.deployProxy(contractFactory, args, options)
@@ -287,4 +298,8 @@ export function logBlue(text: string) {
 
 export function logRed(text: string) {
   console.log("\x1b[31m%s\x1b[0m", text)
+}
+
+export function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }

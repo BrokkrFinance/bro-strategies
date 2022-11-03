@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./StargateStorageLib.sol";
 import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
+import "../../common/libraries/SwapServiceLib.sol";
 import "../../dependencies/stargate/IStargateLpStaking.sol";
 import "../../dependencies/stargate/IStargatePool.sol";
 import "../../dependencies/stargate/IStargateRouter.sol";
@@ -18,11 +19,11 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.stargate_strategy.stargate_strategy_v1.1.0";
+        "brokkr.stargate_strategy.stargate_strategy_v1.1.1";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.1.0";
+    string public constant version = "1.1.1";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -85,7 +86,12 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             path[1] = address(InvestableLib.WAVAX);
             path[2] = address(strategyStorage.poolDepositToken);
 
-            amount = swapExactTokensForTokens(swapService, amount, path);
+            amount = SwapServiceLib.swapExactTokensForTokens(
+                swapService,
+                amount,
+                0,
+                path
+            );
         }
 
         uint256 lpBalanceBefore = strategyStorage.lpToken.balanceOf(
@@ -155,9 +161,10 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             path[1] = address(InvestableLib.WAVAX);
             path[2] = address(depositToken);
 
-            swapExactTokensForTokens(
+            SwapServiceLib.swapExactTokensForTokens(
                 swapService,
                 poolDepositTokenBalanceIncrement,
+                0,
                 path
             );
         }
@@ -173,9 +180,10 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         path[0] = address(strategyStorage.stgToken);
         path[1] = address(depositToken);
 
-        swapExactTokensForTokens(
+        SwapServiceLib.swapExactTokensForTokens(
             swapService,
             strategyStorage.stgToken.balanceOf(address(this)),
+            0,
             path
         );
     }
