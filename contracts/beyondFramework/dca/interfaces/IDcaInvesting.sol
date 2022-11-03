@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 interface IDcaInvesting {
-    function exchangeDepositsAndInvestRewards() external;
+    function invest() external;
 
     function canInvest() external view returns (bool);
 }
