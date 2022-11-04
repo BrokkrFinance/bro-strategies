@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 library DnsVectorStrategyInvestmentLib {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    function deposit(uint256 amount, NameValuePair[] calldata) external {
+    function deposit(uint256 amount, NameValuePair[] calldata) public {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
 
@@ -107,6 +107,7 @@ library DnsVectorStrategyInvestmentLib {
             0,
             0,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
         lpAmountChange =
@@ -144,7 +145,7 @@ library DnsVectorStrategyInvestmentLib {
         uint256 amount,
         NameValuePair[] calldata,
         uint256 investmentTokenSupply
-    ) external {
+    ) public {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
 
@@ -176,6 +177,7 @@ library DnsVectorStrategyInvestmentLib {
             0,
             0,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
         aaveBorrowTokenChangeAmount =
