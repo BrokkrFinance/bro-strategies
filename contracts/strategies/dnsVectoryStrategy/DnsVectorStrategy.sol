@@ -61,13 +61,16 @@ contract DnsVectorStrategy is
         __StrategyRoleablePausableBaseUpgradeable_init(strategyArgs);
 
         require(
-            address(initializeParams.aaveSupplyToken) == InvestableLib.USDC
+            address(initializeParams.aaveSupplyToken) == InvestableLib.USDC,
+            "aaveSupplyToken != USDC"
         );
         require(
-            address(initializeParams.aaveBorrowToken) == InvestableLib.WAVAX
+            address(initializeParams.aaveBorrowToken) == InvestableLib.WAVAX,
+            "aaveBorrowToken != WAVAX"
         );
         require(
-            address(initializeParams.ammPairDepositToken) == InvestableLib.USDC
+            address(initializeParams.ammPairDepositToken) == InvestableLib.USDC,
+            "ammPairDepositToken != USDC"
         );
 
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
