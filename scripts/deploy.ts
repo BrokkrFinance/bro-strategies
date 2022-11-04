@@ -40,7 +40,8 @@ async function deployRecursive(investable: any): Promise<any> {
         investable.swapServiceProvider,
         investable.swapServiceRouter,
         [],
-        investable.strategyExtraArgs
+        investable.strategyExtraArgs,
+        {}
       )
     )
 
@@ -94,7 +95,7 @@ async function deployRecursive(investable: any): Promise<any> {
 async function main() {
   console.log(process.argv.slice(2))
   usdc = await getUsdcContract()
-  priceOracle = await retryUntilSuccess(deployPriceOracle(ContractAddrs.aaveOracle, usdc.address))
+  priceOracle = await retryUntilSuccess(deployPriceOracle("AaveOracle", ContractAddrs.aaveOracle, usdc.address))
 
   const topLevelPortfolio = await deployRecursive(deploymentConfig)
   const topLevelPortfolioToken = await contractAt("InvestmentToken", await topLevelPortfolio.getInvestmentToken())
