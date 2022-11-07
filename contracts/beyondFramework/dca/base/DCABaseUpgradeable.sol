@@ -42,8 +42,8 @@ abstract contract DCABaseUpgradeable is
 
     BluechipInvestmentState public bluechipInvestmentState;
 
-    InvestQueueLib.InvestQueue public globalInvestQueue;
-    DcaHistoryLib.DcaHistory public dcaHistory;
+    InvestQueueLib.InvestQueue private globalInvestQueue;
+    DcaHistoryLib.DcaHistory private dcaHistory;
     SwapLib.Router public router;
 
     TokenInfo public emergencyExitDepositToken;
@@ -52,6 +52,8 @@ abstract contract DCABaseUpgradeable is
     uint256 public emergencySellBluechipPrice;
 
     mapping(address => DcaDepositor) private depositors;
+
+    uint256[7] private __gap;
 
     // solhint-disable-next-line
     function __DCABaseUpgradeable_init(DcaStrategyInitArgs calldata args)
@@ -707,11 +709,14 @@ abstract contract DCABaseUpgradeable is
         // if deposit token != emergency exit token then swap it
         if (depositTokenInfo.token != emergencyExitDepositToken.token) {
             // swap deposit into emergency exit token
-            uint256 depositTokenBalance = depositTokenInfo.token.balanceOf(
-                address(this)
-            );
+            uint256 currentDepositTokenBalance = depositTokenInfo
+                .token
+                .balanceOf(address(this));
             uint256 receivedEmergencyExitDepositAsset = router
-                .swapTokensForTokens(depositTokenBalance, depositSwapPath);
+                .swapTokensForTokens(
+                    currentDepositTokenBalance,
+                    depositSwapPath
+                );
 
             // store token price for future conversions
             emergencySellDepositPrice =
@@ -720,7 +725,7 @@ abstract contract DCABaseUpgradeable is
                     emergencyExitDepositToken.decimals,
                     depositTokenInfo.decimals
                 ) * depositTokenScale) /
-                depositTokenBalance;
+                currentDepositTokenBalance;
         }
 
         // if bluechip token != emergency exit token then swap it
@@ -928,6 +933,38 @@ abstract contract DCABaseUpgradeable is
         returns (DcaDepositor memory)
     {
         return depositors[depositor];
+    }
+
+    function depositTokenBalance() public view virtual returns (uint256) {
+        if (isEmergencyExited()) {
+            return emergencyExitDepositToken.token.balanceOf(address(this));
+        }
+
+        return depositTokenInfo.token.balanceOf(address(this));
+    }
+
+    function bluechipTokenBalance() public view virtual returns (uint256) {
+        return _totalBluechipInvested();
+    }
+
+    function getInvestAmountAt(uint8 index) external view returns (uint256) {
+        return globalInvestQueue.investAmounts[index];
+    }
+
+    function currentInvestQueueIndext() external view returns (uint8) {
+        return globalInvestQueue.current;
+    }
+
+    function getHistoricalGaugeAt(uint256 index)
+        external
+        view
+        returns (uint256, uint256)
+    {
+        return dcaHistory.gaugeByIndex(index);
+    }
+
+    function currentDcaHistoryIndex() external view returns (uint256) {
+        return dcaHistory.currentHistoricalIndex();
     }
 
     function isEmergencyExited() public view virtual returns (bool) {

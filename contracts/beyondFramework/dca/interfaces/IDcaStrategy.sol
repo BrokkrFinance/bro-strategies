@@ -80,4 +80,21 @@ interface IDcaStrategy is IDca, IDcaFor, IDcaInvesting {
         returns (DcaDepositor memory);
 
     function isEmergencyExited() external view returns (bool);
+
+    function depositTokenBalance() external view returns (uint256);
+
+    function bluechipTokenBalance() external view returns (uint256);
+
+    function minDepositAmount() external view returns (uint256);
+
+    function getInvestAmountAt(uint8 index) external view returns (uint256);
+
+    function currentInvestQueueIndext() external view returns (uint8);
+
+    function getHistoricalGaugeAt(uint256 index)
+        external
+        view
+        returns (uint256, uint256);
+
+    function currentDcaHistoryIndex() external view returns (uint256);
 }
