@@ -25,7 +25,7 @@ library InvestQueueLib {
     ) internal {
         require(
             amountSplit < queue.investAmounts.length,
-            "InvestQueueLib: Amount split must be less then invest queue"
+            "InvestQueueLib: Invalid amount split"
         );
 
         uint8 current = queue.current;
