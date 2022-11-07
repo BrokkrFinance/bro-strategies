@@ -123,6 +123,7 @@ abstract contract DCABaseUpgradeable is
         public
         virtual
         nonReentrant
+        whenNotPaused
         nonEmergencyExited
     {
         _deposit(_msgSender(), amount, amountSplit);
@@ -132,7 +133,14 @@ abstract contract DCABaseUpgradeable is
         address sender,
         uint256 amount,
         uint8 amountSplit
-    ) public virtual onlyPortfolio nonReentrant nonEmergencyExited {
+    )
+        public
+        virtual
+        onlyPortfolio
+        nonReentrant
+        whenNotPaused
+        nonEmergencyExited
+    {
         _deposit(sender, amount, amountSplit);
     }
 
@@ -201,6 +209,7 @@ abstract contract DCABaseUpgradeable is
         virtual
         onlyDcaInvestor
         nonReentrant
+        whenNotPaused
         nonEmergencyExited
     {
         // declare total amount for event data
@@ -271,6 +280,7 @@ abstract contract DCABaseUpgradeable is
         public
         virtual
         nonReentrant
+        whenNotPaused
         emergencyWithdrawOnEmergencyExitedStatus(_msgSender())
     {
         _withdrawAll(_msgSender(), convertBluechipIntoDepositAsset);
@@ -284,6 +294,7 @@ abstract contract DCABaseUpgradeable is
         virtual
         onlyPortfolio
         nonReentrant
+        whenNotPaused
         emergencyWithdrawOnEmergencyExitedStatus(sender)
     {
         _withdrawAll(sender, convertBluechipIntoDepositAsset);
@@ -329,6 +340,7 @@ abstract contract DCABaseUpgradeable is
         public
         virtual
         nonReentrant
+        whenNotPaused
         emergencyWithdrawOnEmergencyExitedStatus(_msgSender())
     {
         _withdrawAll(
@@ -347,6 +359,7 @@ abstract contract DCABaseUpgradeable is
         virtual
         onlyPortfolio
         nonReentrant
+        whenNotPaused
         emergencyWithdrawOnEmergencyExitedStatus(sender)
     {
         _withdrawAll(sender, positionIndex, convertBluechipIntoDepositAsset);
@@ -433,6 +446,7 @@ abstract contract DCABaseUpgradeable is
         public
         virtual
         nonReentrant
+        whenNotPaused
         emergencyWithdrawOnEmergencyExitedStatus(_msgSender())
     {
         _withdrawBluechip(_msgSender(), convertBluechipIntoDepositAsset);
@@ -446,6 +460,7 @@ abstract contract DCABaseUpgradeable is
         virtual
         onlyPortfolio
         nonReentrant
+        whenNotPaused
         emergencyWithdrawOnEmergencyExitedStatus(sender)
     {
         _withdrawBluechip(sender, convertBluechipIntoDepositAsset);
@@ -505,6 +520,7 @@ abstract contract DCABaseUpgradeable is
         public
         virtual
         nonReentrant
+        whenNotPaused
         emergencyWithdrawOnEmergencyExitedStatus(_msgSender())
     {
         _withdrawBluechip(
@@ -523,6 +539,7 @@ abstract contract DCABaseUpgradeable is
         virtual
         onlyPortfolio
         nonReentrant
+        whenNotPaused
         emergencyWithdrawOnEmergencyExitedStatus(sender)
     {
         _withdrawBluechip(
