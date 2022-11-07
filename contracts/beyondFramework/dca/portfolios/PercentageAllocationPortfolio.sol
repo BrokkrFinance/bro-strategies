@@ -57,7 +57,6 @@ contract PercentageAllocationPortfolio is
             activeStrategies.push(portfolioArgs.strategies[i]);
         }
 
-        // strategies = portfolioArgs.strategies;
         depositToken = portfolioArgs.depositToken;
         investAmountSplit = portfolioArgs.investAmountSplit;
     }
