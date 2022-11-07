@@ -292,4 +292,33 @@ contract PercentageAllocationPortfolio is
     function unpause() external onlyOwner {
         super._unpause();
     }
+
+    function equityValuation()
+        external
+        view
+        returns (DcaEquityValuation[] memory)
+    {
+        DcaEquityValuation[] memory strategies = new DcaEquityValuation[](
+            activeStrategies.length - 1
+        );
+        for (uint256 i = 0; i < activeStrategies.length; i++) {
+            strategies[i].dca = activeStrategies[i];
+            strategies[i].totalDepositToken = activeStrategies[i]
+                .depositTokenBalance();
+            strategies[i].totalBluechipToken = activeStrategies[i]
+                .bluechipTokenBalance();
+        }
+
+        return strategies;
+    }
+
+    function minDepositAmount()
+        external
+        view
+        returns (uint256 totalMinDeposit)
+    {
+        for (uint256 i = 0; i < activeStrategies.length; i++) {
+            totalMinDeposit += activeStrategies[i].minDepositAmount();
+        }
+    }
 }

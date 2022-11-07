@@ -20,4 +20,17 @@ interface IDcaPortfolio is IDca, IDcaFor {
         IERC20Upgradeable depositToken;
         uint8 investAmountSplit;
     }
+
+    struct DcaEquityValuation {
+        IDcaStrategy dca;
+        uint256 totalDepositToken;
+        uint256 totalBluechipToken;
+    }
+
+    function equityValuation()
+        external
+        view
+        returns (DcaEquityValuation[] memory);
+
+    function minDepositAmount() external view returns (uint256);
 }
