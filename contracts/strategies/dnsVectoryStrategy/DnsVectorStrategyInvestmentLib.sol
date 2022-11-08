@@ -166,6 +166,9 @@ library DnsVectorStrategyInvestmentLib {
         uint256 aaveBorrowTokenChangeAmount = strategyStorage
             .aaveBorrowToken
             .balanceOf(address(this));
+        uint256 ammPairDepositTokenChangeAmount = strategyStorage
+            .ammPairDepositToken
+            .balanceOf(address(this));
         strategyStorage.traderJoePair.approve(
             address(strategyStorage.traderJoeRouter),
             lpUserAmountChange
@@ -183,6 +186,9 @@ library DnsVectorStrategyInvestmentLib {
         aaveBorrowTokenChangeAmount =
             strategyStorage.aaveBorrowToken.balanceOf(address(this)) -
             aaveBorrowTokenChangeAmount;
+        ammPairDepositTokenChangeAmount =
+            strategyStorage.ammPairDepositToken.balanceOf(address(this)) -
+            ammPairDepositTokenChangeAmount;
 
         // repay Aave debt
         uint256 vAaveBorrowTokenUserAmount = ((strategyStorage
@@ -221,7 +227,7 @@ library DnsVectorStrategyInvestmentLib {
             SwapServiceLib.swapTokensForExactTokens(
                 strategyStorage.swapService,
                 amountOut,
-                type(uint256).max,
+                ammPairDepositTokenChangeAmount,
                 path
             );
             // assuming ammPairDepositToken == depositToken

@@ -46,7 +46,6 @@ abstract contract StrategyRoleableBaseUpgradeable is
         StrategyArgs calldata strategyArgs
     ) internal onlyInitializing {
         __AccessControlEnumerable_init();
-        __StrategyBaseUpgradeable_init(strategyArgs);
 
         RoleToUsers[] memory roleToUsersArray = strategyArgs.roleToUsersArray;
         uint256 roleToUsersArrayLength = roleToUsersArray.length;
