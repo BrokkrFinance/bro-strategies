@@ -463,7 +463,7 @@ abstract contract DCABaseUpgradeable is
         DCADepositor storage depositor = depositors[sender];
 
         uint256 investedIntoBluechip;
-        uint256 i = 0;
+        uint256 i;
 
         // since we might remove position we use while loop to iterate over all positions
         while (i < depositor.positions.length) {
