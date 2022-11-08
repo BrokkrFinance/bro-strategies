@@ -1,19 +1,19 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-library DcaHistoryLib {
+library DCAHistoryLib {
     struct HistoricalGauge {
         uint256 amountSpent;
         uint256 amountExchanged;
     }
 
-    struct DcaHistory {
+    struct DCAHistory {
         HistoricalGauge[] gauges;
         uint256 current;
     }
 
     function addHistoricalGauge(
-        DcaHistory storage history,
+        DCAHistory storage history,
         uint256 amountSpent,
         uint256 amountExchanged
     ) internal {
@@ -22,7 +22,7 @@ library DcaHistoryLib {
     }
 
     function increaseGaugeAt(
-        DcaHistory storage history,
+        DCAHistory storage history,
         uint256 rewards,
         uint256 index
     ) internal {
@@ -30,7 +30,7 @@ library DcaHistoryLib {
     }
 
     function decreaseGaugeByIndex(
-        DcaHistory storage history,
+        DCAHistory storage history,
         uint256 index,
         uint256 amountSpent,
         uint256 amountExchanged
@@ -39,7 +39,7 @@ library DcaHistoryLib {
         history.gauges[index].amountExchanged -= amountExchanged;
     }
 
-    function currentHistoricalIndex(DcaHistory storage history)
+    function currentHistoricalIndex(DCAHistory storage history)
         internal
         view
         returns (uint256)
@@ -47,12 +47,12 @@ library DcaHistoryLib {
         return history.current;
     }
 
-    function gaugeByIndex(DcaHistory storage history, uint256 index)
+    function gaugeByIndex(DCAHistory storage history, uint256 index)
         internal
         view
         returns (uint256, uint256)
     {
-        require(index <= history.current, "InvestQueueLib: Out of bounds");
+        require(index <= history.current, "DCAHistoryLib: Out of bounds");
         return (
             history.gauges[index].amountSpent,
             history.gauges[index].amountExchanged
