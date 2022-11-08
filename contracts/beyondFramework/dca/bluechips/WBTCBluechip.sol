@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
 import { DCABaseUpgradeable } from "../base/DCABaseUpgradeable.sol";
@@ -36,7 +36,7 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
     }
 
     function initialize(
-        DcaStrategyInitArgs calldata args,
+        DCAStrategyInitArgs calldata args,
         TokenInfo calldata bluechipTokenInfo_,
         PlatypusInfo calldata platypusInfo_,
         address[] calldata ptpIntoBluechipSwapPath_,
@@ -45,7 +45,7 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
         __UUPSUpgradeable_init();
         __DCABaseUpgradeable_init(args);
 
-        setBluechipTokenInfo(bluechipTokenInfo_);
+        _setBluechipTokenInfo(bluechipTokenInfo_);
         setPlatypusInfo(platypusInfo_);
         _setRewardsSwapPath(
             ptpIntoBluechipSwapPath_,
@@ -56,7 +56,7 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     // ----- Setter Functions -----
-    function setBluechipTokenInfo(TokenInfo memory newBluechipTokenInfo)
+    function _setBluechipTokenInfo(TokenInfo memory newBluechipTokenInfo)
         private
     {
         require(

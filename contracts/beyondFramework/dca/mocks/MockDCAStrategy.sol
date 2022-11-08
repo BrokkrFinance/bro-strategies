@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
 import { DCABaseUpgradeable } from "../base/DCABaseUpgradeable.sol";
@@ -6,7 +6,7 @@ import { DCABaseUpgradeable } from "../base/DCABaseUpgradeable.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-contract MockDcaStrategy is DCABaseUpgradeable {
+contract MockDCAStrategy is DCABaseUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     IERC20Upgradeable public bluechipToken;
     uint8 private bluechipTokenDecimals;
@@ -17,7 +17,7 @@ contract MockDcaStrategy is DCABaseUpgradeable {
     }
 
     function initialize(
-        DcaStrategyInitArgs calldata args,
+        DCAStrategyInitArgs calldata args,
         address bluechipToken_,
         uint8 bluechipTokenDecimals_
     ) external initializer {

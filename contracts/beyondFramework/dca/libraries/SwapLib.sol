@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
 import { ITraderJoeRouter } from "../../../dependencies/traderjoe/ITraderJoeRouter.sol";
@@ -40,7 +40,7 @@ library SwapLib {
                 block.timestamp
             )[path.length - 1];
         } else {
-            revert("Invalid swap service provider");
+            revert("SwapLib: Invalid swap service provider");
         }
     }
 
@@ -60,7 +60,7 @@ library SwapLib {
                 block.timestamp
             )[path.length - 1];
         } else {
-            revert("Invalid swap service provider");
+            revert("SwapLib: Invalid swap service provider");
         }
     }
 
@@ -86,7 +86,7 @@ library SwapLib {
                 block.timestamp
             )[path.length - 1];
         } else {
-            revert("Invalid swap service provider");
+            revert("SwapLib: Invalid swap service provider");
         }
     }
 
@@ -101,7 +101,7 @@ library SwapLib {
                     path.length - 1
                 ];
         } else {
-            revert("Invalid swap service provider");
+            revert("SwapLib: Invalid swap service provider");
         }
     }
 }
