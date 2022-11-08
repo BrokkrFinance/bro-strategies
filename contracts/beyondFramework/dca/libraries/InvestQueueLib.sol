@@ -1,7 +1,9 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
 library InvestQueueLib {
+    uint256 public constant QUEUE_LEN = 244;
+
     struct InvestQueue {
         uint256[255] investAmounts;
         uint8 current;
@@ -49,7 +51,7 @@ library InvestQueueLib {
     }
 
     function _nextQueueIndex(uint8 current) private pure returns (uint8) {
-        if (current == type(uint8).max) {
+        if (current == QUEUE_LEN) {
             return 0;
         } else {
             return current + 1;

@@ -1,10 +1,11 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
 import { InvestQueueLib } from "../libraries/InvestQueueLib.sol";
-import { DcaHistoryLib } from "../libraries/DcaHistoryLib.sol";
-import { IDcaStrategy } from "../interfaces/IDcaStrategy.sol";
+import { DCAHistoryLib } from "../libraries/DCAHistoryLib.sol";
+import { IDCAStrategy } from "../interfaces/IDCAStrategy.sol";
 import { SwapLib } from "../libraries/SwapLib.sol";
+import { PortfolioAccessBaseUpgradeable } from "./PortfolioAccessBaseUpgradeable.sol";
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -13,20 +14,19 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/securit
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 abstract contract DCABaseUpgradeable is
-    OwnableUpgradeable,
+    PortfolioAccessBaseUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
-    IDcaStrategy
+    IDCAStrategy
 {
     using InvestQueueLib for InvestQueueLib.InvestQueue;
-    using DcaHistoryLib for DcaHistoryLib.DcaHistory;
+    using DCAHistoryLib for DCAHistoryLib.DCAHistory;
     using SwapLib for SwapLib.Router;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     DepositFee public depositFee;
 
     address public dcaInvestor;
-    address[] public portfolios;
 
     TokenInfo public depositTokenInfo;
     uint256 private depositTokenScale;
@@ -43,7 +43,7 @@ abstract contract DCABaseUpgradeable is
     BluechipInvestmentState public bluechipInvestmentState;
 
     InvestQueueLib.InvestQueue private globalInvestQueue;
-    DcaHistoryLib.DcaHistory private dcaHistory;
+    DCAHistoryLib.DCAHistory private dcaHistory;
     SwapLib.Router public router;
 
     TokenInfo public emergencyExitDepositToken;
@@ -51,22 +51,22 @@ abstract contract DCABaseUpgradeable is
     TokenInfo public emergencyExitBluechipToken;
     uint256 public emergencySellBluechipPrice;
 
-    mapping(address => DcaDepositor) private depositors;
+    mapping(address => DCADepositor) private depositors;
 
-    uint256[7] private __gap;
+    uint256[10] private __gap;
 
     // solhint-disable-next-line
-    function __DCABaseUpgradeable_init(DcaStrategyInitArgs calldata args)
+    function __DCABaseUpgradeable_init(DCAStrategyInitArgs calldata args)
         internal
         onlyInitializing
     {
-        __Ownable_init();
+        __PortfolioAccessBaseUpgradeable_init();
         __Pausable_init();
         __ReentrancyGuard_init();
 
         setBluechipInvestmentState(BluechipInvestmentState.Investing);
         setDepositFee(args.depositFee);
-        setDcaInvestor(args.dcaInvestor);
+        setDCAInvestor(args.dcaInvestor);
         setDepositTokenInto(args.depositTokenInfo);
         setInvestmentPeriod(args.investmentPeriod);
         setLastInvestmentTimestamp(args.lastInvestmentTimestamp);
@@ -79,21 +79,8 @@ abstract contract DCABaseUpgradeable is
         );
     }
 
-    modifier onlyDcaInvestor() {
+    modifier onlyDCAInvestor() {
         require(_msgSender() == dcaInvestor, "Unauthorized");
-        _;
-    }
-
-    modifier onlyPortfolio() {
-        bool authorized;
-        for (uint256 i = 0; i < portfolios.length; i++) {
-            if (portfolios[i] == _msgSender()) {
-                authorized = true;
-                break;
-            }
-        }
-
-        require(authorized, "Unauthorized");
         _;
     }
 
@@ -164,7 +151,7 @@ abstract contract DCABaseUpgradeable is
         // compute actual deposit and transfer fee to receiver
         amount = _takeFee(amount);
 
-        DcaDepositor storage depositor = depositors[sender];
+        DCADepositor storage depositor = depositors[sender];
 
         // assert positions limit is not reached
         if (depositor.positions.length == positionsLimit) {
@@ -187,6 +174,8 @@ abstract contract DCABaseUpgradeable is
                 // not started position with the same amount split exists
                 // just add invested amount here
                 depositor.positions[i].depositAmount += amount;
+
+                emit Deposit(sender, amount, amountSplit);
                 return;
             }
         }
@@ -207,7 +196,7 @@ abstract contract DCABaseUpgradeable is
     function invest()
         public
         virtual
-        onlyDcaInvestor
+        onlyDCAInvestor
         nonReentrant
         whenNotPaused
         nonEmergencyExited
@@ -272,7 +261,8 @@ abstract contract DCABaseUpgradeable is
         emit Invest(
             totalDepositSpent,
             totalBluechipReceived,
-            lastInvestmentTimestamp
+            lastInvestmentTimestamp,
+            dcaHistory.currentHistoricalIndex()
         );
     }
 
@@ -308,7 +298,7 @@ abstract contract DCABaseUpgradeable is
         uint256 notInvestedYet;
         uint256 investedIntoBluechip;
 
-        DcaDepositor storage depositor = depositors[sender];
+        DCADepositor storage depositor = depositors[sender];
         for (uint256 i = 0; i < depositor.positions.length; i++) {
             (
                 uint256 positionBluechipInvestment,
@@ -370,7 +360,7 @@ abstract contract DCABaseUpgradeable is
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
     ) private {
-        DcaDepositor storage depositor = depositors[sender];
+        DCADepositor storage depositor = depositors[sender];
 
         (
             uint256 positionBluechipInvestment,
@@ -470,7 +460,7 @@ abstract contract DCABaseUpgradeable is
         address sender,
         bool convertBluechipIntoDepositAsset
     ) private {
-        DcaDepositor storage depositor = depositors[sender];
+        DCADepositor storage depositor = depositors[sender];
 
         uint256 investedIntoBluechip;
         uint256 i = 0;
@@ -554,7 +544,7 @@ abstract contract DCABaseUpgradeable is
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
     ) private {
-        DcaDepositor storage depositor = depositors[sender];
+        DCADepositor storage depositor = depositors[sender];
 
         (
             uint256 positionInvestedIntoBluechip,
@@ -774,7 +764,7 @@ abstract contract DCABaseUpgradeable is
         uint256 notInvestedYet;
         uint256 investedIntoBluechip;
 
-        DcaDepositor storage depositor = depositors[sender];
+        DCADepositor storage depositor = depositors[sender];
         for (uint256 i = 0; i < depositor.positions.length; i++) {
             (
                 uint256 positionBluechipInvestment,
@@ -827,31 +817,6 @@ abstract contract DCABaseUpgradeable is
     }
 
     // ----- Base Class Setters -----
-    function addPortfolio(address newPortfolio) public virtual onlyOwner {
-        for (uint256 i = 0; i < portfolios.length; i++) {
-            if (portfolios[i] == newPortfolio) {
-                revert PortfolioAlreadyWhitelisted();
-            }
-        }
-
-        portfolios.push(newPortfolio);
-        emit PortfolioAdded(newPortfolio);
-    }
-
-    function removePortfolio(address portfolio) public virtual onlyOwner {
-        for (uint256 i = 0; i < portfolios.length; i++) {
-            if (portfolios[i] == portfolio) {
-                portfolios[i] = portfolios[portfolios.length - 1];
-                portfolios.pop();
-
-                emit PortfolioRemoved(portfolio);
-                return;
-            }
-        }
-
-        revert PortfolioNotFound();
-    }
-
     function setBluechipInvestmentState(BluechipInvestmentState newState)
         public
         onlyOwner
@@ -868,7 +833,7 @@ abstract contract DCABaseUpgradeable is
         depositFee = newDepositFee;
     }
 
-    function setDcaInvestor(address newDcaInvestor) public onlyOwner {
+    function setDCAInvestor(address newDcaInvestor) public onlyOwner {
         require(newDcaInvestor != address(0), "Invalid DCA investor");
         dcaInvestor = newDcaInvestor;
     }
@@ -947,28 +912,46 @@ abstract contract DCABaseUpgradeable is
         public
         view
         virtual
-        returns (DcaDepositor memory)
+        returns (DCADepositor memory)
     {
         return depositors[depositor];
     }
 
-    function depositTokenBalance() public view virtual returns (uint256) {
+    function equityValuation()
+        public
+        view
+        virtual
+        returns (DCAEquityValuation[] memory)
+    {
+        DCAEquityValuation[] memory valuation = new DCAEquityValuation[](1);
         if (isEmergencyExited()) {
-            return emergencyExitDepositToken.token.balanceOf(address(this));
+            valuation[0].totalDepositToken = emergencyExitDepositToken
+                .token
+                .balanceOf(address(this));
+            valuation[0].totalBluechipToken = emergencyExitBluechipToken
+                .token
+                .balanceOf(address(this));
+            valuation[0].bluechipToken = address(
+                emergencyExitBluechipToken.token
+            );
+
+            return valuation;
         }
 
-        return depositTokenInfo.token.balanceOf(address(this));
-    }
+        valuation[0].totalDepositToken = depositTokenInfo.token.balanceOf(
+            address(this)
+        );
+        valuation[0].totalBluechipToken = _totalBluechipInvested();
+        valuation[0].bluechipToken = _bluechipAddress();
 
-    function bluechipTokenBalance() public view virtual returns (uint256) {
-        return _totalBluechipInvested();
+        return valuation;
     }
 
     function getInvestAmountAt(uint8 index) external view returns (uint256) {
         return globalInvestQueue.investAmounts[index];
     }
 
-    function currentInvestQueueIndext() external view returns (uint8) {
+    function currentInvestQueueIndex() external view returns (uint8) {
         return globalInvestQueue.current;
     }
 
@@ -980,7 +963,7 @@ abstract contract DCABaseUpgradeable is
         return dcaHistory.gaugeByIndex(index);
     }
 
-    function currentDcaHistoryIndex() external view returns (uint256) {
+    function currentDCAHistoryIndex() external view returns (uint256) {
         return dcaHistory.currentHistoricalIndex();
     }
 
@@ -1001,7 +984,7 @@ abstract contract DCABaseUpgradeable is
         }
 
         // actual deposit = amount * (100% - fee%)
-        actualDeposit = (amount * (100 - depositFee.fee)) / 100;
+        actualDeposit = (amount * (10000 - depositFee.fee)) / 10000;
 
         uint256 feeAmount = amount - actualDeposit;
         if (feeAmount != 0) {
@@ -1048,12 +1031,9 @@ abstract contract DCABaseUpgradeable is
                 uint256 totalAmountExchanged
             ) = dcaHistory.gaugeByIndex(j);
 
-            // calculate user share for specified gauge
-            uint256 depositorBluechipShare = (perPeriodInvestment *
-                depositTokenScale) / totalAmountSpent;
             // calculate amount that user ownes in current gauge
-            uint256 depositorOwnedBluechip = (totalAmountExchanged /
-                depositTokenScale) * depositorBluechipShare;
+            uint256 depositorOwnedBluechip = (totalAmountExchanged *
+                perPeriodInvestment) / totalAmountSpent;
 
             bluechipInvestment += depositorOwnedBluechip;
             depositAssetInvestment += perPeriodInvestment;
@@ -1070,7 +1050,7 @@ abstract contract DCABaseUpgradeable is
     }
 
     function _updateOrRemovePosition(
-        DcaDepositor storage depositor,
+        DCADepositor storage depositor,
         uint256 positionIndex,
         uint256 notInvestedYet,
         uint8 newPositionSplit

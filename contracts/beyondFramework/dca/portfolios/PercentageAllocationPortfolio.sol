@@ -1,30 +1,28 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import { IDcaPortfolio } from "../interfaces/IDcaPortfolio.sol";
-import { IDcaStrategy } from "../interfaces/IDcaStrategy.sol";
+import { IDCAPortfolio } from "../interfaces/IDCAPortfolio.sol";
+import { IDCAInvestable } from "../interfaces/IDCAInvestable.sol";
+import { PortfolioAccessBaseUpgradeable } from "../base/PortfolioAccessBaseUpgradeable.sol";
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract PercentageAllocationPortfolio is
-    OwnableUpgradeable,
+    PortfolioAccessBaseUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
     UUPSUpgradeable,
-    IDcaPortfolio
+    IDCAPortfolio
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     IERC20Upgradeable public depositToken;
 
-    IDcaStrategy[] public activeStrategies;
-
-    address[] public portfolios;
+    Investable[] public investables;
 
     uint8 public investAmountSplit;
 
@@ -33,28 +31,28 @@ contract PercentageAllocationPortfolio is
         _disableInitializers();
     }
 
-    function initialize(DcaPortfolioInitArgs calldata portfolioArgs)
+    function initialize(DCAPortfolioInitArgs calldata portfolioArgs)
         external
         initializer
     {
         __UUPSUpgradeable_init();
-        __Ownable_init();
+        __PortfolioAccessBaseUpgradeable_init();
         __Pausable_init();
         __ReentrancyGuard_init();
 
-        for (uint256 i = 0; i < portfolioArgs.strategies.length; i++) {
+        for (uint256 i = 0; i < portfolioArgs.investables.length; i++) {
             if (
-                portfolioArgs.strategies[i].depositToken() !=
+                portfolioArgs.investables[i].depositToken() !=
                 portfolioArgs.depositToken
             ) {
                 revert InvalidDepositToken();
             }
 
-            if (portfolioArgs.strategies[i].isEmergencyExited()) {
-                revert InvalidDcaInvestStatus();
+            if (portfolioArgs.investables[i].isEmergencyExited()) {
+                revert InvestableIsEmergencyExited();
             }
 
-            activeStrategies.push(portfolioArgs.strategies[i]);
+            investables.push(Investable(portfolioArgs.investables[i], false));
         }
 
         depositToken = portfolioArgs.depositToken;
@@ -63,41 +61,7 @@ contract PercentageAllocationPortfolio is
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    modifier onlyPortfolio() {
-        bool authorized;
-        for (uint256 i = 0; i < portfolios.length; i++) {
-            if (portfolios[i] == _msgSender()) {
-                authorized = true;
-            }
-        }
-
-        require(authorized, "Unauthorized");
-        _;
-    }
-
-    modifier checkEmergencyExited() {
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
-            if (activeStrategies[i].isEmergencyExited()) {
-                activeStrategies[i].withdrawAllFor(
-                    _msgSender(),
-                    false // this param affects nothing in this case
-                );
-
-                activeStrategies[i] = activeStrategies[
-                    activeStrategies.length - 1
-                ];
-                activeStrategies.pop();
-            }
-        }
-
-        _;
-    }
-
-    function deposit(uint256 amount, uint8)
-        external
-        nonReentrant
-        checkEmergencyExited
-    {
+    function deposit(uint256 amount, uint8) external nonReentrant {
         _deposit(_msgSender(), amount);
     }
 
@@ -105,31 +69,54 @@ contract PercentageAllocationPortfolio is
         address sender,
         uint256 amount,
         uint8
-    ) external onlyPortfolio nonReentrant checkEmergencyExited {
+    ) external onlyPortfolio nonReentrant {
         _deposit(sender, amount);
     }
 
     function _deposit(address sender, uint256 amount) private {
+        uint256 activeInvestables = _checkActiveInvestables();
+        if (activeInvestables == 0) {
+            revert PortfolioIsEmergencyExited();
+        }
+
         depositToken.safeTransferFrom(_msgSender(), address(this), amount);
 
-        uint256 perDcaDeposit = amount / activeStrategies.length;
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
+        uint256 perInvestableDeposit = amount / activeInvestables;
+        for (uint256 i = 0; i < investables.length; i++) {
             depositToken.safeApprove(
-                address(activeStrategies[i]),
-                perDcaDeposit
+                address(investables[i].investable),
+                perInvestableDeposit
             );
-            activeStrategies[i].depositFor(
+
+            investables[i].investable.depositFor(
                 sender,
-                perDcaDeposit,
+                perInvestableDeposit,
                 investAmountSplit
             );
+        }
+    }
+
+    function _checkActiveInvestables()
+        private
+        returns (uint256 activeInvestables)
+    {
+        for (uint256 i = 0; i < investables.length; i++) {
+            if (investables[i].emergencyExited) {
+                continue;
+            }
+
+            if (investables[i].investable.isEmergencyExited()) {
+                investables[i].emergencyExited = true;
+                continue;
+            }
+
+            activeInvestables++;
         }
     }
 
     function withdrawAll(bool convertBluechipIntoDepositAsset)
         external
         nonReentrant
-        checkEmergencyExited
     {
         _withdrawAll(_msgSender(), convertBluechipIntoDepositAsset);
     }
@@ -137,15 +124,15 @@ contract PercentageAllocationPortfolio is
     function withdrawAllFor(
         address sender,
         bool convertBluechipIntoDepositAsset
-    ) external onlyPortfolio nonReentrant checkEmergencyExited {
+    ) external onlyPortfolio nonReentrant {
         _withdrawAll(sender, convertBluechipIntoDepositAsset);
     }
 
     function _withdrawAll(address sender, bool convertBluechipIntoDepositAsset)
         private
     {
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
-            activeStrategies[i].withdrawAllFor(
+        for (uint256 i = 0; i < investables.length; i++) {
+            investables[i].investable.withdrawAllFor(
                 sender,
                 convertBluechipIntoDepositAsset
             );
@@ -155,7 +142,7 @@ contract PercentageAllocationPortfolio is
     function withdrawAll(
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
-    ) external nonReentrant checkEmergencyExited {
+    ) external nonReentrant {
         _withdrawAll(
             _msgSender(),
             positionIndex,
@@ -167,7 +154,7 @@ contract PercentageAllocationPortfolio is
         address sender,
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
-    ) external onlyPortfolio nonReentrant checkEmergencyExited {
+    ) external onlyPortfolio nonReentrant {
         _withdrawAll(sender, positionIndex, convertBluechipIntoDepositAsset);
     }
 
@@ -176,8 +163,8 @@ contract PercentageAllocationPortfolio is
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
     ) private {
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
-            activeStrategies[i].withdrawAllFor(
+        for (uint256 i = 0; i < investables.length; i++) {
+            investables[i].investable.withdrawAllFor(
                 sender,
                 positionIndex,
                 convertBluechipIntoDepositAsset
@@ -188,7 +175,6 @@ contract PercentageAllocationPortfolio is
     function withdrawBluechip(bool convertBluechipIntoDepositAsset)
         external
         nonReentrant
-        checkEmergencyExited
     {
         _withdrawBluechip(_msgSender(), convertBluechipIntoDepositAsset);
     }
@@ -196,7 +182,7 @@ contract PercentageAllocationPortfolio is
     function withdrawBluechipFor(
         address sender,
         bool convertBluechipIntoDepositAsset
-    ) external onlyPortfolio nonReentrant checkEmergencyExited {
+    ) external onlyPortfolio nonReentrant {
         _withdrawBluechip(sender, convertBluechipIntoDepositAsset);
     }
 
@@ -204,8 +190,8 @@ contract PercentageAllocationPortfolio is
         address sender,
         bool convertBluechipIntoDepositAsset
     ) private {
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
-            activeStrategies[i].withdrawBluechipFor(
+        for (uint256 i = 0; i < investables.length; i++) {
+            investables[i].investable.withdrawBluechipFor(
                 sender,
                 convertBluechipIntoDepositAsset
             );
@@ -215,7 +201,7 @@ contract PercentageAllocationPortfolio is
     function withdrawBluechip(
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
-    ) external nonReentrant checkEmergencyExited {
+    ) external nonReentrant {
         _withdrawBluechip(
             _msgSender(),
             positionIndex,
@@ -227,7 +213,7 @@ contract PercentageAllocationPortfolio is
         address sender,
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
-    ) external onlyPortfolio nonReentrant checkEmergencyExited {
+    ) external onlyPortfolio nonReentrant {
         _withdrawBluechip(
             sender,
             positionIndex,
@@ -240,8 +226,8 @@ contract PercentageAllocationPortfolio is
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
     ) private {
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
-            activeStrategies[i].withdrawBluechipFor(
+        for (uint256 i = 0; i < investables.length; i++) {
+            investables[i].investable.withdrawBluechipFor(
                 sender,
                 positionIndex,
                 convertBluechipIntoDepositAsset
@@ -250,37 +236,21 @@ contract PercentageAllocationPortfolio is
     }
 
     // ----- Base Class Setters -----
-    function addPortfolio(address newPortfolio) external onlyOwner {
-        for (uint256 i = 0; i < portfolios.length; i++) {
-            if (portfolios[i] == newPortfolio) {
-                revert PortfolioAlreadyWhitelisted();
+    function addDCAInvestable(IDCAInvestable newDCAInvestable)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < investables.length; i++) {
+            if (investables[i].investable == newDCAInvestable) {
+                revert DCAInvestableAlreadyAdded();
             }
         }
 
-        portfolios.push(newPortfolio);
-    }
-
-    function removePortfolio(address portfolio) external onlyOwner {
-        for (uint256 i = 0; i < portfolios.length; i++) {
-            if (portfolios[i] == portfolio) {
-                portfolios[i] = portfolios[portfolios.length - 1];
-                portfolios.pop();
-
-                return;
-            }
+        if (newDCAInvestable.isEmergencyExited()) {
+            revert InvestableIsEmergencyExited();
         }
 
-        revert PortfolioNotFound();
-    }
-
-    function addDca(IDcaStrategy newDca) external onlyOwner {
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
-            if (activeStrategies[i] == newDca) {
-                revert DcaAlreadyAdded();
-            }
-        }
-
-        activeStrategies.push(newDca);
+        investables.push(Investable(newDCAInvestable, false));
     }
 
     // ----- Pausable -----
@@ -292,32 +262,62 @@ contract PercentageAllocationPortfolio is
         super._unpause();
     }
 
+    function isEmergencyExited() external view returns (bool) {
+        // portfolio should return true only if
+        // all investables return true
+        uint256 emergencyExitedInvestables = 0;
+        for (uint256 i = 0; i < investables.length; i++) {
+            if (investables[i].investable.isEmergencyExited()) {
+                emergencyExitedInvestables++;
+            }
+        }
+
+        return emergencyExitedInvestables == investables.length;
+    }
+
     function equityValuation()
         external
         view
-        returns (DcaEquityValuation[] memory)
+        returns (DCAEquityValuation[] memory)
     {
-        DcaEquityValuation[] memory strategies = new DcaEquityValuation[](
-            activeStrategies.length - 1
-        );
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
-            strategies[i].dca = activeStrategies[i];
-            strategies[i].totalDepositToken = activeStrategies[i]
-                .depositTokenBalance();
-            strategies[i].totalBluechipToken = activeStrategies[i]
-                .bluechipTokenBalance();
+        uint256 totalValuationsLength;
+        DCAEquityValuation[][]
+            memory investableValuations = new DCAEquityValuation[][](
+                investables.length
+            );
+
+        for (uint256 i = 0; i < investables.length; i++) {
+            DCAEquityValuation[] memory investableValuation = investables[i]
+                .investable
+                .equityValuation();
+
+            investableValuations[i] = investableValuation;
+            totalValuationsLength += investableValuation.length;
         }
 
-        return strategies;
+        DCAEquityValuation[] memory valuation = new DCAEquityValuation[](
+            totalValuationsLength
+        );
+        uint256 current = 0;
+        for (uint256 i = 0; i < investableValuations.length; i++) {
+            for (uint256 j = 0; j < investableValuations[i].length; j++) {
+                valuation[current] = investableValuations[i][j];
+                current++;
+            }
+        }
+
+        return valuation;
     }
 
     function minDepositAmount()
         external
         view
-        returns (uint256 totalMinDeposit)
+        returns (uint256 totalMinDepositAmount)
     {
-        for (uint256 i = 0; i < activeStrategies.length; i++) {
-            totalMinDeposit += activeStrategies[i].minDepositAmount();
+        for (uint256 i = 0; i < investables.length; i++) {
+            totalMinDepositAmount += investables[i]
+                .investable
+                .minDepositAmount();
         }
     }
 }
