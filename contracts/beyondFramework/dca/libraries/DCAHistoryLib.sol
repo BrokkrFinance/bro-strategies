@@ -21,7 +21,7 @@ library DCAHistoryLib {
         history.current++;
     }
 
-    function increaseGaugeAt(
+    function increaseHistoricalGaugeAt(
         DCAHistory storage history,
         uint256 rewards,
         uint256 index
@@ -29,7 +29,7 @@ library DCAHistoryLib {
         history.gauges[index].amountExchanged += rewards;
     }
 
-    function decreaseGaugeByIndex(
+    function decreaseHistoricalGaugeByIndex(
         DCAHistory storage history,
         uint256 index,
         uint256 amountSpent,
@@ -47,7 +47,7 @@ library DCAHistoryLib {
         return history.current;
     }
 
-    function gaugeByIndex(DCAHistory storage history, uint256 index)
+    function historicalGaugeByIndex(DCAHistory storage history, uint256 index)
         internal
         view
         returns (uint256, uint256)

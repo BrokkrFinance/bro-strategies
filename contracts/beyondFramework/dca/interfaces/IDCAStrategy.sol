@@ -44,7 +44,7 @@ interface IDCAStrategy is IDCAInvestable {
 
     struct DepositFee {
         address feeReceiver;
-        uint8 fee; // .0000 number
+        uint16 fee; // .0000 number
     }
 
     struct TokenInfo {

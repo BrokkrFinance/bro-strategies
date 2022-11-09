@@ -12,10 +12,10 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract PercentageAllocationPortfolio is
-    PortfolioAccessBaseUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
     UUPSUpgradeable,
+    PortfolioAccessBaseUpgradeable,
     IDCAPortfolio
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
