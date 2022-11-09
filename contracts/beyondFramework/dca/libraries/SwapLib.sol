@@ -40,6 +40,7 @@ library SwapLib {
                 block.timestamp
             )[path.length - 1];
         } else {
+            // solhint-disable-next-line reason-string
             revert("SwapLib: Invalid swap service provider");
         }
     }
@@ -60,6 +61,7 @@ library SwapLib {
                 block.timestamp
             )[path.length - 1];
         } else {
+            // solhint-disable-next-line reason-string
             revert("SwapLib: Invalid swap service provider");
         }
     }
@@ -86,6 +88,7 @@ library SwapLib {
                 block.timestamp
             )[path.length - 1];
         } else {
+            // solhint-disable-next-line reason-string
             revert("SwapLib: Invalid swap service provider");
         }
     }
@@ -101,6 +104,7 @@ library SwapLib {
                     path.length - 1
                 ];
         } else {
+            // solhint-disable-next-line reason-string
             revert("SwapLib: Invalid swap service provider");
         }
     }

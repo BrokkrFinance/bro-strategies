@@ -13,10 +13,11 @@ import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/O
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
+// solhint-disable-next-line max-states-count
 abstract contract DCABaseUpgradeable is
-    PortfolioAccessBaseUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
+    PortfolioAccessBaseUpgradeable,
     IDCAStrategy
 {
     using InvestQueueLib for InvestQueueLib.InvestQueue;
@@ -245,7 +246,7 @@ abstract contract DCABaseUpgradeable is
             // if something was claimed invest rewards and increase current gauge
             if (claimedBluechipRewards > 0) {
                 claimedBluechipRewards = _invest(claimedBluechipRewards);
-                dcaHistory.increaseGaugeAt(
+                dcaHistory.increaseHistoricalGaugeAt(
                     claimedBluechipRewards,
                     dcaHistory.currentHistoricalIndex() - 1
                 );
@@ -663,7 +664,7 @@ abstract contract DCABaseUpgradeable is
     ) private {
         if (actualReceived > bluechipBalance) {
             // in case we received more increase current gauge
-            dcaHistory.increaseGaugeAt(
+            dcaHistory.increaseHistoricalGaugeAt(
                 actualReceived - bluechipBalance,
                 dcaHistory.currentHistoricalIndex() - 1
             );
@@ -677,16 +678,21 @@ abstract contract DCABaseUpgradeable is
     function _deductLossFromGauges(uint256 diff) private {
         // start iterating over gauges
         for (uint256 i = dcaHistory.currentHistoricalIndex() - 1; i >= 0; i--) {
-            (, uint256 gaugeBluechipBalancee) = dcaHistory.gaugeByIndex(i);
+            (, uint256 gaugeBluechipBalancee) = dcaHistory
+                .historicalGaugeByIndex(i);
 
             // if gauge balance is higher then diff simply remove diff from it
             if (gaugeBluechipBalancee >= diff) {
-                dcaHistory.decreaseGaugeByIndex(i, 0, diff);
+                dcaHistory.decreaseHistoricalGaugeByIndex(i, 0, diff);
                 return;
             } else {
                 // otherwise deduct as much as possible and go to the next one
                 diff -= gaugeBluechipBalancee;
-                dcaHistory.decreaseGaugeByIndex(i, 0, gaugeBluechipBalancee);
+                dcaHistory.decreaseHistoricalGaugeByIndex(
+                    i,
+                    0,
+                    gaugeBluechipBalancee
+                );
             }
         }
     }
@@ -829,7 +835,7 @@ abstract contract DCABaseUpgradeable is
             newDepositFee.feeReceiver != address(0),
             "Invalid fee receiver"
         );
-        require(newDepositFee.fee <= 100, "Invalid fee percentage");
+        require(newDepositFee.fee <= 10000, "Invalid fee percentage");
         depositFee = newDepositFee;
     }
 
@@ -960,7 +966,7 @@ abstract contract DCABaseUpgradeable is
         view
         returns (uint256, uint256)
     {
-        return dcaHistory.gaugeByIndex(index);
+        return dcaHistory.historicalGaugeByIndex(index);
     }
 
     function currentDCAHistoryIndex() external view returns (uint256) {
@@ -1029,7 +1035,7 @@ abstract contract DCABaseUpgradeable is
             (
                 uint256 totalAmountSpent,
                 uint256 totalAmountExchanged
-            ) = dcaHistory.gaugeByIndex(j);
+            ) = dcaHistory.historicalGaugeByIndex(j);
 
             // calculate amount that user ownes in current gauge
             uint256 depositorOwnedBluechip = (totalAmountExchanged *
@@ -1039,7 +1045,7 @@ abstract contract DCABaseUpgradeable is
             depositAssetInvestment += perPeriodInvestment;
 
             // decrease gauge info
-            dcaHistory.decreaseGaugeByIndex(
+            dcaHistory.decreaseHistoricalGaugeByIndex(
                 j,
                 perPeriodInvestment,
                 depositorOwnedBluechip
