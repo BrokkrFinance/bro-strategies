@@ -2,10 +2,10 @@
 pragma solidity ^0.8.0;
 
 library InvestQueueLib {
-    uint256 public constant QUEUE_LEN = 244;
+    uint256 public constant QUEUE_LEN = 254;
 
     struct InvestQueue {
-        uint256[255] investAmounts;
+        uint256[QUEUE_LEN + 1] investAmounts;
         uint8 current;
     }
 
@@ -25,6 +25,7 @@ library InvestQueueLib {
         uint256 amountToInvest,
         uint8 amountSplit
     ) internal {
+        // solhint-disable-next-line reason-string
         require(
             amountSplit < queue.investAmounts.length,
             "InvestQueueLib: Invalid amount split"
