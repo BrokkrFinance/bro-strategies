@@ -1,0 +1,8 @@
+{
+  "owner": "0x5a39059cc09425aB39719F909Ac57fD2dfac19eE",
+  "initArgs": {
+    "investables": [],
+    "depositToken": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+    "investAmountSplit": 10
+  }
+}
