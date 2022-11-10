@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import { DCABaseUpgradeableCutted } from "../base/DCABaseUpgradeableCutted.sol";
 import { DCABaseUpgradeable } from "../base/DCABaseUpgradeable.sol";
 import { IAltPool } from "../../../dependencies/platypus/IAltPool.sol";
 import { IMasterPlatypusV4 } from "../../../dependencies/platypus/IMasterPlatypusV4.sol";
@@ -11,7 +12,7 @@ import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interface
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
+contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
     using SwapLib for SwapLib.Router;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -45,67 +46,13 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
         __UUPSUpgradeable_init();
         __DCABaseUpgradeable_init(args);
 
-        _setBluechipTokenInfo(bluechipTokenInfo_);
-        setPlatypusInfo(platypusInfo_);
-        _setRewardsSwapPath(
-            ptpIntoBluechipSwapPath_,
-            avaxIntoBluechipSwapPath_
-        );
+        bluechipTokenInfo = bluechipTokenInfo_;
+        platypusInfo = platypusInfo_;
+        ptpIntoBluechipSwapPath = ptpIntoBluechipSwapPath_;
+        avaxIntoBluechipSwapPath = avaxIntoBluechipSwapPath_;
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
-
-    // ----- Setter Functions -----
-    function _setBluechipTokenInfo(TokenInfo memory newBluechipTokenInfo)
-        private
-    {
-        require(
-            address(newBluechipTokenInfo.token) != address(0),
-            "Invalid bluechip token address"
-        );
-        bluechipTokenInfo = newBluechipTokenInfo;
-    }
-
-    function setPlatypusInfo(PlatypusInfo memory newPlatypusInfo) private {
-        require(
-            address(newPlatypusInfo.altPoolBTC) != address(0) &&
-                address(newPlatypusInfo.masterPlatypusV4) != address(0) &&
-                address(newPlatypusInfo.altBtcLpToken) != address(0) &&
-                address(newPlatypusInfo.platypusToken) != address(0),
-            "Invalid Platypus info"
-        );
-        platypusInfo = newPlatypusInfo;
-    }
-
-    function setRewardsSwapPath(
-        address[] memory newPtpIntoAvaxSwapPath,
-        address[] memory newAvaxIntoBluechipSwapPath
-    ) external onlyOwner {
-        _setRewardsSwapPath(
-            newPtpIntoAvaxSwapPath,
-            newAvaxIntoBluechipSwapPath
-        );
-    }
-
-    function _setRewardsSwapPath(
-        address[] memory newPtpIntoAvaxSwapPath,
-        address[] memory newAvaxIntoBluechipSwapPath
-    ) private {
-        require(
-            newPtpIntoAvaxSwapPath[0] == address(platypusInfo.platypusToken) &&
-                newPtpIntoAvaxSwapPath[newPtpIntoAvaxSwapPath.length - 1] ==
-                address(bluechipTokenInfo.token) &&
-                newAvaxIntoBluechipSwapPath[0] == InvestableLib.WAVAX &&
-                newAvaxIntoBluechipSwapPath[
-                    newAvaxIntoBluechipSwapPath.length - 1
-                ] ==
-                address(bluechipTokenInfo.token),
-            "Invalid swap path"
-        );
-
-        ptpIntoBluechipSwapPath = newPtpIntoAvaxSwapPath;
-        avaxIntoBluechipSwapPath = newAvaxIntoBluechipSwapPath;
-    }
 
     // ----- Base Contract Overrides -----
     function _invest(uint256 amount)
@@ -281,4 +228,54 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeable {
             );
         }
     }
+
+    // ----- Setter Functions -----
+    // function _setBluechipTokenInfo(TokenInfo memory newBluechipTokenInfo)
+    //     private
+    // {
+    //     require(
+    //         address(newBluechipTokenInfo.token) != address(0),
+    //         "Invalid bluechip token address"
+    //     );
+    //     bluechipTokenInfo = newBluechipTokenInfo;
+    // }
+
+    // function setPlatypusInfo(PlatypusInfo memory newPlatypusInfo) private {
+    //     require(
+    //         address(newPlatypusInfo.altPoolBTC) != address(0) &&
+    //             address(newPlatypusInfo.masterPlatypusV4) != address(0) &&
+    //             address(newPlatypusInfo.altBtcLpToken) != address(0) &&
+    //             address(newPlatypusInfo.platypusToken) != address(0),
+    //         "Invalid Platypus info"
+    //     );
+    //     platypusInfo = newPlatypusInfo;
+    // }
+
+    function setRewardsSwapPath(
+        address[] memory newPtpIntoAvaxSwapPath,
+        address[] memory newAvaxIntoBluechipSwapPath
+    ) external onlyOwner {
+        ptpIntoBluechipSwapPath = newPtpIntoAvaxSwapPath;
+        avaxIntoBluechipSwapPath = newAvaxIntoBluechipSwapPath;
+    }
+
+    // function _setRewardsSwapPath(
+    //     address[] memory newPtpIntoAvaxSwapPath,
+    //     address[] memory newAvaxIntoBluechipSwapPath
+    // ) private {
+    //     require(
+    //         newPtpIntoAvaxSwapPath[0] == address(platypusInfo.platypusToken) &&
+    //             newPtpIntoAvaxSwapPath[newPtpIntoAvaxSwapPath.length - 1] ==
+    //             address(bluechipTokenInfo.token) &&
+    //             newAvaxIntoBluechipSwapPath[0] == InvestableLib.WAVAX &&
+    //             newAvaxIntoBluechipSwapPath[
+    //                 newAvaxIntoBluechipSwapPath.length - 1
+    //             ] ==
+    //             address(bluechipTokenInfo.token),
+    //         "Invalid swap path"
+    //     );
+
+    //     ptpIntoBluechipSwapPath = newPtpIntoAvaxSwapPath;
+    //     avaxIntoBluechipSwapPath = newAvaxIntoBluechipSwapPath;
+    // }
 }
