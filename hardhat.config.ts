@@ -12,6 +12,7 @@ import "hardhat-deploy"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
 import "solidity-coverage"
+import blockNumber from "./constants/BlockNumber.json"
 
 import "./tasks/upgrade"
 
@@ -48,7 +49,7 @@ const config: HardhatUserConfig = {
       forking: {
         url: "https://api.avax.network/ext/bc/C/rpc",
         enabled: true,
-        blockNumber: 21777750,
+        blockNumber: blockNumber.forkAt,
       },
     },
 

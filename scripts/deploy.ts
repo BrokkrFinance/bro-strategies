@@ -6,12 +6,12 @@ import {
   deployPortfolio,
   deployPriceOracle,
   deployUpgradeableStrategy,
-  getUsdcContract,
   logRed,
   retryUntilSuccess,
-} from "./helper"
+} from "./helper/helper"
 
 import { exit } from "process"
+import Tokens from "../constants/addresses/Tokens.json"
 import deploymentConfig from "../configs/deploymentConfig.json"
 
 let priceOracle: Contract
@@ -94,7 +94,7 @@ async function deployRecursive(investable: any): Promise<any> {
 
 async function main() {
   console.log(process.argv.slice(2))
-  usdc = await getUsdcContract()
+  usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.usdc)
   priceOracle = await retryUntilSuccess(deployPriceOracle("AaveOracle", ContractAddrs.aaveOracle, usdc.address))
 
   const topLevelPortfolio = await deployRecursive(deploymentConfig)

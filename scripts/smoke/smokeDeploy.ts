@@ -13,7 +13,7 @@ import {
   getUsdcContract,
   increaseEvmTimeBySeconds,
   retryUntilSuccess,
-} from "../helper"
+} from "../helper/helper"
 type TransactionResponse = providers.TransactionResponse
 
 ContractAddrs

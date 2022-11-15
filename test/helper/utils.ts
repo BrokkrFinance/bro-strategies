@@ -1,19 +1,13 @@
 import { BigNumber } from "ethers"
-import { AccessControlRoles } from "./constants"
+import AccessControlRoles from "../../constants/AccessControlRoles.json"
 
-const ERROR_RANGE = 5 // ±5%
-const ERROR_RANGE_PRECISION = 1e2
+const ERROR_RANGE_NUMERATOR = BigNumber.from(5) // ±5%
+const ERROR_RANGE_DENOMINATOR = BigNumber.from(1e2)
 
-export function getErrorRange(value: BigNumber) {
-  let errorRange = value.mul(ERROR_RANGE).div(ERROR_RANGE_PRECISION)
-
-  return errorRange > BigNumber.from(0) ? errorRange : value
-}
-
-export function getErrorRangeGeneral(
+export function getErrorRange(
   value: BigNumber,
-  errorRangeNumerator: BigNumber,
-  errorRangeDenominator: BigNumber
+  errorRangeNumerator: BigNumber = ERROR_RANGE_NUMERATOR,
+  errorRangeDenominator: BigNumber = ERROR_RANGE_DENOMINATOR
 ) {
   let errorRange = value.mul(errorRangeNumerator).div(errorRangeDenominator)
 
@@ -34,11 +28,11 @@ export function getYearsInSeconds(years: number) {
 
 export function createRolesArray(ownerAddr: string) {
   return [
-    { role: AccessControlRoles.ADMIN_ROLE, users: [ownerAddr] },
-    { role: AccessControlRoles.GOVERNOR_ROLE, users: [ownerAddr] },
-    { role: AccessControlRoles.STRATEGIST_ROLE, users: [ownerAddr] },
-    { role: AccessControlRoles.MAINTAINER_ROLE, users: [ownerAddr] },
-    { role: AccessControlRoles.UPGRADE_ROLE, users: [ownerAddr] },
-    { role: AccessControlRoles.PAUSE_ROLE, users: [ownerAddr] },
+    { role: AccessControlRoles.admin, users: [ownerAddr] },
+    { role: AccessControlRoles.governor, users: [ownerAddr] },
+    { role: AccessControlRoles.strategist, users: [ownerAddr] },
+    { role: AccessControlRoles.maintainer, users: [ownerAddr] },
+    { role: AccessControlRoles.upgrade, users: [ownerAddr] },
+    { role: AccessControlRoles.pause, users: [ownerAddr] },
   ]
 }

@@ -6,7 +6,7 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
   .addParam("multisig", "An address of multisig to propose an upgrade")
   .setAction(async (taskArgs, hre) => {
     console.log(
-      `Prepare upgrade proposal of proxy ${taskArgs.proxy} with new implementation ${taskArgs.newImplementation} to ${taskArgs.multisig}`
+      `Upgrade: Prepare upgrade proposal of proxy ${taskArgs.proxy} with new implementation ${taskArgs.newImplementation} to ${taskArgs.multisig}.`
     )
 
     const NewImplementation = await hre.ethers.getContractFactory(taskArgs.newImplementation)
@@ -15,9 +15,9 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
       // unsafeSkipStorageCheck: true,
     })
 
-    console.log(`The upgrade proposal is created at ${proposal.url}\n`)
+    console.log(`Upgrade: The upgrade proposal is created at ${proposal.url}`)
 
-    console.log("Verify new implementation contract if it is unverified")
+    console.log("Upgrade: Verify new implementation contract.\n")
 
     const newImplementationAddress = proposal.metadata?.newImplementationAddress
     if (newImplementationAddress !== undefined) {
@@ -32,6 +32,7 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
       }
     } else {
       console.log("Couldn't find new implementation contract's address. Skip verification.")
+      throw new Error("Wrong arguments")
     }
 
     console.log()
