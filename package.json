@@ -45,6 +45,7 @@
     "hardhat-gas-reporter": "^1.0.4",
     "hardhat-solpp": "^1.0.1",
     "husky": "^8.0.1",
+    "json-schema-ref-parser": "^9.0.9",
     "lint-staged": ">=10",
     "pinst": "^3.0.0",
     "prettier": "^2.3.2",
