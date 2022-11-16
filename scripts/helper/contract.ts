@@ -151,7 +151,23 @@ async function upgradeInvestable(name: string): Promise<Contract> {
   return await ethers.getContractAt(liveConfig.name, liveConfig.address)
 }
 
-export async function removeInvestmentLimitsAndFees(investable: Contract, owner: SignerWithAddress) {
+export async function verifyContract(address: string): Promise<void> {
+  const hre = require("hardhat")
+
+  console.log(`Verify: Verify a contract at ${address}`)
+
+  try {
+    await hre.run("verify", { address })
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === "Contract source code already verified") {
+      console.log("Verify: The contract is already verified.")
+    } else {
+      console.log(`Verify: The following error occured during verificaiton.\n\n${e}`)
+    }
+  }
+}
+
+export async function removeInvestmentLimitsAndFees(investable: Contract, owner: SignerWithAddress): Promise<void> {
   const isPortfolio = await investable.supportsInterface("0x2ac9cdaa")
   const isStrategy = await investable.supportsInterface("0x00000000")
 

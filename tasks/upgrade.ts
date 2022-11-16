@@ -1,4 +1,5 @@
 import { task } from "hardhat/config"
+import { verifyContract } from "../scripts/helper/contract"
 
 task("upgrade", "Upgrade a proxy contract to point to a new implementation contract")
   .addParam("proxy", "An address of proxy contract to be upgraded")
@@ -20,20 +21,13 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
     console.log("Upgrade: Verify new implementation contract.\n")
 
     const newImplementationAddress = proposal.metadata?.newImplementationAddress
-    if (newImplementationAddress !== undefined) {
-      try {
-        await hre.run("verify", { address: newImplementationAddress })
-      } catch (e: unknown) {
-        if (e instanceof Error && e.message === "Contract source code already verified") {
-          console.log("New implementation contract is already verified.")
-        } else {
-          console.log(`An error occured during verificaiton: ${e}`)
-        }
-      }
-    } else {
-      console.log("Couldn't find new implementation contract's address. Skip verification.")
+
+    if (newImplementationAddress === undefined) {
+      console.log("Upgrade: Couldn't find new implementation contract's address. Skip verification.")
       throw new Error("Wrong arguments")
     }
+
+    await verifyContract(newImplementationAddress)
 
     console.log()
   })
