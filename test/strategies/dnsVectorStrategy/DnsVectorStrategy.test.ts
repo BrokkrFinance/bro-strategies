@@ -410,6 +410,11 @@ async function deployDnsStrategy() {
   const strategy = await deployUUPSUpgradeableStrategy(
     "DnsVectorStrategy",
     {
+      name: "InvestmentToken",
+      symbol: "DnsToken",
+    },
+    {
+      depositToken: Tokens.usdc,
       depositFee: { amount: 0, params: [] },
       withdrawalFee: { amount: 0, params: [] },
       performanceFee: { amount: 0, params: [] },

@@ -36,6 +36,11 @@ async function deployTraderJoeStrategy() {
   const strategy = await deployUUPSUpgradeableStrategy(
     "TraderJoe",
     {
+      name: "InvestmentToken",
+      symbol: "TraderJoeToken",
+    },
+    {
+      depositToken: Tokens.usdc,
       depositFee: { amount: 0, params: [] },
       withdrawalFee: { amount: 0, params: [] },
       performanceFee: { amount: 0, params: [] },

@@ -11,32 +11,32 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Stargate USDC Strategy - Deploy", deployStargateUsdcStrategy, "OwnableStrategyV2", [
+testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, "OwnableStrategyV2", [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
   testStargateUsdcUpgradeable,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDT Strategy - Deploy", deployStargateUsdtStrategy, "OwnableStrategyV2", [
+testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "OwnableStrategyV2", [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
   testStargateUsdtUpgradeable,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUsdcStrategy, "OwnableStrategyV2", [
+testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "OwnableStrategyV2", [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
   testStargateUsdcUpgradeable,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUsdtStrategy, "OwnableStrategyV2", [
+testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "OwnableStrategyV2", [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
   testStargateUsdtUpgradeable,
   testStrategyReapRewardExtra,
 ])
 
-async function deployStargateUsdcStrategy() {
+async function deployStargateUSDCStrategy() {
   // Strategy owner.
   const signers = await ethers.getSigners()
   const owner = signers[0]
@@ -45,6 +45,11 @@ async function deployStargateUsdcStrategy() {
   const strategy = await deployUUPSUpgradeableStrategy(
     "Stargate",
     {
+      name: "InvestmentToken",
+      symbol: "StargateToken",
+    },
+    {
+      depositToken: Tokens.usdc,
       depositFee: { amount: 0, params: [] },
       withdrawalFee: { amount: 0, params: [] },
       performanceFee: { amount: 0, params: [] },
@@ -62,7 +67,7 @@ async function deployStargateUsdcStrategy() {
   return strategy
 }
 
-async function deployStargateUsdtStrategy() {
+async function deployStargateUSDTStrategy() {
   // Strategy owner.
   const signers = await ethers.getSigners()
   const owner = signers[0]
@@ -71,6 +76,11 @@ async function deployStargateUsdtStrategy() {
   const strategy = await deployUUPSUpgradeableStrategy(
     "Stargate",
     {
+      name: "InvestmentToken",
+      symbol: "StargateToken",
+    },
+    {
+      depositToken: Tokens.usdc,
       depositFee: { amount: 0, params: [] },
       withdrawalFee: { amount: 0, params: [] },
       performanceFee: { amount: 0, params: [] },
@@ -88,11 +98,11 @@ async function deployStargateUsdtStrategy() {
   return strategy
 }
 
-async function upgradeStargateUsdcStrategy() {
+async function upgradeStargateUSDCStrategy() {
   return await upgradeStrategy("StargateUSDC")
 }
 
-async function upgradeStargateUsdtStrategy() {
+async function upgradeStargateUSDTStrategy() {
   return await upgradeStrategy("StargateUSDT")
 }
 

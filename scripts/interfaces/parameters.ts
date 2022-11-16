@@ -8,6 +8,7 @@ import { RoleToUsers } from "./role-to-users"
 import { SwapService } from "./swap-service"
 
 export interface StrategyArgs {
+  depositToken: string
   depositFee: Fee
   withdrawalFee: Fee
   performanceFee: Fee
@@ -27,6 +28,7 @@ export interface StrategyLibraries {
 }
 
 export interface PortfolioArgs {
+  depositToken: string
   depositFee: Fee
   withdrawalFee: Fee
   performanceFee: Fee
@@ -36,6 +38,11 @@ export interface PortfolioArgs {
 
 export interface PortfolioExtraArgs {
   extraArgs: any[]
+}
+
+export interface InvestmentTokenArgs {
+  name: string
+  symbol: string
 }
 
 export interface InvestArgs {

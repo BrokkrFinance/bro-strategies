@@ -1,10 +1,9 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { Contract, ContractFactory } from "ethers"
-import { ethers, upgrades } from "hardhat"
 import path from "path"
-import Tokens from "../../constants/addresses/Tokens.json"
 import { LiveConfig, UpgradeConfig } from "../interfaces/configs"
 import {
+  InvestmentTokenArgs,
   PortfolioArgs,
   PortfolioExtraArgs,
   StrategyArgs,
@@ -15,23 +14,30 @@ import { readLiveConfig, readUpgradeConfig } from "./paths"
 
 export async function deployUUPSUpgradeablePortfolio(
   portfolioName: string,
+  investmentTokenArgs: InvestmentTokenArgs,
   portfolioArgs: PortfolioArgs,
   portfolioExtraArgs: PortfolioExtraArgs,
-  investables: Contract[],
+  investables: string[],
   allocations: number[][]
-) {
+): Promise<Contract> {
+  // Get an instance of HRE.
+  const { ethers } = require("hardhat")
+
   // Contact factories.
   const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
   const Portfolio = await ethers.getContractFactory(portfolioName)
 
   // Deploy portfolio token.
-  const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "Portfolio Token"])
+  const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, [
+    investmentTokenArgs.name,
+    investmentTokenArgs.symbol,
+  ])
 
   // Deploy portfolio.
   const portfolio = await deployUUPSUpgradeableContract(Portfolio, [
     [
       investmentToken.address,
-      Tokens.usdc,
+      portfolioArgs.depositToken,
       portfolioArgs.depositFee.amount,
       portfolioArgs.depositFee.params,
       portfolioArgs.withdrawalFee.amount,
@@ -48,7 +54,7 @@ export async function deployUUPSUpgradeablePortfolio(
 
   // Add investables.
   for (let i = 0; i < investables.length; i++) {
-    await portfolio.addInvestable(investables[i].address, allocations[i], [])
+    await portfolio.addInvestable(investables[i], allocations[i], [])
   }
 
   // Transfer ownership of portfolio token to portfolio.
@@ -59,12 +65,16 @@ export async function deployUUPSUpgradeablePortfolio(
 
 export async function deployUUPSUpgradeableStrategy(
   strategyName: string,
+  investmentTokenArgs: InvestmentTokenArgs,
   strategyArgs: StrategyArgs,
   strategyExtraArgs: StrategyExtraArgs,
   strategyLibraries: StrategyLibraries = {
     libraries: [],
   }
-) {
+): Promise<Contract> {
+  // Get an instance of HRE.
+  const { ethers } = require("hardhat")
+
   // Deploy libraries.
   const libraries: { [libraryName: string]: string } = {}
 
@@ -80,17 +90,25 @@ export async function deployUUPSUpgradeableStrategy(
   // Contact factories.
   const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
   const PriceOracle = await ethers.getContractFactory(strategyArgs.oracle.name)
-  const Strategy = await ethers.getContractFactory(strategyName, { libraries: libraries })
+  const Strategy = await ethers.getContractFactory(strategyName, { libraries })
 
   // Deploy strategy token.
-  const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, ["InvestmentToken", "Strategy Token"])
-  const priceOracle = await deployUUPSUpgradeableContract(PriceOracle, [strategyArgs.oracle.address, Tokens.usdc])
+  const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, [
+    investmentTokenArgs.name,
+    investmentTokenArgs.symbol,
+  ])
+
+  // Deploy price oracle.
+  const priceOracle = await deployUUPSUpgradeableContract(PriceOracle, [
+    strategyArgs.oracle.address,
+    strategyArgs.depositToken,
+  ])
 
   // Deploy strategy.
   const strategy = await deployUUPSUpgradeableContract(Strategy, [
     [
       investmentToken.address,
-      Tokens.usdc,
+      strategyArgs.depositToken,
       strategyArgs.depositFee.amount,
       strategyArgs.depositFee.params,
       strategyArgs.withdrawalFee.amount,
@@ -116,6 +134,9 @@ export async function deployUUPSUpgradeableStrategy(
 }
 
 async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {
+  // Get an instance of HRE.
+  const { upgrades } = require("hardhat")
+
   const contract = await upgrades.deployProxy(factory, args, {
     kind: "uups",
     unsafeAllow: ["external-library-linking"],
@@ -134,6 +155,9 @@ export async function upgradeStrategy(name: string): Promise<Contract> {
 }
 
 async function upgradeInvestable(name: string): Promise<Contract> {
+  // Get an instance of HRE.
+  const { ethers, upgrades } = require("hardhat")
+
   const liveConfig: LiveConfig = readLiveConfig(name)
   const upgradeConfigs: UpgradeConfig[] = readUpgradeConfig(name)
 
@@ -168,6 +192,9 @@ export async function verifyContract(address: string): Promise<void> {
 }
 
 export async function removeInvestmentLimitsAndFees(investable: Contract, owner: SignerWithAddress): Promise<void> {
+  // Get an instance of HRE.
+  const { ethers } = require("hardhat")
+
   const isPortfolio = await investable.supportsInterface("0x2ac9cdaa")
   const isStrategy = await investable.supportsInterface("0x00000000")
 
@@ -188,12 +215,16 @@ export async function removeInvestmentLimitsAndFees(investable: Contract, owner:
   await setFees(investable, owner)
 }
 
-async function setInvestmentLimits(investable: Contract, owner: SignerWithAddress, limit: BigInt = BigInt(1e20)) {
+async function setInvestmentLimits(
+  investable: Contract,
+  owner: SignerWithAddress,
+  limit: BigInt = BigInt(1e20)
+): Promise<void> {
   await investable.connect(owner).setTotalInvestmentLimit(limit)
   await investable.connect(owner).setInvestmentLimitPerAddress(limit)
 }
 
-async function setFees(investable: Contract, owner: SignerWithAddress, fee: number = 0) {
+async function setFees(investable: Contract, owner: SignerWithAddress, fee: number = 0): Promise<void> {
   await investable.connect(owner).setDepositFee(fee, [])
   await investable.connect(owner).setWithdrawalFee(fee, [])
   await investable.connect(owner).setPerformanceFee(fee, [])

@@ -10,7 +10,7 @@ import {
   deployUUPSUpgradeableStrategy,
   upgradePortfolio,
 } from "../../../scripts/helper/contract"
-import { PortfolioArgs, StrategyArgs } from "../../../scripts/interfaces/parameters"
+import { InvestmentTokenArgs, PortfolioArgs, StrategyArgs } from "../../../scripts/interfaces/parameters"
 import { testPortfolio } from "../Portfolio.test"
 
 testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, "PortfolioV2", [testCalmPortfolioUpgradeable])
@@ -23,8 +23,15 @@ async function deployCalmPortfolio() {
   const signers = await ethers.getSigners()
   const owner = signers[0]
 
+  // Investment token arguments.
+  const investmentTokenArgs: InvestmentTokenArgs = {
+    name: "InvestmentToken",
+    symbol: "IVT",
+  }
+
   // Strategy arguments.
   const strategyArgs: StrategyArgs = {
+    depositToken: Tokens.usdc,
     depositFee: { amount: 0, params: [] },
     withdrawalFee: { amount: 0, params: [] },
     performanceFee: { amount: 0, params: [] },
@@ -37,6 +44,7 @@ async function deployCalmPortfolio() {
 
   // Portfolio arguments.
   const portfolioArgs: PortfolioArgs = {
+    depositToken: Tokens.usdc,
     depositFee: { amount: 0, params: [] },
     withdrawalFee: { amount: 0, params: [] },
     performanceFee: { amount: 0, params: [] },
@@ -45,62 +53,66 @@ async function deployCalmPortfolio() {
   }
 
   // Cash strategy.
-  const cash = await deployUUPSUpgradeableStrategy("Cash", strategyArgs, { extraArgs: [] })
+  const cash = await deployUUPSUpgradeableStrategy("Cash", investmentTokenArgs, strategyArgs, { extraArgs: [] })
 
   //////////////// Stargate USDC wrapper portfolio.
 
   // Stargate USDC strategy
-  const stargateUsdc = await deployUUPSUpgradeableStrategy("Stargate", strategyArgs, {
+  const stargateUSDC = await deployUUPSUpgradeableStrategy("Stargate", investmentTokenArgs, strategyArgs, {
     extraArgs: [Stargate.router, Stargate.usdcPool, Stargate.lpStaking, Stargate.usdcLPToken, Stargate.stgToken],
   })
 
   // Stargate USDC wrapper portfolio
-  const stargateUsdcPortfolio = await deployUUPSUpgradeablePortfolio(
+  const stargateUSDCPortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
+    investmentTokenArgs,
     portfolioArgs,
     { extraArgs: [] },
-    [cash, stargateUsdc],
+    [cash.address, stargateUSDC.address],
     [[100000], [0, 100000]]
   )
 
   //////////////// Stargate USDT wrapper portfolio.
 
   // Stargate USDT strategy
-  const stargateUsdt = await deployUUPSUpgradeableStrategy("Stargate", strategyArgs, {
+  const stargateUSDT = await deployUUPSUpgradeableStrategy("Stargate", investmentTokenArgs, strategyArgs, {
     extraArgs: [Stargate.router, Stargate.usdtPool, Stargate.lpStaking, Stargate.usdtLPToken, Stargate.stgToken],
   })
 
   // Stargate USDT wrapper portfolio
-  const stargateUsdtPortfolio = await deployUUPSUpgradeablePortfolio(
+  const stargateUSDTPortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
+    investmentTokenArgs,
     portfolioArgs,
     { extraArgs: [] },
-    [cash, stargateUsdt],
+    [cash.address, stargateUSDT.address],
     [[100000], [0, 100000]]
   )
 
   //////////////// TraderJoe USDC-USDC.e wrapper portfolio.
 
   // TraderJoe USDC-USDC.e strategy
-  const traderjoe = await deployUUPSUpgradeableStrategy("TraderJoe", strategyArgs, {
+  const traderjoe = await deployUUPSUpgradeableStrategy("TraderJoe", investmentTokenArgs, strategyArgs, {
     extraArgs: [TraderJoe.router, TraderJoe.masterChef, TraderJoe.lpToken, TraderJoe.joeToken],
   })
 
   // TraderJoe USDC-USDC.e wrapper portfolio
   const traderjoePortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
+    investmentTokenArgs,
     portfolioArgs,
     { extraArgs: [] },
-    [cash, traderjoe],
+    [cash.address, traderjoe.address],
     [[100000], [0, 100000]]
   )
 
   // Top level portfolio.
   const portfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
+    investmentTokenArgs,
     portfolioArgs,
     { extraArgs: [] },
-    [stargateUsdcPortfolio, stargateUsdtPortfolio, traderjoePortfolio],
+    [stargateUSDCPortfolio.address, stargateUSDTPortfolio.address, traderjoePortfolio.address],
     [[100000], [50000, 50000], [30000, 30000, 40000]]
   )
 

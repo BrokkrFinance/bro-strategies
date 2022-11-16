@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
+import Tokens from "../../../constants/addresses/Tokens.json"
 import Oracles from "../../../constants/Oracles.json"
 import SwapServices from "../../../constants/SwapServices.json"
 import { deployUUPSUpgradeableStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
@@ -41,6 +42,11 @@ async function deployCashStrategy() {
   const strategy = await deployUUPSUpgradeableStrategy(
     "Cash",
     {
+      name: "InvestmentToken",
+      symbol: "CashToken",
+    },
+    {
+      depositToken: Tokens.usdc,
       depositFee: { amount: 0, params: [] },
       withdrawalFee: { amount: 0, params: [] },
       performanceFee: { amount: 0, params: [] },
