@@ -135,7 +135,9 @@ abstract contract DCABaseUpgradeableCutted is
         setBluechipInvestmentState(BluechipInvestmentState.Investing);
         setDepositFee(args.depositFee);
         setDCAInvestor(args.dcaInvestor);
-        setDepositTokenInto(args.depositTokenInfo);
+        // setDepositTokenInto(args.depositTokenInfo);
+        depositTokenInfo = args.depositTokenInfo;
+        depositTokenScale = 10**args.depositTokenInfo.decimals;
         setInvestmentPeriod(args.investmentPeriod);
         setLastInvestmentTimestamp(args.lastInvestmentTimestamp);
         setMinDepositAmount(args.minDepositAmount);
@@ -383,19 +385,21 @@ abstract contract DCABaseUpgradeableCutted is
         // we can remove his data completely
         delete depositors[sender];
 
-        if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
-            investedIntoBluechip = _withdrawInvestedBluechip(
-                investedIntoBluechip
-            );
-        }
-
         // if convertion requested swap bluechip -> deposit asset
-        if (convertBluechipIntoDepositAsset) {
-            notInvestedYet += router.swapTokensForTokens(
-                investedIntoBluechip,
-                bluechipToDepositSwapPath
-            );
-            investedIntoBluechip = 0;
+        if (investedIntoBluechip != 0) {
+            if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
+                investedIntoBluechip = _withdrawInvestedBluechip(
+                    investedIntoBluechip
+                );
+            }
+
+            if (convertBluechipIntoDepositAsset) {
+                notInvestedYet += router.swapTokensForTokens(
+                    investedIntoBluechip,
+                    bluechipToDepositSwapPath
+                );
+                investedIntoBluechip = 0;
+            }
         }
 
         if (notInvestedYet != 0) {
@@ -626,14 +630,15 @@ abstract contract DCABaseUpgradeableCutted is
 
         // if deposit token != emergency exit token compute share
         if (depositTokenInfo.token != emergencyExitDepositToken.token) {
-            uint256 convertedDepositShare = (notInvestedYet *
-                emergencySellDepositPrice) / depositTokenScale;
+            uint256 payout = _scaleAmount(
+                (notInvestedYet * emergencySellDepositPrice) /
+                    depositTokenScale,
+                depositTokenInfo.decimals,
+                emergencyExitDepositToken.decimals
+            );
 
-            if (convertedDepositShare != 0) {
-                emergencyExitDepositToken.token.safeTransfer(
-                    sender,
-                    convertedDepositShare
-                );
+            if (payout != 0) {
+                emergencyExitDepositToken.token.safeTransfer(sender, payout);
             }
         } else {
             // otherwise send deposit token
@@ -644,14 +649,15 @@ abstract contract DCABaseUpgradeableCutted is
 
         // if bluechip != emergency exit token compute share
         if (_bluechipAddress() != address(emergencyExitBluechipToken.token)) {
-            uint256 convertedBluechipShare = (investedIntoBluechip *
-                emergencySellBluechipPrice) / _bluechipTokenScale();
+            uint256 payout = _scaleAmount(
+                (investedIntoBluechip * emergencySellBluechipPrice) /
+                    _bluechipTokenScale(),
+                _bluechipDecimals(),
+                emergencyExitBluechipToken.decimals
+            );
 
-            if (convertedBluechipShare != 0) {
-                emergencyExitBluechipToken.token.safeTransfer(
-                    sender,
-                    convertedBluechipShare
-                );
+            if (payout != 0) {
+                emergencyExitBluechipToken.token.safeTransfer(sender, payout);
             }
         } else {
             // otherwise send bluechip token
@@ -683,14 +689,14 @@ abstract contract DCABaseUpgradeableCutted is
         dcaInvestor = newDcaInvestor;
     }
 
-    function setDepositTokenInto(TokenInfo memory newDepositTokenInfo) private {
-        require(
-            address(newDepositTokenInfo.token) != address(0),
-            "Invalid deposit token address"
-        );
-        depositTokenInfo = newDepositTokenInfo;
-        depositTokenScale = 10**depositTokenInfo.decimals;
-    }
+    // function setDepositTokenInto(TokenInfo memory newDepositTokenInfo) private {
+    //     require(
+    //         address(newDepositTokenInfo.token) != address(0),
+    //         "Invalid deposit token address"
+    //     );
+    //     depositTokenInfo = newDepositTokenInfo;
+    //     depositTokenScale = 10**depositTokenInfo.decimals;
+    // }
 
     function setInvestmentPeriod(uint256 newInvestmentPeriod) public onlyOwner {
         require(newInvestmentPeriod > 0, "Invalid investment period");
