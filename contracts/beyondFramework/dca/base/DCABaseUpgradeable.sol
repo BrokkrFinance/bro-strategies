@@ -790,11 +790,14 @@ abstract contract DCABaseUpgradeable is
             uint256 convertedDepositShare = (notInvestedYet *
                 emergencySellDepositPrice) / depositTokenScale;
 
-            if (convertedDepositShare != 0) {
-                emergencyExitDepositToken.token.safeTransfer(
-                    sender,
-                    convertedDepositShare
-                );
+            uint256 payout = _scaleAmount(
+                convertedDepositShare,
+                depositTokenInfo.decimals,
+                emergencyExitDepositToken.decimals
+            );
+
+            if (payout != 0) {
+                emergencyExitDepositToken.token.safeTransfer(sender, payout);
             }
         } else {
             // otherwise send deposit token
@@ -808,11 +811,14 @@ abstract contract DCABaseUpgradeable is
             uint256 convertedBluechipShare = (investedIntoBluechip *
                 emergencySellBluechipPrice) / _bluechipTokenScale();
 
-            if (convertedBluechipShare != 0) {
-                emergencyExitBluechipToken.token.safeTransfer(
-                    sender,
-                    convertedBluechipShare
-                );
+            uint256 payout = _scaleAmount(
+                convertedBluechipShare,
+                _bluechipDecimals(),
+                emergencyExitBluechipToken.decimals
+            );
+
+            if (payout != 0) {
+                emergencyExitBluechipToken.token.safeTransfer(sender, payout);
             }
         } else {
             // otherwise send bluechip token
@@ -1093,17 +1099,20 @@ abstract contract DCABaseUpgradeable is
         uint256 bluechipAssetAmount,
         bool convertBluechipIntoDepositAsset
     ) private {
-        // if state is Withdrawn then bluechip is already on the contract balance
-        if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
-            bluechipAssetAmount = _withdrawInvestedBluechip(
-                bluechipAssetAmount
-            );
-        }
-
         // if convertion requested swap bluechip -> deposit asset
-        if (convertBluechipIntoDepositAsset) {
-            depositAssetAmount += _swapIntoDepositAsset(bluechipAssetAmount);
-            bluechipAssetAmount = 0;
+        if (bluechipAssetAmount != 0) {
+            if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
+                bluechipAssetAmount = _withdrawInvestedBluechip(
+                    bluechipAssetAmount
+                );
+            }
+
+            if (convertBluechipIntoDepositAsset) {
+                depositAssetAmount += _swapIntoDepositAsset(
+                    bluechipAssetAmount
+                );
+                bluechipAssetAmount = 0;
+            }
         }
 
         if (depositAssetAmount != 0) {
