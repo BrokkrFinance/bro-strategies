@@ -1,6 +1,9 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser"
 import { execSync } from "child_process"
-import { getDeployConfigPath } from "./helper/paths"
+import { ethers } from "hardhat"
+import path from "path"
+import Tokens from "../constants/addresses/Tokens.json"
+import { getDeployConfigPath, readLiveConfig } from "./helper/paths"
 import { NameValuePair } from "./interfaces/name-value-pair"
 import { RoleToUsers } from "./interfaces/role-to-users"
 
@@ -50,6 +53,17 @@ async function main() {
       }
     }
   }
+
+  const last = deployConfigs.at(-1)
+
+  if (last.type !== "portfolio") {
+    console.log("Deploy: It looks like what we just deployed is not a portfolio. Skip investing $1.")
+    return
+  }
+
+  console.log("Deploy: Deposit $2 to and withdraw $1 from the top level portfolio.")
+
+  await investOneDollar(last)
 }
 
 function parseSharedArgs(deployConfig: any): string {
@@ -108,6 +122,27 @@ function parseStrategyArgs(deployConfig: any): string {
   --swap-service-router ${deployConfig.swapService.router} \
   --roles ${JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.role))} \
   --users ${JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.users))}`
+}
+
+async function investOneDollar(deployConfig: any): Promise<void> {
+  const portfolioLiveConfig = readLiveConfig(path.join("portfolio", deployConfig.name))
+  const portfolio = await ethers.getContractAt(portfolioLiveConfig.name, portfolioLiveConfig.address)
+  const portfolioToken = await ethers.getContractAt("InvestmentToken", await portfolio.getInvestmentToken())
+
+  const deployer = (await ethers.getSigners())[0]
+  const usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.usdc)
+
+  const portfolioTokenBalanceBefore = await portfolioToken.balanceOf(deployer.address)
+
+  await usdc.approve(portfolio.address, ethers.utils.parseUnits("2", 6))
+  await portfolio.deposit(ethers.utils.parseUnits("2", 6), 0, deployer.address, [])
+
+  const portfolioTokenBalanceAfter = await portfolioToken.balanceOf(deployer.address)
+
+  const portfolioTokenBalance = portfolioTokenBalanceAfter - portfolioTokenBalanceBefore
+
+  await portfolioToken.approve(portfolio.address, portfolioTokenBalance / 2)
+  await portfolio.withdraw(portfolioTokenBalance / 2, 0, deployer.address, [])
 }
 
 main()
