@@ -289,4 +289,137 @@ library DnsVectorStrategyInvestmentLib {
             path
         );
     }
+
+    function repayDebt(uint256 traderJoePairAmount, NameValuePair[] calldata)
+        external
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        // withdrawing Trader Joe LP tokens from Vector
+        uint256 lpAmountChange = strategyStorage.traderJoePair.balanceOf(
+            address(this)
+        );
+        strategyStorage.vectorPoolHelperJoe.withdraw(traderJoePairAmount);
+        lpAmountChange =
+            strategyStorage.traderJoePair.balanceOf(address(this)) -
+            lpAmountChange;
+        assert(traderJoePairAmount == lpAmountChange);
+
+        // burning Trader Joe lp tokens
+        uint256 aaveBorrowTokenBefore = strategyStorage
+            .aaveBorrowToken
+            .balanceOf(address(this));
+        uint256 aaveSupplyTokenAmountChange = strategyStorage
+            .aaveSupplyToken
+            .balanceOf(address(this));
+        strategyStorage.traderJoePair.approve(
+            address(strategyStorage.traderJoeRouter),
+            lpAmountChange
+        );
+        strategyStorage.traderJoeRouter.removeLiquidity(
+            address(strategyStorage.ammPairDepositToken),
+            address(strategyStorage.aaveBorrowToken),
+            lpAmountChange,
+            0,
+            0,
+            address(this),
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp
+        );
+        aaveSupplyTokenAmountChange =
+            strategyStorage.aaveSupplyToken.balanceOf(address(this)) -
+            aaveSupplyTokenAmountChange;
+
+        // converting aaveSupplyToken to aaveBorrowToken
+        address[] memory path = new address[](2);
+        path[0] = address(strategyStorage.aaveSupplyToken);
+        path[1] = address(strategyStorage.aaveBorrowToken);
+        SwapServiceLib.swapExactTokensForTokens(
+            strategyStorage.swapService,
+            aaveSupplyTokenAmountChange,
+            0,
+            path
+        );
+        uint256 aaveBorrowTokenAmountChange = strategyStorage
+            .aaveBorrowToken
+            .balanceOf(address(this)) - aaveBorrowTokenBefore;
+
+        // repay aave debt
+        strategyStorage.aaveBorrowToken.approve(
+            address(strategyStorage.aavePool),
+            aaveBorrowTokenAmountChange
+        );
+        uint256 repayed = strategyStorage.aavePool.repay(
+            address(strategyStorage.aaveBorrowToken),
+            aaveBorrowTokenAmountChange,
+            VARIABLE_DEBT,
+            address(this)
+        );
+        assert(repayed == aaveBorrowTokenAmountChange);
+    }
+
+    function increaseDebt(
+        uint256 aaveBorrowTokenAmount,
+        NameValuePair[] calldata params
+    ) external {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        // borrow more aaveBorrowTokenAmount
+        strategyStorage.aavePool.borrow(
+            address(strategyStorage.aaveBorrowToken),
+            aaveBorrowTokenAmount,
+            VARIABLE_DEBT,
+            0,
+            address(this)
+        );
+
+        // swap aaveBorrowTokenAmount to depositToken
+        uint256 depositTokenBalanceChange = strategyStorage
+            .depositToken
+            .balanceOf(address(this));
+        // assuming aaveBorrowToken != depositToken
+        address[] memory path = new address[](2);
+        path[0] = address(strategyStorage.aaveBorrowToken);
+        path[1] = address(strategyStorage.depositToken);
+        SwapServiceLib.swapExactTokensForTokens(
+            strategyStorage.swapService,
+            aaveBorrowTokenAmount,
+            0,
+            path
+        );
+        depositTokenBalanceChange =
+            strategyStorage.depositToken.balanceOf(address(this)) -
+            depositTokenBalanceChange;
+
+        // reinvest into the strategy
+        deposit(depositTokenBalanceChange, params);
+    }
+
+    function decreaseSupply(
+        uint256 aaveSupplyTokenAmount,
+        NameValuePair[] calldata params
+    ) external {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        // withdraw aaveSupplyToken from aave
+        uint256 aaveSupplyTokenAmountChange = strategyStorage
+            .aaveSupplyToken
+            .balanceOf(address(this));
+        strategyStorage.aavePool.withdraw(
+            address(strategyStorage.aaveSupplyToken),
+            aaveSupplyTokenAmount,
+            address(this)
+        );
+        aaveSupplyTokenAmountChange =
+            strategyStorage.aaveSupplyToken.balanceOf(address(this)) -
+            aaveSupplyTokenAmountChange;
+        assert(aaveSupplyTokenAmount == aaveSupplyTokenAmountChange);
+
+        // reinvest into the strategy
+        // assuming aaveSupplyToken == depositToken
+        deposit(aaveSupplyTokenAmountChange, params);
+    }
 }

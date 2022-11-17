@@ -9,6 +9,7 @@ export const TokenAddrs = {
   vEth: "0x0c84331e39d6658Cd6e6b9ba04736cC4c4734351",
   vWavax: "0x4a1c3aD6Ed28a636ee1751C69071f6be75DEb8B8",
   gmx: "0x62edc0692BD897D2295872a9FFCac5425011c661",
+  vectorAvaxUsdcStakingToken: "0x08a7f16ad042365965d61f2518ead2dee281a1f6",
 }
 
 // TODO: To be deleted

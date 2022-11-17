@@ -22,6 +22,7 @@ contract DnsVectorStrategy is
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     error SafetyFactorRangeError();
+    error TooLowMinimumEquityAfterOperation();
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
@@ -126,6 +127,80 @@ contract DnsVectorStrategy is
         DnsVectorStrategyInvestmentLib.reapReward(params);
     }
 
+    modifier checkMinimumEquityAfterOperation(
+        uint256 minimumEquityAfterOperation
+    ) {
+        _;
+        if (getEquityValuation(false, false) < minimumEquityAfterOperation)
+            revert TooLowMinimumEquityAfterOperation();
+    }
+
+    function repayDebt(
+        uint256 traderJoePairAmount,
+        NameValuePair[] calldata params,
+        uint256 minimumEquityAfterOperation
+    )
+        external
+        onlyRole(MAINTAINER_ROLE)
+        checkMinimumEquityAfterOperation(minimumEquityAfterOperation)
+    {
+        DnsVectorStrategyInvestmentLib.repayDebt(traderJoePairAmount, params);
+    }
+
+    function increaseDebt(
+        uint256 aaveBorrowTokenAmount,
+        NameValuePair[] calldata params,
+        uint256 minimumEquityAfterOperation
+    )
+        external
+        onlyRole(MAINTAINER_ROLE)
+        checkMinimumEquityAfterOperation(minimumEquityAfterOperation)
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        uint256 depositTokenBalanceBefore = depositToken.balanceOf(
+            address(this)
+        );
+
+        DnsVectorStrategyInvestmentLib.increaseDebt(
+            aaveBorrowTokenAmount,
+            params
+        );
+
+        // handling dust amount caused by providing liquidity
+        uninvestedDepositTokenAmount +=
+            strategyStorage.depositToken.balanceOf(address(this)) -
+            depositTokenBalanceBefore;
+    }
+
+    function decreaseSupply(
+        uint256 aaveSupplyTokenAmount,
+        NameValuePair[] calldata params,
+        uint256 minimumEquityAfterOperation
+    )
+        external
+        onlyRole(MAINTAINER_ROLE)
+        checkMinimumEquityAfterOperation(minimumEquityAfterOperation)
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        uint256 depositTokenBalanceBefore = depositToken.balanceOf(
+            address(this)
+        );
+
+        DnsVectorStrategyInvestmentLib.decreaseSupply(
+            aaveSupplyTokenAmount,
+            params
+        );
+
+        // handling dust amount caused by providing liquidity
+        uninvestedDepositTokenAmount +=
+            strategyStorage.depositToken.balanceOf(address(this)) -
+            depositTokenBalanceBefore;
+    }
+
     function _getAssetBalances()
         internal
         view
@@ -166,6 +241,57 @@ contract DnsVectorStrategy is
                 shouldMaximise,
                 shouldIncludeAmmPrice
             );
+    }
+
+    function getAaveDebt() external view returns (uint256) {
+        return DnsVectorStrategyAumLib.getAaveDebt();
+    }
+
+    function getAaveSupply() external view returns (uint256) {
+        return DnsVectorStrategyAumLib.getAaveSupply();
+    }
+
+    function getPoolDebt() external view returns (uint256) {
+        return DnsVectorStrategyAumLib.getPoolDebt();
+    }
+
+    function getVectorLpBalance() external view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+        return strategyStorage.vectorPoolHelperJoe.balanceOf(address(this));
+    }
+
+    function getInverseCollateralRatio(
+        bool shouldMaximise,
+        bool shouldIncludeAmmPrice
+    ) external view returns (uint256) {
+        return
+            DnsVectorStrategyAumLib.getInverseCollateralRatio(
+                shouldMaximise,
+                shouldIncludeAmmPrice
+            );
+    }
+
+    // precision of 0.001, 800 means 0.8 -> 80%
+    function getSafetyFactor() external view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+        return strategyStorage.safetyFactor;
+    }
+
+    // precision of 0.001, 800 means 0.8 -> 80%
+    function getCombinedSafetyFactor() external view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        (, , uint256 maxLoanToValueFactor, , , , , , , ) = strategyStorage
+            .aaveProtocolDataProvider
+            .getReserveConfigurationData(
+                address(strategyStorage.aaveSupplyToken)
+            );
+        return
+            (strategyStorage.safetyFactor * maxLoanToValueFactor) /
+            AAVE_FIXED_DECIMAL_FACTOR;
     }
 
     function _authorizeUpgrade(address)
