@@ -7,7 +7,7 @@ import Tokens from "../../../constants/addresses/Tokens.json"
 import TraderJoe from "../../../constants/addresses/TraderJoe.json"
 import {
   deployUUPSUpgradeablePortfolio,
-  deployUUPSUpgradeableStrategy,
+  deployUUPSUpgradeableStrategyOwnable,
   upgradePortfolio,
 } from "../../../scripts/helper/contract"
 import { InvestmentTokenArgs, PortfolioArgs, StrategyArgs } from "../../../scripts/interfaces/parameters"
@@ -53,18 +53,27 @@ async function deployCalmPortfolio() {
   }
 
   // Cash strategy.
-  const cash = await deployUUPSUpgradeableStrategy("Cash", investmentTokenArgs, strategyArgs, { extraArgs: [] })
+  const cash = await deployUUPSUpgradeableStrategyOwnable("Cash", owner.address, investmentTokenArgs, strategyArgs, {
+    extraArgs: [],
+  })
 
   //////////////// Stargate USDC wrapper portfolio.
 
   // Stargate USDC strategy
-  const stargateUSDC = await deployUUPSUpgradeableStrategy("Stargate", investmentTokenArgs, strategyArgs, {
-    extraArgs: [Stargate.router, Stargate.usdcPool, Stargate.lpStaking, Stargate.usdcLPToken, Stargate.stgToken],
-  })
+  const stargateUSDC = await deployUUPSUpgradeableStrategyOwnable(
+    "Stargate",
+    owner.address,
+    investmentTokenArgs,
+    strategyArgs,
+    {
+      extraArgs: [Stargate.router, Stargate.usdcPool, Stargate.lpStaking, Stargate.usdcLPToken, Stargate.stgToken],
+    }
+  )
 
   // Stargate USDC wrapper portfolio
   const stargateUSDCPortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
+    owner.address,
     investmentTokenArgs,
     portfolioArgs,
     { extraArgs: [] },
@@ -75,13 +84,20 @@ async function deployCalmPortfolio() {
   //////////////// Stargate USDT wrapper portfolio.
 
   // Stargate USDT strategy
-  const stargateUSDT = await deployUUPSUpgradeableStrategy("Stargate", investmentTokenArgs, strategyArgs, {
-    extraArgs: [Stargate.router, Stargate.usdtPool, Stargate.lpStaking, Stargate.usdtLPToken, Stargate.stgToken],
-  })
+  const stargateUSDT = await deployUUPSUpgradeableStrategyOwnable(
+    "Stargate",
+    owner.address,
+    investmentTokenArgs,
+    strategyArgs,
+    {
+      extraArgs: [Stargate.router, Stargate.usdtPool, Stargate.lpStaking, Stargate.usdtLPToken, Stargate.stgToken],
+    }
+  )
 
   // Stargate USDT wrapper portfolio
   const stargateUSDTPortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
+    owner.address,
     investmentTokenArgs,
     portfolioArgs,
     { extraArgs: [] },
@@ -92,13 +108,20 @@ async function deployCalmPortfolio() {
   //////////////// TraderJoe USDC-USDC.e wrapper portfolio.
 
   // TraderJoe USDC-USDC.e strategy
-  const traderjoe = await deployUUPSUpgradeableStrategy("TraderJoe", investmentTokenArgs, strategyArgs, {
-    extraArgs: [TraderJoe.router, TraderJoe.masterChef, TraderJoe.lpToken, TraderJoe.joeToken],
-  })
+  const traderjoe = await deployUUPSUpgradeableStrategyOwnable(
+    "TraderJoe",
+    owner.address,
+    investmentTokenArgs,
+    strategyArgs,
+    {
+      extraArgs: [TraderJoe.router, TraderJoe.masterChef, TraderJoe.lpToken, TraderJoe.joeToken],
+    }
+  )
 
   // TraderJoe USDC-USDC.e wrapper portfolio
   const traderjoePortfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
+    owner.address,
     investmentTokenArgs,
     portfolioArgs,
     { extraArgs: [] },
@@ -109,6 +132,7 @@ async function deployCalmPortfolio() {
   // Top level portfolio.
   const portfolio = await deployUUPSUpgradeablePortfolio(
     "PercentageAllocation",
+    owner.address,
     investmentTokenArgs,
     portfolioArgs,
     { extraArgs: [] },

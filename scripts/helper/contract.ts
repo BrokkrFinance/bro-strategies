@@ -14,7 +14,8 @@ import { readLiveConfig, readUpgradeConfig } from "./paths"
 
 export async function deployUUPSUpgradeablePortfolio(
   portfolioName: string,
-  investmentTokenArgs: InvestmentTokenArgs,
+  portfolioOwner: string,
+  portfolioTokenArgs: InvestmentTokenArgs,
   portfolioArgs: PortfolioArgs,
   portfolioExtraArgs: PortfolioExtraArgs,
   investables: string[],
@@ -29,8 +30,8 @@ export async function deployUUPSUpgradeablePortfolio(
 
   // Deploy portfolio token.
   const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, [
-    investmentTokenArgs.name,
-    investmentTokenArgs.symbol,
+    portfolioTokenArgs.name,
+    portfolioTokenArgs.symbol,
   ])
 
   // Deploy portfolio.
@@ -60,12 +61,43 @@ export async function deployUUPSUpgradeablePortfolio(
   // Transfer ownership of portfolio token to portfolio.
   await investmentToken.transferOwnership(portfolio.address)
 
+  if (ethers.utils.isAddress(portfolioOwner)) {
+    // Transfer ownership of portfolio to portfolio owner.
+    await portfolio.transferOwnership(portfolioOwner)
+  }
+
   return portfolio
 }
 
-export async function deployUUPSUpgradeableStrategy(
+export async function deployUUPSUpgradeableStrategyOwnable(
   strategyName: string,
-  investmentTokenArgs: InvestmentTokenArgs,
+  strategyOwner: string,
+  strategyTokenArgs: InvestmentTokenArgs,
+  strategyArgs: StrategyArgs,
+  strategyExtraArgs: StrategyExtraArgs,
+  strategyLibraries: StrategyLibraries = {
+    libraries: [],
+  }
+): Promise<Contract> {
+  const strategy = await deployUUPSUpgradeableStrategy(
+    strategyName,
+    strategyTokenArgs,
+    strategyArgs,
+    strategyExtraArgs,
+    strategyLibraries
+  )
+
+  // Transfer ownership of strategy to strategy owner.
+  await strategy.transferOwnership(strategyOwner)
+
+  return strategy
+}
+
+export const deployUUPSUpgradeableStrategyRoleable = deployUUPSUpgradeableStrategy
+
+async function deployUUPSUpgradeableStrategy(
+  strategyName: string,
+  strategyTokenArgs: InvestmentTokenArgs,
   strategyArgs: StrategyArgs,
   strategyExtraArgs: StrategyExtraArgs,
   strategyLibraries: StrategyLibraries = {
@@ -94,8 +126,8 @@ export async function deployUUPSUpgradeableStrategy(
 
   // Deploy strategy token.
   const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, [
-    investmentTokenArgs.name,
-    investmentTokenArgs.symbol,
+    strategyTokenArgs.name,
+    strategyTokenArgs.symbol,
   ])
 
   // Deploy price oracle.

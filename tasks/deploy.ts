@@ -1,15 +1,27 @@
 import { Contract } from "ethers"
 import { task } from "hardhat/config"
 import path from "path"
-import { deployUUPSUpgradeablePortfolio, deployUUPSUpgradeableStrategy, verifyContract } from "../scripts/helper/contract"
+import {
+  deployUUPSUpgradeablePortfolio,
+  deployUUPSUpgradeableStrategyOwnable,
+  deployUUPSUpgradeableStrategyRoleable,
+  verifyContract,
+} from "../scripts/helper/contract"
 import { LiveConfig } from "../scripts/interfaces/configs"
 import { getLiveConfigPath, readLiveConfig, writeLiveConfig } from "../scripts/helper/paths"
 import { NameValuePair } from "../scripts/interfaces/name-value-pair"
 import { RoleToUsers } from "../scripts/interfaces/role-to-users"
-import { Library } from "../scripts/interfaces/library"
+import {
+  InvestmentTokenArgs,
+  PortfolioArgs,
+  PortfolioExtraArgs,
+  StrategyArgs,
+  StrategyExtraArgs,
+} from "../scripts/interfaces/parameters"
 
 task("deploy", "")
   .addParam("type", "")
+  .addParam("subtype", "")
   .addParam("name", "")
   .addParam("owner", "")
   .addParam("contractName", "")
@@ -47,70 +59,33 @@ task("deploy", "")
     if (taskArgs.type === "portfolio") {
       investable = await deployUUPSUpgradeablePortfolio(
         taskArgs.contractName,
-        {
-          name: taskArgs.investmentTokenName,
-          symbol: taskArgs.investmentTokenSymbol,
-        },
-        {
-          depositToken: taskArgs.depositToken,
-          depositFee: {
-            amount: taskArgs.depositFee,
-            params: parseParams(taskArgs.depositFeeParamKeys, taskArgs.depositFeeParamValues),
-          },
-          withdrawalFee: {
-            amount: taskArgs.withdrawalFee,
-            params: parseParams(taskArgs.withdrawalFeeParamKeys, taskArgs.withdrawalFeeParamValues),
-          },
-          performanceFee: {
-            amount: taskArgs.performanceFee,
-            params: parseParams(taskArgs.performanceFeeParamKeys, taskArgs.performanceFeeParamValues),
-          },
-          feeReceiver: {
-            address: taskArgs.feeReceiver,
-            params: parseParams(taskArgs.feeReceiverParamKeys, taskArgs.feeReceiverParamValues),
-          },
-          investmentLimit: { total: taskArgs.totalInvestmentLimit, perAddress: taskArgs.investmentLimitPerAddress },
-        },
-        {
-          extraArgs: parseExtraArgs(taskArgs.extraArgs),
-        },
+        taskArgs.owner,
+        parseInvestmentTokenArgs(taskArgs),
+        parsePortfolioArgs(taskArgs),
+        parsePortfolioExtraArgs(taskArgs.extraArgs),
         parseInvestables(taskArgs.investables),
         parseAllocations(taskArgs.allocations)
       )
     } else if (taskArgs.type === "strategy") {
-      investable = await deployUUPSUpgradeableStrategy(
-        taskArgs.contractName,
-        {
-          name: taskArgs.investmentTokenName,
-          symbol: taskArgs.investmentTokenSymbol,
-        },
-        {
-          depositToken: taskArgs.depositToken,
-          depositFee: {
-            amount: taskArgs.depositFee,
-            params: parseParams(taskArgs.depositFeeParamKeys, taskArgs.depositFeeParamValues),
-          },
-          withdrawalFee: {
-            amount: taskArgs.withdrawalFee,
-            params: parseParams(taskArgs.withdrawalFeeParamKeys, taskArgs.withdrawalFeeParamValues),
-          },
-          performanceFee: {
-            amount: taskArgs.performanceFee,
-            params: parseParams(taskArgs.performanceFeeParamKeys, taskArgs.performanceFeeParamValues),
-          },
-          feeReceiver: {
-            address: taskArgs.feeReceiver,
-            params: parseParams(taskArgs.feeReceiverParamKeys, taskArgs.feeReceiverParamValues),
-          },
-          investmentLimit: { total: taskArgs.totalInvestmentLimit, perAddress: taskArgs.investmentLimitPerAddress },
-          oracle: { name: taskArgs.oracleName, address: taskArgs.oracleAddress },
-          swapService: { provider: taskArgs.swapServiceProvider, router: taskArgs.swapServiceRouter },
-          roleToUsers: parseRoleToUsers(taskArgs.roles, taskArgs.users),
-        },
-        {
-          extraArgs: parseExtraArgs(taskArgs.extraArgs),
-        }
-      )
+      if (taskArgs.subtype === "ownable") {
+        investable = await deployUUPSUpgradeableStrategyOwnable(
+          taskArgs.contractName,
+          taskArgs.owner,
+          parseInvestmentTokenArgs(taskArgs),
+          parseStrategyArgs(taskArgs),
+          parseStrategyExtraArgs(taskArgs.extraArgs)
+        )
+      } else if (taskArgs.subtype === "roleable") {
+        investable = await deployUUPSUpgradeableStrategyRoleable(
+          taskArgs.contractName,
+          parseInvestmentTokenArgs(taskArgs),
+          parseStrategyArgs(taskArgs),
+          parseStrategyExtraArgs(taskArgs.extraArgs)
+        )
+      } else {
+        console.log("Deploy: The 'strategy' type must define 'subtype' key of 'ownable' or 'roleable'.")
+        throw new Error("Wrong config file")
+      }
     } else {
       console.log("Deploy: The config file must define 'type' key and value of 'portfolio' or 'strategy'.")
       throw new Error("Wrong config file")
@@ -134,6 +109,62 @@ task("deploy", "")
 
     console.log()
   })
+
+function parseInvestmentTokenArgs(taskArgs: any): InvestmentTokenArgs {
+  return {
+    name: taskArgs.investmentTokenName,
+    symbol: taskArgs.investmentTokenSymbol,
+  }
+}
+
+function parsePortfolioArgs(taskArgs: any): PortfolioArgs {
+  return {
+    depositToken: taskArgs.depositToken,
+    depositFee: {
+      amount: taskArgs.depositFee,
+      params: parseParams(taskArgs.depositFeeParamKeys, taskArgs.depositFeeParamValues),
+    },
+    withdrawalFee: {
+      amount: taskArgs.withdrawalFee,
+      params: parseParams(taskArgs.withdrawalFeeParamKeys, taskArgs.withdrawalFeeParamValues),
+    },
+    performanceFee: {
+      amount: taskArgs.performanceFee,
+      params: parseParams(taskArgs.performanceFeeParamKeys, taskArgs.performanceFeeParamValues),
+    },
+    feeReceiver: {
+      address: taskArgs.feeReceiver,
+      params: parseParams(taskArgs.feeReceiverParamKeys, taskArgs.feeReceiverParamValues),
+    },
+    investmentLimit: { total: taskArgs.totalInvestmentLimit, perAddress: taskArgs.investmentLimitPerAddress },
+  }
+}
+
+function parseStrategyArgs(taskArgs: any): StrategyArgs {
+  return {
+    depositToken: taskArgs.depositToken,
+    depositFee: {
+      amount: taskArgs.depositFee,
+      params: parseParams(taskArgs.depositFeeParamKeys, taskArgs.depositFeeParamValues),
+    },
+    withdrawalFee: {
+      amount: taskArgs.withdrawalFee,
+      params: parseParams(taskArgs.withdrawalFeeParamKeys, taskArgs.withdrawalFeeParamValues),
+    },
+    performanceFee: {
+      amount: taskArgs.performanceFee,
+      params: parseParams(taskArgs.performanceFeeParamKeys, taskArgs.performanceFeeParamValues),
+    },
+    feeReceiver: {
+      address: taskArgs.feeReceiver,
+      params: parseParams(taskArgs.feeReceiverParamKeys, taskArgs.feeReceiverParamValues),
+    },
+    investmentLimit: { total: taskArgs.totalInvestmentLimit, perAddress: taskArgs.investmentLimitPerAddress },
+    oracle: { name: taskArgs.oracleName, address: taskArgs.oracleAddress },
+    swapService: { provider: taskArgs.swapServiceProvider, router: taskArgs.swapServiceRouter },
+    roleToUsers: parseRoleToUsers(taskArgs.roles, taskArgs.users),
+  }
+}
 
 function parseParams(stringfiedKeys: string, stringfiedValues: string): NameValuePair[] {
   if (stringfiedKeys === "[]" && stringfiedValues === "[]") {
@@ -188,6 +219,18 @@ function parseRoleToUsers(stringfiedRoles: string, stringfiedUsers: string): Rol
   })
 
   return params
+}
+
+function parsePortfolioExtraArgs(stringfiedArgs: string): PortfolioExtraArgs {
+  return {
+    extraArgs: parseExtraArgs(stringfiedArgs),
+  }
+}
+
+function parseStrategyExtraArgs(stringfiedArgs: string): StrategyExtraArgs {
+  return {
+    extraArgs: parseExtraArgs(stringfiedArgs),
+  }
 }
 
 function parseExtraArgs(stringfiedArgs: string): string[] {

@@ -2,12 +2,12 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import Aave from "../../../constants/addresses/Aave.json"
+import Oracles from "../../../constants/Oracles.json"
+import SwapServices from "../../../constants/SwapServices.json"
 import Tokens from "../../../constants/addresses/Tokens.json"
 import TraderJoe from "../../../constants/addresses/TraderJoe.json"
 import Vector from "../../../constants/addresses/Vector.json"
-import { deployUUPSUpgradeableStrategy } from "../../../scripts/helper/contract"
-import Oracles from "../../../constants/Oracles.json"
-import SwapServices from "../../../constants/SwapServices.json"
+import { deployUUPSUpgradeableStrategyRoleable } from "../../../scripts/helper/contract"
 import { createRolesArray, getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
@@ -407,7 +407,7 @@ async function deployDnsStrategy() {
   const owner = signers[0]
 
   // Deploy strategy.
-  const strategy = await deployUUPSUpgradeableStrategy(
+  const strategy = await deployUUPSUpgradeableStrategyRoleable(
     "DnsVectorStrategy",
     {
       name: "InvestmentToken",

@@ -5,7 +5,7 @@ import Tokens from "../../../constants/addresses/Tokens.json"
 import Oracles from "../../../constants/Oracles.json"
 import Stargate from "../../../constants/addresses/Stargate.json"
 import SwapServices from "../../../constants/SwapServices.json"
-import { deployUUPSUpgradeableStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
+import { deployUUPSUpgradeableStrategyOwnable, upgradeStrategy } from "../../../scripts/helper/contract"
 import StargateLPTokenABI from "../../helper/abi/StargateLPToken.json"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
@@ -42,8 +42,9 @@ async function deployStargateUSDCStrategy() {
   const owner = signers[0]
 
   // Deploy strategy.
-  const strategy = await deployUUPSUpgradeableStrategy(
+  const strategy = await deployUUPSUpgradeableStrategyOwnable(
     "Stargate",
+    owner.address,
     {
       name: "InvestmentToken",
       symbol: "StargateToken",
@@ -73,8 +74,9 @@ async function deployStargateUSDTStrategy() {
   const owner = signers[0]
 
   // Deploy strategy.
-  const strategy = await deployUUPSUpgradeableStrategy(
+  const strategy = await deployUUPSUpgradeableStrategyOwnable(
     "Stargate",
+    owner.address,
     {
       name: "InvestmentToken",
       symbol: "StargateToken",

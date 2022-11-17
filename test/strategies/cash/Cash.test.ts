@@ -1,10 +1,10 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
-import Tokens from "../../../constants/addresses/Tokens.json"
 import Oracles from "../../../constants/Oracles.json"
 import SwapServices from "../../../constants/SwapServices.json"
-import { deployUUPSUpgradeableStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
+import Tokens from "../../../constants/addresses/Tokens.json"
+import { deployUUPSUpgradeableStrategyOwnable, upgradeStrategy } from "../../../scripts/helper/contract"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
@@ -39,8 +39,9 @@ async function deployCashStrategy() {
   const owner = signers[0]
 
   // Deploy strategy.
-  const strategy = await deployUUPSUpgradeableStrategy(
+  const strategy = await deployUUPSUpgradeableStrategyOwnable(
     "Cash",
+    owner.address,
     {
       name: "InvestmentToken",
       symbol: "CashToken",

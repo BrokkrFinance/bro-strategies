@@ -2,6 +2,7 @@
   "properties": [
     {
       "type": "strategy",
+      "subtype": "ownable",
       "name": "StargateUSDC",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "Stargate",
@@ -31,6 +32,7 @@
     },
     {
       "type": "strategy",
+      "subtype": "ownable",
       "name": "CashWithStargateUSDC",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "Cash",
@@ -76,6 +78,7 @@
     },
     {
       "type": "strategy",
+      "subtype": "ownable",
       "name": "StargateUSDT",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "Stargate",
@@ -105,6 +108,7 @@
     },
     {
       "type": "strategy",
+      "subtype": "ownable",
       "name": "CashWithStargateUSDT",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "Cash",
@@ -150,6 +154,7 @@
     },
     {
       "type": "strategy",
+      "subtype": "ownable",
       "name": "TraderJoe",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "TraderJoe",
@@ -178,6 +183,7 @@
     },
     {
       "type": "strategy",
+      "subtype": "ownable",
       "name": "CashWithTraderJoe",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "Cash",

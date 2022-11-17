@@ -69,6 +69,7 @@ async function main() {
 function parseSharedArgs(deployConfig: any): string {
   return ` \
   --type ${deployConfig.type} \
+  --subtype ${deployConfig.subtype} \
   --name ${deployConfig.name} \
   --owner ${deployConfig.owner} \
   --contract-name ${deployConfig.contractName} \
