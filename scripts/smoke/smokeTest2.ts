@@ -1,4 +1,4 @@
-import { BigNumber, providers } from "ethers"
+import { BigNumber, Contract, providers } from "ethers"
 import { ethers } from "hardhat"
 
 import {
@@ -27,6 +27,36 @@ getExecutionCostInUsd
 getExecutionGasAmount
 increaseEvmTimeBySeconds
 
+async function printInternalState(strategy: Contract) {
+  console.log("Aave debt: ", (await strategy.getAaveDebt()).toString())
+  console.log("Pool debt: ", (await strategy.getPoolDebt()).toString())
+  console.log(
+    "Collateral ratio with minimum price: ",
+    (await strategy.getInverseCollateralRatio(false, false)).toString()
+  )
+  console.log(
+    "Collateral ratio with maximum price: ",
+    (await strategy.getInverseCollateralRatio(true, false)).toString()
+  )
+  console.log("Investment token total supply: ", (await strategy.getInvestmentTokenSupply()).toString())
+}
+
+async function printBalances(strategy: Contract) {
+  for (const assetValuation of await strategy.getAssetBalances()) {
+    console.log("asset:", assetValuation.asset)
+    console.log("asset balance:", assetValuation.balance.toString())
+  }
+  for (const liabilityValuation of await strategy.getLiabilityBalances()) {
+    console.log("liability:", liabilityValuation.asset)
+    console.log("liability balance:", liabilityValuation.balance.toString())
+  }
+}
+
+async function printValuation(strategy: Contract) {
+  console.log("getting minimum total AUM: ", (await strategy.getEquityValuation(false, false)).toString())
+  console.log("getting maximum total AUM: ", (await strategy.getEquityValuation(true, false)).toString())
+}
+
 describe("DNS Vector", function () {
   this.timeout(60 * 60 * 1000)
 
@@ -36,51 +66,73 @@ describe("DNS Vector", function () {
     const Alice = accounts[0].address
 
     let impersonatedSigner = await expectSuccess(
-      ethers.getImpersonatedSigner("0x4aeFa39caEAdD662aE31ab0CE7c8C2c9c0a013E8")
+      ethers.getImpersonatedSigner("0x42d6ce661bb2e5f5cc639e7befe74ff9fd649541")
     )
     const usdcContract = await expectSuccess(getUsdcContract())
 
+    console.log("funding Alice account with native currency")
     let tx = await expectSuccess(
       impersonatedSigner.sendTransaction({
         to: Alice,
         value: ethers.utils.parseEther("10000"),
       })
     )
-    await expectSuccess(usdcContract.connect(impersonatedSigner).transfer(Alice, ethers.utils.parseUnits("20000", 6)))
+    console.log("funding Alice account with usdc currency")
+    await expectSuccess(usdcContract.connect(impersonatedSigner).transfer(Alice, ethers.utils.parseUnits("2000", 6)))
 
     // depoloy contracts
     const priceOracle = await expectSuccess(
       deployPriceOracle("GmxOracle", ContractAddrs.gmxOracle, (await getUsdcContract()).address)
     )
 
+    // deposit
+    console.log("\n\n**** deposit ****")
     const strategy = await getUsdcStrategy(priceOracle)
-    const depositAmount = ethers.utils.parseUnits("10000", 6)
+    console.log("getCombinedSafetyFactor: ", (await strategy.getCombinedSafetyFactor()).toString())
+    const depositAmount = ethers.utils.parseUnits("2000", 6)
     await expectSuccess(usdcContract.approve(strategy.address, depositAmount))
-    let transactionResponse: TransactionResponse = await expectSuccess(strategy.deposit(depositAmount, Alice, []))
+    let transactionResponse: TransactionResponse = await expectSuccess(strategy.deposit(depositAmount, 0, Alice, []))
     console.log("deposit cost in USD: ", await getExecutionCostInUsd(transactionResponse))
     console.log("deposit cost in Gas: ", await getExecutionGasAmount(transactionResponse))
-    console.log("Asset Balances after deposit: ", JSON.stringify(await strategy.getAssetBalances()))
+    await printInternalState(strategy)
+    await printBalances(strategy)
+    await printValuation(strategy)
 
-    console.log("getting minimum total AUM before: ")
-    console.log(((await expectSuccess(strategy.getEquityValuation(false, false))) as BigInt).toString())
-    console.log("getting maximum total AUM before: ")
-    console.log(((await expectSuccess(strategy.getEquityValuation(true, false))) as BigInt).toString())
+    // repay debt
+    console.log("**** repay debt ****")
+    await strategy.repayDebt(BigNumber.from(13918153133989), [])
+    await printInternalState(strategy)
+    await printBalances(strategy)
+    await printValuation(strategy)
 
-    console.log("**** withdrawal ****")
-    const investmentTokenBalance = await strategy.getInvestmentTokenBalanceOf(Alice)
-    const investmentToken = await getTokenContract(await strategy.getInvestmentToken())
-    const withdrawAmount = Math.floor(investmentTokenBalance)
-    investmentToken.approve(strategy.address, withdrawAmount)
-    transactionResponse = await expectSuccess(strategy.withdraw(withdrawAmount, Alice, []))
-    console.log("withdraw cost in USD: ", await getExecutionCostInUsd(transactionResponse))
-    console.log("withdraw cost in Gas: ", await getExecutionGasAmount(transactionResponse))
+    // increase debt
+    // console.log("**** increase debt ****")
+    // await strategy.increaseDebt(BigNumber.from("4220910200000000000"), [])
+    // await printInternalState(strategy)
+    // await printBalances(strategy)
+    // await printValuation(strategy)
 
-    // await increaseEvmTimeBySeconds(3600 * 24)
-    // console.log("getting total AUM after: ")
-    // await expectSuccess(strategy.getEquityValuation(false, false))
+    // decrease collateral
+    // console.log("**** decrease collateral ****")
+    // await strategy.decreaseSupply(BigNumber.from("119047619"), [])
+    // await printInternalState(strategy)
+    // await printBalances(strategy)
+    // await printValuation(strategy)
+
+    // withdraw
+    // console.log("\n\n**** withdrawal ****")
+    // const investmentTokenBalance = await strategy.getInvestmentTokenBalanceOf(Alice)
+    // const investmentToken = await getTokenContract(await strategy.getInvestmentToken())
+    // const withdrawAmount = Math.floor(investmentTokenBalance / 2)
+    // investmentToken.approve(strategy.address, withdrawAmount)
+    // transactionResponse = await expectSuccess(strategy.withdraw(withdrawAmount, 0, Alice, []))
+    // console.log("withdraw cost in USD: ", await getExecutionCostInUsd(transactionResponse))
+    // console.log("withdraw cost in Gas: ", await getExecutionGasAmount(transactionResponse))
+    // await printInternalState(strategy)
+    // await printBalances(strategy)
 
     // reaping rewards
-
+    // await increaseEvmTimeBySeconds(3600 * 24)
     // console.log("Investment token supply before reaping rewards: ", await strategy.getInvestmentTokenSupply())
     // await ethers.provider.send("evm_increaseTime", [3600 * 48])
     // await ethers.provider.send("evm_mine", [])

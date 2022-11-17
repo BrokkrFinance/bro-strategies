@@ -5,7 +5,7 @@ import "./DnsVectorStrategyStorageLib.sol";
 import "../../common/interfaces/IAum.sol";
 
 library DnsVectorStrategyAumLib {
-    function getAssetBalances() external view returns (Balance[] memory) {
+    function getAssetBalances() public view returns (Balance[] memory) {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
         Balance[] memory assetBalances = new Balance[](2);
@@ -21,7 +21,7 @@ library DnsVectorStrategyAumLib {
         return assetBalances;
     }
 
-    function getLiabilityBalances() external view returns (Balance[] memory) {
+    function getLiabilityBalances() public view returns (Balance[] memory) {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
         Balance[] memory liabilityBalances = new Balance[](1);
@@ -104,5 +104,60 @@ library DnsVectorStrategyAumLib {
                 )) / 10**18
         );
         return liabilityValuations;
+    }
+
+    function getAaveDebt() external view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+        return strategyStorage.vAaveBorrowToken.balanceOf(address(this));
+    }
+
+    function getAaveSupply() external view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+        return strategyStorage.aAaveSupplyToken.balanceOf(address(this));
+    }
+
+    function getPoolDebt() external view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        // get Traker Joe LP token reserves
+        // asuming a certain order of tokens
+        (
+            uint112 reserve0, // wAvax (generally it can be aaveSupplyToken or aaveBorrowToken) // usdc (generally it can be aaveSupplyToken or aaveBorrowToken)
+            ,
+
+        ) = strategyStorage.traderJoePair.getReserves();
+        uint256 lpTokenTotalSupply = strategyStorage
+            .traderJoePair
+            .totalSupply();
+        uint256 lpTokenContractBalance = strategyStorage
+            .vectorPoolHelperJoe
+            .balanceOf(address(this));
+
+        return (reserve0 * lpTokenContractBalance) / lpTokenTotalSupply;
+    }
+
+    function getInverseCollateralRatio(
+        bool shouldMaximise,
+        bool shouldIncludeAmmPrice
+    ) external view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+        Balance[] memory assetBalances = getAssetBalances();
+        Balance[] memory liabilityBalances = getLiabilityBalances();
+
+        // assuming aAaveSupplyToken == depositToken
+        // assuming aAaveSupplyToken is at index 0 of getAssetBalances()
+        // assuming vAaveBorrowToken is at index 0 of getLiabilityBalances()
+        return
+            (((strategyStorage.priceOracle.getPrice(
+                strategyStorage.aaveBorrowToken,
+                shouldMaximise,
+                shouldIncludeAmmPrice
+            ) * liabilityBalances[0].balance) *
+                Math.SHORT_FIXED_DECIMAL_FACTOR) / 10**18) /
+            (assetBalances[0].balance);
     }
 }
