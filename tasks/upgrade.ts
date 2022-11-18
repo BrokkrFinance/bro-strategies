@@ -3,7 +3,7 @@ import { verifyContract } from "../scripts/helper/contract"
 
 task("upgrade", "Upgrade a proxy contract to point to a new implementation contract")
   .addParam("proxy", "An address of proxy contract to be upgraded")
-  .addParam("newImplementation", "The name of new implementation contract")
+  .addParam("newImplementation", "A name of new implementation contract")
   .addParam("multisig", "An address of multisig to propose an upgrade")
   .setAction(async (taskArgs, hre) => {
     console.log(
