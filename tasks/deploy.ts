@@ -7,17 +7,19 @@ import {
   deployUUPSUpgradeableStrategyRoleable,
   verifyContract,
 } from "../scripts/helper/contract"
-import { LiveConfig } from "../scripts/interfaces/configs"
 import { getLiveConfigPath, readLiveConfig, writeLiveConfig } from "../scripts/helper/paths"
+import { LiveConfig } from "../scripts/interfaces/configs"
+import { Library } from "../scripts/interfaces/library"
 import { NameValuePair } from "../scripts/interfaces/name-value-pair"
-import { RoleToUsers } from "../scripts/interfaces/role-to-users"
 import {
   InvestmentTokenArgs,
   PortfolioArgs,
   PortfolioExtraArgs,
   StrategyArgs,
   StrategyExtraArgs,
+  StrategyLibraries,
 } from "../scripts/interfaces/parameters"
+import { RoleToUsers } from "../scripts/interfaces/role-to-users"
 
 task("deploy", "")
   .addParam("type", "")
@@ -49,6 +51,8 @@ task("deploy", "")
   .addOptionalParam("swapServiceRouter", "")
   .addOptionalParam("roles", "")
   .addOptionalParam("users", "")
+  .addOptionalParam("libraryNames", "")
+  .addOptionalParam("libraryDependencies", "")
   .addOptionalParam("investables", "")
   .addOptionalParam("allocations", "")
   .setAction(async (taskArgs) => {
@@ -73,14 +77,16 @@ task("deploy", "")
           taskArgs.owner,
           parseInvestmentTokenArgs(taskArgs),
           parseStrategyArgs(taskArgs),
-          parseStrategyExtraArgs(taskArgs.extraArgs)
+          parseStrategyExtraArgs(taskArgs.extraArgs),
+          parseStrategyLibraries(taskArgs.libraryNames, taskArgs.libraryDependencies)
         )
       } else if (taskArgs.subtype === "roleable") {
         investable = await deployUUPSUpgradeableStrategyRoleable(
           taskArgs.contractName,
           parseInvestmentTokenArgs(taskArgs),
           parseStrategyArgs(taskArgs),
-          parseStrategyExtraArgs(taskArgs.extraArgs)
+          parseStrategyExtraArgs(taskArgs.extraArgs),
+          parseStrategyLibraries(taskArgs.libraryNames, taskArgs.libraryDependencies)
         )
       } else {
         console.log("Deploy: The 'strategy' type must define 'subtype' key of 'ownable' or 'roleable'.")
@@ -140,6 +146,12 @@ function parsePortfolioArgs(taskArgs: any): PortfolioArgs {
   }
 }
 
+function parsePortfolioExtraArgs(stringfiedArgs: string): PortfolioExtraArgs {
+  return {
+    extraArgs: parseExtraArgs(stringfiedArgs),
+  }
+}
+
 function parseStrategyArgs(taskArgs: any): StrategyArgs {
   return {
     depositToken: taskArgs.depositToken,
@@ -166,6 +178,21 @@ function parseStrategyArgs(taskArgs: any): StrategyArgs {
   }
 }
 
+function parseStrategyExtraArgs(stringfiedArgs: string): StrategyExtraArgs {
+  return {
+    extraArgs: parseExtraArgs(stringfiedArgs),
+  }
+}
+
+function parseStrategyLibraries(
+  stringfiedLibraryNames: string,
+  stringfiedLibraryDependencies: string
+): StrategyLibraries {
+  return {
+    libraries: parseLibraries(stringfiedLibraryNames, stringfiedLibraryDependencies),
+  }
+}
+
 function parseParams(stringfiedKeys: string, stringfiedValues: string): NameValuePair[] {
   if (stringfiedKeys === "[]" && stringfiedValues === "[]") {
     return []
@@ -189,48 +216,6 @@ function parseParams(stringfiedKeys: string, stringfiedValues: string): NameValu
   })
 
   return params
-}
-
-function parseRoleToUsers(stringfiedRoles: string, stringfiedUsers: string): RoleToUsers[] {
-  if (stringfiedRoles === "[]" && stringfiedUsers === "[]") {
-    return []
-  }
-
-  const roles: string[] = stringfiedRoles.slice(1, -1).split(",")
-  const users = stringfiedUsers
-    .slice(1, -1)
-    .match(/(?<=\[)(.*?)(?=\])/g)!
-    .map((users: string): string[] => {
-      return users.split(",")
-    })
-
-  if (roles.length != users.length) {
-    console.log("Deploy: RoleToUsers must have the same length of roles and users.")
-    throw new Error("Wrong config file")
-  }
-
-  const params: RoleToUsers[] = []
-
-  roles.forEach((role: string, index: number) => {
-    params.push({
-      role: role,
-      users: users[index],
-    })
-  })
-
-  return params
-}
-
-function parsePortfolioExtraArgs(stringfiedArgs: string): PortfolioExtraArgs {
-  return {
-    extraArgs: parseExtraArgs(stringfiedArgs),
-  }
-}
-
-function parseStrategyExtraArgs(stringfiedArgs: string): StrategyExtraArgs {
-  return {
-    extraArgs: parseExtraArgs(stringfiedArgs),
-  }
 }
 
 function parseExtraArgs(stringfiedArgs: string): string[] {
@@ -273,4 +258,64 @@ function parseAllocations(stringfiedAllocations: string): number[][] {
     })
 
   return allocations
+}
+
+function parseRoleToUsers(stringfiedRoles: string, stringfiedUsers: string): RoleToUsers[] {
+  if (stringfiedRoles === "[]" && stringfiedUsers === "[]") {
+    return []
+  }
+
+  const roles: string[] = stringfiedRoles.slice(1, -1).split(",")
+  const users = stringfiedUsers
+    .slice(1, -1)
+    .match(/(?<=\[)(.*?)(?=\])/g)!
+    .map((users: string): string[] => {
+      return users.split(",")
+    })
+
+  if (roles.length != users.length) {
+    console.log("Deploy: RoleToUsers must have the same length of roles and users.")
+    throw new Error("Wrong config file")
+  }
+
+  const params: RoleToUsers[] = []
+
+  roles.forEach((role: string, index: number) => {
+    params.push({
+      role: role,
+      users: users[index],
+    })
+  })
+
+  return params
+}
+
+function parseLibraries(stringfiedLibraryNames: string, stringfiedLibraryDependencies: string): Library[] {
+  if (stringfiedLibraryNames === "[]" && stringfiedLibraryDependencies === "[]") {
+    return []
+  }
+
+  const names: string[] = stringfiedLibraryNames.slice(1, -1).split(",")
+  const dependencies = stringfiedLibraryDependencies
+    .slice(1, -1)
+    .match(/(?<=\[)(.*?)(?=\])/g)!
+    .map((dependency: string): string[] => {
+      return dependency.split(",")
+    })
+
+  if (names.length != dependencies.length) {
+    console.log("Deploy: Library must have the same length of names and dependencies.")
+    throw new Error("Wrong config file")
+  }
+
+  const params: Library[] = []
+
+  names.forEach((name: string, index: number) => {
+    params.push({
+      name: name,
+      dependencies: dependencies[index],
+    })
+  })
+
+  return params
 }

@@ -28,7 +28,8 @@
         { "$ref": "../../../constants/addresses/Stargate.json#/lpStaking" },
         { "$ref": "../../../constants/addresses/Stargate.json#/usdcLPToken" },
         { "$ref": "../../../constants/addresses/Stargate.json#/stgToken" }
-      ]
+      ],
+      "libraries": []
     },
     {
       "type": "strategy",
@@ -52,7 +53,8 @@
       "oracle": { "$ref": "../../../constants/Oracles.json#/aave" },
       "swapService": { "$ref": "../../../constants/SwapServices.json#/traderjoe" },
       "roleToUsers": [],
-      "extraArgs": []
+      "extraArgs": [],
+      "libraries": []
     },
     {
       "type": "portfolio",
@@ -104,7 +106,8 @@
         { "$ref": "../../../constants/addresses/Stargate.json#/lpStaking" },
         { "$ref": "../../../constants/addresses/Stargate.json#/usdtLPToken" },
         { "$ref": "../../../constants/addresses/Stargate.json#/stgToken" }
-      ]
+      ],
+      "libraries": []
     },
     {
       "type": "strategy",
@@ -128,7 +131,8 @@
       "oracle": { "$ref": "../../../constants/Oracles.json#/aave" },
       "swapService": { "$ref": "../../../constants/SwapServices.json#/traderjoe" },
       "roleToUsers": [],
-      "extraArgs": []
+      "extraArgs": [],
+      "libraries": []
     },
     {
       "type": "portfolio",
@@ -179,7 +183,8 @@
         { "$ref": "../../../constants/addresses/TraderJoe.json#/masterChef" },
         { "$ref": "../../../constants/addresses/TraderJoe.json#/lpToken" },
         { "$ref": "../../../constants/addresses/TraderJoe.json#/joeToken" }
-      ]
+      ],
+      "libraries": []
     },
     {
       "type": "strategy",
@@ -203,7 +208,8 @@
       "oracle": { "$ref": "../../../constants/Oracles.json#/aave" },
       "swapService": { "$ref": "../../../constants/SwapServices.json#/traderjoe" },
       "roleToUsers": [],
-      "extraArgs": []
+      "extraArgs": [],
+      "libraries": []
     },
     {
       "type": "portfolio",

@@ -4,6 +4,7 @@ import { ethers } from "hardhat"
 import path from "path"
 import Tokens from "../constants/addresses/Tokens.json"
 import { getDeployConfigPath, readLiveConfig } from "./helper/paths"
+import { Library } from "./interfaces/library"
 import { NameValuePair } from "./interfaces/name-value-pair"
 import { RoleToUsers } from "./interfaces/role-to-users"
 
@@ -122,7 +123,9 @@ function parseStrategyArgs(deployConfig: any): string {
   --swap-service-provider ${deployConfig.swapService.provider} \
   --swap-service-router ${deployConfig.swapService.router} \
   --roles ${JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.role))} \
-  --users ${JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.users))}`
+  --users ${JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.users))} \
+  --library-names ${JSON.stringify(deployConfig.libraries.map((library: Library) => library.name))} \
+  --library-dependencies ${JSON.stringify(deployConfig.libraries.map((library: Library) => library.dependencies))}`
 }
 
 async function investOneDollar(deployConfig: any): Promise<void> {
