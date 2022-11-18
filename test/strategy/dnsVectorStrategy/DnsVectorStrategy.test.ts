@@ -370,7 +370,7 @@ function testCollaterizationAndDeltaNeutrality() {
 }
 
 function testAum() {
-  describe("AUM - Cash Strategy Specific", async function () {
+  describe("AUM - Dns Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
