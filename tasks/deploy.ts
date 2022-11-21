@@ -218,12 +218,18 @@ function parseParams(stringfiedKeys: string, stringfiedValues: string): NameValu
   return params
 }
 
-function parseExtraArgs(stringfiedArgs: string): string[] {
+function parseExtraArgs(stringfiedArgs: string): string[] | string[][] {
   if (stringfiedArgs === "[]") {
     return []
   }
 
-  const extraArgs: string[] = stringfiedArgs.slice(1, -1).split(",")
+  let extraArgs: string[] | string[][]
+
+  if (stringfiedArgs.startsWith("[") === true && stringfiedArgs.endsWith("]") === true) {
+    extraArgs = [stringfiedArgs.slice(2, -2).split(",")]
+  } else {
+    extraArgs = stringfiedArgs.slice(1, -1).split(",")
+  }
 
   return extraArgs
 }
