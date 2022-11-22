@@ -2,9 +2,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { expect } from "chai"
 import { BigNumber, Contract } from "ethers"
 import { ethers } from "hardhat"
-import erc20Abi from "../helper/abi/erc20.json"
-import { DepositArgs, InvestArgs, WithdrawArgs } from "./parameters"
-import { getErrorRange, getErrorRangeGeneral } from "./utils"
+import { DepositArgs, InvestArgs, WithdrawArgs } from "../../scripts/interfaces/parameters"
+import { getErrorRange } from "./utils"
 
 enum InvestType {
   DEPOSIT,
@@ -137,7 +136,7 @@ export class InvestHelper {
         expect.fail("Unexpected deposit result")
       }
     } else if (this.investType === InvestType.WITHDRAW) {
-      const investmentToken = await ethers.getContractAt(erc20Abi, await this.investable.getInvestmentToken())
+      const investmentToken = await ethers.getContractAt("IInvestmentToken", await this.investable.getInvestmentToken())
       await investmentToken.connect(this.investor).approve(this.investable.address, this.investArgs.amount)
 
       const withdrawResult = await this.withdrawResults.get(this.investResult)
@@ -264,7 +263,7 @@ export class InvestHelper {
   }
 
   private async storeStates(states: InvestmentStates) {
-    const investmentToken = await ethers.getContractAt(erc20Abi, await this.investable.getInvestmentToken())
+    const investmentToken = await ethers.getContractAt("IInvestmentToken", await this.investable.getInvestmentToken())
 
     if (this.investType === InvestType.DEPOSIT) {
       states.depositTokenBalance = await this.depositToken.balanceOf(this.investor.address)
@@ -322,7 +321,7 @@ export class InvestHelper {
       // is reverted the new block timestamp will influence the equity valuation.
       expect(this.statesAfter.equityValuation.sub(this.statesBefore.equityValuation)).to.be.approximately(
         0,
-        getErrorRangeGeneral(this.statesAfter.equityValuation, BigNumber.from(5), BigNumber.from(1000))
+        getErrorRange(this.statesAfter.equityValuation, BigNumber.from(5), BigNumber.from(1000))
       )
       expect(this.statesAfter.investmentTokenSupply.sub(this.statesBefore.investmentTokenSupply)).to.equal(0)
     } else {
@@ -363,7 +362,7 @@ export class InvestHelper {
       // is reverted the new block timestamp will influence the equity valuation.
       expect(this.statesAfter.equityValuation.sub(this.statesBefore.equityValuation)).to.be.approximately(
         0,
-        getErrorRangeGeneral(this.statesAfter.equityValuation, BigNumber.from(5), BigNumber.from(1000))
+        getErrorRange(this.statesAfter.equityValuation, BigNumber.from(5), BigNumber.from(1000))
       )
       expect(this.statesBefore.investmentTokenSupply.sub(this.statesAfter.investmentTokenSupply)).to.equal(0)
     } else {

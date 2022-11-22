@@ -1,0 +1,9 @@
+{
+  "router": "0x45a01e4e04f14f7a4a6702c74187c5f6222033cd",
+  "usdcPool": "0x1205f31718499dbf1fca446663b532ef87481fe1",
+  "usdtPool": "0x29e38769f23701a2e4a8ef0492e19da4604be62c",
+  "lpStaking": "0x8731d54e9d02c286767d56ac03e8037c07e01e98",
+  "usdcLPToken": "0x1205f31718499dbf1fca446663b532ef87481fe1",
+  "usdtLPToken": "0x29e38769f23701a2e4a8ef0492e19da4604be62c",
+  "stgToken": "0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590"
+}
