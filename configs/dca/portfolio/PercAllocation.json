@@ -1,8 +1,8 @@
 {
-  "owner": "0xDE971dAc0009Dfb373AcEE32F94777AF2E38e56C",
+  "owner": "0xE8855828fEC29dc6860A4362BCb386CCf6C0c601",
   "initArgs": {
     "investables": [],
     "depositToken": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
-    "investAmountSplit": 10
+    "investAmountSplit": 52
   }
 }
