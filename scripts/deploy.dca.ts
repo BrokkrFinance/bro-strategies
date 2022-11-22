@@ -2,7 +2,7 @@ import { Contract } from "ethers"
 import { deployProxyContract, getUsdcContract, logBlue, retryUntilSuccess } from "./helper"
 
 import portfolioConfig from "../configs/dca/portfolio/PercAllocation.json"
-import wBtcConfig from "../configs/dca/strategy/WBTC.json"
+import wBtcConfig from "../configs/dca/strategy/BTCBMain.json"
 
 let usdc: Contract
 
