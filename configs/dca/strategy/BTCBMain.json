@@ -1,0 +1,52 @@
+{
+  "owner": "0xE8855828fEC29dc6860A4362BCb386CCf6C0c601",
+  "dcaBaseArgs": {
+    "depositFee": {
+      "feeReceiver": "0xE8855828fEC29dc6860A4362BCb386CCf6C0c601",
+      "fee": 0
+    },
+    "dcaInvestor": "0xe3b30829a9d585297988a4f14d49aa67333eeb4b",
+    "depositTokenInfo": {
+      "token": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "decimals": 6
+    },
+    "investmentPeriod": 604800,
+    "lastInvestmentTimestamp": 1668931200,
+    "minDepositAmount": 50000000,
+    "positionsLimit": 52,
+    "router": {
+      "dex": 0,
+      "router": "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
+    },
+    "depositToBluechipSwapPath": [
+      "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e",
+      "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+      "0x152b9d0FdC40C096757F570A51E494bd4b943E50"
+    ],
+    "bluechipToDepositSwapPath": [
+      "0x152b9d0FdC40C096757F570A51E494bd4b943E50",
+      "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+      "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e"
+    ]
+  },
+  "bluechipTokenInfo": {
+    "token": "0x152b9d0FdC40C096757F570A51E494bd4b943E50",
+    "decimals": 8
+  },
+  "platypusInfo": {
+    "altPoolBTC": "0x39dE4e02F76Dbd4352Ec2c926D8d64Db8aBdf5b2",
+    "masterPlatypusV4": "0xfF6934aAC9C94E1C39358D4fDCF70aeca77D0AB0",
+    "altBtcLpToken": "0x209a0399A2905900C0d1a9a382fe23e37024dC84",
+    "platypusToken": "0x22d4002028f537599be9f666d1c4fa138522f9c8",
+    "poolId": 18
+  },
+  "ptpIntoBluechipSwapPath": [
+    "0x22d4002028f537599bE9f666d1c4Fa138522f9c8",
+    "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+    "0x152b9d0FdC40C096757F570A51E494bd4b943E50"
+  ],
+  "avaxIntoBluechipSwapPath": [
+    "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+    "0x152b9d0FdC40C096757F570A51E494bd4b943E50"
+  ]
+}

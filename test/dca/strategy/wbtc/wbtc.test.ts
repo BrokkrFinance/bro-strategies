@@ -1,10 +1,11 @@
+import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { TokenAddrs } from "../../../helper/addresses"
 import { deployUUPSUpgradeableContract, getTokenContract } from "../../../helper/contracts"
 import { SwapServices } from "../../../helper/swaps"
-import { currentBlockchainTime, setBlockchainTime, testDcaStrategy } from "../shared"
+import { currentBlockchainTime, testDcaStrategy } from "../shared"
 
 testDcaStrategy("WBTC DCA Strategy", deployWBTCDcaStrategy, [testWbtcDca])
 
@@ -109,16 +110,14 @@ async function testWbtcDca() {
     it("should allow to invest user deposits", async function () {
       await expect(this.strategy.canInvest()).to.be.reverted
 
-      let currentTime = (await currentBlockchainTime(ethers.provider)) + 86400 + 1
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
 
       expect(await this.strategy.canInvest()).to.equal(false)
 
       await this.usdc.connect(this.user3).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 9)
 
-      currentTime += 86400
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
 
       expect(await this.strategy.canInvest()).to.equal(true)
 
@@ -140,8 +139,7 @@ async function testWbtcDca() {
       expect(await this.strategy.currentInvestQueueIndex()).to.equal(1)
       expect(await this.strategy.getInvestAmountAt(0)).to.equal(0)
 
-      currentTime += 86400
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
       expect(await this.strategy.canInvest()).to.equal(true)
 
       await this.strategy.connect(this.user1).invest()
@@ -194,14 +192,12 @@ async function testWbtcDca() {
       usdcBalanceBefore = await this.usdc.balanceOf(this.user3.address)
       wbtcBalanceBefore = await this.btc.balanceOf(this.user3.address)
 
-      let currentTime = (await currentBlockchainTime(ethers.provider)) + 86400 + 1
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86401)
 
       await this.usdc.connect(this.user3).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 9)
 
-      currentTime += 86400
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
 
       await this.strategy.connect(this.user1).invest()
       const [_, amountReceived] = await this.strategy.getHistoricalGaugeAt(0)
@@ -223,8 +219,7 @@ async function testWbtcDca() {
       await this.usdc.connect(this.user3).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 9)
 
-      currentTime += 86400
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
 
       await this.strategy.connect(this.user1).invest()
 
@@ -241,8 +236,7 @@ async function testWbtcDca() {
       await this.usdc.connect(this.user3).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 1)
 
-      currentTime += 86400
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
 
       await this.strategy.connect(this.user1).invest()
 
@@ -263,8 +257,7 @@ async function testWbtcDca() {
     it("should properly calculate user bluechip asset share", async function () {
       this.btc = await getTokenContract(TokenAddrs.btc)
 
-      let currentTime = (await currentBlockchainTime(ethers.provider)) + 86400 + 1
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86401)
 
       await this.usdc.connect(this.user3).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 9)
@@ -272,8 +265,7 @@ async function testWbtcDca() {
       await this.usdc.connect(this.user2).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await this.strategy.connect(this.user2).deposit(ethers.utils.parseUnits("1000", 6), 9)
 
-      currentTime += 86400
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
 
       await this.strategy.connect(this.user1).invest()
 
@@ -308,8 +300,7 @@ async function testWbtcDca() {
       const emergencyDepositSwapPath = [TokenAddrs.usdc, TokenAddrs.usdt]
       const emergencyBluechipSwapPath = [TokenAddrs.btc, TokenAddrs.eth]
 
-      let currentTime = (await currentBlockchainTime(ethers.provider)) + 86400 + 1
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86401)
 
       await this.usdc.connect(this.user3).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 9)
@@ -317,13 +308,11 @@ async function testWbtcDca() {
       await this.usdc.connect(this.user2).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
       await this.strategy.connect(this.user2).deposit(ethers.utils.parseUnits("1000", 6), 9)
 
-      currentTime += 86400
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
 
       await this.strategy.connect(this.user1).invest()
 
-      currentTime += 86400
-      await setBlockchainTime(ethers.provider, currentTime)
+      await mine(86400)
 
       await this.strategy.connect(this.user1).invest()
 
