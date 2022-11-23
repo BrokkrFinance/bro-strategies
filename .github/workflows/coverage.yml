@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  NODEOPTIONS: --max-old-space-size=1536
+
 jobs:
   coverage-check:
     name: Coverage Check
@@ -24,7 +27,7 @@ jobs:
         run: cp .openzeppelin/avalanche.json .openzeppelin/unknown-31337.json
 
       - name: Run Coverage Check
-        run: yarn --max-old-space-size=8192 coverage
+        run: yarn coverage
 
       - uses: VeryGoodOpenSource/very_good_coverage@v1
         with:
