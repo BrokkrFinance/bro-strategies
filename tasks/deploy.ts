@@ -225,7 +225,7 @@ function parseExtraArgs(stringfiedArgs: string): string[] | string[][] {
 
   let extraArgs: string[] | string[][]
 
-  if (stringfiedArgs.startsWith("[") === true && stringfiedArgs.endsWith("]") === true) {
+  if (stringfiedArgs.startsWith("[[") === true && stringfiedArgs.endsWith("]]") === true) {
     extraArgs = [stringfiedArgs.slice(2, -2).split(",")]
   } else {
     extraArgs = stringfiedArgs.slice(1, -1).split(",")
