@@ -1,5 +1,4 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser"
-import { ethers, run } from "hardhat"
 import path from "path"
 import Tokens from "../constants/addresses/Tokens.json"
 import { getDeployConfigPath, readLiveConfig } from "./helper/paths"
@@ -7,17 +6,8 @@ import { Library } from "./interfaces/library"
 import { NameValuePair } from "./interfaces/name-value-pair"
 import { RoleToUsers } from "./interfaces/role-to-users"
 
-async function main() {
-  const args = process.argv.slice(2)
-
-  if (args.length != 2) {
-    console.log("Deploy: Wrong arguments. The arguments must be network and contract type/name.")
-    console.log("Deploy: ts-node ./scripts/deploy.ts avax_mainnet portfolio/Calm")
-    throw new Error("Wrong arguments")
-  }
-
-  const network = args[0]
-  const name = args[1]
+export async function deploy(network: string, name: string) {
+  const { run } = require("hardhat")
 
   const deployConfigSchema = await $RefParser.dereference(getDeployConfigPath(name))
 
@@ -55,13 +45,30 @@ async function main() {
   const last = deployConfigs.at(-1)
 
   if (last.type !== "portfolio") {
-    console.log("Deploy: It looks like what we just deployed is not a portfolio. Skip investing $1.")
+    console.log("Deploy: It looks like what we just deployed is not a portfolio. Skip investing $1.\n")
     return
   }
 
   console.log("Deploy: Deposit $2 to and withdraw $1 from the top level portfolio.")
 
   await investOneDollar(last)
+
+  console.log()
+}
+
+async function main() {
+  const args = process.argv.slice(2)
+
+  if (args.length != 2) {
+    console.log("Deploy: Wrong arguments. The arguments must be network and contract type/name.")
+    console.log("Deploy: ts-node ./scripts/deploy.ts avax_mainnet portfolio/Calm")
+    throw new Error("Wrong arguments")
+  }
+
+  const network = args[0]
+  const name = args[1]
+
+  await deploy(network, name)
 }
 
 function parseSharedArgs(deployConfig: any): { [key: string]: string } {
@@ -138,29 +145,42 @@ function parseStrategyArgs(deployConfig: any): { [key: string]: string } {
 }
 
 async function investOneDollar(deployConfig: any): Promise<void> {
+  // Get an instance of HRE.
+  const { ethers } = require("hardhat")
+
+  // Get portfolio and its token.
   const portfolioLiveConfig = readLiveConfig(path.join("portfolio", deployConfig.name))
   const portfolio = await ethers.getContractAt(portfolioLiveConfig.name, portfolioLiveConfig.address)
   const portfolioToken = await ethers.getContractAt("InvestmentToken", await portfolio.getInvestmentToken())
 
+  // Get deployer account and USDC.
   const deployer = (await ethers.getSigners())[0]
   const usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.usdc)
 
+  // Deposit $2.
   const portfolioTokenBalanceBefore = await portfolioToken.balanceOf(deployer.address)
 
-  await usdc.approve(portfolio.address, ethers.utils.parseUnits("2", 6))
-  await portfolio.deposit(ethers.utils.parseUnits("2", 6), 0, deployer.address, [])
+  await usdc.connect(deployer).approve(portfolio.address, ethers.utils.parseUnits("2", 6))
+  await portfolio.connect(deployer).deposit(ethers.utils.parseUnits("2", 6), 0, deployer.address, [])
 
   const portfolioTokenBalanceAfter = await portfolioToken.balanceOf(deployer.address)
 
+  console.log(`Deploy: Successfully deposited $2 to ${portfolioLiveConfig.address}.`)
+
+  // Withdraw $1.
   const portfolioTokenBalance = portfolioTokenBalanceAfter - portfolioTokenBalanceBefore
 
-  await portfolioToken.approve(portfolio.address, portfolioTokenBalance / 2)
-  await portfolio.withdraw(portfolioTokenBalance / 2, 0, deployer.address, [])
+  await portfolioToken.connect(deployer).approve(portfolio.address, portfolioTokenBalance / 2)
+  await portfolio.connect(deployer).withdraw(portfolioTokenBalance / 2, 0, deployer.address, [])
+
+  console.log(`Deploy: Successfully withdrew $1 from ${portfolioLiveConfig.address}.`)
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error)
-    process.exit(1)
-  })
+if (require.main === module) {
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error)
+      process.exit(1)
+    })
+}

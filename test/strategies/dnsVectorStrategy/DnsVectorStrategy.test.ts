@@ -1,14 +1,10 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
-import Aave from "../../../constants/addresses/Aave.json"
-import Oracles from "../../../constants/Oracles.json"
-import SwapServices from "../../../constants/SwapServices.json"
 import Tokens from "../../../constants/addresses/Tokens.json"
-import TraderJoe from "../../../constants/addresses/TraderJoe.json"
 import Vector from "../../../constants/addresses/Vector.json"
-import { deployUUPSUpgradeableStrategyRoleable } from "../../../scripts/helper/contract"
-import { createRolesArray, getErrorRange } from "../../helper/utils"
+import { deployStrategy } from "../../../scripts/helper/contract"
+import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
 testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, "RoleableStrategyV2", [
@@ -402,53 +398,5 @@ function testAum() {
 }
 
 async function deployDnsStrategy() {
-  // Strategy owner.
-  const signers = await ethers.getSigners()
-  const owner = signers[0]
-
-  // Deploy strategy.
-  const strategy = await deployUUPSUpgradeableStrategyRoleable(
-    "DnsVectorStrategy",
-    {
-      name: "InvestmentToken",
-      symbol: "DnsToken",
-    },
-    {
-      depositToken: Tokens.usdc,
-      depositFee: { amount: 0, params: [] },
-      withdrawalFee: { amount: 0, params: [] },
-      performanceFee: { amount: 0, params: [] },
-      feeReceiver: { address: owner.address, params: [] },
-      investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
-      oracle: Oracles.aave,
-      swapService: SwapServices.traderjoe,
-      roleToUsers: createRolesArray(owner.address),
-    },
-    {
-      extraArgs: [
-        [
-          800, // safetyFactor
-          Tokens.usdc, // aaveSupplyToken
-          Tokens.aUsdc, // aAaveSupplyToken
-          Tokens.wAvax, // aaveBorrowToken
-          Tokens.vWavax, // vAaveBorrowToken
-          Tokens.usdc, // ammPairDepositToken
-          TraderJoe.joeToken, // Joe token
-          Aave.aavePool, // Aave pool
-          Aave.aaveProtocolDataProvider, // Aave protocol data provider
-          TraderJoe.router, // TraderJoe router
-          TraderJoe.usdcWAvaxLpToken, // TraderJeo pair (same as the LP token in TraderJoe's implementation)
-          Vector.poolHelperJoe, // Vector pool helper joe (call getPoolInfo on MainStaking: 0x0E25c07748f727D6CCcD7D2711fD7bD13d13422d)
-        ],
-      ],
-    },
-    {
-      libraries: [
-        { name: "DnsVectorStrategyAumLib", dependencies: [] },
-        { name: "DnsVectorStrategyInvestmentLib", dependencies: [] },
-      ],
-    }
-  )
-
-  return strategy
+  return await deployStrategy("DnsVector")
 }
