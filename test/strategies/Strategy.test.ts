@@ -41,7 +41,7 @@ export function testStrategy(
       // Get ERC20 tokens.
       this.usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.usdc)
 
-      // Signers.
+      // Users.
       this.signers = await ethers.getSigners()
       this.user0 = this.signers[1]
       this.user1 = this.signers[2]
@@ -50,7 +50,7 @@ export function testStrategy(
 
       // Airdrop signers.
       this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.usdc)
-      for (let i = 1; i <= this.userCount; i++) {
+      for (let i = 0; i <= this.userCount; i++) {
         await this.impersonatedSigner.sendTransaction({
           to: this.signers[i].address,
           value: ethers.utils.parseEther("100"),

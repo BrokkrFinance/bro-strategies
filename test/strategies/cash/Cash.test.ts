@@ -1,10 +1,7 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
-import Oracles from "../../../constants/Oracles.json"
-import SwapServices from "../../../constants/SwapServices.json"
-import Tokens from "../../../constants/addresses/Tokens.json"
-import { deployUUPSUpgradeableStrategyOwnable, upgradeStrategy } from "../../../scripts/helper/contract"
+import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
@@ -24,35 +21,7 @@ testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashW
 ])
 
 async function deployCashStrategy() {
-  // Strategy owner.
-  const signers = await ethers.getSigners()
-  const owner = signers[0]
-
-  // Deploy strategy.
-  const strategy = await deployUUPSUpgradeableStrategyOwnable(
-    "Cash",
-    owner.address,
-    {
-      name: "InvestmentToken",
-      symbol: "CashToken",
-    },
-    {
-      depositToken: Tokens.usdc,
-      depositFee: { amount: 0, params: [] },
-      withdrawalFee: { amount: 0, params: [] },
-      performanceFee: { amount: 0, params: [] },
-      feeReceiver: { address: owner.address, params: [] },
-      investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
-      oracle: Oracles.aave,
-      swapService: SwapServices.traderjoe,
-      roleToUsers: [],
-    },
-    {
-      extraArgs: [],
-    }
-  )
-
-  return strategy
+  return await deployStrategy("Cash")
 }
 
 async function upgradeCashWithStargateUsdcStrategy() {

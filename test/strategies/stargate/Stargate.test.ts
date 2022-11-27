@@ -2,98 +2,40 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import Tokens from "../../../constants/addresses/Tokens.json"
-import Oracles from "../../../constants/Oracles.json"
 import Stargate from "../../../constants/addresses/Stargate.json"
-import SwapServices from "../../../constants/SwapServices.json"
-import { deployUUPSUpgradeableStrategyOwnable, upgradeStrategy } from "../../../scripts/helper/contract"
+import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import StargateLPTokenABI from "../../helper/abi/StargateLPToken.json"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
 testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, "StargateV2", [
-  testStargateUsdcAum,
-  testStargateUsdcInitialize,
+  testStargateUSDCAum,
+  testStargateUSDCInitialize,
   testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "StargateV2", [
-  testStargateUsdtAum,
-  testStargateUsdtInitialize,
+  testStargateUSDTAum,
+  testStargateUSDTInitialize,
   testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "StargateV2", [
-  testStargateUsdcAum,
-  testStargateUsdcInitialize,
+  testStargateUSDCAum,
+  testStargateUSDCInitialize,
   testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "StargateV2", [
-  testStargateUsdtAum,
-  testStargateUsdtInitialize,
+  testStargateUSDTAum,
+  testStargateUSDTInitialize,
   testStrategyReapRewardExtra,
 ])
 
 async function deployStargateUSDCStrategy() {
-  // Strategy owner.
-  const signers = await ethers.getSigners()
-  const owner = signers[0]
-
-  // Deploy strategy.
-  const strategy = await deployUUPSUpgradeableStrategyOwnable(
-    "Stargate",
-    owner.address,
-    {
-      name: "InvestmentToken",
-      symbol: "StargateToken",
-    },
-    {
-      depositToken: Tokens.usdc,
-      depositFee: { amount: 0, params: [] },
-      withdrawalFee: { amount: 0, params: [] },
-      performanceFee: { amount: 0, params: [] },
-      feeReceiver: { address: owner.address, params: [] },
-      investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
-      oracle: Oracles.aave,
-      swapService: SwapServices.traderjoe,
-      roleToUsers: [],
-    },
-    {
-      extraArgs: [Stargate.router, Stargate.usdcPool, Stargate.lpStaking, Stargate.usdcLPToken, Stargate.stgToken],
-    }
-  )
-
-  return strategy
+  return await deployStrategy("StargateUSDC")
 }
 
 async function deployStargateUSDTStrategy() {
-  // Strategy owner.
-  const signers = await ethers.getSigners()
-  const owner = signers[0]
-
-  // Deploy strategy.
-  const strategy = await deployUUPSUpgradeableStrategyOwnable(
-    "Stargate",
-    owner.address,
-    {
-      name: "InvestmentToken",
-      symbol: "StargateToken",
-    },
-    {
-      depositToken: Tokens.usdc,
-      depositFee: { amount: 0, params: [] },
-      withdrawalFee: { amount: 0, params: [] },
-      performanceFee: { amount: 0, params: [] },
-      feeReceiver: { address: owner.address, params: [] },
-      investmentLimit: { total: BigInt(1e20), perAddress: BigInt(1e20) },
-      oracle: Oracles.aave,
-      swapService: SwapServices.traderjoe,
-      roleToUsers: [],
-    },
-    {
-      extraArgs: [Stargate.router, Stargate.usdtPool, Stargate.lpStaking, Stargate.usdtLPToken, Stargate.stgToken],
-    }
-  )
-
-  return strategy
+  return await deployStrategy("StargateUSDT")
 }
 
 async function upgradeStargateUSDCStrategy() {
@@ -104,7 +46,7 @@ async function upgradeStargateUSDTStrategy() {
   return await upgradeStrategy("StargateUSDT")
 }
 
-function testStargateUsdcAum() {
+function testStargateUSDCAum() {
   describe("AUM - Stargate USDC Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
       const assetBalancesBefore = await this.strategy.getAssetBalances()
@@ -250,7 +192,7 @@ function testStargateUsdcAum() {
   })
 }
 
-function testStargateUsdcInitialize() {
+function testStargateUSDCInitialize() {
   describe("Initialize - Stargate USDC Strategy Specific", async function () {
     it("should fail when passed wrong LP token address", async function () {
       const Strategy = await ethers.getContractFactory("Stargate")
@@ -290,7 +232,7 @@ function testStargateUsdcInitialize() {
   })
 }
 
-function testStargateUsdtAum() {
+function testStargateUSDTAum() {
   describe("AUM - Stargate USDT Strategy Specific", async function () {
     it("should succeed after a single deposit", async function () {
       const assetBalancesBefore = await this.strategy.getAssetBalances()
@@ -436,7 +378,7 @@ function testStargateUsdtAum() {
   })
 }
 
-function testStargateUsdtInitialize() {
+function testStargateUSDTInitialize() {
   describe("Initialize - Stargate USDT Strategy Specific", async function () {
     it("should fail when passed wrong LP token address", async function () {
       const Strategy = await ethers.getContractFactory("Stargate")

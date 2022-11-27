@@ -1,6 +1,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { Contract, ContractFactory } from "ethers"
 import path from "path"
+import { deploy } from "../deploy"
 import { LiveConfig, UpgradeConfig } from "../interfaces/configs"
 import {
   InvestmentTokenArgs,
@@ -169,6 +170,7 @@ async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any
   // Get an instance of HRE.
   const { upgrades } = require("hardhat")
 
+  // Deploy investable.
   const contract = await upgrades.deployProxy(factory, args, {
     kind: "uups",
     unsafeAllow: ["external-library-linking"],
@@ -176,6 +178,27 @@ async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any
   await contract.deployed()
 
   return contract
+}
+
+export async function deployPortfolio(name: string): Promise<Contract> {
+  return await deployInvestable(path.join("portfolio", name))
+}
+
+export async function deployStrategy(name: string): Promise<Contract> {
+  return await deployInvestable(path.join("strategy", name))
+}
+
+async function deployInvestable(name: string): Promise<Contract> {
+  // Get an instance of HRE.
+  const { ethers, network } = require("hardhat")
+
+  // Deploy the given investable and its all relevant investables.
+  await deploy(network.name, name)
+
+  // Return the given investable contract.
+  const liveConfig: LiveConfig = readLiveConfig(name)
+
+  return await ethers.getContractAt(liveConfig.name, liveConfig.address)
 }
 
 export async function upgradePortfolio(name: string): Promise<Contract> {
@@ -190,6 +213,7 @@ async function upgradeInvestable(name: string): Promise<Contract> {
   // Get an instance of HRE.
   const { ethers, upgrades } = require("hardhat")
 
+  // Upgrade the given investable and its all relevant investables.
   const liveConfig: LiveConfig = readLiveConfig(name)
   const upgradeConfigs: UpgradeConfig[] = readUpgradeConfig(name)
 
@@ -204,16 +228,17 @@ async function upgradeInvestable(name: string): Promise<Contract> {
     await newImplementation.deployed()
   }
 
+  // Return the given investable contract.
   return await ethers.getContractAt(liveConfig.name, liveConfig.address)
 }
 
 export async function verifyContract(address: string): Promise<void> {
-  const hre = require("hardhat")
+  const { run } = require("hardhat")
 
   console.log(`Verify: Verify a contract at ${address}`)
 
   try {
-    await hre.run("verify", { address })
+    await run("verify", { address })
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "Contract source code already verified") {
       console.log("Verify: The contract is already verified.")
