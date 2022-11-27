@@ -7,27 +7,7 @@ export function testPortfolioUpgradeable() {
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.portfolio.address)
 
       const NewPortfolio = await ethers.getContractFactory(this.upgradeTo, this.owner)
-      const newPortfolio = await upgrades.upgradeProxy(this.portfolio.address, NewPortfolio, {
-        call: {
-          fn: "initialize",
-          args: [
-            [
-              this.investmentToken.address,
-              this.usdc.address,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-            ],
-          ],
-        },
-      })
+      const newPortfolio = await upgrades.upgradeProxy(this.portfolio.address, NewPortfolio)
       await newPortfolio.deployed()
 
       const addr_after_upgrade = await upgrades.erc1967.getImplementationAddress(this.portfolio.address)
@@ -41,27 +21,7 @@ export function testPortfolioUpgradeable() {
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.portfolio.address)
 
       const NewPortfolio = await ethers.getContractFactory(this.upgradeTo, this.owner)
-      const newPortfolio = await upgrades.upgradeProxy(this.portfolio.address, NewPortfolio, {
-        call: {
-          fn: "initialize",
-          args: [
-            [
-              this.investmentToken.address,
-              this.usdc.address,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-            ],
-          ],
-        },
-      })
+      const newPortfolio = await upgrades.upgradeProxy(this.portfolio.address, NewPortfolio)
       await newPortfolio.deployed()
 
       const addr_after_upgrade = await upgrades.erc1967.getImplementationAddress(this.portfolio.address)
@@ -71,29 +31,7 @@ export function testPortfolioUpgradeable() {
 
     it("should fail when the non-owner user upgrades", async function () {
       const NewPortfolio = await ethers.getContractFactory(this.upgradeTo, this.user0)
-      await expect(
-        upgrades.upgradeProxy(this.portfolio.address, NewPortfolio, {
-          call: {
-            fn: "initialize",
-            args: [
-              [
-                this.investmentToken.address,
-                this.usdc.address,
-                this.depositFee,
-                this.depositFeeParams,
-                this.withdrawalFee,
-                this.withdrawalFeeParams,
-                this.performanceFee,
-                this.performanceFeeParams,
-                this.feeReceiver,
-                this.feeReceiverParams,
-                this.totalInvestmentLimit,
-                this.investmentLimitPerAddress,
-              ],
-            ],
-          },
-        })
-      ).to.be.reverted
+      await expect(upgrades.upgradeProxy(this.portfolio.address, NewPortfolio)).to.be.reverted
     })
 
     it("should succeed to leave all common state variables' value intact", async function () {
@@ -126,27 +64,7 @@ export function testPortfolioUpgradeable() {
       // IReward has no getter.
 
       const NewPortfolio = await ethers.getContractFactory(this.upgradeTo, this.owner)
-      const newPortfolio = await upgrades.upgradeProxy(this.portfolio.address, NewPortfolio, {
-        call: {
-          fn: "initialize",
-          args: [
-            [
-              this.investmentToken.address,
-              this.usdc.address,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-            ],
-          ],
-        },
-      })
+      const newPortfolio = await upgrades.upgradeProxy(this.portfolio.address, NewPortfolio)
       await newPortfolio.deployed()
 
       // IAum.

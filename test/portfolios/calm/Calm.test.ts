@@ -13,11 +13,9 @@ import {
 import { InvestmentTokenArgs, PortfolioArgs, StrategyArgs } from "../../../scripts/interfaces/parameters"
 import { testPortfolio } from "../Portfolio.test"
 
-testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, "PercentageAllocationV2", [
-  testCalmPortfolioUpgradeable,
-])
+testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, "PercentageAllocationV2", [testCalmPortfolioAum])
 testPortfolio("Calm Portfolio - Upgrade After Deploy", upgradeCalmPortfolio, "PercentageAllocationV2", [
-  testCalmPortfolioUpgradeable,
+  testCalmPortfolioAum,
 ])
 
 async function deployCalmPortfolio() {
@@ -149,44 +147,21 @@ async function upgradeCalmPortfolio() {
   return await upgradePortfolio("Calm")
 }
 
-function testCalmPortfolioUpgradeable() {
-  describe("Upgradeable - PercentageAllocation Portfolio Specific", async function () {
-    it("should succeed to leave all portfolio specific state variables' value intact", async function () {
-      // IAum.
+function testCalmPortfolioAum() {
+  describe("AUM - PercentageAllocation Portfolio Specific", async function () {
+    it("should succeed after upgrade", async function () {
       const assetBalancesBefore = await this.portfolio.getAssetBalances()
       const assetValuationsBefore = await this.portfolio.getAssetValuations(true, false)
       const equityValuationBefore = await this.portfolio.getEquityValuation(true, false)
 
       const PortfolioV2 = await ethers.getContractFactory("PercentageAllocationV2", this.owner)
-      const portfolioV2 = await upgrades.upgradeProxy(this.portfolio.address, PortfolioV2, {
-        call: {
-          fn: "initialize",
-          args: [
-            [
-              this.investmentToken.address,
-              Tokens.usdc,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-            ],
-          ],
-        },
-      })
+      const portfolioV2 = await upgrades.upgradeProxy(this.portfolio.address, PortfolioV2)
       await portfolioV2.deployed()
 
-      // IAum.
       const assetBalancesAfter = await this.portfolio.getAssetBalances()
       const assetValuationsAfter = await this.portfolio.getAssetValuations(true, false)
       const equityValuationAfter = await this.portfolio.getEquityValuation(true, false)
 
-      // IAum.
       expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
       expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
 
@@ -198,13 +173,6 @@ function testCalmPortfolioUpgradeable() {
       expect(await this.portfolio.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
-
-      // IInvestable.
-      expect(await this.portfolio.trackingName()).to.equal(
-        "brokkr.percentage_allocation_portfolio.percentage_allocation_portfolio_v2.0.0"
-      )
-      expect(await this.portfolio.humanReadableName()).to.equal("Percentage allocation portfolio")
-      expect(await this.portfolio.version()).to.equal("2.0.0")
     })
   })
 }

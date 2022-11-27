@@ -14,25 +14,21 @@ import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, "StargateV2", [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
-  testStargateUsdcUpgradeable,
   testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "StargateV2", [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
-  testStargateUsdtUpgradeable,
   testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "StargateV2", [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
-  testStargateUsdcUpgradeable,
   testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "StargateV2", [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
-  testStargateUsdtUpgradeable,
   testStrategyReapRewardExtra,
 ])
 
@@ -225,6 +221,32 @@ function testStargateUsdcAum() {
         getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
       )
     })
+
+    it("should succeed after upgrade", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
+      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
+
+      const StargateV2 = await ethers.getContractFactory("StargateV2", this.owner)
+      const stargateV2 = await upgrades.upgradeProxy(this.strategy.address, StargateV2)
+      await stargateV2.deployed()
+
+      const assetBalancesAfter = await this.strategy.getAssetBalances()
+      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
+      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
+
+      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
+      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
+
+      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
+
+      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
+      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
+
+      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
+
+      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
+    })
   })
 }
 
@@ -264,73 +286,6 @@ function testStargateUsdcInitialize() {
           { kind: "uups" }
         )
       ).to.be.revertedWithCustomError(this.strategy, "InvalidStargateLpToken")
-    })
-  })
-}
-
-function testStargateUsdcUpgradeable() {
-  describe("Upgradeable - Stargate USDC Strategy Specific", async function () {
-    it("should succeed to leave all strategy specific state variables' value intact", async function () {
-      // IAum.
-      const assetBalancesBefore = await this.strategy.getAssetBalances()
-      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
-      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
-
-      const StargateV2 = await ethers.getContractFactory("StargateV2", this.owner)
-      const stargateV2 = await upgrades.upgradeProxy(this.strategy.address, StargateV2, {
-        call: {
-          fn: "initialize",
-          args: [
-            [
-              this.investmentToken.address,
-              Tokens.usdc,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-              this.priceOracle,
-              this.swapServiceProvider,
-              this.swapServiceRouter,
-              [],
-            ],
-            Stargate.router,
-            Stargate.usdcPool,
-            Stargate.lpStaking,
-            Stargate.usdcLPToken,
-            Stargate.stgToken,
-          ],
-        },
-      })
-      await stargateV2.deployed()
-
-      // IAum.
-      const assetBalancesAfter = await this.strategy.getAssetBalances()
-      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
-
-      // IAum.
-      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
-      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
-
-      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
-
-      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
-      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
-
-      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
-
-      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
-
-      // IInvestable.
-      expect(await this.strategy.trackingName()).to.equal("brokkr.stargate_strategy.stargate_strategy_v2.0.0")
-      expect(await this.strategy.humanReadableName()).to.equal("Stargate Strategy")
-      expect(await this.strategy.version()).to.equal("2.0.0")
     })
   })
 }
@@ -452,6 +407,32 @@ function testStargateUsdtAum() {
         getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
       )
     })
+
+    it("should succeed after upgrade", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
+      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
+
+      const StargateV2 = await ethers.getContractFactory("StargateV2", this.owner)
+      const stargateV2 = await upgrades.upgradeProxy(this.strategy.address, StargateV2)
+      await stargateV2.deployed()
+
+      const assetBalancesAfter = await this.strategy.getAssetBalances()
+      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
+      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
+
+      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
+      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
+
+      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
+
+      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
+      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
+
+      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
+
+      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
+    })
   })
 }
 
@@ -491,73 +472,6 @@ function testStargateUsdtInitialize() {
           { kind: "uups" }
         )
       ).to.be.revertedWithCustomError(this.strategy, "InvalidStargateLpToken")
-    })
-  })
-}
-
-function testStargateUsdtUpgradeable() {
-  describe("Upgradeable - Stargate USDT Strategy Specific", async function () {
-    it("should succeed to leave all strategy specific state variables' value intact", async function () {
-      // IAum.
-      const assetBalancesBefore = await this.strategy.getAssetBalances()
-      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
-      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
-
-      const StargateV2 = await ethers.getContractFactory("StargateV2", this.owner)
-      const stargateV2 = await upgrades.upgradeProxy(this.strategy.address, StargateV2, {
-        call: {
-          fn: "initialize",
-          args: [
-            [
-              this.investmentToken.address,
-              Tokens.usdc,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-              this.priceOracle,
-              this.swapServiceProvider,
-              this.swapServiceRouter,
-              [],
-            ],
-            Stargate.router,
-            Stargate.usdtPool,
-            Stargate.lpStaking,
-            Stargate.usdtLPToken,
-            Stargate.stgToken,
-          ],
-        },
-      })
-      await stargateV2.deployed()
-
-      // IAum.
-      const assetBalancesAfter = await this.strategy.getAssetBalances()
-      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
-
-      // IAum.
-      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
-      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
-
-      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
-
-      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
-      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
-
-      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
-
-      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
-
-      // IInvestable.
-      expect(await this.strategy.trackingName()).to.equal("brokkr.stargate_strategy.stargate_strategy_v2.0.0")
-      expect(await this.strategy.humanReadableName()).to.equal("Stargate Strategy")
-      expect(await this.strategy.version()).to.equal("2.0.0")
     })
   })
 }

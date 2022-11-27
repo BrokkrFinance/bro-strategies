@@ -9,29 +9,19 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Cash Strategy - Deploy", deployCashStrategy, "CashV2", [
+testStrategy("Cash Strategy - Deploy", deployCashStrategy, "CashV2", [testCashAum, testStrategyReapRewardExtra])
+testStrategy("Cash with Stargate USDC Strategy - Upgrade After Deploy", upgradeCashWithStargateUsdcStrategy, "CashV2", [
   testCashAum,
-  testCashUpgradeable,
   testStrategyReapRewardExtra,
 ])
-testStrategy(
-  "Cash with Stargate USDC Strategy - Upgrade After Deploy",
-  upgradeCashWithStargateUsdcStrategy,
-  "CashV2",
-  [testCashAum, testCashUpgradeable, testStrategyReapRewardExtra]
-)
-testStrategy(
-  "Cash with Stargate USDT Strategy - Upgrade After Deploy",
-  upgradeCashWithStargateUsdtStrategy,
-  "CashV2",
-  [testCashAum, testCashUpgradeable, testStrategyReapRewardExtra]
-)
-testStrategy(
-  "Cash with TraderJoe Strategy - Upgrade After Deploy",
-  upgradeCashWithTraderJoeStrategy,
-  "CashV2",
-  [testCashAum, testCashUpgradeable, testStrategyReapRewardExtra]
-)
+testStrategy("Cash with Stargate USDT Strategy - Upgrade After Deploy", upgradeCashWithStargateUsdtStrategy, "CashV2", [
+  testCashAum,
+  testStrategyReapRewardExtra,
+])
+testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, "CashV2", [
+  testCashAum,
+  testStrategyReapRewardExtra,
+])
 
 async function deployCashStrategy() {
   // Strategy owner.
@@ -184,51 +174,20 @@ function testCashAum() {
         getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
       )
     })
-  })
-}
 
-function testCashUpgradeable() {
-  describe("Upgradeable - Cash Strategy Specific", async function () {
-    it("should succeed to leave all strategy specific state variables' value intact", async function () {
-      // IAum.
+    it("should succeed after upgrade", async function () {
       const assetBalancesBefore = await this.strategy.getAssetBalances()
       const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
       const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
 
       const CashV2 = await ethers.getContractFactory("CashV2", this.owner)
-      const cashV2 = await upgrades.upgradeProxy(this.strategy.address, CashV2, {
-        call: {
-          fn: "initialize",
-          args: [
-            [
-              this.investmentToken.address,
-              this.usdc.address,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-              this.priceOracle,
-              this.swapServiceProvider,
-              this.swapServiceRouter,
-              [],
-            ],
-          ],
-        },
-      })
+      const cashV2 = await upgrades.upgradeProxy(this.strategy.address, CashV2)
       await cashV2.deployed()
 
-      // IAum.
       const assetBalancesAfter = await this.strategy.getAssetBalances()
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
       const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
 
-      // IAum.
       expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
       expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
 
@@ -240,11 +199,6 @@ function testCashUpgradeable() {
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
-
-      // IInvestable.
-      expect(await this.strategy.trackingName()).to.equal("brokkr.cash_strategy.cash_strategy_initial")
-      expect(await this.strategy.humanReadableName()).to.equal("Cash strategy")
-      expect(await this.strategy.version()).to.equal("2.0.0")
     })
   })
 }
