@@ -1,44 +1,80 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
+import "../../strategies/cash/CashStorageLib.sol";
+import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract OwnableStrategyV2 is
-    UUPSUpgradeable,
-    StrategyOwnablePausableBaseUpgradeable
-{
+contract CashV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.test_strategy.<insert git label here>";
+        "brokkr.cash_strategy.cash_strategy_v2.0.0";
     // solhint-disable-next-line const-name-snakecase
-    string public constant humanReadableName = "OwnableStrategyV2";
+    string public constant humanReadableName = "Cash strategy";
     // solhint-disable-next-line const-name-snakecase
     string public constant version = "2.0.0";
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(StrategyArgs calldata strategyArgs)
         external
-        reinitializer(2)
+        initializer
     {
+        __UUPSUpgradeable_init();
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function _deposit(uint256, NameValuePair[] calldata)
+    function _deposit(uint256 amount, NameValuePair[] calldata)
         internal
         virtual
         override
     {}
 
-    function _withdraw(uint256, NameValuePair[] calldata)
+    function _beforeWithdraw(uint256, NameValuePair[] calldata)
+        internal
+        virtual
+        override
+        returns (uint256)
+    {
+        return 0;
+    }
+
+    function _withdraw(uint256 amount, NameValuePair[] calldata)
         internal
         virtual
         override
     {}
 
-    function _reapReward(NameValuePair[] calldata) internal virtual override {}
+    function _afterWithdraw(uint256, NameValuePair[] calldata)
+        internal
+        virtual
+        override
+        returns (uint256)
+    {
+        return 0;
+    }
+
+    function _reapReward(NameValuePair[] calldata params)
+        internal
+        virtual
+        override
+    {}
+
+    function processReward(NameValuePair[] calldata, NameValuePair[] calldata)
+        external
+        virtual
+        override
+        nonReentrant
+    {
+        emit RewardProcess(0);
+        emit Deposit(address(this), address(0), 0);
+    }
 
     function _getAssetBalances()
         internal

@@ -9,7 +9,7 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Cash Strategy - Deploy", deployCashStrategy, "OwnableStrategyV2", [
+testStrategy("Cash Strategy - Deploy", deployCashStrategy, "CashV2", [
   testCashAum,
   testCashUpgradeable,
   testStrategyReapRewardExtra,
@@ -17,19 +17,19 @@ testStrategy("Cash Strategy - Deploy", deployCashStrategy, "OwnableStrategyV2", 
 testStrategy(
   "Cash with Stargate USDC Strategy - Upgrade After Deploy",
   upgradeCashWithStargateUsdcStrategy,
-  "OwnableStrategyV2",
+  "CashV2",
   [testCashAum, testCashUpgradeable, testStrategyReapRewardExtra]
 )
 testStrategy(
   "Cash with Stargate USDT Strategy - Upgrade After Deploy",
   upgradeCashWithStargateUsdtStrategy,
-  "OwnableStrategyV2",
+  "CashV2",
   [testCashAum, testCashUpgradeable, testStrategyReapRewardExtra]
 )
 testStrategy(
   "Cash with TraderJoe Strategy - Upgrade After Deploy",
   upgradeCashWithTraderJoeStrategy,
-  "OwnableStrategyV2",
+  "CashV2",
   [testCashAum, testCashUpgradeable, testStrategyReapRewardExtra]
 )
 
