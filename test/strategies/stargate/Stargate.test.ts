@@ -11,25 +11,25 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, "OwnableStrategyV2", [
+testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, "StargateV2", [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
   testStargateUsdcUpgradeable,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "OwnableStrategyV2", [
+testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "StargateV2", [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
   testStargateUsdtUpgradeable,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "OwnableStrategyV2", [
+testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "StargateV2", [
   testStargateUsdcAum,
   testStargateUsdcInitialize,
   testStargateUsdcUpgradeable,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "OwnableStrategyV2", [
+testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "StargateV2", [
   testStargateUsdtAum,
   testStargateUsdtInitialize,
   testStargateUsdtUpgradeable,

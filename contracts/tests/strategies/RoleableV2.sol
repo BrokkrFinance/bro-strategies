@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "../common/bases/StrategyRoleablePausableBaseUpgradeable.sol";
+import "../../common/bases/StrategyRoleablePausableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -11,7 +11,7 @@ contract RoleableStrategyV2 is
 {
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.test_strategy.<insert git label here>";
+        "brokkr.test_strategy.roleable_strategy_v2.0.0";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "RoleableStrategyV2";
     // solhint-disable-next-line const-name-snakecase

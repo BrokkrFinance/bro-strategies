@@ -13,8 +13,10 @@ import {
 import { InvestmentTokenArgs, PortfolioArgs, StrategyArgs } from "../../../scripts/interfaces/parameters"
 import { testPortfolio } from "../Portfolio.test"
 
-testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, "PortfolioV2", [testCalmPortfolioUpgradeable])
-testPortfolio("Calm Portfolio - Upgrade After Deploy", upgradeCalmPortfolio, "PortfolioV2", [
+testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, "PercentageAllocationV2", [
+  testCalmPortfolioUpgradeable,
+])
+testPortfolio("Calm Portfolio - Upgrade After Deploy", upgradeCalmPortfolio, "PercentageAllocationV2", [
   testCalmPortfolioUpgradeable,
 ])
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "../../../common/bases/PortfolioOwnablePausableBaseUpgradeable.sol";
+import "../../common/bases/PortfolioOwnablePausableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -25,7 +25,7 @@ contract PercentageAllocationV2 is
 
     function initialize(PortfolioArgs calldata portfolioArgs)
         external
-        reinitializer(2)
+        initializer
     {
         __PortfolioOwnablePausableBaseUpgradeable_init(portfolioArgs);
     }

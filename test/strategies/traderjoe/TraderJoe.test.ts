@@ -12,20 +12,25 @@ import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 import { testStrategyReapUninvestedReward } from "../StrategyReapUninvestedReward.test"
 
-testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, "OwnableStrategyV2", [
+testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, "TraderJoeV2", [
   testTraderJoeAum,
   testTraderJoeInitialize,
   testTraderJoeUpgradeable,
   testStrategyReapUninvestedReward,
   testStrategyReapRewardExtra,
 ])
-testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, "OwnableStrategyV2", [
-  testTraderJoeAum,
-  testTraderJoeInitialize,
-  testTraderJoeUpgradeable,
-  testStrategyReapUninvestedReward,
-  testStrategyReapRewardExtra,
-])
+testStrategy(
+  "TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy",
+  upgradeTraderJoeStrategy,
+  "TraderJoeV2",
+  [
+    testTraderJoeAum,
+    testTraderJoeInitialize,
+    testTraderJoeUpgradeable,
+    testStrategyReapUninvestedReward,
+    testStrategyReapRewardExtra,
+  ]
+)
 
 async function deployTraderJoeStrategy() {
   // Strategy owner.
