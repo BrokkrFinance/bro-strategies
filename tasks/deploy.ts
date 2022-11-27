@@ -22,10 +22,11 @@ import {
 import { RoleToUsers } from "../scripts/interfaces/role-to-users"
 
 task("deploy", "Deploy an investable contract")
+  .addParam("targetNetwork", "A network to deploy")
   .addParam("type", "A type of investable such as portfolio or strategy")
   .addParam("subtype", "A type of strategy such as ownable or roleable")
   .addParam("name", "A unique name of an investable such as StargateUSDC")
-  .addParam("owner", "An address of owner")
+  .addOptionalParam("owner", "An address of owner")
   .addParam("contractName", "A name of investable")
   .addParam("investmentTokenName", "A name of investment token")
   .addParam("investmentTokenSymbol", "A symbol of investment token")
@@ -55,9 +56,16 @@ task("deploy", "Deploy an investable contract")
   .addOptionalParam("libraryDependencies", "A list of library dependencies")
   .addOptionalParam("investables", "A list of portfolio's investables")
   .addOptionalParam("allocations", "A list of portfolio's allocations")
-  .setAction(async (taskArgs) => {
-    console.log(`Deploy: Deploy ${taskArgs.name} ${taskArgs.type}.`)
+  .setAction(async (taskArgs, hre) => {
+    console.log(`Deploy: Deploy ${taskArgs.name} ${taskArgs.type} on ${taskArgs.targetNetwork}.`)
 
+    // Store previous network.
+    const previousNetwork = hre.network.name
+
+    // Switch to target network.
+    await hre.changeNetwork(taskArgs.targetNetwork)
+
+    // Deploy an investable contract.
     let investable: Contract
 
     if (taskArgs.type === "portfolio") {
@@ -99,10 +107,11 @@ task("deploy", "Deploy an investable contract")
 
     console.log(`Deploy: ${taskArgs.name} ${taskArgs.type} is deployed at ${investable.address}`)
 
+    // Write live config file.
     const name = path.join(taskArgs.type, taskArgs.name)
 
     writeLiveConfig(name, {
-      name: taskArgs.name,
+      name: taskArgs.contractName,
       address: investable.address,
       owner: taskArgs.owner,
     })
@@ -111,7 +120,11 @@ task("deploy", "Deploy an investable contract")
 
     console.log("Deploy: Verify the new contract.\n")
 
+    // Verify contract.
     await verifyContract(investable.address)
+
+    // Switch back to the previous network.
+    await hre.changeNetwork(previousNetwork)
 
     console.log()
   })
