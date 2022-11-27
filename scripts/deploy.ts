@@ -1,6 +1,5 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser"
-import { execSync } from "child_process"
-import { ethers } from "hardhat"
+import { ethers, run } from "hardhat"
 import path from "path"
 import Tokens from "../constants/addresses/Tokens.json"
 import { getDeployConfigPath, readLiveConfig } from "./helper/paths"
@@ -30,12 +29,12 @@ async function main() {
   const deployConfigs = JSON.parse(JSON.stringify(deployConfigSchema.properties))
 
   for (let deployConfig of deployConfigs) {
-    let deployArgs = parseSharedArgs(deployConfig)
+    let deployArgs: { [key: string]: string } = Object.assign({ targetNetwork: network }, parseSharedArgs(deployConfig))
 
     if (deployConfig.type === "portfolio") {
-      deployArgs += parsePortfolioArgs(deployConfig)
+      deployArgs = Object.assign(deployArgs, parsePortfolioArgs(deployConfig))
     } else if (deployConfig.type === "strategy") {
-      deployArgs += parseStrategyArgs(deployConfig)
+      deployArgs = Object.assign(deployArgs, parseStrategyArgs(deployConfig))
     } else {
       console.log("Deploy: The config file must define 'type' key and value of 'portfolio' or 'strategy'.")
       throw new Error("Wrong config file")
@@ -43,9 +42,7 @@ async function main() {
 
     while (true) {
       try {
-        execSync(`npx hardhat --network ${network} deploy ${deployArgs}`, {
-          stdio: "inherit",
-        })
+        await run("deploy", deployArgs)
         break
       } catch (e: unknown) {
         console.log(`\n${e}\n`)
@@ -67,65 +64,77 @@ async function main() {
   await investOneDollar(last)
 }
 
-function parseSharedArgs(deployConfig: any): string {
-  return ` \
-  --type ${deployConfig.type} \
-  --subtype ${deployConfig.subtype} \
-  --name ${deployConfig.name} \
-  --owner ${deployConfig.owner} \
-  --contract-name ${deployConfig.contractName} \
-  --investment-token-name "${deployConfig.investmentTokenName}" \
-  --investment-token-symbol ${deployConfig.investmentTokenSymbol} \
-  --deposit-token ${deployConfig.depositToken} \
-  --deposit-fee ${deployConfig.depositFee} \
-  --deposit-fee-param-keys ${JSON.stringify(
-    deployConfig.depositFeeParams.map((depositFeeParam: NameValuePair) => depositFeeParam.key)
-  )} \
-  --deposit-fee-param-values ${JSON.stringify(
-    deployConfig.depositFeeParams.map((depositFeeParam: NameValuePair) => depositFeeParam.value)
-  )} \
-  --withdrawal-fee ${deployConfig.withdrawalFee} \
-  --withdrawal-fee-param-keys ${JSON.stringify(
-    deployConfig.withdrawalFeeParams.map((withdrawalFeeParam: NameValuePair) => withdrawalFeeParam.key)
-  )} \
-  --withdrawal-fee-param-values ${JSON.stringify(
-    deployConfig.withdrawalFeeParams.map((withdrawalFeeParam: NameValuePair) => withdrawalFeeParam.value)
-  )} \
-  --performance-fee ${deployConfig.performanceFee} \
-  --performance-fee-param-keys ${JSON.stringify(
-    deployConfig.performanceFeeParams.map((performanceFeeParam: NameValuePair) => performanceFeeParam.key)
-  )} \
-  --performance-fee-param-values ${JSON.stringify(
-    deployConfig.performanceFeeParams.map((performanceFeeParam: NameValuePair) => performanceFeeParam.value)
-  )} \
-  --fee-receiver ${deployConfig.feeReceiver} \
-  --fee-receiver-param-keys ${JSON.stringify(
-    deployConfig.feeReceiverParams.map((feeReceiverParam: NameValuePair) => feeReceiverParam.key)
-  )} \
-  --fee-receiver-param-values ${JSON.stringify(
-    deployConfig.feeReceiverParams.map((feeReceiverParam: NameValuePair) => feeReceiverParam.value)
-  )} \
-  --total-investment-limit ${deployConfig.totalInvestmentLimit} \
-  --investment-limit-per-address ${deployConfig.investmentLimitPerAddress} \
-  --extra-args ${JSON.stringify(deployConfig.extraArgs)}`
+function parseSharedArgs(deployConfig: any): { [key: string]: string } {
+  return {
+    type: deployConfig.type,
+    subtype: deployConfig.subtype,
+    name: deployConfig.name,
+    owner: deployConfig.owner,
+    contractName: deployConfig.contractName,
+    investmentTokenName: deployConfig.investmentTokenName,
+    investmentTokenSymbol: deployConfig.investmentTokenSymbol,
+    depositToken: deployConfig.depositToken,
+    depositFee: JSON.stringify(deployConfig.depositFee),
+    depositFeeParamKeys: JSON.stringify(
+      deployConfig.depositFeeParams.map((depositFeeParam: NameValuePair) => depositFeeParam.key)
+    ).replace(/["]/g, ""),
+    depositFeeParamValues: JSON.stringify(
+      deployConfig.depositFeeParams.map((depositFeeParam: NameValuePair) => depositFeeParam.value)
+    ).replace(/["]/g, ""),
+    withdrawalFee: JSON.stringify(deployConfig.withdrawalFee),
+    withdrawalFeeParamKeys: JSON.stringify(
+      deployConfig.withdrawalFeeParams.map((withdrawalFeeParam: NameValuePair) => withdrawalFeeParam.key)
+    ).replace(/["]/g, ""),
+    withdrawalFeeParamValues: JSON.stringify(
+      deployConfig.withdrawalFeeParams.map((withdrawalFeeParam: NameValuePair) => withdrawalFeeParam.value)
+    ).replace(/["]/g, ""),
+    performanceFee: JSON.stringify(deployConfig.performanceFee),
+    performanceFeeParamKeys: JSON.stringify(
+      deployConfig.performanceFeeParams.map((performanceFeeParam: NameValuePair) => performanceFeeParam.key)
+    ).replace(/["]/g, ""),
+    performanceFeeParamValues: JSON.stringify(
+      deployConfig.performanceFeeParams.map((performanceFeeParam: NameValuePair) => performanceFeeParam.value)
+    ).replace(/["]/g, ""),
+    feeReceiver: deployConfig.feeReceiver,
+    feeReceiverParamKeys: JSON.stringify(
+      deployConfig.feeReceiverParams.map((feeReceiverParam: NameValuePair) => feeReceiverParam.key)
+    ).replace(/["]/g, ""),
+    feeReceiverParamValues: JSON.stringify(
+      deployConfig.feeReceiverParams.map((feeReceiverParam: NameValuePair) => feeReceiverParam.value)
+    ).replace(/["]/g, ""),
+    totalInvestmentLimit: JSON.stringify(deployConfig.totalInvestmentLimit),
+    investmentLimitPerAddress: JSON.stringify(deployConfig.investmentLimitPerAddress),
+    extraArgs: JSON.stringify(deployConfig.extraArgs).replace(/["]/g, ""),
+  }
 }
 
-function parsePortfolioArgs(deployConfig: any): string {
-  return ` \
-  --investables ${JSON.stringify(deployConfig.investables)} \
-  --allocations ${JSON.stringify(deployConfig.allocations)}`
+function parsePortfolioArgs(deployConfig: any): { [key: string]: string } {
+  return {
+    investables: JSON.stringify(deployConfig.investables).replace(/["]/g, ""),
+    allocations: JSON.stringify(deployConfig.allocations),
+  }
 }
 
-function parseStrategyArgs(deployConfig: any): string {
-  return ` \
-  --oracle-name ${deployConfig.oracle.name} \
-  --oracle-address ${deployConfig.oracle.address} \
-  --swap-service-provider ${deployConfig.swapService.provider} \
-  --swap-service-router ${deployConfig.swapService.router} \
-  --roles ${JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.role))} \
-  --users ${JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.users))} \
-  --library-names ${JSON.stringify(deployConfig.libraries.map((library: Library) => library.name))} \
-  --library-dependencies ${JSON.stringify(deployConfig.libraries.map((library: Library) => library.dependencies))}`
+function parseStrategyArgs(deployConfig: any): { [key: string]: string } {
+  return {
+    oracleName: deployConfig.oracle.name,
+    oracleAddress: deployConfig.oracle.address,
+    swapServiceProvider: JSON.stringify(deployConfig.swapService.provider),
+    swapServiceRouter: deployConfig.swapService.router,
+    roles: JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.role)).replace(
+      /["]/g,
+      ""
+    ),
+    users: JSON.stringify(deployConfig.roleToUsers.map((roleToUser: RoleToUsers) => roleToUser.users)).replace(
+      /["]/g,
+      ""
+    ),
+    libraryNames: JSON.stringify(deployConfig.libraries.map((library: Library) => library.name)).replace(/["]/g, ""),
+    libraryDependencies: JSON.stringify(deployConfig.libraries.map((library: Library) => library.dependencies)).replace(
+      /["]/g,
+      ""
+    ),
+  }
 }
 
 async function investOneDollar(deployConfig: any): Promise<void> {

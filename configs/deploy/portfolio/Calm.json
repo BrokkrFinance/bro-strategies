@@ -58,6 +58,7 @@
     },
     {
       "type": "portfolio",
+      "subtype": "ownable",
       "name": "WrapperStargateUSDC",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "PercentageAllocation",
@@ -136,6 +137,7 @@
     },
     {
       "type": "portfolio",
+      "subtype": "ownable",
       "name": "WrapperStargateUSDT",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "PercentageAllocation",
@@ -213,6 +215,7 @@
     },
     {
       "type": "portfolio",
+      "subtype": "ownable",
       "name": "WrapperTraderJoe",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "PercentageAllocation",
@@ -235,6 +238,7 @@
     },
     {
       "type": "portfolio",
+      "subtype": "ownable",
       "name": "Calm",
       "owner": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "PercentageAllocation",
