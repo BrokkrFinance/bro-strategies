@@ -15,22 +15,15 @@ import { testStrategyReapUninvestedReward } from "../StrategyReapUninvestedRewar
 testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, "TraderJoeV2", [
   testTraderJoeAum,
   testTraderJoeInitialize,
-  testTraderJoeUpgradeable,
   testStrategyReapUninvestedReward,
   testStrategyReapRewardExtra,
 ])
-testStrategy(
-  "TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy",
-  upgradeTraderJoeStrategy,
-  "TraderJoeV2",
-  [
-    testTraderJoeAum,
-    testTraderJoeInitialize,
-    testTraderJoeUpgradeable,
-    testStrategyReapUninvestedReward,
-    testStrategyReapRewardExtra,
-  ]
-)
+testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, "TraderJoeV2", [
+  testTraderJoeAum,
+  testTraderJoeInitialize,
+  testStrategyReapUninvestedReward,
+  testStrategyReapRewardExtra,
+])
 
 async function deployTraderJoeStrategy() {
   // Strategy owner.
@@ -185,6 +178,32 @@ function testTraderJoeAum() {
         getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
       )
     })
+
+    it("should succeed after upgrade", async function () {
+      const assetBalancesBefore = await this.strategy.getAssetBalances()
+      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
+      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
+
+      const TraderJoeV2 = await ethers.getContractFactory("TraderJoeV2", this.owner)
+      const traderJoeV2 = await upgrades.upgradeProxy(this.strategy.address, TraderJoeV2)
+      await traderJoeV2.deployed()
+
+      const assetBalancesAfter = await this.strategy.getAssetBalances()
+      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
+      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
+
+      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
+      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
+
+      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
+
+      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
+      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
+
+      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
+
+      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
+    })
   })
 }
 
@@ -223,72 +242,6 @@ function testTraderJoeInitialize() {
           { kind: "uups" }
         )
       ).to.be.reverted
-    })
-  })
-}
-
-function testTraderJoeUpgradeable() {
-  describe("Upgradeable - TraderJoe Strategy Specific", async function () {
-    it("should succeed to leave all strategy specific state variables' value intact", async function () {
-      // IAum.
-      const assetBalancesBefore = await this.strategy.getAssetBalances()
-      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
-      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
-
-      const TraderJoeV2 = await ethers.getContractFactory("TraderJoeV2", this.owner)
-      const traderJoeV2 = await upgrades.upgradeProxy(this.strategy.address, TraderJoeV2, {
-        call: {
-          fn: "initialize",
-          args: [
-            [
-              this.investmentToken.address,
-              Tokens.usdc,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-              this.priceOracle,
-              this.swapServiceProvider,
-              this.swapServiceRouter,
-              [],
-            ],
-            TraderJoe.router,
-            TraderJoe.masterChef,
-            TraderJoe.lpToken,
-            TraderJoe.joeToken,
-          ],
-        },
-      })
-      await traderJoeV2.deployed()
-
-      // IAum.
-      const assetBalancesAfter = await this.strategy.getAssetBalances()
-      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
-
-      // IAum.
-      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
-      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
-
-      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
-
-      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
-      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
-
-      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
-
-      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
-
-      // IInvestable.
-      expect(await this.strategy.trackingName()).to.equal("brokkr.traderjoe_strategy.traderjoe_strategy_v2.0.0")
-      expect(await this.strategy.humanReadableName()).to.equal("TraderJoe Strategy")
-      expect(await this.strategy.version()).to.equal("2.0.0")
     })
   })
 }
