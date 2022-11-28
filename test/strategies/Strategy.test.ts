@@ -67,13 +67,33 @@ export function testStrategy(
       // Portfolio upgradeability test to.
       this.upgradeTo = upgradeTo
 
-      // Strategy owner.
-      // TODO: Each role must be handled seperately.
+      // Strategy owner and role members.
       const isRoleable = await this.strategy.supportsInterface("0x5A05180F") // IAccessControlEnumerableUpgradeable
-      const ownerAddr = isRoleable
-        ? await this.strategy.getRoleMember(AccessControlRoles.admin, 0)
-        : await this.strategy.owner()
+      if (isRoleable) {
+        const ownerAddr = await this.strategy.getRoleMember(AccessControlRoles.admin, 0)
+        this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+
+        const adminMemberAddr = await this.strategy.getRoleMember(AccessControlRoles.admin, 0)
+        this.adminMember = await ethers.getImpersonatedSigner(adminMemberAddr)
+
+        const governorMemberAddr = await this.strategy.getRoleMember(AccessControlRoles.governor, 0)
+        this.governorMember = await ethers.getImpersonatedSigner(governorMemberAddr)
+
+        const strategistMemberAddr = await this.strategy.getRoleMember(AccessControlRoles.strategist, 0)
+        this.strategistMember = await ethers.getImpersonatedSigner(strategistMemberAddr)
+
+        const maintainerMemberAddr = await this.strategy.getRoleMember(AccessControlRoles.maintainer, 0)
+        this.maintainerMember = await ethers.getImpersonatedSigner(maintainerMemberAddr)
+
+        const upgradeMemberAddr = await this.strategy.getRoleMember(AccessControlRoles.upgrade, 0)
+        this.upgradeMember = await ethers.getImpersonatedSigner(upgradeMemberAddr)
+
+        const pauseMemberAddr = await this.strategy.getRoleMember(AccessControlRoles.pause, 0)
+        this.pauseMember = await ethers.getImpersonatedSigner(pauseMemberAddr)
+      } else {
+        const ownerAddr = await this.strategy.owner()
       this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+      }
 
       // Strategy token.
       const investmentTokenAddr = await this.strategy.getInvestmentToken()
