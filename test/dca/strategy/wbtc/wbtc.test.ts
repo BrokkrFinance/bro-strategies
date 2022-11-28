@@ -2,9 +2,8 @@ import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
-import { TokenAddrs } from "../../../helper/addresses"
-import { deployUUPSUpgradeableContract, getTokenContract } from "../../../helper/contracts"
-import { SwapServices } from "../../../helper/swaps"
+import { deployUUPSUpgradeableContract } from "../../../../scripts/helper/contract"
+import { CoinAddrs, getTokenContract } from "../../../../scripts/helper/helper"
 import { currentBlockchainTime, testDcaStrategy } from "../shared"
 
 testDcaStrategy("WBTC DCA Strategy", deployWBTCDcaStrategy, [testWbtcDca])
@@ -16,16 +15,16 @@ async function deployWBTCDcaStrategy() {
     [
       [signers[1].address, 1000],
       signers[2].address,
-      [TokenAddrs.usdc, 6],
+      [CoinAddrs.usdc, 6],
       86400,
       (await currentBlockchainTime(ethers.provider)) + 86400,
       1000000,
       52,
-      [SwapServices.traderjoe.provider, SwapServices.traderjoe.router],
-      [TokenAddrs.usdc, TokenAddrs.btc],
-      [TokenAddrs.btc, TokenAddrs.usdc],
+      [0, "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"],
+      [CoinAddrs.usdc, CoinAddrs.btc],
+      [CoinAddrs.btc, CoinAddrs.usdc],
     ],
-    [TokenAddrs.btc, 8],
+    [CoinAddrs.btc, 8],
     [
       "0x39dE4e02F76Dbd4352Ec2c926D8d64Db8aBdf5b2",
       "0xfF6934aAC9C94E1C39358D4fDCF70aeca77D0AB0",
@@ -154,7 +153,7 @@ async function testWbtcDca() {
       expect(await this.strategy.bluechipInvestmentState()).to.equal(0)
 
       await this.strategy.withdrawBluechipFromPool()
-      this.btc = await getTokenContract(TokenAddrs.btc)
+      this.btc = await getTokenContract(CoinAddrs.btc)
       expect(await this.btc.balanceOf(this.strategy.address)).to.equal(totalExchangedBluechip)
       expect(await this.strategy.bluechipInvestmentState()).to.equal(1)
 
@@ -165,7 +164,7 @@ async function testWbtcDca() {
     })
 
     it("should allow to withdraw user deposits", async function () {
-      this.btc = await getTokenContract(TokenAddrs.btc)
+      this.btc = await getTokenContract(CoinAddrs.btc)
 
       let usdcBalanceBefore = await this.usdc.balanceOf(this.user3.address)
       let wbtcBalanceBefore = await this.btc.balanceOf(this.user3.address)
@@ -255,7 +254,7 @@ async function testWbtcDca() {
     })
 
     it("should properly calculate user bluechip asset share", async function () {
-      this.btc = await getTokenContract(TokenAddrs.btc)
+      this.btc = await getTokenContract(CoinAddrs.btc)
 
       await mine(86401)
 
@@ -293,12 +292,12 @@ async function testWbtcDca() {
     })
 
     it("should properly withdraw user funds on emergency exit", async function () {
-      this.btc = await getTokenContract(TokenAddrs.btc)
-      this.usdt = await getTokenContract(TokenAddrs.usdt)
-      this.eth = await getTokenContract(TokenAddrs.eth)
+      this.btc = await getTokenContract(CoinAddrs.btc)
+      this.usdt = await getTokenContract(CoinAddrs.usdt)
+      this.eth = await getTokenContract(CoinAddrs.eth)
 
-      const emergencyDepositSwapPath = [TokenAddrs.usdc, TokenAddrs.usdt]
-      const emergencyBluechipSwapPath = [TokenAddrs.btc, TokenAddrs.eth]
+      const emergencyDepositSwapPath = [CoinAddrs.usdc, CoinAddrs.usdt]
+      const emergencyBluechipSwapPath = [CoinAddrs.btc, CoinAddrs.eth]
 
       await mine(86401)
 
@@ -318,9 +317,9 @@ async function testWbtcDca() {
 
       // swap usdc -> usdt; btc -> eth
       await this.strategy.emergencyWithdrawFunds(
-        [TokenAddrs.usdt, 6],
+        [CoinAddrs.usdt, 6],
         emergencyDepositSwapPath,
-        [TokenAddrs.eth, 18],
+        [CoinAddrs.eth, 18],
         emergencyBluechipSwapPath
       )
 
