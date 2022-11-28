@@ -1,42 +1,42 @@
 [
-    {
-        "proxy": "0x2eAf73F8E6BCf606f56E5cf201756C1f0565C068",
-        "newImplementation": "PercentageAllocation"
-    },
-    {
-        "proxy": "0x69C8367bfe0DD9B26284617353B58319241A6763",
-        "newImplementation": "PercentageAllocation"
-    },
-    {
-        "proxy": "0x72126b4d9dd23093D54F94A64D7831D101ba13d5",
-        "newImplementation": "Stargate"
-    },
-    {
-        "proxy": "0xcc23fa2a377Ea6F43E34A8c43d08DC428B647a81",
-        "newImplementation": "Cash"
-    },
-    {
-        "proxy": "0x8f723a11C674cab9BA4C71Bb5df3c519Eea0fD0a",
-        "newImplementation": "PercentageAllocation"
-    },
-    {
-        "proxy": "0xc802921c1557C96e6ba40CfD219e8F825BD34D84",
-        "newImplementation": "Stargate"
-    },
-    {
-        "proxy": "0x01e1Db5bEAbDA37396Cf7178248B8f202437385c",
-        "newImplementation": "Cash"
-    },
-    {
-        "proxy": "0xe203647cC2b89860735aE191F13DE44749Cd37C8",
-        "newImplementation": "PercentageAllocation"
-    },
-    {
-        "proxy": "0xec4042d20FCC06aBb52363f2e7f6be5396Ec79B5",
-        "newImplementation": "TraderJoe"
-    },
-    {
-        "proxy": "0x217711F828D44Ba4d9055974DCE17bF1Aec42746",
-        "newImplementation": "Cash"
-    }
+  {
+    "proxy": "0x2eAf73F8E6BCf606f56E5cf201756C1f0565C068",
+    "newImplementation": "PercentageAllocation"
+  },
+  {
+    "proxy": "0x69C8367bfe0DD9B26284617353B58319241A6763",
+    "newImplementation": "PercentageAllocation"
+  },
+  {
+    "proxy": "0x72126b4d9dd23093D54F94A64D7831D101ba13d5",
+    "newImplementation": "Stargate"
+  },
+  {
+    "proxy": "0xcc23fa2a377Ea6F43E34A8c43d08DC428B647a81",
+    "newImplementation": "Cash"
+  },
+  {
+    "proxy": "0x8f723a11C674cab9BA4C71Bb5df3c519Eea0fD0a",
+    "newImplementation": "PercentageAllocation"
+  },
+  {
+    "proxy": "0xc802921c1557C96e6ba40CfD219e8F825BD34D84",
+    "newImplementation": "Stargate"
+  },
+  {
+    "proxy": "0x01e1Db5bEAbDA37396Cf7178248B8f202437385c",
+    "newImplementation": "Cash"
+  },
+  {
+    "proxy": "0xe203647cC2b89860735aE191F13DE44749Cd37C8",
+    "newImplementation": "PercentageAllocation"
+  },
+  {
+    "proxy": "0xec4042d20FCC06aBb52363f2e7f6be5396Ec79B5",
+    "newImplementation": "TraderJoe"
+  },
+  {
+    "proxy": "0x217711F828D44Ba4d9055974DCE17bF1Aec42746",
+    "newImplementation": "Cash"
+  }
 ]
