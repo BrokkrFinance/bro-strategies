@@ -1,8 +1,8 @@
 import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import type * as ethersTypes from "ethers"
 import { ethers, network } from "hardhat"
-import { TokenAddrs, WhaleAddrs } from "../../helper/addresses"
-import { getTokenContract } from "../../helper/contracts"
+import { CoinAddrs, getTokenContract } from "../../../scripts/helper/helper"
+import { WhaleAddrs } from "../../helper/addresses"
 
 export function testDcaStrategy(description: string, deployStrategy: Function, strategySpecificTests: (() => any)[]) {
   describe(description, function () {
@@ -23,7 +23,7 @@ export function testDcaStrategy(description: string, deployStrategy: Function, s
       })
 
       // Get ERC20 tokens.
-      this.usdc = await getTokenContract(TokenAddrs.usdc)
+      this.usdc = await getTokenContract(CoinAddrs.usdc)
 
       // Signers.
       this.signers = await ethers.getSigners()

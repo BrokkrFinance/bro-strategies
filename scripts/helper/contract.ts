@@ -7,8 +7,8 @@ import {
   PortfolioArgs,
   PortfolioExtraArgs,
   StrategyArgs,
-  StrategyLibraries,
   StrategyExtraArgs,
+  StrategyLibraries,
 } from "../interfaces/parameters"
 import { readLiveConfig, readUpgradeConfig } from "./paths"
 
@@ -165,7 +165,7 @@ async function deployUUPSUpgradeableStrategy(
   return strategy
 }
 
-async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {
+export async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {
   // Get an instance of HRE.
   const { upgrades } = require("hardhat")
 
