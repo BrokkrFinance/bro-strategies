@@ -1,8 +1,9 @@
-import { execSync } from "child_process"
 import { UpgradeConfig } from "./interfaces/configs"
 import { readUpgradeConfig } from "./helper/paths"
 
 async function main() {
+  const { run } = require("hardhat")
+
   const args = process.argv.slice(2)
 
   if (args.length != 3) {
@@ -20,21 +21,22 @@ async function main() {
   const upgradeConfigs: UpgradeConfig[] = readUpgradeConfig(name)
 
   for (let upgradeConfig of upgradeConfigs) {
-    execSync(
-      `npx hardhat --network ${network} upgrade \
-      --proxy ${upgradeConfig.proxy} \
-      --new-implementation ${upgradeConfig.newImplementation} \
-      --multisig ${multisig}`,
-      {
-        stdio: "inherit",
-      }
-    )
+    const upgradeArgs: { [key: string]: string } = {
+      targetNetwork: network,
+      proxy: upgradeConfig.proxy,
+      newImplementation: upgradeConfig.newImplementation,
+      multisig: multisig,
+    }
+
+    await run("upgrade", upgradeArgs)
   }
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error)
-    process.exit(1)
-  })
+if (require.main === module) {
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error)
+      process.exit(1)
+    })
+}
