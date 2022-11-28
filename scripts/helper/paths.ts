@@ -1,3 +1,4 @@
+import { execSync } from "child_process"
 import { readFileSync, writeFileSync } from "fs"
 import path from "path"
 import { LiveConfig, UpgradeConfig } from "../interfaces/configs"
@@ -27,7 +28,10 @@ export function readUpgradeConfig(name: string): UpgradeConfig[] {
 }
 
 export function writeLiveConfig(name: string, liveConfig: LiveConfig): void {
-  writeFileSync(getLiveConfigPath(name), JSON.stringify(liveConfig), {
+  const path = getLiveConfigPath(name)
+
+  writeFileSync(path, JSON.stringify(liveConfig), {
     encoding: "utf-8",
   })
+  execSync(`npx prettier --write '${path}'`)
 }
