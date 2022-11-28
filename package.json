@@ -67,7 +67,7 @@
     "test:localhost": "hardhat test --config ./hardhat.config.ts --network localhost",
     "profile": "REPORT_GAS=true hardhat test",
     "precoverage": "cp .openzeppelin/avalanche.json .openzeppelin/unknown-31337.json",
-    "coverage": "hardhat coverage --config ./hardhat-coverage.config.ts --solcoverjs ./.solcover.js",
+    "coverage": "hardhat coverage --config ./hardhat.config.ts --solcoverjs ./.solcover.js",
     "lint:fix": "prettier --write '**.sol' && prettier --write '**.js' && prettier --write '**.ts' && prettier --check '**.json'",
     "lint:check": "prettier --check '**.sol' && prettier --check '**.js' && prettier --check '**.ts' && prettier --check '**.json' && hardhat compile && npx solhint --config ./.solhint.json --ignore-path ./.solhintignore 'contracts/**/*.sol'",
     "prepare": "husky install",
