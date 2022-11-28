@@ -4697,9 +4697,7 @@
           },
           "t_enum(SwapServiceProvider)15874": {
             "label": "enum SwapServiceProvider",
-            "members": [
-              "TraderJoe"
-            ],
+            "members": ["TraderJoe"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -5093,9 +5091,7 @@
           },
           "t_enum(SwapServiceProvider)15874": {
             "label": "enum SwapServiceProvider",
-            "members": [
-              "TraderJoe"
-            ],
+            "members": ["TraderJoe"],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)15880_storage": {
