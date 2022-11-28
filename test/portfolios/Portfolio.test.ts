@@ -1,6 +1,7 @@
 import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import Tokens from "../../constants/addresses/Tokens.json"
+import blockNumber from "../../constants/BlockNumber.json"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
 import { WhaleAddrs } from "../helper/addresses"
 import { InvestHelper } from "../helper/invest"
@@ -13,6 +14,7 @@ import { testPortfolioPausable } from "./PortfolioPausable.test"
 import { testPortfolioRebalance } from "./PortfolioRebalance.test"
 import { testPortfolioUpgradeable } from "./PortfolioUpgradeable.test"
 import { testPortfolioWithdraw } from "./PortfolioWithdraw.test"
+import { execSync } from "child_process"
 import { Contract } from "ethers"
 
 export function testPortfolio(
@@ -32,7 +34,7 @@ export function testPortfolio(
             forking: {
               jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
               enabled: true,
-              blockNumber: 21777750,
+              blockNumber: blockNumber.forkAt,
             },
           },
         ],
@@ -125,10 +127,14 @@ export function testPortfolio(
     }
 
     after(async function () {
+      // Reset network.
       await network.provider.request({
         method: "hardhat_reset",
         params: [],
       })
+
+      // Reset configs.
+      execSync("git checkout -- ./configs && git clean -fd ./configs")
     })
   })
 }
