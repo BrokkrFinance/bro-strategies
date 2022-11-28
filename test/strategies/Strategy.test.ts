@@ -2,6 +2,7 @@ import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import AccessControlRoles from "../../constants/AccessControlRoles.json"
 import Tokens from "../../constants/addresses/Tokens.json"
+import blockNumber from "../../constants/BlockNumber.json"
 import { WhaleAddrs } from "../helper/addresses"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
 import { InvestHelper } from "../helper/invest"
@@ -14,6 +15,7 @@ import { testStrategyReapReward } from "./StrategyReapReward.test"
 import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 import { Contract } from "ethers"
+import { execSync } from "child_process"
 
 export function testStrategy(
   description: string,
@@ -32,7 +34,7 @@ export function testStrategy(
             forking: {
               jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
               enabled: true,
-              blockNumber: 21777750,
+              blockNumber: blockNumber.forkAt,
             },
           },
         ],
@@ -92,7 +94,7 @@ export function testStrategy(
         this.pauseMember = await ethers.getImpersonatedSigner(pauseMemberAddr)
       } else {
         const ownerAddr = await this.strategy.owner()
-      this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+        this.owner = await ethers.getImpersonatedSigner(ownerAddr)
       }
 
       // Strategy token.
@@ -141,6 +143,7 @@ export function testStrategy(
     })
 
     beforeEach(async function () {
+      // Restore snapshot.
       await this.snapshot.restore()
     })
 
@@ -158,10 +161,14 @@ export function testStrategy(
     }
 
     after(async function () {
+      // Reset network.
       await network.provider.request({
         method: "hardhat_reset",
         params: [],
       })
+
+      // Reset configs.
+      execSync("git checkout -- ./configs && git clean -fd ./configs")
     })
   })
 }
