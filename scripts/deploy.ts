@@ -168,10 +168,10 @@ async function investOneDollar(deployConfig: any): Promise<void> {
   console.log(`Deploy: Successfully deposited $2 to ${portfolioLiveConfig.address}.`)
 
   // Withdraw $1.
-  const portfolioTokenBalance = portfolioTokenBalanceAfter - portfolioTokenBalanceBefore
+  const portfolioTokenBalance = ethers.BigNumber.from(portfolioTokenBalanceAfter - portfolioTokenBalanceBefore)
 
-  await portfolioToken.connect(deployer).approve(portfolio.address, portfolioTokenBalance / 2)
-  await portfolio.connect(deployer).withdraw(portfolioTokenBalance / 2, 0, deployer.address, [])
+  await portfolioToken.connect(deployer).approve(portfolio.address, portfolioTokenBalance.div(2))
+  await portfolio.connect(deployer).withdraw(portfolioTokenBalance.div(2), 0, deployer.address, [])
 
   console.log(`Deploy: Successfully withdrew $1 from ${portfolioLiveConfig.address}.`)
 }
