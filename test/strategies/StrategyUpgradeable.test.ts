@@ -1,6 +1,5 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
-import { createRolesArray } from "../helper/utils"
 
 export function testStrategyUpgradeable() {
   describe("Upgradeable", async function () {
