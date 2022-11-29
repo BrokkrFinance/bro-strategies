@@ -61,7 +61,7 @@ async function main() {
 
   if (args.length != 2) {
     console.log("Deploy: Wrong arguments. The arguments must be network and contract type/name.")
-    console.log("Deploy: ts-node ./scripts/deploy.ts avax_mainnet portfolio/Calm")
+    console.log("Deploy: ts-node ./scripts/deploy.ts avalanche portfolio/Calm")
     throw new Error("Wrong arguments")
   }
 
