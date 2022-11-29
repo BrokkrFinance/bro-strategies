@@ -168,7 +168,7 @@ export function testStrategy(
       })
 
       // Reset configs.
-      execSync("git checkout -- ./configs && git clean -fd ./configs")
+      execSync("git checkout -- ./configs && git clean -fd ./configs", { stdio: "inherit" })
     })
   })
 }

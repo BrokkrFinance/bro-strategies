@@ -1,4 +1,5 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser"
+import { execSync } from "child_process"
 import path from "path"
 import Tokens from "../constants/addresses/Tokens.json"
 import { getDeployConfigPath, readLiveConfig } from "./helper/paths"
@@ -57,6 +58,8 @@ export async function deploy(network: string, name: string) {
 }
 
 async function main() {
+  execSync("yarn hardhat clean && yarn compile", { stdio: "inherit" })
+
   const args = process.argv.slice(2)
 
   if (args.length != 2) {
