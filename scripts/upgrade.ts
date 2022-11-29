@@ -31,6 +31,11 @@ async function main() {
       multisig: multisig,
     }
 
+    if (upgradeConfig.functionName !== undefined && upgradeConfig.functionArgs !== undefined) {
+      upgradeArgs["functionName"] = upgradeConfig.functionName
+      upgradeArgs["functionArgs"] = JSON.stringify(upgradeConfig.functionArgs).replace(/["]/g, "")
+    }
+
     await run("upgrade", upgradeArgs)
   }
 }
