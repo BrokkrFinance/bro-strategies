@@ -7,4 +7,6 @@ export interface LiveConfig {
 export interface UpgradeConfig {
   proxy: string
   newImplementation: string
+  functionName?: string
+  functionArgs?: any[]
 }
