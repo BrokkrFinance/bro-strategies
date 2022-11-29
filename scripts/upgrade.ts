@@ -1,8 +1,11 @@
+import { execSync } from "child_process"
 import { UpgradeConfig } from "./interfaces/configs"
 import { readUpgradeConfig } from "./helper/paths"
 
 async function main() {
   const { run } = require("hardhat")
+
+  execSync("yarn hardhat clean && yarn compile", { stdio: "inherit" })
 
   const args = process.argv.slice(2)
 
