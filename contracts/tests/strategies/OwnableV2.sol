@@ -5,7 +5,7 @@ import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract Ownable is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
+contract OwnableV2 is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
         "brokkr.test_strategy.ownable_strategy_v2.0.0";
