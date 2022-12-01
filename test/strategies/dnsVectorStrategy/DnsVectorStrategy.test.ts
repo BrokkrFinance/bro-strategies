@@ -7,7 +7,7 @@ import { deployStrategy } from "../../../scripts/helper/contract"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, "RoleableStrategyV2", [
+testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, "RoleableV2", [
   testAum,
   testCollaterizationAndDeltaNeutrality,
   testRebalanceSafetyLimits,
