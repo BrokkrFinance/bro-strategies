@@ -5,7 +5,7 @@ import "../../common/bases/StrategyRoleablePausableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract RoleableStrategyV2 is
+contract RoleableV2 is
     UUPSUpgradeable,
     StrategyRoleablePausableBaseUpgradeable
 {
@@ -13,16 +13,19 @@ contract RoleableStrategyV2 is
     string public constant trackingName =
         "brokkr.test_strategy.roleable_strategy_v2.0.0";
     // solhint-disable-next-line const-name-snakecase
-    string public constant humanReadableName = "RoleableStrategyV2";
+    string public constant humanReadableName = "Roleable Strategy V2";
     // solhint-disable-next-line const-name-snakecase
     string public constant version = "2.0.0";
 
     function initialize(StrategyArgs calldata strategyArgs)
         external
-        reinitializer(2)
+        initializer
     {
+        __UUPSUpgradeable_init();
         __StrategyRoleablePausableBaseUpgradeable_init(strategyArgs);
     }
+
+    function reinitialize() external reinitializer(2) {}
 
     function _authorizeUpgrade(address)
         internal

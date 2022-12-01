@@ -10,13 +10,13 @@ import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 import { testStrategyReapUninvestedReward } from "../StrategyReapUninvestedReward.test"
 
-testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, "TraderJoeV2", [
+testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, "OwnableV2", [
   testTraderJoeAum,
   testTraderJoeInitialize,
   testStrategyReapUninvestedReward,
   testStrategyReapRewardExtra,
 ])
-testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, "TraderJoeV2", [
+testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, "OwnableV2", [
   testTraderJoeAum,
   testTraderJoeInitialize,
   testStrategyReapUninvestedReward,
@@ -147,32 +147,6 @@ function testTraderJoeAum() {
         ethers.utils.parseUnits("50", 6).add(this.equityValuation),
         getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
       )
-    })
-
-    it("should succeed after upgrade", async function () {
-      const assetBalancesBefore = await this.strategy.getAssetBalances()
-      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
-      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
-
-      const TraderJoeV2 = await ethers.getContractFactory("TraderJoeV2", this.owner)
-      const traderJoeV2 = await upgrades.upgradeProxy(this.strategy.address, TraderJoeV2)
-      await traderJoeV2.deployed()
-
-      const assetBalancesAfter = await this.strategy.getAssetBalances()
-      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
-
-      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
-      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
-
-      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
-
-      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
-      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
-
-      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
-
-      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
     })
   })
 }
