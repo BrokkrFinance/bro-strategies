@@ -9,22 +9,22 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, "StargateV2", [
+testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, "OwnableV2", [
   testStargateUSDCAum,
   testStargateUSDCInitialize,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "StargateV2", [
+testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "OwnableV2", [
   testStargateUSDTAum,
   testStargateUSDTInitialize,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "StargateV2", [
+testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "OwnableV2", [
   testStargateUSDCAum,
   testStargateUSDCInitialize,
   testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "StargateV2", [
+testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "OwnableV2", [
   testStargateUSDTAum,
   testStargateUSDTInitialize,
   testStrategyReapRewardExtra,
@@ -162,32 +162,6 @@ function testStargateUSDCAum() {
         ethers.utils.parseUnits("50", 6).add(this.equityValuation),
         getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
       )
-    })
-
-    it("should succeed after upgrade", async function () {
-      const assetBalancesBefore = await this.strategy.getAssetBalances()
-      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
-      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
-
-      const StargateV2 = await ethers.getContractFactory("StargateV2", this.owner)
-      const stargateV2 = await upgrades.upgradeProxy(this.strategy.address, StargateV2)
-      await stargateV2.deployed()
-
-      const assetBalancesAfter = await this.strategy.getAssetBalances()
-      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
-
-      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
-      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
-
-      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
-
-      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
-      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
-
-      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
-
-      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
     })
   })
 }
@@ -348,32 +322,6 @@ function testStargateUSDTAum() {
         ethers.utils.parseUnits("50", 6).add(this.equityValuation),
         getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
       )
-    })
-
-    it("should succeed after upgrade", async function () {
-      const assetBalancesBefore = await this.strategy.getAssetBalances()
-      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
-      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
-
-      const StargateV2 = await ethers.getContractFactory("StargateV2", this.owner)
-      const stargateV2 = await upgrades.upgradeProxy(this.strategy.address, StargateV2)
-      await stargateV2.deployed()
-
-      const assetBalancesAfter = await this.strategy.getAssetBalances()
-      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
-
-      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
-      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
-
-      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
-
-      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
-      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
-
-      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
-
-      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
     })
   })
 }

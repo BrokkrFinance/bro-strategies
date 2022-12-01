@@ -6,16 +6,20 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Cash Strategy - Deploy", deployCashStrategy, "CashV2", [testCashAum, testStrategyReapRewardExtra])
-testStrategy("Cash with Stargate USDC Strategy - Upgrade After Deploy", upgradeCashWithStargateUsdcStrategy, "CashV2", [
-  testCashAum,
-  testStrategyReapRewardExtra,
-])
-testStrategy("Cash with Stargate USDT Strategy - Upgrade After Deploy", upgradeCashWithStargateUsdtStrategy, "CashV2", [
-  testCashAum,
-  testStrategyReapRewardExtra,
-])
-testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, "CashV2", [
+testStrategy("Cash Strategy - Deploy", deployCashStrategy, "OwnableV2", [testCashAum, testStrategyReapRewardExtra])
+testStrategy(
+  "Cash with Stargate USDC Strategy - Upgrade After Deploy",
+  upgradeCashWithStargateUsdcStrategy,
+  "OwnableV2",
+  [testCashAum, testStrategyReapRewardExtra]
+)
+testStrategy(
+  "Cash with Stargate USDT Strategy - Upgrade After Deploy",
+  upgradeCashWithStargateUsdtStrategy,
+  "OwnableV2",
+  [testCashAum, testStrategyReapRewardExtra]
+)
+testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, "OwnableV2", [
   testCashAum,
   testStrategyReapRewardExtra,
 ])
@@ -142,32 +146,6 @@ function testCashAum() {
         ethers.utils.parseUnits("50", 6).add(this.equityValuation),
         getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
       )
-    })
-
-    it("should succeed after upgrade", async function () {
-      const assetBalancesBefore = await this.strategy.getAssetBalances()
-      const assetValuationsBefore = await this.strategy.getAssetValuations(true, false)
-      const equityValuationBefore = await this.strategy.getEquityValuation(true, false)
-
-      const CashV2 = await ethers.getContractFactory("CashV2", this.owner)
-      const cashV2 = await upgrades.upgradeProxy(this.strategy.address, CashV2)
-      await cashV2.deployed()
-
-      const assetBalancesAfter = await this.strategy.getAssetBalances()
-      const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      const equityValuationAfter = await this.strategy.getEquityValuation(true, false)
-
-      expect(assetBalancesBefore[0].asset).to.equal(assetBalancesAfter[0].asset)
-      expect(assetBalancesBefore[0].balance).to.equal(assetBalancesAfter[0].balance)
-
-      expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
-
-      expect(assetValuationsBefore[0].asset).to.equal(assetValuationsAfter[0].asset)
-      expect(assetValuationsBefore[0].valuation).to.equal(assetValuationsAfter[0].valuation)
-
-      expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
-
-      expect(equityValuationBefore.eq(equityValuationAfter)).to.equal(true)
     })
   })
 }
