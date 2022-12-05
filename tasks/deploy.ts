@@ -129,6 +129,13 @@ task("deploy", "Deploy an investable contract")
     console.log()
   })
 
+const REGEX_GET_SUBSTRING_WITHIN_BRACKET: RegExp = /(?<=\[)(.*?)(?=\])/g // "[0, 1], [2, 3], [4]" -> ["0, 1", "2, 3", "4"]
+const REGEX_TOKENIZE_BY_BRACKET: RegExp = /,(?![^[]*\])/g // "0, 1, [2, 3], 4" -> ["0", "1", "[2, 3]", "4"]
+
+function isDecimal(arg: any): boolean {
+  return !Number.isNaN(Number(arg)) && Number(arg).toString(10) === arg
+}
+
 function parseInvestmentTokenArgs(taskArgs: any): InvestmentTokenArgs {
   return {
     name: taskArgs.investmentTokenName,
@@ -231,20 +238,34 @@ function parseParams(stringfiedKeys: string, stringfiedValues: string): NameValu
   return params
 }
 
-function parseExtraArgs(stringfiedArgs: string): string[] | string[][] {
+function parseExtraArgs(stringfiedArgs: string): any[] {
   if (stringfiedArgs === "[]") {
     return []
   }
 
-  let extraArgs: string[] | string[][]
+  let extraArgs: any[]
+  let isNested: boolean
 
   if (stringfiedArgs.startsWith("[[") === true && stringfiedArgs.endsWith("]]") === true) {
-    extraArgs = [stringfiedArgs.slice(2, -2).split(",")]
+    extraArgs = stringfiedArgs.slice(2, -2).split(REGEX_TOKENIZE_BY_BRACKET)
+    isNested = true
   } else {
-    extraArgs = stringfiedArgs.slice(1, -1).split(",")
+    extraArgs = stringfiedArgs.slice(1, -1).split(REGEX_TOKENIZE_BY_BRACKET)
+    isNested = false
   }
 
-  return extraArgs
+  for (let i = 0; i < extraArgs.length; i++) {
+    if (extraArgs[i].startsWith("[") && extraArgs[i].endsWith("]")) {
+      extraArgs[i] = extraArgs[i]
+        .slice(1, -1)
+        .split(",")
+        .map((arg: string): string | number => {
+          return isDecimal(arg) ? Number(arg) : arg
+        })
+    }
+  }
+
+  return isNested ? [extraArgs] : extraArgs
 }
 
 function parseInvestables(stringfiedInvestables: string): string[] {
@@ -271,7 +292,7 @@ function parseAllocations(stringfiedAllocations: string): number[][] {
 
   const allocations = stringfiedAllocations
     .slice(1, -1)
-    .match(/(?<=\[)(.*?)(?=\])/g)!
+    .match(REGEX_GET_SUBSTRING_WITHIN_BRACKET)!
     .map((allocations: string): number[] => {
       return allocations.split(",").map((allocation: string): number => Number(allocation))
     })
@@ -287,7 +308,7 @@ function parseRoleToUsers(stringfiedRoles: string, stringfiedUsers: string): Rol
   const roles: string[] = stringfiedRoles.slice(1, -1).split(",")
   const users = stringfiedUsers
     .slice(1, -1)
-    .match(/(?<=\[)(.*?)(?=\])/g)!
+    .match(REGEX_GET_SUBSTRING_WITHIN_BRACKET)!
     .map((users: string): string[] => {
       return users.split(",")
     })
@@ -317,7 +338,7 @@ function parseLibraries(stringfiedLibraryNames: string, stringfiedLibraryDepende
   const names: string[] = stringfiedLibraryNames.slice(1, -1).split(",")
   const dependencies = stringfiedLibraryDependencies
     .slice(1, -1)
-    .match(/(?<=\[)(.*?)(?=\])/g)!
+    .match(REGEX_GET_SUBSTRING_WITHIN_BRACKET)!
     .map((dependency: string): string[] => {
       return dependency.split(",")
     })
