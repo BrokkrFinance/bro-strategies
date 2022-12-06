@@ -189,7 +189,66 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         internal
         virtual
         override
-    {}
+    {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        // Calculate LP token balance to withdraw per bin.
+        uint256 binsAmount = strategyStorage.binIds.length;
+        uint256[] memory amounts = new uint256[](binsAmount);
+        uint256 investmentTokenSupply = getInvestmentTokenSupply();
+
+        for (uint256 i; i < binsAmount; ++i) {
+            uint256 lpTokenBalance = strategyStorage.lbPair.balanceOf(
+                address(this),
+                strategyStorage.binIds[i]
+            );
+
+            amounts[i] = (lpTokenBalance * amount) / investmentTokenSupply;
+        }
+
+        // Withdraw.
+        uint256 pairdepositTokenBefore = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
+
+        strategyStorage.lbPair.setApprovalForAll(
+            address(strategyStorage.lbRouter),
+            true
+        );
+
+        strategyStorage.lbRouter.removeLiquidity(
+            address(strategyStorage.tokenX),
+            address(strategyStorage.tokenY),
+            uint16(strategyStorage.binStep),
+            0, // Base contracts take care of min amount.
+            0, // Base contracts take care of min amount.
+            strategyStorage.binIds,
+            amounts,
+            address(this),
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp
+        );
+
+        uint256 pairDepositTokenAfter = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
+
+        // Swap withdrawn pairDepositToken to depositToken.
+        uint256 pairDepositIncrement = pairDepositTokenAfter -
+            pairdepositTokenBefore;
+
+        address[] memory path = new address[](2);
+        path[0] = address(strategyStorage.pairDepositToken);
+        path[1] = address(depositToken);
+
+        SwapServiceLib.swapExactTokensForTokens(
+            swapService,
+            pairDepositIncrement,
+            0,
+            path
+        );
+    }
 
     function _reapReward(NameValuePair[] calldata) internal virtual override {}
 
