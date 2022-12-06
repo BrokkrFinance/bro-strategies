@@ -7,16 +7,6 @@ import { getErrorRange, getMonthsInSeconds } from "../helper/utils"
 export function testStrategyFee() {
   describe("Fee", async function () {
     it("should succeed when any user calls claim fee", async function () {
-      await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
-      await this.strategy
-        .connect(this.user0)
-        .deposit(ethers.utils.parseUnits("10000", 6), BigNumber.from(0), this.user0.address, [])
-
-      // Wait 1 month to reward get accrued.
-      await mine(getMonthsInSeconds(1))
-
-      await this.strategy.connect(this.user1).processReward([], [])
-
       const feeReceiver = await this.strategy.getFeeReceiver([])
       const feeAmount = await this.strategy.getCurrentAccumulatedFee()
 
