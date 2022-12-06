@@ -101,6 +101,59 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         } else {
             revert InvalidTraderJoeLBPair();
         }
+
+        // Migration from V1 to V2 consists of three steps.
+        // 0. Withdraw all depositToken and pairDepositToken from V1.
+        // 1. Swap all pairDepositToken to depositToken.
+        // 2. Deposit all depositToken into V2.
+
+        // 0. Withdraw all depositToken and pairDepositToken from V1.
+        uint256 depositTokenBefore = depositToken.balanceOf(address(this));
+
+        uint256 lpBalanceToWithdraw = strategyStorage
+            .masterChef
+            .userInfo(strategyStorage.farmId, address(this))
+            .amount;
+
+        strategyStorage.masterChef.withdraw(
+            strategyStorage.farmId,
+            lpBalanceToWithdraw
+        );
+
+        strategyStorage.lpToken.approve(
+            address(strategyStorage.router),
+            lpBalanceToWithdraw
+        );
+
+        strategyStorage.router.removeLiquidity(
+            address(strategyStorage.pairDepositToken),
+            address(depositToken),
+            lpBalanceToWithdraw,
+            0,
+            0,
+            address(this),
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp
+        );
+
+        // 1. Swap all pairDepositToken to depositToken.
+        address[] memory path = new address[](2);
+        path[0] = address(strategyStorage.pairDepositToken);
+        path[1] = address(depositToken);
+
+        SwapServiceLib.swapExactTokensForTokens(
+            swapService,
+            strategyStorage.pairDepositToken.balanceOf(address(this)),
+            0,
+            path
+        );
+
+        uint256 depositTokenAfter = depositToken.balanceOf(address(this));
+
+        // 2. Deposit all depositToken into V2.
+        uint256 depositTokenIncrement = depositTokenAfter - depositTokenBefore;
+
+        _deposit(depositTokenIncrement, params);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
