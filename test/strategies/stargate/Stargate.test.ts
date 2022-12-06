@@ -21,12 +21,10 @@ testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "Own
 ])
 testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "OwnableV2", [
   testStargateUSDCAum,
-  testStargateUSDCInitialize,
   testStrategyReapRewardExtra,
 ])
 testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "OwnableV2", [
   testStargateUSDTAum,
-  testStargateUSDTInitialize,
   testStrategyReapRewardExtra,
 ])
 
