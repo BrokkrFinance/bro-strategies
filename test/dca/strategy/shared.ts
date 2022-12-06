@@ -1,4 +1,4 @@
-import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
+import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import type * as ethersTypes from "ethers"
 import { ethers, network } from "hardhat"
 import { CoinAddrs, getTokenContract } from "../../../scripts/helper/helper"
@@ -35,11 +35,9 @@ export function testDcaStrategy(description: string, deployStrategy: Function, s
 
       // Airdrop signers.
       this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.usdc)
-      for (let i = 1; i <= this.userCount; i++) {
-        await this.impersonatedSigner.sendTransaction({
-          to: this.signers[i].address,
-          value: ethers.utils.parseEther("100"),
-        })
+      await setBalance(this.impersonatedSigner.address, ethers.utils.parseEther("10000"))
+      for (let i = 0; i <= this.userCount; i++) {
+        await setBalance(this.signers[i].address, ethers.utils.parseEther("10000"))
         await this.usdc
           .connect(this.impersonatedSigner)
           .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))

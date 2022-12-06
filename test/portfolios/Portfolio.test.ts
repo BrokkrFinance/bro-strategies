@@ -1,4 +1,4 @@
-import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
+import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import Tokens from "../../constants/addresses/Tokens.json"
 import blockNumber from "../../constants/BlockNumber.json"
@@ -52,11 +52,9 @@ export function testPortfolio(
 
       // Airdrop signers.
       this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.usdc)
+      await setBalance(this.impersonatedSigner.address, ethers.utils.parseEther("10000"))
       for (let i = 0; i <= this.userCount; i++) {
-        await this.impersonatedSigner.sendTransaction({
-          to: this.signers[i].address,
-          value: ethers.utils.parseEther("100"),
-        })
+        await setBalance(this.signers[i].address, ethers.utils.parseEther("10000"))
         await this.usdc
           .connect(this.impersonatedSigner)
           .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
