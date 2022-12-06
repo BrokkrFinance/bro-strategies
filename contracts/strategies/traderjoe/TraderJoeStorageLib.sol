@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import "../../dependencies/traderjoe/ITraderJoeLBPair.sol";
+import "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
 import "../../dependencies/traderjoe/ITraderJoeMasterChef.sol";
 import "../../dependencies/traderjoe/ITraderJoePair.sol";
 import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
@@ -14,6 +16,14 @@ struct TraderJoeStorage {
     ITraderJoePair lpToken;
     IERC20Upgradeable joeToken;
     uint256 farmId;
+    ITraderJoeLBPair lbPair;
+    ITraderJoeLBRouter lbRouter;
+    IERC20Upgradeable tokenX;
+    IERC20Upgradeable tokenY;
+    uint256 binStep;
+    uint256[] binIds;
+    uint256[] binAllocationsX;
+    uint256[] binAllocationsY;
 }
 
 library TraderJoeStorageLib {

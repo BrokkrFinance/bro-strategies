@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "./TraderJoeStorageLib.sol";
 import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 import "../../common/libraries/SwapServiceLib.sol";
+import "../../dependencies/traderjoe/ITraderJoeLBPair.sol";
+import "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
 import "../../dependencies/traderjoe/ITraderJoeMasterChef.sol";
 import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
 import "../../dependencies/traderjoe/ITraderJoePair.sol";
@@ -14,7 +16,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    error InvalidTraderJoeLpToken();
+    error InvalidTraderJoeLBPair();
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
@@ -31,10 +33,12 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function initialize(
         StrategyArgs calldata strategyArgs,
-        ITraderJoeRouter router,
-        ITraderJoeMasterChef masterChef,
-        ITraderJoePair lpToken,
-        IERC20Upgradeable joeToken
+        ITraderJoeLBPair lbPair,
+        ITraderJoeLBRouter lbRouter,
+        uint256 binStep,
+        uint256[] calldata binIds,
+        uint256[] calldata binAllocationsX,
+        uint256[] calldata binAllocationsY
     ) external initializer {
         __UUPSUpgradeable_init();
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
@@ -42,35 +46,60 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
-        strategyStorage.router = router;
-        strategyStorage.masterChef = masterChef;
-        strategyStorage.lpToken = lpToken;
-        strategyStorage.joeToken = joeToken;
+        strategyStorage.lbPair = lbPair;
+        strategyStorage.lbRouter = lbRouter;
+        strategyStorage.tokenX = IERC20Upgradeable(lbPair.tokenX());
+        strategyStorage.tokenY = IERC20Upgradeable(lbPair.tokenY());
+        strategyStorage.binStep = binStep;
+        strategyStorage.binIds = binIds;
+        strategyStorage.binAllocationsX = binAllocationsX;
+        strategyStorage.binAllocationsY = binAllocationsY;
 
-        address token0 = lpToken.token0();
-        address token1 = lpToken.token1();
-        if (token0 != address(depositToken)) {
-            strategyStorage.pairDepositToken = IERC20Upgradeable(token0);
-        } else if (token1 != address(depositToken)) {
-            strategyStorage.pairDepositToken = IERC20Upgradeable(token1);
+        if (strategyStorage.tokenX == depositToken) {
+            strategyStorage.pairDepositToken = IERC20Upgradeable(
+                strategyStorage.tokenY
+            );
+        } else if (strategyStorage.tokenY == depositToken) {
+            strategyStorage.pairDepositToken = IERC20Upgradeable(
+                strategyStorage.tokenX
+            );
         } else {
-            revert InvalidTraderJoeLpToken();
+            revert InvalidTraderJoeLBPair();
         }
+    }
 
-        ITraderJoeMasterChef.PoolInfo memory poolInfo;
-        uint256 poolLength = masterChef.poolLength();
-        bool isPoolFound = false;
-        for (uint256 i = 0; i < poolLength; i++) {
-            poolInfo = masterChef.poolInfo(i);
-            if (address(poolInfo.lpToken) == address(lpToken)) {
-                strategyStorage.farmId = i;
-                isPoolFound = true;
-                break;
-            }
-        }
+    function reinitialize(
+        ITraderJoeLBPair lbPair,
+        ITraderJoeLBRouter lbRouter,
+        uint256 binStep,
+        uint256[] calldata binIds,
+        uint256[] calldata binAllocationsX,
+        uint256[] calldata binAllocationsY,
+        NameValuePair[] calldata params
+    ) external reinitializer(2) {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
 
-        if (!isPoolFound) {
-            revert InvalidTraderJoeLpToken();
+        // Initialization.
+        strategyStorage.lbPair = lbPair;
+        strategyStorage.lbRouter = lbRouter;
+        strategyStorage.tokenX = IERC20Upgradeable(lbPair.tokenX());
+        strategyStorage.tokenY = IERC20Upgradeable(lbPair.tokenY());
+        strategyStorage.binStep = binStep;
+        strategyStorage.binIds = binIds;
+        strategyStorage.binAllocationsX = binAllocationsX;
+        strategyStorage.binAllocationsY = binAllocationsY;
+
+        if (strategyStorage.tokenX == depositToken) {
+            strategyStorage.pairDepositToken = IERC20Upgradeable(
+                strategyStorage.tokenY
+            );
+        } else if (strategyStorage.tokenY == depositToken) {
+            strategyStorage.pairDepositToken = IERC20Upgradeable(
+                strategyStorage.tokenX
+            );
+        } else {
+            revert InvalidTraderJoeLBPair();
         }
     }
 
@@ -80,135 +109,15 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         internal
         virtual
         override
-    {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        uint256 pairDepositTokenBalanceBeforeSwap = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this));
-
-        // swapping depositToken to pairDepositToken
-        uint256 swapAmount = amount / 2;
-        address[] memory path = new address[](2);
-        path[0] = address(depositToken);
-        path[1] = address(strategyStorage.pairDepositToken);
-
-        uint256 pairDepositTokenDesired = SwapServiceLib
-            .swapExactTokensForTokens(swapService, swapAmount, 0, path);
-        uint256 depositTokenDesired = amount - swapAmount;
-
-        // providing liquidity to Trader Joe
-        strategyStorage.pairDepositToken.approve(
-            address(strategyStorage.router),
-            pairDepositTokenDesired
-        );
-        depositToken.approve(
-            address(strategyStorage.router),
-            depositTokenDesired
-        );
-        (, , uint256 lpBalance) = strategyStorage.router.addLiquidity(
-            address(strategyStorage.pairDepositToken),
-            address(depositToken),
-            pairDepositTokenDesired,
-            depositTokenDesired,
-            0,
-            0,
-            address(this),
-            // solhint-disable-next-line not-rely-on-time
-            block.timestamp
-        );
-
-        // swapping back extra pairDepositToken to depositToken
-        uint256 extraPairDepositTokenAmount = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this)) - pairDepositTokenBalanceBeforeSwap;
-        if (extraPairDepositTokenAmount != 0) {
-            path[0] = address(strategyStorage.pairDepositToken);
-            path[1] = address(depositToken);
-            SwapServiceLib.swapExactTokensForTokens(
-                swapService,
-                extraPairDepositTokenAmount,
-                0,
-                path
-            );
-        }
-
-        // staking LP tokens on Trader Joe
-        strategyStorage.lpToken.approve(
-            address(strategyStorage.masterChef),
-            lpBalance
-        );
-        strategyStorage.masterChef.deposit(strategyStorage.farmId, lpBalance);
-    }
+    {}
 
     function _withdraw(uint256 amount, NameValuePair[] calldata)
         internal
         virtual
         override
-    {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
+    {}
 
-        uint256 lpBalanceToWithdraw = (getTraderJoeLpBalance() * amount) /
-            getInvestmentTokenSupply();
-
-        uint256 pairDepositTokenBalanceBefore = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this));
-        strategyStorage.masterChef.withdraw(
-            strategyStorage.farmId,
-            lpBalanceToWithdraw
-        );
-        strategyStorage.lpToken.approve(
-            address(strategyStorage.router),
-            lpBalanceToWithdraw
-        );
-        strategyStorage.router.removeLiquidity(
-            address(strategyStorage.pairDepositToken),
-            address(depositToken),
-            lpBalanceToWithdraw,
-            0,
-            0,
-            address(this),
-            // solhint-disable-next-line not-rely-on-time
-            block.timestamp
-        );
-        uint256 pairDepositTokenBalanceAfter = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this));
-
-        uint256 pairDepositTokenBalanceIncrement = pairDepositTokenBalanceAfter -
-                pairDepositTokenBalanceBefore;
-        address[] memory path = new address[](2);
-        path[0] = address(strategyStorage.pairDepositToken);
-        path[1] = address(depositToken);
-
-        SwapServiceLib.swapExactTokensForTokens(
-            swapService,
-            pairDepositTokenBalanceIncrement,
-            0,
-            path
-        );
-    }
-
-    function _reapReward(NameValuePair[] calldata) internal virtual override {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        strategyStorage.masterChef.deposit(strategyStorage.farmId, 0);
-
-        address[] memory path = new address[](2);
-        path[0] = address(strategyStorage.joeToken);
-        path[1] = address(depositToken);
-
-        SwapServiceLib.swapExactTokensForTokens(
-            swapService,
-            strategyStorage.joeToken.balanceOf(address(this)),
-            0,
-            path
-        );
-    }
+    function _reapReward(NameValuePair[] calldata) internal virtual override {}
 
     function _getAssetBalances()
         internal
@@ -216,23 +125,14 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
         returns (Balance[] memory assetBalances)
-    {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        assetBalances = new Balance[](1);
-        assetBalances[0] = Balance(
-            address(strategyStorage.lpToken),
-            getTraderJoeLpBalance()
-        );
-    }
+    {}
 
     function _getLiabilityBalances()
         internal
         view
         virtual
         override
-        returns (Balance[] memory liabilityBalances)
+        returns (Balance[] memory)
     {}
 
     function _getAssetValuations(bool, bool)
@@ -241,45 +141,13 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
         returns (Valuation[] memory assetValuations)
-    {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        assetValuations = new Valuation[](1);
-        assetValuations[0] = Valuation(
-            address(strategyStorage.lpToken),
-            (getTraderJoeLpBalance() * getTraderJoeLpReserve()) /
-                strategyStorage.lpToken.totalSupply()
-        );
-    }
+    {}
 
     function _getLiabilityValuations(bool, bool)
         internal
         view
         virtual
         override
-        returns (Valuation[] memory liabilityValuations)
+        returns (Valuation[] memory)
     {}
-
-    function getTraderJoeLpBalance() public view returns (uint256) {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        return
-            strategyStorage
-                .masterChef
-                .userInfo(strategyStorage.farmId, address(this))
-                .amount;
-    }
-
-    function getTraderJoeLpReserve() public view returns (uint256) {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        (uint256 reserve0, uint256 reserve1, ) = strategyStorage
-            .lpToken
-            .getReserves();
-
-        return reserve0 + reserve1;
-    }
 }
