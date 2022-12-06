@@ -5,27 +5,28 @@ import Tokens from "../../../constants/addresses/Tokens.json"
 import Stargate from "../../../constants/addresses/Stargate.json"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import StargateLPTokenABI from "../../helper/abi/StargateLPToken.json"
+import { TestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
-import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, "OwnableV2", [
+const stargateTestOptions: TestOptions = {
+  upgradeTo: "OwnableV2",
+  runReapUninvestedReward: false,
+}
+
+testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, stargateTestOptions, [
   testStargateUSDCAum,
   testStargateUSDCInitialize,
-  testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, "OwnableV2", [
+testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, stargateTestOptions, [
   testStargateUSDTAum,
   testStargateUSDTInitialize,
-  testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, "OwnableV2", [
+testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, stargateTestOptions, [
   testStargateUSDCAum,
-  testStrategyReapRewardExtra,
 ])
-testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, "OwnableV2", [
+testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, stargateTestOptions, [
   testStargateUSDTAum,
-  testStrategyReapRewardExtra,
 ])
 
 async function deployStargateUSDCStrategy() {

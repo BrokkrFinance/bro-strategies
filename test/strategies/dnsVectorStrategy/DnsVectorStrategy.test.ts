@@ -4,10 +4,16 @@ import { ethers } from "hardhat"
 import Tokens from "../../../constants/addresses/Tokens.json"
 import Vector from "../../../constants/addresses/Vector.json"
 import { deployStrategy } from "../../../scripts/helper/contract"
+import { TestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, "RoleableV2", [
+const dnsVectorTestOptions: TestOptions = {
+  upgradeTo: "RoleableV2",
+  runReapRewardExtra: false,
+}
+
+testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, dnsVectorTestOptions, [
   testAum,
   testCollaterizationAndDeltaNeutrality,
   testRebalanceSafetyLimits,
