@@ -250,7 +250,26 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function _reapReward(NameValuePair[] calldata) internal virtual override {}
+    function _reapReward(NameValuePair[] calldata) internal virtual override {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        strategyStorage.lbPair.collectFees(
+            address(this),
+            strategyStorage.binIds
+        );
+
+        address[] memory path = new address[](2);
+        path[0] = address(strategyStorage.pairDepositToken);
+        path[1] = address(depositToken);
+
+        SwapServiceLib.swapExactTokensForTokens(
+            swapService,
+            strategyStorage.pairDepositToken.balanceOf(address(this)),
+            0,
+            path
+        );
+    }
 
     function _getAssetBalances()
         internal
