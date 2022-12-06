@@ -23,10 +23,12 @@
       "swapService": { "$ref": "../../../constants/SwapServices.json#/traderjoe" },
       "roleToUsers": [],
       "extraArgs": [
-        { "$ref": "../../../constants/addresses/TraderJoe.json#/router" },
-        { "$ref": "../../../constants/addresses/TraderJoe.json#/masterChef" },
-        { "$ref": "../../../constants/addresses/TraderJoe.json#/lpToken" },
-        { "$ref": "../../../constants/addresses/TraderJoe.json#/joeToken" }
+        { "$ref": "../../../constants/addresses/TraderJoe.json#/lbPair" },
+        { "$ref": "../../../constants/addresses/TraderJoe.json#/lbRouter" },
+        1,
+        [8388607, 8388608, 8388609],
+        [0, 700, 300],
+        [300, 700, 0]
       ],
       "libraries": []
     }
