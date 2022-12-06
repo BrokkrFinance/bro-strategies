@@ -330,7 +330,25 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
         returns (Balance[] memory assetBalances)
-    {}
+    {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        uint256 binsAmount = strategyStorage.binIds.length;
+        assetBalances = new Balance[](binsAmount);
+
+        for (uint256 i; i < binsAmount; ++i) {
+            uint256 balance = strategyStorage.lbPair.balanceOf(
+                address(this),
+                strategyStorage.binIds[i]
+            );
+
+            assetBalances[i] = Balance(
+                address(strategyStorage.lbPair),
+                balance
+            );
+        }
+    }
 
     function _getLiabilityBalances()
         internal
@@ -346,7 +364,36 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
         returns (Valuation[] memory assetValuations)
-    {}
+    {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        uint256 binsAmount = strategyStorage.binIds.length;
+        assetValuations = new Valuation[](binsAmount);
+
+        for (uint256 i; i < binsAmount; ++i) {
+            uint256 lpTokenBalance = strategyStorage.lbPair.balanceOf(
+                address(this),
+                strategyStorage.binIds[i]
+            );
+
+            (uint256 reserveX, uint256 reserveY) = strategyStorage
+                .lbPair
+                .getBin(uint24(strategyStorage.binIds[i]));
+
+            uint256 totalSupply = strategyStorage.lbPair.totalSupply(
+                strategyStorage.binIds[i]
+            );
+
+            uint256 valuation = (lpTokenBalance * (reserveX + reserveY)) /
+                totalSupply;
+
+            assetValuations[i] = Valuation(
+                address(strategyStorage.lbPair),
+                valuation
+            );
+        }
+    }
 
     function _getLiabilityValuations(bool, bool)
         internal
