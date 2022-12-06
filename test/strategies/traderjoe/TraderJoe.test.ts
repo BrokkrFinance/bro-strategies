@@ -5,22 +5,24 @@ import Tokens from "../../../constants/addresses/Tokens.json"
 import TraderJoe from "../../../constants/addresses/TraderJoe.json"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import TraderJoeLPTokenABI from "../../helper/abi/TraderJoeLPToken.json"
+import { TestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
-import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
-import { testStrategyReapUninvestedReward } from "../StrategyReapUninvestedReward.test"
 
-testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, "OwnableV2", [
-  testTraderJoeAum,
-  testTraderJoeInitialize,
-  testStrategyReapUninvestedReward,
-  testStrategyReapRewardExtra,
+const traderjoeTestOptions: TestOptions = {
+  upgradeTo: "OwnableV2",
+  runReapReward: false,
+  runReapRewardExtra: false,
+  runReapUninvestedReward: false,
+}
+
+testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, traderjoeTestOptions, [
+  // testTraderJoeAum,
+  // testTraderJoeInitialize,
 ])
-testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, "OwnableV2", [
-  testTraderJoeAum,
-  testTraderJoeInitialize,
-  testStrategyReapUninvestedReward,
-  testStrategyReapRewardExtra,
+testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, traderjoeTestOptions, [
+  // testTraderJoeAum,
+  // testTraderJoeInitialize,
 ])
 
 async function deployTraderJoeStrategy() {

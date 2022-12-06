@@ -9,10 +9,6 @@ export function testStrategyReapRewardExtra() {
     // not all defi protocol rewards are controlled solely by time,
     // so this test can fail for some strategies
     it("should succeed to earn larger reward when reap after 1 year", async function () {
-      if ((await this.strategy.humanReadableName()) == "Cash strategy") {
-        return
-      }
-
       await this.investHelper
         .deposit(this.investable, this.user0, {
           amount: ethers.utils.parseUnits("1000", 6),

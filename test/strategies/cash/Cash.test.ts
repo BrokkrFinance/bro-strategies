@@ -1,27 +1,32 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
-import { ethers, upgrades } from "hardhat"
+import { ethers } from "hardhat"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
+import { TestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
-import { testStrategyReapRewardExtra } from "../StrategyReapRewardExtra.test"
 
-testStrategy("Cash Strategy - Deploy", deployCashStrategy, "OwnableV2", [testCashAum, testStrategyReapRewardExtra])
+const cashTestOptions: TestOptions = {
+  upgradeTo: "OwnableV2",
+  runReapRewardExtra: false,
+  runReapUninvestedReward: false,
+}
+
+testStrategy("Cash Strategy - Deploy", deployCashStrategy, cashTestOptions, [testCashAum])
 testStrategy(
   "Cash with Stargate USDC Strategy - Upgrade After Deploy",
   upgradeCashWithStargateUsdcStrategy,
-  "OwnableV2",
-  [testCashAum, testStrategyReapRewardExtra]
+  cashTestOptions,
+  [testCashAum]
 )
 testStrategy(
   "Cash with Stargate USDT Strategy - Upgrade After Deploy",
   upgradeCashWithStargateUsdtStrategy,
-  "OwnableV2",
-  [testCashAum, testStrategyReapRewardExtra]
+  cashTestOptions,
+  [testCashAum]
 )
-testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, "OwnableV2", [
+testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, cashTestOptions, [
   testCashAum,
-  testStrategyReapRewardExtra,
 ])
 
 async function deployCashStrategy() {

@@ -5,6 +5,7 @@ import Tokens from "../../constants/addresses/Tokens.json"
 import blockNumber from "../../constants/BlockNumber.json"
 import { WhaleAddrs } from "../helper/addresses"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
+import { TestOptions } from "../helper/interfaces/options"
 import { InvestHelper } from "../helper/invest"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
@@ -12,6 +13,8 @@ import { testStrategyERC165 } from "./StrategyERC165.test"
 import { testStrategyFee } from "./StrategyFee.test"
 import { testStrategyPausable } from "./StrategyPausable.test"
 import { testStrategyReapReward } from "./StrategyReapReward.test"
+import { testStrategyReapRewardExtra } from "./StrategyReapRewardExtra.test"
+import { testStrategyReapUninvestedReward } from "./StrategyReapUninvestedReward.test"
 import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 import { Contract } from "ethers"
@@ -20,7 +23,7 @@ import { execSync } from "child_process"
 export function testStrategy(
   description: string,
   deployStrategy: () => Promise<Contract>,
-  upgradeTo: string,
+  testOptions: TestOptions,
   strategySpecificTests: (() => void)[]
 ) {
   describe(description, function () {
@@ -65,7 +68,7 @@ export function testStrategy(
       this.strategy = await deployStrategy()
 
       // Portfolio upgradeability test to.
-      this.upgradeTo = upgradeTo
+      this.upgradeTo = testOptions.upgradeTo
 
       // Strategy owner and role members.
       const isRoleable = await this.strategy.supportsInterface("0x5A05180F") // IAccessControlEnumerableUpgradeable
@@ -150,7 +153,9 @@ export function testStrategy(
     testStrategyERC165()
     testStrategyFee()
     testStrategyPausable()
-    testStrategyReapReward()
+    if (testOptions.runReapReward !== false) testStrategyReapReward()
+    if (testOptions.runReapRewardExtra !== false) testStrategyReapRewardExtra()
+    if (testOptions.runReapUninvestedReward !== false) testStrategyReapUninvestedReward()
     testStrategyUpgradeable()
     testStrategyWithdraw()
 
