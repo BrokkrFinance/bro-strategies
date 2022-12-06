@@ -411,6 +411,37 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         returns (Valuation[] memory)
     {}
 
+    function adjustBins(
+        uint256[] calldata binIds,
+        uint256[] calldata binAllocationsX,
+        uint256[] calldata binAllocationsY,
+        NameValuePair[] calldata params
+    ) public onlyOwner {
+        checkBinIds(binIds);
+        checkBinAllocations(binAllocationsX);
+        checkBinAllocations(binAllocationsY);
+
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        // Withdraw from all bins.
+        uint256 depositTokenBefore = depositToken.balanceOf(address(this));
+
+        _withdraw(getInvestmentTokenSupply(), params);
+
+        uint256 depositTokenAfter = depositToken.balanceOf(address(this));
+
+        // Set bin IDs and allocations to the given ones.
+        strategyStorage.binIds = binIds;
+        strategyStorage.binAllocationsX = binAllocationsX;
+        strategyStorage.binAllocationsY = binAllocationsY;
+
+        // Deposit into the new bins with the new allocations.
+        uint256 depositTokenIncrement = depositTokenAfter - depositTokenBefore;
+
+        _deposit(depositTokenIncrement, params);
+    }
+
     function checkBinIds(uint256[] calldata binIds) private pure {
         uint256 binsAmount = binIds.length;
 
