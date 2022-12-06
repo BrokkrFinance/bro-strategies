@@ -1,4 +1,4 @@
 // TODO: To be deleted
 export const WhaleAddrs = {
-  usdc: "0x42d6ce661bb2e5f5cc639e7befe74ff9fd649541",
+  usdc: "0x625e7708f30ca75bfd92586e17077590c60eb4cd", // Aave: aUSDC Token V3
 }
