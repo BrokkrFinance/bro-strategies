@@ -40,6 +40,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256[] calldata binAllocationsX,
         uint256[] calldata binAllocationsY
     ) external initializer {
+        checkBinIds(binIds);
+        checkBinAllocations(binAllocationsX);
+        checkBinAllocations(binAllocationsY);
+
         __UUPSUpgradeable_init();
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
@@ -77,6 +81,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256[] calldata binAllocationsY,
         NameValuePair[] calldata params
     ) external reinitializer(2) {
+        checkBinIds(binIds);
+        checkBinAllocations(binAllocationsX);
+        checkBinAllocations(binAllocationsY);
+
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
@@ -402,4 +410,34 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         override
         returns (Valuation[] memory)
     {}
+
+    function checkBinIds(uint256[] calldata binIds) private pure {
+        uint256 binsAmount = binIds.length;
+
+        require(binsAmount >= 1, "TraderJoe: too few bins");
+        require(binsAmount <= 51, "TraderJoe: too many bins");
+
+        for (uint256 i; i < binsAmount; i++) {
+            require(binIds[i] <= type(uint24).max, "TraderJoe: too big bin ID");
+        }
+    }
+
+    function checkBinAllocations(uint256[] calldata binAllocations)
+        private
+        pure
+    {
+        uint256 allocationsAmount = binAllocations.length;
+
+        require(allocationsAmount >= 1, "TraderJoe: too few allocations");
+        require(allocationsAmount <= 51, "TraderJoe: too many allocations");
+
+        uint256 allocations;
+
+        for (uint256 i; i < allocationsAmount; i++) {
+            allocations += binAllocations[i];
+        }
+
+        require(allocations >= 1e3, "TraderJoe: too small allocations");
+        require(allocations <= 1e3, "TraderJoe: too big allocations");
+    }
 }
