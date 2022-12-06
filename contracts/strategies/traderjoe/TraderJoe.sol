@@ -109,7 +109,81 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         internal
         virtual
         override
-    {}
+    {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        // Swap half of depositToken to pairDepositToken.
+        uint256 swapAmount = amount / 2;
+        address[] memory path = new address[](2);
+        path[0] = address(depositToken);
+        path[1] = address(strategyStorage.pairDepositToken);
+
+        uint256 pairDepositTokenAmount = SwapServiceLib
+            .swapExactTokensForTokens(swapService, swapAmount, 0, path);
+        uint256 depositTokenAmount = amount - swapAmount;
+
+        uint256 amountX;
+        uint256 amountY;
+        if (strategyStorage.tokenX == depositToken) {
+            amountX = depositTokenAmount;
+            amountY = pairDepositTokenAmount;
+        } else {
+            amountX = pairDepositTokenAmount;
+            amountY = depositTokenAmount;
+        }
+
+        // Prepare params.
+        uint256 binsAmount = strategyStorage.binIds.length;
+        uint256[] memory distributionX = new uint256[](binsAmount);
+        uint256[] memory distributionY = new uint256[](binsAmount);
+
+        for (uint256 i; i < binsAmount; ++i) {
+            // Bin allocation has precision of 1e3 and TraderJoe V2 has 1e18.
+            distributionX[i] = strategyStorage.binAllocationsX[i] * 1e15;
+            distributionY[i] = strategyStorage.binAllocationsY[i] * 1e15;
+        }
+
+        int256[] memory deltaIds = new int256[](binsAmount);
+        (, , uint256 activeId) = strategyStorage.lbPair.getReservesAndId();
+
+        for (uint256 i; i < binsAmount; ++i) {
+            deltaIds[i] = int256(strategyStorage.binIds[i]) - int256(activeId);
+        }
+
+        // Deposit.
+        ITraderJoeLBRouter.LiquidityParameters memory liquidityParameters = ITraderJoeLBRouter
+            .LiquidityParameters(
+                address(strategyStorage.tokenX),
+                address(strategyStorage.tokenY),
+                strategyStorage.binStep,
+                amountX,
+                amountY,
+                0, // Base contracts take care of min amount.
+                0, // Base contracts take care of min amount.
+                activeId,
+                0,
+                deltaIds,
+                distributionX,
+                distributionY,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            );
+
+        strategyStorage.tokenX.approve(
+            address(strategyStorage.lbRouter),
+            amountX
+        );
+        strategyStorage.tokenY.approve(
+            address(strategyStorage.lbRouter),
+            amountY
+        );
+
+        strategyStorage.lbRouter.addLiquidity(liquidityParameters);
+
+        // Since the amount of remaining pairDepositToken is nearly zero, skip swapping it back to depositToken.
+    }
 
     function _withdraw(uint256 amount, NameValuePair[] calldata)
         internal
