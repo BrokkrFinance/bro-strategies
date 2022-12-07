@@ -131,8 +131,8 @@ export function testPortfolio(
         params: [],
       })
 
-      // Reset configs.
-      execSync("git checkout -- ./configs && git clean -fd ./configs", { stdio: "inherit" })
+      // Reset live configs.
+      execSync("git checkout -- ./configs/live && git clean -fd ./configs/live", { stdio: "inherit" })
     })
   })
 }
