@@ -6,9 +6,6 @@ import "../../common/bases/StrategyOwnablePausableBaseUpgradeable.sol";
 import "../../common/libraries/SwapServiceLib.sol";
 import "../../dependencies/traderjoe/ITraderJoeLBPair.sol";
 import "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
-import "../../dependencies/traderjoe/ITraderJoeMasterChef.sol";
-import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
-import "../../dependencies/traderjoe/ITraderJoePair.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
