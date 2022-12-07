@@ -1,5 +1,3 @@
-import { expect } from "chai"
-import { ethers, upgrades } from "hardhat"
 import { deployPortfolio, upgradePortfolio } from "../../../scripts/helper/contract"
 import { testPortfolio } from "../Portfolio.test"
 

@@ -1,8 +1,7 @@
-import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
-import { getErrorRange, getMonthsInSeconds } from "../helper/utils"
+import { getErrorRange } from "../helper/utils"
 
 export function testStrategyFee() {
   describe("Fee", async function () {
