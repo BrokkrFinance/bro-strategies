@@ -10,12 +10,12 @@ import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 
 struct TraderJoeStorage {
-    ITraderJoeRouter router;
-    ITraderJoeMasterChef masterChef;
-    IERC20Upgradeable pairDepositToken;
-    ITraderJoePair lpToken;
-    IERC20Upgradeable joeToken;
-    uint256 farmId;
+    ITraderJoeRouter router; // Obsolete.
+    ITraderJoeMasterChef masterChef; // Obsolete.
+    IERC20Upgradeable pairDepositToken; // Obsolete.
+    ITraderJoePair lpToken; // Obsolete.
+    IERC20Upgradeable joeToken; // Obsolete.
+    uint256 farmId; // Obsolete.
     ITraderJoeLBPair lbPair;
     ITraderJoeLBRouter lbRouter;
     IERC20Upgradeable tokenX;
