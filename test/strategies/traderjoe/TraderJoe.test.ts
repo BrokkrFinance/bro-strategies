@@ -181,6 +181,78 @@ function testTraderJoeInitialize() {
       ).to.be.reverted
     })
 
+    it("should fail when passed different length of bin IDs and allocations X", async function () {
+      const Strategy = await ethers.getContractFactory("TraderJoe")
+      await expect(
+        upgrades.deployProxy(
+          Strategy,
+          [
+            [
+              this.investmentToken.address,
+              Tokens.usdc,
+              this.depositFee,
+              this.depositFeeParams,
+              this.withdrawalFee,
+              this.withdrawalFeeParams,
+              this.performanceFee,
+              this.performanceFeeParams,
+              this.feeReceiver,
+              this.feeReceiverParams,
+              this.totalInvestmentLimit,
+              this.investmentLimitPerAddress,
+              this.priceOracle,
+              this.swapServiceProvider,
+              this.swapServiceRouter,
+              [],
+            ],
+            TraderJoe.lbPair,
+            TraderJoe.lbRouter,
+            1,
+            [0, 1, 2],
+            [300, 300, 400],
+            [1000],
+          ],
+          { kind: "uups" }
+        )
+      ).to.be.reverted
+    })
+
+    it("should fail when passed different length of bin IDs and allocations Y", async function () {
+      const Strategy = await ethers.getContractFactory("TraderJoe")
+      await expect(
+        upgrades.deployProxy(
+          Strategy,
+          [
+            [
+              this.investmentToken.address,
+              Tokens.usdc,
+              this.depositFee,
+              this.depositFeeParams,
+              this.withdrawalFee,
+              this.withdrawalFeeParams,
+              this.performanceFee,
+              this.performanceFeeParams,
+              this.feeReceiver,
+              this.feeReceiverParams,
+              this.totalInvestmentLimit,
+              this.investmentLimitPerAddress,
+              this.priceOracle,
+              this.swapServiceProvider,
+              this.swapServiceRouter,
+              [],
+            ],
+            TraderJoe.lbPair,
+            TraderJoe.lbRouter,
+            1,
+            [0, 1, 2],
+            [1000],
+            [300, 300, 400],
+          ],
+          { kind: "uups" }
+        )
+      ).to.be.reverted
+    })
+
     it("should fail when passed too many bins", async function () {
       const Strategy = await ethers.getContractFactory("TraderJoe")
       await expect(
