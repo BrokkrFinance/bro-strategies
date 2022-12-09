@@ -80,14 +80,15 @@ export function testStrategyFee() {
         .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user0.address, [])
 
       // The first user withdraws.
-      await this.investmentToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
+      let availableTokenBalance = await this.investmentToken.connect(this.user0).balanceOf(this.user0.address)
+      await this.investmentToken.connect(this.user0).approve(this.strategy.address, availableTokenBalance.div(5))
       await expect(
         this.strategy
           .connect(this.user0)
-          .withdraw(ethers.utils.parseUnits("1000", 6), BigNumber.from(0), this.user0.address, [])
+          .withdraw(availableTokenBalance.div(5), BigNumber.from(0), this.user0.address, [])
       )
         .to.emit(this.strategy, "Withdrawal")
-        .withArgs(this.user0.address, this.user0.address, ethers.utils.parseUnits("1000", 6))
+        .withArgs(this.user0.address, this.user0.address, availableTokenBalance.div(5))
 
       // Set withdrawal fee to 30%.
       await this.strategy.connect(this.owner).setWithdrawalFee(30000, [])
@@ -99,14 +100,15 @@ export function testStrategyFee() {
         .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user1.address, [])
 
       // The second user withdraws.
-      await this.investmentToken.connect(this.user1).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
+      availableTokenBalance = await this.investmentToken.connect(this.user1).balanceOf(this.user1.address)
+      await this.investmentToken.connect(this.user1).approve(this.strategy.address, availableTokenBalance.div(5))
       await expect(
         this.strategy
           .connect(this.user1)
-          .withdraw(ethers.utils.parseUnits("1000", 6), BigNumber.from(0), this.user1.address, [])
+          .withdraw(availableTokenBalance.div(5), BigNumber.from(0), this.user1.address, [])
       )
         .to.emit(this.strategy, "Withdrawal")
-        .withArgs(this.user1.address, this.user1.address, ethers.utils.parseUnits("1000", 6))
+        .withArgs(this.user1.address, this.user1.address, availableTokenBalance.div(5))
 
       // The third user deposits.
       await this.usdc.connect(this.user2).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
@@ -115,14 +117,15 @@ export function testStrategyFee() {
         .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user2.address, [])
 
       // The third user withdraws.
-      await this.investmentToken.connect(this.user2).approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
+      availableTokenBalance = await this.investmentToken.connect(this.user2).balanceOf(this.user2.address)
+      await this.investmentToken.connect(this.user2).approve(this.strategy.address, availableTokenBalance.div(5))
       await expect(
         this.strategy
           .connect(this.user2)
-          .withdraw(ethers.utils.parseUnits("1000", 6), BigNumber.from(0), this.user2.address, [])
+          .withdraw(availableTokenBalance.div(5), BigNumber.from(0), this.user2.address, [])
       )
         .to.emit(this.strategy, "Withdrawal")
-        .withArgs(this.user2.address, this.user2.address, ethers.utils.parseUnits("1000", 6))
+        .withArgs(this.user2.address, this.user2.address, availableTokenBalance.div(5))
 
       const userInvestmentTokenBalance = BigNumber.from(
         Math.floor(ethers.utils.parseUnits("4000", 6).toNumber() / this.investmentTokenPrice)
