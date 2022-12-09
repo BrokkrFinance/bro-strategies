@@ -397,6 +397,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 strategyStorage.binIds[i]
             );
 
+            // Assume that USDC.e price equals to USDC price.
             uint256 valuation = (lpTokenBalance * (reserveX + reserveY)) /
                 totalSupply;
 
