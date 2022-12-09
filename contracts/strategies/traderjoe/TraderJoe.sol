@@ -134,15 +134,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
 
         // 1. Swap all pairDepositToken to depositToken.
-        address[] memory path = new address[](2);
-        path[0] = address(strategyStorage.pairDepositToken);
-        path[1] = address(depositToken);
-
-        SwapServiceLib.swapExactTokensForTokens(
-            swapService,
+        __swapTokens(
             strategyStorage.pairDepositToken.balanceOf(address(this)),
-            0,
-            path
+            strategyStorage.pairDepositToken,
+            depositToken
         );
 
         uint256 depositTokenAfter = depositToken.balanceOf(address(this));
@@ -165,12 +160,12 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         // Swap half of depositToken to pairDepositToken.
         uint256 swapAmount = amount / 2;
-        address[] memory path = new address[](2);
-        path[0] = address(depositToken);
-        path[1] = address(strategyStorage.pairDepositToken);
 
-        uint256 pairDepositTokenAmount = SwapServiceLib
-            .swapExactTokensForTokens(swapService, swapAmount, 0, path);
+        uint256 pairDepositTokenAmount = __swapTokens(
+            swapAmount,
+            depositToken,
+            strategyStorage.pairDepositToken
+        );
         uint256 depositTokenAmount = amount - swapAmount;
 
         uint256 amountX;
@@ -295,15 +290,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 pairDepositIncrement = pairDepositTokenAfter -
             pairdepositTokenBefore;
 
-        address[] memory path = new address[](2);
-        path[0] = address(strategyStorage.pairDepositToken);
-        path[1] = address(depositToken);
-
-        SwapServiceLib.swapExactTokensForTokens(
-            swapService,
+        __swapTokens(
             pairDepositIncrement,
-            0,
-            path
+            strategyStorage.pairDepositToken,
+            depositToken
         );
     }
 
@@ -327,15 +317,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 pairDepositIncrement = pairDepositTokenAfter -
             pairdepositTokenBefore;
 
-        address[] memory path = new address[](2);
-        path[0] = address(strategyStorage.pairDepositToken);
-        path[1] = address(depositToken);
-
-        SwapServiceLib.swapExactTokensForTokens(
-            swapService,
+        __swapTokens(
             pairDepositIncrement,
-            0,
-            path
+            strategyStorage.pairDepositToken,
+            depositToken
         );
     }
 
@@ -480,6 +465,23 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         require(
             allocations == 1e3,
             "TraderJoe: the sum of allocations must be 1e3"
+        );
+    }
+
+    function __swapTokens(
+        uint256 amountIn,
+        IERC20Upgradeable tokenIn,
+        IERC20Upgradeable tokenOut
+    ) private returns (uint256 amountOut) {
+        address[] memory path = new address[](2);
+        path[0] = address(tokenIn);
+        path[1] = address(tokenOut);
+
+        amountOut = SwapServiceLib.swapExactTokensForTokens(
+            swapService,
+            amountIn,
+            0,
+            path
         );
     }
 }
