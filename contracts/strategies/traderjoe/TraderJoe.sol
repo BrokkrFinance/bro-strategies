@@ -308,10 +308,21 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
+        uint256 pairdepositTokenBefore = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
+
         strategyStorage.lbPair.collectFees(
             address(this),
             strategyStorage.binIds
         );
+
+        uint256 pairDepositTokenAfter = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
+
+        uint256 pairDepositIncrement = pairDepositTokenAfter -
+            pairdepositTokenBefore;
 
         address[] memory path = new address[](2);
         path[0] = address(strategyStorage.pairDepositToken);
@@ -319,7 +330,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         SwapServiceLib.swapExactTokensForTokens(
             swapService,
-            strategyStorage.pairDepositToken.balanceOf(address(this)),
+            pairDepositIncrement,
             0,
             path
         );
