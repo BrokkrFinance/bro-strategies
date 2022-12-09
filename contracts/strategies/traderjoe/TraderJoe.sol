@@ -34,10 +34,9 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         ITraderJoeLBRouter lbRouter,
         uint256 binStep,
         uint256[] calldata binIds,
-        uint256[] calldata binAllocationsX,
-        uint256[] calldata binAllocationsY
+        uint256[] calldata binAllocations
     ) external initializer {
-        __checkBinIdsAndAllocations(binIds, binAllocationsX, binAllocationsY);
+        __checkBinIdsAndAllocations(binIds, binAllocations);
 
         __UUPSUpgradeable_init();
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
@@ -51,8 +50,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         strategyStorage.tokenY = IERC20Upgradeable(lbPair.tokenY());
         strategyStorage.binStep = binStep;
         strategyStorage.binIds = binIds;
-        strategyStorage.binAllocationsX = binAllocationsX;
-        strategyStorage.binAllocationsY = binAllocationsY;
+        strategyStorage.binAllocations = binAllocations;
 
         if (strategyStorage.tokenX == depositToken) {
             strategyStorage.pairDepositToken = IERC20Upgradeable(
@@ -72,11 +70,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         ITraderJoeLBRouter lbRouter,
         uint256 binStep,
         uint256[] calldata binIds,
-        uint256[] calldata binAllocationsX,
-        uint256[] calldata binAllocationsY,
+        uint256[] calldata binAllocations,
         NameValuePair[] calldata params
     ) external reinitializer(2) {
-        __checkBinIdsAndAllocations(binIds, binAllocationsX, binAllocationsY);
+        __checkBinIdsAndAllocations(binIds, binAllocations);
 
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
@@ -88,8 +85,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         strategyStorage.tokenY = IERC20Upgradeable(lbPair.tokenY());
         strategyStorage.binStep = binStep;
         strategyStorage.binIds = binIds;
-        strategyStorage.binAllocationsX = binAllocationsX;
-        strategyStorage.binAllocationsY = binAllocationsY;
+        strategyStorage.binAllocations = binAllocations;
 
         if (strategyStorage.tokenX == depositToken) {
             strategyStorage.pairDepositToken = IERC20Upgradeable(
@@ -189,17 +185,24 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         // Prepare params.
         uint256 binsAmount = strategyStorage.binIds.length;
+
         uint256[] memory distributionX = new uint256[](binsAmount);
         uint256[] memory distributionY = new uint256[](binsAmount);
 
+        (, , uint256 activeId) = strategyStorage.lbPair.getReservesAndId();
+
         for (uint256 i; i < binsAmount; ++i) {
             // Bin allocation has precision of 1e3 and TraderJoe V2 has 1e18.
-            distributionX[i] = strategyStorage.binAllocationsX[i] * 1e15;
-            distributionY[i] = strategyStorage.binAllocationsY[i] * 1e15;
+            if (strategyStorage.binIds[i] <= activeId) {
+                distributionX[i] = 0;
+                distributionY[i] = strategyStorage.binAllocations[i] * 1e15;
+            } else {
+                distributionX[i] = strategyStorage.binAllocations[i] * 1e15;
+                distributionY[i] = 0;
+            }
         }
 
         int256[] memory deltaIds = new int256[](binsAmount);
-        (, , uint256 activeId) = strategyStorage.lbPair.getReservesAndId();
 
         for (uint256 i; i < binsAmount; ++i) {
             deltaIds[i] = int256(strategyStorage.binIds[i]) - int256(activeId);
@@ -418,11 +421,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function adjustBins(
         uint256[] calldata binIds,
-        uint256[] calldata binAllocationsX,
-        uint256[] calldata binAllocationsY,
+        uint256[] calldata binAllocations,
         NameValuePair[] calldata params
     ) public onlyOwner {
-        __checkBinIdsAndAllocations(binIds, binAllocationsX, binAllocationsY);
+        __checkBinIdsAndAllocations(binIds, binAllocations);
 
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
@@ -436,8 +438,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         // Set bin IDs and allocations to the given ones.
         strategyStorage.binIds = binIds;
-        strategyStorage.binAllocationsX = binAllocationsX;
-        strategyStorage.binAllocationsY = binAllocationsY;
+        strategyStorage.binAllocations = binAllocations;
 
         // Deposit into the new bins with the new allocations.
         uint256 depositTokenIncrement = depositTokenAfter - depositTokenBefore;
@@ -447,17 +448,14 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function __checkBinIdsAndAllocations(
         uint256[] calldata binIds,
-        uint256[] calldata binAllocationsX,
-        uint256[] calldata binAllocationsY
+        uint256[] calldata binAllocations
     ) private pure {
         uint256 binsAmount = binIds.length;
-        uint256 allocationsAmountX = binAllocationsX.length;
-        uint256 allocationsAmountY = binAllocationsY.length;
+        uint256 allocationsAmount = binAllocations.length;
 
         // solhint-disable-next-line reason-string
         require(
-            binsAmount == allocationsAmountX &&
-                binsAmount == allocationsAmountY,
+            binsAmount == allocationsAmount,
             "TraderJoe: the number of bin IDs and allocations are different"
         );
 
@@ -466,24 +464,22 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             binsAmount >= 1 && binsAmount <= 51,
             "TraderJoe: too few or too many bin ID"
         );
-        // No need to check the number of allocations X and Y.
+        // No need to check the number of allocations.
 
         for (uint256 i; i < binsAmount; i++) {
             require(binIds[i] <= type(uint24).max, "TraderJoe: too big bin ID");
         }
 
-        uint256 allocationsX;
-        uint256 allocationsY;
+        uint256 allocations;
 
         for (uint256 i; i < binsAmount; i++) {
-            allocationsX += binAllocationsX[i];
-            allocationsY += binAllocationsY[i];
+            allocations += binAllocations[i];
         }
 
         // solhint-disable-next-line reason-string
         require(
-            allocationsX == 1e3 && allocationsY == 1e3,
-            "TraderJoe: the sum of allocations must be 1e3 each"
+            allocations == 1e3,
+            "TraderJoe: the sum of allocations must be 1e3"
         );
     }
 }

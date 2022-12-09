@@ -22,8 +22,7 @@ struct TraderJoeStorage {
     IERC20Upgradeable tokenY;
     uint256 binStep;
     uint256[] binIds;
-    uint256[] binAllocationsX;
-    uint256[] binAllocationsY;
+    uint256[] binAllocations;
 }
 
 library TraderJoeStorageLib {
