@@ -63,16 +63,16 @@ contract DnsVectorStrategy is
 
         require(
             initializeParams.aaveSupplyToken == InvestableLib.AVALANCHE_USDC,
-            "aaveSupplyToken != AVALANCHE_USDC"
+            "aaveSupplyToken != USDC"
         );
         require(
             initializeParams.aaveBorrowToken == InvestableLib.AVALANCHE_WAVAX,
-            "aaveBorrowToken != AVALANCHE_WAVAX"
+            "aaveBorrowToken!= WAVAX"
         );
         require(
             initializeParams.ammPairDepositToken ==
                 InvestableLib.AVALANCHE_USDC,
-            "ammPairDepositToken != AVALANCHE_USDC"
+            "ammPairDepositToken != USDC"
         );
 
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
