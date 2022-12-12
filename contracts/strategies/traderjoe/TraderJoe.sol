@@ -355,6 +355,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
+        uint256 pairDepositTokenBefore = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this)) - pairDepositTokenAmount;
+
         uint256 amountXIn;
         uint256 amountYIn;
 
@@ -457,6 +461,16 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
 
         strategyStorage.lbRouter.addLiquidity(liquidityParameters);
+
+        uint256 pairDepositTokenAfter = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
+
+        uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
+            pairDepositTokenBefore;
+
+        // Swap back remaining pairDepositToken to depositToken if possible.
+        __swapBack(pairDepositTokenIncrement);
     }
 
     function __withdraw(uint256 amount) private {
@@ -512,5 +526,28 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             0,
             path
         );
+    }
+
+    function __swapBack(uint256 amountIn) private {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        address[] memory path = new address[](2);
+        path[0] = address(strategyStorage.pairDepositToken);
+        path[1] = address(depositToken);
+        uint256[] memory binSteps = new uint256[](1);
+        binSteps[0] = strategyStorage.binStep;
+
+        try
+            strategyStorage.lbRouter.swapExactTokensForTokens(
+                amountIn,
+                0,
+                binSteps,
+                path,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            )
+        returns (uint256) {} catch {}
     }
 }
