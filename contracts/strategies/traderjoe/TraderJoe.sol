@@ -17,11 +17,11 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.1.1";
+        "brokkr.traderjoe_strategy.traderjoe_strategy_v1.2.1";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "TraderJoe Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.1.1";
+    string public constant version = "1.2.1";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
