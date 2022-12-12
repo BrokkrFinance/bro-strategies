@@ -145,6 +145,41 @@ function testTraderJoeAum() {
 
 function testTraderJoeInitialize() {
   describe("Initialize - TraderJoe USDC Strategy Specific", async function () {
+    it("should fail when passed different length of bin IDs and allocations", async function () {
+      const Strategy = await ethers.getContractFactory("TraderJoe")
+      await expect(
+        upgrades.deployProxy(
+          Strategy,
+          [
+            [
+              this.investmentToken.address,
+              Tokens.usdc,
+              this.depositFee,
+              this.depositFeeParams,
+              this.withdrawalFee,
+              this.withdrawalFeeParams,
+              this.performanceFee,
+              this.performanceFeeParams,
+              this.feeReceiver,
+              this.feeReceiverParams,
+              this.totalInvestmentLimit,
+              this.investmentLimitPerAddress,
+              this.priceOracle,
+              this.swapServiceProvider,
+              this.swapServiceRouter,
+              [],
+            ],
+            TraderJoe.lbPair,
+            TraderJoe.lbRouter,
+            1,
+            [0, 1, 2],
+            [300, 700],
+          ],
+          { kind: "uups" }
+        )
+      ).to.be.reverted
+    })
+
     it("should fail when passed too few bins", async function () {
       const Strategy = await ethers.getContractFactory("TraderJoe")
       await expect(
@@ -174,79 +209,6 @@ function testTraderJoeInitialize() {
             1,
             [],
             [1000],
-            [1000],
-          ],
-          { kind: "uups" }
-        )
-      ).to.be.reverted
-    })
-
-    it("should fail when passed different length of bin IDs and allocations X", async function () {
-      const Strategy = await ethers.getContractFactory("TraderJoe")
-      await expect(
-        upgrades.deployProxy(
-          Strategy,
-          [
-            [
-              this.investmentToken.address,
-              Tokens.usdc,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-              this.priceOracle,
-              this.swapServiceProvider,
-              this.swapServiceRouter,
-              [],
-            ],
-            TraderJoe.lbPair,
-            TraderJoe.lbRouter,
-            1,
-            [0, 1, 2],
-            [300, 300, 400],
-            [1000],
-          ],
-          { kind: "uups" }
-        )
-      ).to.be.reverted
-    })
-
-    it("should fail when passed different length of bin IDs and allocations Y", async function () {
-      const Strategy = await ethers.getContractFactory("TraderJoe")
-      await expect(
-        upgrades.deployProxy(
-          Strategy,
-          [
-            [
-              this.investmentToken.address,
-              Tokens.usdc,
-              this.depositFee,
-              this.depositFeeParams,
-              this.withdrawalFee,
-              this.withdrawalFeeParams,
-              this.performanceFee,
-              this.performanceFeeParams,
-              this.feeReceiver,
-              this.feeReceiverParams,
-              this.totalInvestmentLimit,
-              this.investmentLimitPerAddress,
-              this.priceOracle,
-              this.swapServiceProvider,
-              this.swapServiceRouter,
-              [],
-            ],
-            TraderJoe.lbPair,
-            TraderJoe.lbRouter,
-            1,
-            [0, 1, 2],
-            [1000],
-            [300, 300, 400],
           ],
           { kind: "uups" }
         )
@@ -285,7 +247,6 @@ function testTraderJoeInitialize() {
               29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
             ],
             [1000],
-            [1000],
           ],
           { kind: "uups" }
         )
@@ -320,7 +281,6 @@ function testTraderJoeInitialize() {
             TraderJoe.lbRouter,
             1,
             [16777216], // 2^24.
-            [1000],
             [1000],
           ],
           { kind: "uups" }
@@ -357,7 +317,6 @@ function testTraderJoeInitialize() {
             1,
             [8388608],
             [],
-            [1000],
           ],
           { kind: "uups" }
         )
@@ -396,7 +355,6 @@ function testTraderJoeInitialize() {
               0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
               29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
             ],
-            [1000],
           ],
           { kind: "uups" }
         )
@@ -432,7 +390,6 @@ function testTraderJoeInitialize() {
             1,
             [8388607, 8388608, 8388609],
             [0, 700, 299], // It's sum should be 1e3.
-            [300, 700, 0],
           ],
           { kind: "uups" }
         )
@@ -468,7 +425,6 @@ function testTraderJoeInitialize() {
             1,
             [8388607, 8388608, 8388609],
             [0, 700, 301],
-            [300, 700, 0],
           ],
           { kind: "uups" }
         )

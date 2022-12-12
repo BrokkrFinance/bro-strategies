@@ -41,28 +41,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         __UUPSUpgradeable_init();
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        strategyStorage.lbPair = lbPair;
-        strategyStorage.lbRouter = lbRouter;
-        strategyStorage.tokenX = IERC20Upgradeable(lbPair.tokenX());
-        strategyStorage.tokenY = IERC20Upgradeable(lbPair.tokenY());
-        strategyStorage.binStep = binStep;
-        strategyStorage.binIds = binIds;
-        strategyStorage.binAllocations = binAllocations;
-
-        if (strategyStorage.tokenX == depositToken) {
-            strategyStorage.pairDepositToken = IERC20Upgradeable(
-                strategyStorage.tokenY
-            );
-        } else if (strategyStorage.tokenY == depositToken) {
-            strategyStorage.pairDepositToken = IERC20Upgradeable(
-                strategyStorage.tokenX
-            );
-        } else {
-            revert InvalidTraderJoeLBPair();
-        }
+        __initialize(lbPair, lbRouter, binStep, binIds, binAllocations);
     }
 
     function reinitialize(
@@ -70,8 +49,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         ITraderJoeLBRouter lbRouter,
         uint256 binStep,
         uint256[] calldata binIds,
-        uint256[] calldata binAllocations,
-        NameValuePair[] calldata params
+        uint256[] calldata binAllocations
     ) external reinitializer(2) {
         __checkBinIdsAndAllocations(binIds, binAllocations);
 
@@ -79,33 +57,17 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             .getStorage();
 
         // Initialization.
-        strategyStorage.lbPair = lbPair;
-        strategyStorage.lbRouter = lbRouter;
-        strategyStorage.tokenX = IERC20Upgradeable(lbPair.tokenX());
-        strategyStorage.tokenY = IERC20Upgradeable(lbPair.tokenY());
-        strategyStorage.binStep = binStep;
-        strategyStorage.binIds = binIds;
-        strategyStorage.binAllocations = binAllocations;
+        __initialize(lbPair, lbRouter, binStep, binIds, binAllocations);
 
-        if (strategyStorage.tokenX == depositToken) {
-            strategyStorage.pairDepositToken = IERC20Upgradeable(
-                strategyStorage.tokenY
-            );
-        } else if (strategyStorage.tokenY == depositToken) {
-            strategyStorage.pairDepositToken = IERC20Upgradeable(
-                strategyStorage.tokenX
-            );
-        } else {
-            revert InvalidTraderJoeLBPair();
-        }
-
-        // Migration from V1 to V2 consists of three steps.
+        // Migration from V1 to V2 consists of two steps.
         // 0. Withdraw all depositToken and pairDepositToken from V1.
-        // 1. Swap all pairDepositToken to depositToken.
-        // 2. Deposit all depositToken into V2.
+        // 1. Deposit all withdrawn depositToken and pairDepositToken into V2.
 
         // 0. Withdraw all depositToken and pairDepositToken from V1.
         uint256 depositTokenBefore = depositToken.balanceOf(address(this));
+        uint256 pairDepositTokenBefore = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
 
         uint256 lpBalanceToWithdraw = strategyStorage
             .masterChef
@@ -133,19 +95,17 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             block.timestamp
         );
 
-        // 1. Swap all pairDepositToken to depositToken.
-        __swapTokens(
-            strategyStorage.pairDepositToken.balanceOf(address(this)),
-            strategyStorage.pairDepositToken,
-            depositToken
-        );
-
         uint256 depositTokenAfter = depositToken.balanceOf(address(this));
+        uint256 pairDepositTokenAfter = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
 
-        // 2. Deposit all depositToken into V2.
+        // 1. Deposit all withdrawn depositToken and pairDepositToken into V2.
         uint256 depositTokenIncrement = depositTokenAfter - depositTokenBefore;
+        uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
+            pairDepositTokenBefore;
 
-        _deposit(depositTokenIncrement, params);
+        __deposit(depositTokenIncrement, pairDepositTokenIncrement);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
@@ -155,86 +115,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         virtual
         override
     {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        // Swap half of depositToken to pairDepositToken.
-        uint256 swapAmount = amount / 2;
-
-        uint256 pairDepositTokenAmount = __swapTokens(
-            swapAmount,
-            depositToken,
-            strategyStorage.pairDepositToken
-        );
-        uint256 depositTokenAmount = amount - swapAmount;
-
-        uint256 amountX;
-        uint256 amountY;
-        if (strategyStorage.tokenX == depositToken) {
-            amountX = depositTokenAmount;
-            amountY = pairDepositTokenAmount;
-        } else {
-            amountX = pairDepositTokenAmount;
-            amountY = depositTokenAmount;
-        }
-
-        // Prepare params.
-        uint256 binsAmount = strategyStorage.binIds.length;
-
-        uint256[] memory distributionX = new uint256[](binsAmount);
-        uint256[] memory distributionY = new uint256[](binsAmount);
-
-        (, , uint256 activeId) = strategyStorage.lbPair.getReservesAndId();
-
-        for (uint256 i; i < binsAmount; ++i) {
-            // Bin allocation has precision of 1e3 and TraderJoe V2 has 1e18.
-            if (strategyStorage.binIds[i] <= activeId) {
-                distributionX[i] = 0;
-                distributionY[i] = strategyStorage.binAllocations[i] * 1e15;
-            } else {
-                distributionX[i] = strategyStorage.binAllocations[i] * 1e15;
-                distributionY[i] = 0;
-            }
-        }
-
-        int256[] memory deltaIds = new int256[](binsAmount);
-
-        for (uint256 i; i < binsAmount; ++i) {
-            deltaIds[i] = int256(strategyStorage.binIds[i]) - int256(activeId);
-        }
-
-        // Deposit.
-        ITraderJoeLBRouter.LiquidityParameters memory liquidityParameters = ITraderJoeLBRouter
-            .LiquidityParameters(
-                address(strategyStorage.tokenX),
-                address(strategyStorage.tokenY),
-                strategyStorage.binStep,
-                amountX,
-                amountY,
-                0, // Base contracts take care of min amount.
-                0, // Base contracts take care of min amount.
-                activeId,
-                0,
-                deltaIds,
-                distributionX,
-                distributionY,
-                address(this),
-                // solhint-disable-next-line not-rely-on-time
-                block.timestamp
-            );
-
-        strategyStorage.tokenX.approve(
-            address(strategyStorage.lbRouter),
-            amountX
-        );
-        strategyStorage.tokenY.approve(
-            address(strategyStorage.lbRouter),
-            amountY
-        );
-
-        strategyStorage.lbRouter.addLiquidity(liquidityParameters);
-
-        // Since the amount of remaining pairDepositToken is nearly zero, skip swapping it back to depositToken.
+        __deposit(amount, 0);
     }
 
     function _withdraw(uint256 amount, NameValuePair[] calldata)
@@ -245,53 +126,23 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
-        // Calculate LP token balance to withdraw per bin.
-        uint256 binsAmount = strategyStorage.binIds.length;
-        uint256[] memory amounts = new uint256[](binsAmount);
-        uint256 investmentTokenSupply = getInvestmentTokenSupply();
-
-        for (uint256 i; i < binsAmount; ++i) {
-            uint256 lpTokenBalance = strategyStorage.lbPair.balanceOf(
-                address(this),
-                strategyStorage.binIds[i]
-            );
-
-            amounts[i] = (lpTokenBalance * amount) / investmentTokenSupply;
-        }
-
         // Withdraw.
         uint256 pairdepositTokenBefore = strategyStorage
             .pairDepositToken
             .balanceOf(address(this));
 
-        strategyStorage.lbPair.setApprovalForAll(
-            address(strategyStorage.lbRouter),
-            true
-        );
-
-        strategyStorage.lbRouter.removeLiquidity(
-            address(strategyStorage.tokenX),
-            address(strategyStorage.tokenY),
-            uint16(strategyStorage.binStep),
-            0, // Base contracts take care of min amount.
-            0, // Base contracts take care of min amount.
-            strategyStorage.binIds,
-            amounts,
-            address(this),
-            // solhint-disable-next-line not-rely-on-time
-            block.timestamp
-        );
+        __withdraw(amount);
 
         uint256 pairDepositTokenAfter = strategyStorage
             .pairDepositToken
             .balanceOf(address(this));
 
         // Swap withdrawn pairDepositToken to depositToken.
-        uint256 pairDepositIncrement = pairDepositTokenAfter -
+        uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
             pairdepositTokenBefore;
 
         __swapTokens(
-            pairDepositIncrement,
+            pairDepositTokenIncrement,
             strategyStorage.pairDepositToken,
             depositToken
         );
@@ -314,11 +165,11 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             .pairDepositToken
             .balanceOf(address(this));
 
-        uint256 pairDepositIncrement = pairDepositTokenAfter -
+        uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
             pairdepositTokenBefore;
 
         __swapTokens(
-            pairDepositIncrement,
+            pairDepositTokenIncrement,
             strategyStorage.pairDepositToken,
             depositToken
         );
@@ -406,8 +257,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function adjustBins(
         uint256[] calldata binIds,
-        uint256[] calldata binAllocations,
-        NameValuePair[] calldata params
+        uint256[] calldata binAllocations
     ) public onlyOwner {
         __checkBinIdsAndAllocations(binIds, binAllocations);
 
@@ -417,7 +267,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         // Withdraw from all bins.
         uint256 depositTokenBefore = depositToken.balanceOf(address(this));
 
-        _withdraw(getInvestmentTokenSupply(), params);
+        __withdraw(getInvestmentTokenSupply());
 
         uint256 depositTokenAfter = depositToken.balanceOf(address(this));
 
@@ -428,7 +278,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         // Deposit into the new bins with the new allocations.
         uint256 depositTokenIncrement = depositTokenAfter - depositTokenBefore;
 
-        _deposit(depositTokenIncrement, params);
+        __deposit(depositTokenIncrement, 0);
     }
 
     function __checkBinIdsAndAllocations(
@@ -437,7 +287,6 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     ) private pure {
         uint256 binsAmount = binIds.length;
         uint256 allocationsAmount = binAllocations.length;
-
         // solhint-disable-next-line reason-string
         require(
             binsAmount == allocationsAmount,
@@ -465,6 +314,186 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         require(
             allocations == 1e3,
             "TraderJoe: the sum of allocations must be 1e3"
+        );
+    }
+
+    function __initialize(
+        ITraderJoeLBPair lbPair,
+        ITraderJoeLBRouter lbRouter,
+        uint256 binStep,
+        uint256[] calldata binIds,
+        uint256[] calldata binAllocations
+    ) private {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        strategyStorage.lbPair = lbPair;
+        strategyStorage.lbRouter = lbRouter;
+        strategyStorage.tokenX = IERC20Upgradeable(lbPair.tokenX());
+        strategyStorage.tokenY = IERC20Upgradeable(lbPair.tokenY());
+        strategyStorage.binStep = binStep;
+        strategyStorage.binIds = binIds;
+        strategyStorage.binAllocations = binAllocations;
+
+        if (strategyStorage.tokenX == depositToken) {
+            strategyStorage.pairDepositToken = IERC20Upgradeable(
+                strategyStorage.tokenY
+            );
+        } else if (strategyStorage.tokenY == depositToken) {
+            strategyStorage.pairDepositToken = IERC20Upgradeable(
+                strategyStorage.tokenX
+            );
+        } else {
+            revert InvalidTraderJoeLBPair();
+        }
+    }
+
+    function __deposit(
+        uint256 depositTokenAmount,
+        uint256 pairDepositTokenAmount
+    ) private {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        uint256 amountXIn;
+        uint256 amountYIn;
+
+        if (strategyStorage.tokenX == depositToken) {
+            amountXIn = depositTokenAmount;
+            amountYIn = pairDepositTokenAmount;
+        } else {
+            amountXIn = pairDepositTokenAmount;
+            amountYIn = depositTokenAmount;
+        }
+
+        uint256 binsAmount = strategyStorage.binIds.length;
+
+        (, , uint256 activeId) = strategyStorage.lbPair.getReservesAndId();
+
+        uint256 totalAmount = amountXIn + amountYIn;
+        uint256 amountX;
+        uint256 amountY;
+
+        // Distributions.
+        uint256[] memory distributionX = new uint256[](binsAmount);
+        uint256[] memory distributionY = new uint256[](binsAmount);
+
+        for (uint256 i; i < binsAmount; ++i) {
+            // Bin allocation has precision of 1e3.
+            uint256 amount = (totalAmount * strategyStorage.binAllocations[i]) /
+                1e3;
+
+            if (strategyStorage.binIds[i] <= activeId) {
+                distributionY[i] = amount;
+                amountY += amount;
+            } else if (strategyStorage.binIds[i] > activeId) {
+                distributionX[i] = amount;
+                amountX += amount;
+            }
+        }
+
+        for (uint256 i; i < binsAmount; ++i) {
+            // TraderJoe V2 has precision of 1e18. Calibrate distributions so that the sum of them equals to 1e18.
+            if (strategyStorage.binIds[i] <= activeId) {
+                distributionY[i] = (distributionY[i] * 1e18) / amountY;
+            } else if (strategyStorage.binIds[i] > activeId) {
+                distributionX[i] = (distributionX[i] * 1e18) / amountX;
+            }
+        }
+
+        // Swap only as much as is needed.
+        if (amountXIn > amountX) {
+            amountY =
+                amountYIn +
+                __swapTokens(
+                    amountXIn - amountX,
+                    strategyStorage.tokenX,
+                    strategyStorage.tokenY
+                );
+        } else if (amountYIn > amountY) {
+            amountX =
+                amountXIn +
+                __swapTokens(
+                    amountYIn - amountY,
+                    strategyStorage.tokenY,
+                    strategyStorage.tokenX
+                );
+        }
+
+        // Delta IDs.
+        int256[] memory deltaIds = new int256[](binsAmount);
+
+        for (uint256 i; i < binsAmount; ++i) {
+            deltaIds[i] = int256(strategyStorage.binIds[i]) - int256(activeId);
+        }
+
+        // Deposit.
+        ITraderJoeLBRouter.LiquidityParameters memory liquidityParameters = ITraderJoeLBRouter
+            .LiquidityParameters(
+                address(strategyStorage.tokenX),
+                address(strategyStorage.tokenY),
+                strategyStorage.binStep,
+                amountX,
+                amountY,
+                0, // Base contracts take care of min amount.
+                0, // Base contracts take care of min amount.
+                activeId,
+                0,
+                deltaIds,
+                distributionX,
+                distributionY,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            );
+
+        strategyStorage.tokenX.approve(
+            address(strategyStorage.lbRouter),
+            amountX
+        );
+        strategyStorage.tokenY.approve(
+            address(strategyStorage.lbRouter),
+            amountY
+        );
+
+        strategyStorage.lbRouter.addLiquidity(liquidityParameters);
+    }
+
+    function __withdraw(uint256 amount) private {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        // Calculate LP token balance to withdraw per bin.
+        uint256 binsAmount = strategyStorage.binIds.length;
+        uint256[] memory amounts = new uint256[](binsAmount);
+        uint256 investmentTokenSupply = getInvestmentTokenSupply();
+
+        for (uint256 i; i < binsAmount; ++i) {
+            uint256 lpTokenBalance = strategyStorage.lbPair.balanceOf(
+                address(this),
+                strategyStorage.binIds[i]
+            );
+
+            amounts[i] = (lpTokenBalance * amount) / investmentTokenSupply;
+        }
+
+        // Withdraw.
+        strategyStorage.lbPair.setApprovalForAll(
+            address(strategyStorage.lbRouter),
+            true
+        );
+
+        strategyStorage.lbRouter.removeLiquidity(
+            address(strategyStorage.tokenX),
+            address(strategyStorage.tokenY),
+            uint16(strategyStorage.binStep),
+            0, // Base contracts take care of min amount.
+            0, // Base contracts take care of min amount.
+            strategyStorage.binIds,
+            amounts,
+            address(this),
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp
         );
     }
 
