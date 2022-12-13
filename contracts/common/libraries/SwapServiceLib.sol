@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./Math.sol";
 
+import "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
 import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -10,7 +11,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 error InvalidSwapServiceProvider();
 
 enum SwapServiceProvider {
-    TraderJoe
+    TraderJoe,
+    TraderJoeV2
 }
 
 struct SwapService {
@@ -25,7 +27,8 @@ library SwapServiceLib {
         SwapService memory swapService_,
         uint256 amountIn,
         uint256 minAmountOut,
-        address[] memory path
+        address[] memory path,
+        uint256[] memory binSteps
     ) internal returns (uint256 amountOut) {
         if (swapService_.provider == SwapServiceProvider.TraderJoe) {
             ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(
@@ -45,6 +48,25 @@ library SwapServiceLib {
                 // solhint-disable-next-line not-rely-on-time
                 block.timestamp
             )[path.length - 1];
+        } else if (swapService_.provider == SwapServiceProvider.TraderJoeV2) {
+            ITraderJoeLBRouter traderjoeLBRouter = ITraderJoeLBRouter(
+                swapService_.router
+            );
+
+            IERC20Upgradeable(path[0]).approve(
+                address(traderjoeLBRouter),
+                amountIn
+            );
+
+            amountOut = traderjoeLBRouter.swapExactTokensForTokens(
+                amountIn,
+                minAmountOut,
+                binSteps,
+                path,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            );
         } else {
             revert InvalidSwapServiceProvider();
         }
@@ -54,7 +76,8 @@ library SwapServiceLib {
         SwapService memory swapService_,
         uint256 amountOut,
         uint256 maxAmountIn,
-        address[] memory path
+        address[] memory path,
+        uint256[] memory binSteps
     ) internal returns (uint256 amountIn) {
         if (swapService_.provider == SwapServiceProvider.TraderJoe) {
             ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(
@@ -77,6 +100,27 @@ library SwapServiceLib {
                 // solhint-disable-next-line not-rely-on-time
                 block.timestamp
             )[0];
+        } else if (swapService_.provider == SwapServiceProvider.TraderJoeV2) {
+            ITraderJoeLBRouter traderjoeLBRouter = ITraderJoeLBRouter(
+                swapService_.router
+            );
+
+            IERC20Upgradeable(path[0]).approve(
+                address(traderjoeLBRouter),
+                maxAmountIn
+            );
+
+            amountOut = traderjoeLBRouter.swapTokensForExactTokens(
+                amountOut,
+                maxAmountIn,
+                binSteps,
+                path,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            )[0];
+
+            IERC20Upgradeable(path[0]).approve(address(traderjoeLBRouter), 0);
         } else {
             revert InvalidSwapServiceProvider();
         }
