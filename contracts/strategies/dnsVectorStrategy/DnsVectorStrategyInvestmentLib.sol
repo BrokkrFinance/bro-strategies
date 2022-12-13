@@ -129,7 +129,8 @@ library DnsVectorStrategyInvestmentLib {
                 strategyStorage.swapService,
                 aaveBorrowTokenBalanceChange,
                 0,
-                path
+                path,
+                new uint256[](0)
             );
         }
 
@@ -213,7 +214,8 @@ library DnsVectorStrategyInvestmentLib {
                 strategyStorage.swapService,
                 amountIn,
                 0,
-                path
+                path,
+                new uint256[](0)
             );
         } else if (aaveBorrowTokenChangeAmount < vAaveBorrowTokenUserAmount) {
             // traderJoe returned less borrowToken than the user needs to pay off debt,
@@ -228,7 +230,8 @@ library DnsVectorStrategyInvestmentLib {
                 strategyStorage.swapService,
                 amountOut,
                 ammPairDepositTokenChangeAmount,
-                path
+                path,
+                new uint256[](0)
             );
             // assuming ammPairDepositToken == depositToken
         }
@@ -286,7 +289,8 @@ library DnsVectorStrategyInvestmentLib {
             strategyStorage.swapService,
             joeTokenBalanceChange,
             0,
-            path
+            path,
+            new uint256[](0)
         );
     }
 
@@ -339,7 +343,8 @@ library DnsVectorStrategyInvestmentLib {
             strategyStorage.swapService,
             aaveSupplyTokenAmountChange,
             0,
-            path
+            path,
+            new uint256[](0)
         );
         uint256 aaveBorrowTokenAmountChange = strategyStorage
             .aaveBorrowToken
@@ -387,7 +392,8 @@ library DnsVectorStrategyInvestmentLib {
             strategyStorage.swapService,
             aaveBorrowTokenAmount,
             0,
-            path
+            path,
+            new uint256[](0)
         );
         depositTokenBalanceChange =
             strategyStorage.depositToken.balanceOf(address(this)) -

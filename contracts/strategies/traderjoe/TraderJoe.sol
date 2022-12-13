@@ -530,15 +530,21 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         IERC20Upgradeable tokenIn,
         IERC20Upgradeable tokenOut
     ) private returns (uint256 amountOut) {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
         address[] memory path = new address[](2);
         path[0] = address(tokenIn);
         path[1] = address(tokenOut);
+        uint256[] memory binSteps = new uint256[](1);
+        binSteps[0] = strategyStorage.binStep;
 
         amountOut = SwapServiceLib.swapExactTokensForTokens(
             swapService,
             amountIn,
             0,
-            path
+            path,
+            binSteps
         );
     }
 

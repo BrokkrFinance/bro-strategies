@@ -90,7 +90,8 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 swapService,
                 amount,
                 0,
-                path
+                path,
+                new uint256[](0)
             );
         }
 
@@ -165,7 +166,8 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 swapService,
                 poolDepositTokenBalanceIncrement,
                 0,
-                path
+                path,
+                new uint256[](0)
             );
         }
     }
@@ -184,7 +186,8 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             swapService,
             strategyStorage.stgToken.balanceOf(address(this)),
             0,
-            path
+            path,
+            new uint256[](0)
         );
     }
 
