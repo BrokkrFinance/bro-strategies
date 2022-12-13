@@ -259,7 +259,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 strategyStorage.binIds[i]
             );
 
-            // Assume that USDC.e price equals to USDC price.
+            // Assume that token X and token Y have the same price.
             uint256 valuation = (lpTokenBalance * (reserveX + reserveY)) /
                 totalSupply;
 
@@ -392,7 +392,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         (, , uint256 activeId) = strategyStorage.lbPair.getReservesAndId();
 
-        // Assume that USDC.e price equals to USDC price.
+        // Assume that token X and token Y have the same price.
         uint256 totalAmount = amountXIn + amountYIn;
         uint256 amountX;
         uint256 amountY;
@@ -561,7 +561,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         (uint256 amountOut, ) = strategyStorage.lbRouter.getSwapOut(
             address(strategyStorage.lbPair),
             amountIn,
-            true
+            strategyStorage.tokenY == depositToken
         );
 
         if (amountOut == 0) {
