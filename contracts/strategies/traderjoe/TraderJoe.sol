@@ -13,6 +13,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    error InvalidAllocations();
+    error InvalidBinId();
+    error InvalidBinsAmount();
+    error InvalidBinsAndAllocations();
     error InvalidTraderJoeLBPair();
     error TooBigValuationLoss();
 
@@ -306,31 +310,28 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     ) private pure {
         uint256 binsAmount = binIds.length;
         uint256 allocationsAmount = binAllocations.length;
-        // solhint-disable-next-line reason-string
-        require(
-            binsAmount == allocationsAmount,
-            "TraderJoe: the number of bin IDs and allocations are different"
-        );
 
-        // solhint-disable-next-line reason-string
-        require(
-            binsAmount >= 1 && binsAmount <= 51,
-            "TraderJoe: too few or too many bin ID"
-        );
+        if (binsAmount != allocationsAmount) {
+            revert InvalidBinsAndAllocations();
+        }
+
+        if (binsAmount < 1 || binsAmount > 51) {
+            revert InvalidBinsAmount();
+        }
         // No need to check the number of allocations.
 
         uint256 allocations;
 
         for (uint256 i; i < binsAmount; i++) {
-            require(binIds[i] <= type(uint24).max, "TraderJoe: too big bin ID");
+            if (binIds[i] > type(uint24).max) {
+                revert InvalidBinId();
+            }
             allocations += binAllocations[i];
         }
 
-        // solhint-disable-next-line reason-string
-        require(
-            allocations == 1e3,
-            "TraderJoe: the sum of allocations must be 1e3"
-        );
+        if (allocations != 1e3) {
+            revert InvalidAllocations();
+        }
     }
 
     function __initialize(
@@ -556,22 +557,16 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
-        address[] memory path = new address[](2);
-        path[0] = address(strategyStorage.pairDepositToken);
-        path[1] = address(depositToken);
-        uint256[] memory binSteps = new uint256[](1);
-        binSteps[0] = strategyStorage.binStep;
+        (uint256 amountOut, ) = strategyStorage.lbRouter.getSwapOut(
+            address(strategyStorage.lbPair),
+            amountIn,
+            true
+        );
 
-        try
-            strategyStorage.lbRouter.swapExactTokensForTokens(
-                amountIn,
-                0,
-                binSteps,
-                path,
-                address(this),
-                // solhint-disable-next-line not-rely-on-time
-                block.timestamp
-            )
-        returns (uint256) {} catch {}
+        if (amountOut == 0) {
+            return;
+        }
+
+        __swapTokens(amountIn, strategyStorage.pairDepositToken, depositToken);
     }
 }
