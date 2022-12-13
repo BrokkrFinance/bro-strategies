@@ -300,13 +300,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
         // No need to check the number of allocations.
 
-        for (uint256 i; i < binsAmount; i++) {
-            require(binIds[i] <= type(uint24).max, "TraderJoe: too big bin ID");
-        }
-
         uint256 allocations;
 
         for (uint256 i; i < binsAmount; i++) {
+            require(binIds[i] <= type(uint24).max, "TraderJoe: too big bin ID");
             allocations += binAllocations[i];
         }
 
@@ -374,6 +371,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         (, , uint256 activeId) = strategyStorage.lbPair.getReservesAndId();
 
+        // Assume that USDC.e price equals to USDC price.
         uint256 totalAmount = amountXIn + amountYIn;
         uint256 amountX;
         uint256 amountY;
