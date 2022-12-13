@@ -14,6 +14,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     error InvalidTraderJoeLBPair();
+    error TooBigValuationLoss();
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
@@ -49,7 +50,8 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         ITraderJoeLBRouter lbRouter,
         uint256 binStep,
         uint256[] calldata binIds,
-        uint256[] calldata binAllocations
+        uint256[] calldata binAllocations,
+        uint256 mimValuation
     ) external reinitializer(2) {
         __checkBinIdsAndAllocations(binIds, binAllocations);
 
@@ -59,9 +61,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         // Initialization.
         __initialize(lbPair, lbRouter, binStep, binIds, binAllocations);
 
-        // Migration from V1 to V2 consists of two steps.
+        // Migration from V1 to V2 consists of three steps.
         // 0. Withdraw all depositToken and pairDepositToken from V1.
         // 1. Deposit all withdrawn depositToken and pairDepositToken into V2.
+        // 2. Check if valuation after migration is greater than or equal to minValuation.
 
         // 0. Withdraw all depositToken and pairDepositToken from V1.
         uint256 depositTokenBefore = depositToken.balanceOf(address(this));
@@ -106,6 +109,19 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             pairDepositTokenBefore;
 
         __deposit(depositTokenIncrement, pairDepositTokenIncrement);
+
+        // 2. Check if valuation after migration is greater than or equal to minValuation.
+        Valuation[] memory assetValuations = _getAssetValuations(true, false);
+        uint256 valuationsAmount = assetValuations.length;
+        uint256 valuation;
+
+        for (uint256 i; i < valuationsAmount; i++) {
+            valuation += assetValuations[i].valuation;
+        }
+
+        if (valuation < mimValuation) {
+            revert TooBigValuationLoss();
+        }
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
