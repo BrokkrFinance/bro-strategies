@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import "../../common/libraries/SwapServiceLib.sol";
 import "../../dependencies/traderjoe/ITraderJoeLBPair.sol";
 import "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
 import "../../dependencies/traderjoe/ITraderJoeMasterChef.sol";
@@ -12,10 +13,12 @@ import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 struct TraderJoeStorage {
     ITraderJoeRouter router; // Obsolete.
     ITraderJoeMasterChef masterChef; // Obsolete.
-    IERC20Upgradeable pairDepositToken; // Obsolete.
+    IERC20Upgradeable pairDepositToken;
     ITraderJoePair lpToken; // Obsolete.
     IERC20Upgradeable joeToken; // Obsolete.
     uint256 farmId; // Obsolete.
+    IERC20Upgradeable depositToken; // To make it accessible from other libraries.
+    SwapService swapService; // To make it accessible from other libraries.
     ITraderJoeLBPair lbPair;
     ITraderJoeLBRouter lbRouter;
     IERC20Upgradeable tokenX;

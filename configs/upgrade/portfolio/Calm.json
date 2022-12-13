@@ -36,12 +36,20 @@
     "newImplementation": "TraderJoe",
     "functionName": "reinitialize",
     "functionArgs": [
-      "0x18332988456C4Bd9ABa6698ec748b331516F5A14",
-      "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3",
-      1,
-      [8388607, 8388608, 8388609],
-      [100, 800, 100],
+      [
+        "0x18332988456C4Bd9ABa6698ec748b331516F5A14",
+        "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3",
+        1,
+        [8388607, 8388608, 8388609],
+        [100, 800, 100]
+      ],
       0
+    ],
+    "libraries": [
+      {
+        "name": "TraderJoeInvestmentLib",
+        "dependencies": []
+      }
     ]
   },
   {

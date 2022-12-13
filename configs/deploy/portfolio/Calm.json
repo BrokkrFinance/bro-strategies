@@ -181,13 +181,20 @@
       "swapService": { "$ref": "../../../constants/SwapServices.json#/traderjoeV2" },
       "roleToUsers": [],
       "extraArgs": [
-        { "$ref": "../../../constants/addresses/TraderJoe.json#/lbPair" },
-        { "$ref": "../../../constants/addresses/TraderJoe.json#/lbRouter" },
-        1,
-        [8388607, 8388608, 8388609],
-        [100, 800, 100]
+        [
+          { "$ref": "../../../constants/addresses/TraderJoe.json#/lbPair" },
+          { "$ref": "../../../constants/addresses/TraderJoe.json#/lbRouter" },
+          1,
+          [8388607, 8388608, 8388609],
+          [100, 800, 100]
+        ]
       ],
-      "libraries": []
+      "libraries": [
+        {
+          "name": "TraderJoeInvestmentLib",
+          "dependencies": []
+        }
+      ]
     },
     {
       "type": "strategy",
