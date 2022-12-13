@@ -289,10 +289,16 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         // Withdraw from all bins.
         uint256 depositTokenBefore = depositToken.balanceOf(address(this));
+        uint256 pairDepositTokenBefore = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
 
         __withdraw(getInvestmentTokenSupply());
 
         uint256 depositTokenAfter = depositToken.balanceOf(address(this));
+        uint256 pairDepositTokenAfter = strategyStorage
+            .pairDepositToken
+            .balanceOf(address(this));
 
         // Set bin IDs and allocations to the given ones.
         strategyStorage.binIds = binIds;
@@ -300,8 +306,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         // Deposit into the new bins with the new allocations.
         uint256 depositTokenIncrement = depositTokenAfter - depositTokenBefore;
+        uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
+            pairDepositTokenBefore;
 
-        __deposit(depositTokenIncrement, 0);
+        __deposit(depositTokenIncrement, pairDepositTokenIncrement);
     }
 
     function __checkBinIdsAndAllocations(
