@@ -1,3 +1,5 @@
+import { Library } from "./library"
+
 export interface LiveConfig {
   name: string
   address: string
@@ -9,4 +11,5 @@ export interface UpgradeConfig {
   newImplementation: string
   functionName?: string
   functionArgs?: any[]
+  libraries?: Library[]
 }

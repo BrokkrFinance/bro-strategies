@@ -109,16 +109,7 @@ async function deployUUPSUpgradeableStrategy(
   const { ethers } = require("hardhat")
 
   // Deploy libraries.
-  const libraries: { [libraryName: string]: string } = {}
-
-  for (const strategyLibrary of strategyLibraries.libraries) {
-    const Library = await ethers.getContractFactory(strategyLibrary.name)
-    const library = await Library.deploy()
-
-    libraries[strategyLibrary.name] = library.address
-
-    // TODO: The functionality of libraries depending on other libraries is not yet supported
-  }
+  const libraries = await deployLibraries(strategyLibraries)
 
   // Contact factories.
   const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
@@ -164,6 +155,24 @@ async function deployUUPSUpgradeableStrategy(
   await investmentToken.transferOwnership(strategy.address)
 
   return strategy
+}
+
+async function deployLibraries(strategyLibraries: StrategyLibraries): Promise<{ [libraryName: string]: string }> {
+  // Get an instance of HRE.
+  const { ethers } = require("hardhat")
+
+  const libraries: { [libraryName: string]: string } = {}
+
+  for (const strategyLibrary of strategyLibraries.libraries) {
+    const Library = await ethers.getContractFactory(strategyLibrary.name)
+    const library = await Library.deploy()
+
+    libraries[strategyLibrary.name] = library.address
+
+    // TODO: The functionality of libraries depending on other libraries is not yet supported
+  }
+
+  return libraries
 }
 
 export async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {
@@ -228,10 +237,23 @@ async function upgradeInvestable(name: string): Promise<Contract> {
       }
     }
 
-    const NewImplementation = await ethers.getContractFactory(upgradeConfig.newImplementation, owner)
+    let libraries: { [libraryName: string]: string } = {}
+    if (upgradeConfig.libraries !== undefined) {
+      // Deploy libraries.
+      libraries = await deployLibraries({
+        libraries: upgradeConfig.libraries,
+      })
+    }
+
+    // Contact factories.
+    const NewImplementation = await ethers.getContractFactory(upgradeConfig.newImplementation, {
+      signer: owner,
+      libraries,
+    })
     const newImplementation = await upgrades.upgradeProxy(upgradeConfig.proxy, NewImplementation, {
-      kind: "uups",
       call,
+      kind: "uups",
+      unsafeAllow: ["external-library-linking"],
     })
     await newImplementation.deployed()
   }
