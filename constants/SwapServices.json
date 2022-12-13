@@ -2,5 +2,9 @@
   "traderjoe": {
     "provider": 0,
     "router": "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
+  },
+  "traderjoeV2": {
+    "provider": 1,
+    "router": "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3"
   }
 }

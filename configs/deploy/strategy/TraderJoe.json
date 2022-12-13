@@ -20,7 +20,7 @@
       "totalInvestmentLimit": 1e20,
       "investmentLimitPerAddress": 1e20,
       "oracle": { "$ref": "../../../constants/Oracles.json#/aave" },
-      "swapService": { "$ref": "../../../constants/SwapServices.json#/traderjoe" },
+      "swapService": { "$ref": "../../../constants/SwapServices.json#/traderjoeV2" },
       "roleToUsers": [],
       "extraArgs": [
         { "$ref": "../../../constants/addresses/TraderJoe.json#/lbPair" },
