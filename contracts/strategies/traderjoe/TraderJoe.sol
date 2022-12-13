@@ -55,7 +55,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 binStep,
         uint256[] calldata binIds,
         uint256[] calldata binAllocations,
-        uint256 mimValuation
+        uint256 minValuation
     ) external reinitializer(2) {
         __checkBinIdsAndAllocations(binIds, binAllocations);
 
@@ -126,7 +126,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             valuation += assetValuations[i].valuation;
         }
 
-        if (valuation < mimValuation) {
+        if (valuation < minValuation) {
             revert TooBigValuationLoss();
         }
     }
@@ -326,6 +326,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             if (binIds[i] > type(uint24).max) {
                 revert InvalidBinId();
             }
+
             allocations += binAllocations[i];
         }
 
