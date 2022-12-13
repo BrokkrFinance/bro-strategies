@@ -61,6 +61,9 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         // Initialization.
         __initialize(lbPair, lbRouter, binStep, binIds, binAllocations);
 
+        // Use V2 router to swap.
+        setSwapService(SwapServiceProvider.TraderJoeV2, address(lbRouter));
+
         // Migration from V1 to V2 consists of three steps.
         // 0. Withdraw all depositToken and pairDepositToken from V1.
         // 1. Deposit all withdrawn depositToken and pairDepositToken into V2.
@@ -536,6 +539,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         address[] memory path = new address[](2);
         path[0] = address(tokenIn);
         path[1] = address(tokenOut);
+
         uint256[] memory binSteps = new uint256[](1);
         binSteps[0] = strategyStorage.binStep;
 
