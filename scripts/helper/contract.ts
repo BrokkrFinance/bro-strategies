@@ -13,6 +13,32 @@ import {
 } from "../interfaces/parameters"
 import { readLiveConfig, readUpgradeConfig } from "./paths"
 
+export async function deployLibraries(
+  strategyLibraries: StrategyLibraries
+): Promise<{ [libraryName: string]: string }> {
+  // Get an instance of HRE.
+  const { ethers } = require("hardhat")
+
+  const libraries: { [libraryName: string]: string } = {}
+
+  for (const strategyLibrary of strategyLibraries.libraries) {
+    console.log(`Library: Deploy ${strategyLibrary.name}.`)
+
+    const Library = await ethers.getContractFactory(strategyLibrary.name)
+    const library = await Library.deploy()
+
+    console.log(`Library: ${strategyLibrary.name} is deployed at ${library.address}`)
+
+    await verifyContract(library.address)
+
+    libraries[strategyLibrary.name] = library.address
+
+    // TODO: The functionality of libraries depending on other libraries is not yet supported
+  }
+
+  return libraries
+}
+
 export async function deployUUPSUpgradeablePortfolio(
   portfolioName: string,
   portfolioOwner: string,
@@ -157,24 +183,6 @@ async function deployUUPSUpgradeableStrategy(
   return strategy
 }
 
-async function deployLibraries(strategyLibraries: StrategyLibraries): Promise<{ [libraryName: string]: string }> {
-  // Get an instance of HRE.
-  const { ethers } = require("hardhat")
-
-  const libraries: { [libraryName: string]: string } = {}
-
-  for (const strategyLibrary of strategyLibraries.libraries) {
-    const Library = await ethers.getContractFactory(strategyLibrary.name)
-    const library = await Library.deploy()
-
-    libraries[strategyLibrary.name] = library.address
-
-    // TODO: The functionality of libraries depending on other libraries is not yet supported
-  }
-
-  return libraries
-}
-
 export async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {
   // Get an instance of HRE.
   const { upgrades } = require("hardhat")
@@ -237,9 +245,9 @@ async function upgradeInvestable(name: string): Promise<Contract> {
       }
     }
 
+    // Deploy libraries.
     let libraries: { [libraryName: string]: string } = {}
     if (upgradeConfig.libraries !== undefined) {
-      // Deploy libraries.
       libraries = await deployLibraries({
         libraries: upgradeConfig.libraries,
       })

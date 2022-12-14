@@ -28,7 +28,8 @@
           { "$ref": "../../../constants/addresses/TraderJoe.json#/lbRouter" },
           1,
           [8388607, 8388608, 8388609],
-          [100, 800, 100]
+          [100, 800, 100],
+          0
         ]
       ],
       "libraries": [

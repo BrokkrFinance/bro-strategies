@@ -1,7 +1,8 @@
 import { AdminClient } from "defender-admin-client"
 import { ProposalResponseWithUrl } from "defender-admin-client/lib/api"
 import { task } from "hardhat/config"
-import { verifyContract } from "../scripts/helper/contract"
+import { parseExtraArgs, parseStrategyLibraries } from "./parse"
+import { deployLibraries, verifyContract } from "../scripts/helper/contract"
 
 task("upgrade", "Upgrade a proxy contract to point to a new implementation contract")
   .addParam("targetNetwork", "A network to deploy")
@@ -10,6 +11,8 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
   .addParam("multisig", "An address of multisig to propose an upgrade")
   .addOptionalParam("functionName", "A name of function to be called after upgrade")
   .addOptionalParam("functionArgs", "A arguments of function to be called after upgrade")
+  .addOptionalParam("libraryNames", "A list of library name")
+  .addOptionalParam("libraryDependencies", "A list of library dependencies")
   .setAction(async (taskArgs, hre) => {
     console.log(
       `Upgrade: Prepare upgrade proposal of proxy ${taskArgs.proxy} with new implementation ${taskArgs.newImplementation} to ${taskArgs.multisig}.`
@@ -25,7 +28,17 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
     let proposal: ProposalResponseWithUrl
     let newImplementationAddress: string | undefined
 
-    const NewImplementation = await hre.ethers.getContractFactory(taskArgs.newImplementation)
+    // Deploy libraries if any.
+    let libraries: { [libraryName: string]: string }
+
+    if (taskArgs.libraryNames !== undefined && taskArgs.libraryDependencies !== undefined) {
+      const strategyLibraries = parseStrategyLibraries(taskArgs.libraryNames, taskArgs.libraryDependencies)
+      libraries = await deployLibraries(strategyLibraries)
+    } else {
+      libraries = {}
+    }
+
+    const NewImplementation = await hre.ethers.getContractFactory(taskArgs.newImplementation, { libraries })
 
     if (taskArgs.functionName !== undefined && taskArgs.functionArgs !== undefined) {
       // Upgrade and call.
@@ -39,10 +52,12 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
 
       const data = NewImplementation.interface.encodeFunctionData(
         taskArgs.functionName,
-        parseArgs(taskArgs.functionArgs)
+        parseExtraArgs(taskArgs.functionArgs)
       )
 
-      newImplementationAddress = (await hre.upgrades.prepareUpgrade(taskArgs.proxy, NewImplementation)) as string
+      newImplementationAddress = (await hre.upgrades.prepareUpgrade(taskArgs.proxy, NewImplementation, {
+        unsafeAllow: ["external-library-linking"],
+      })) as string
 
       proposal = await defenderAdmin.createProposal({
         contract: { address: taskArgs.proxy, network: taskArgs.targetNetwork },
@@ -64,6 +79,7 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
       // Upgrade.
       proposal = await hre.defender.proposeUpgrade(taskArgs.proxy, NewImplementation, {
         multisig: taskArgs.multisig,
+        unsafeAllow: ["external-library-linking"],
       })
 
       newImplementationAddress = proposal.metadata?.newImplementationAddress
@@ -86,19 +102,3 @@ task("upgrade", "Upgrade a proxy contract to point to a new implementation contr
 
     console.log()
   })
-
-function parseArgs(stringfiedArgs: string): string[] | string[][] {
-  if (stringfiedArgs === "[]") {
-    return []
-  }
-
-  let extraArgs: string[] | string[][]
-
-  if (stringfiedArgs.startsWith("[[") === true && stringfiedArgs.endsWith("]]") === true) {
-    extraArgs = [stringfiedArgs.slice(2, -2).split(",")]
-  } else {
-    extraArgs = stringfiedArgs.slice(1, -1).split(",")
-  }
-
-  return extraArgs
-}
