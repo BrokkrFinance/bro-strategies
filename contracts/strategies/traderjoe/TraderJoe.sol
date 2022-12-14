@@ -306,6 +306,20 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
+    function getBinIds() public view returns (uint256[] memory) {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        return strategyStorage.binIds;
+    }
+
+    function getBinAllocations() public view returns (uint256[] memory) {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        return strategyStorage.binAllocations;
+    }
+
     function __checkBinIdsAndAllocations(
         uint256[] calldata binIds,
         uint256[] calldata binAllocations
