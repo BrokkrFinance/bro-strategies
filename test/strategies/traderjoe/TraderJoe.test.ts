@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
+import TraderJoeLBPairABI from "../../helper/abi/TraderJoeLBPair.json"
 import Tokens from "../../../constants/addresses/Tokens.json"
 import TraderJoe from "../../../constants/addresses/TraderJoe.json"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
@@ -16,10 +17,12 @@ const traderjoeTestOptions: TestOptions = {
 }
 
 testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, traderjoeTestOptions, [
+  testTraderJoeAdjustBins,
   testTraderJoeAum,
   testTraderJoeInitialize,
 ])
 testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, traderjoeTestOptions, [
+  testTraderJoeAdjustBins,
   testTraderJoeAum,
 ])
 
@@ -29,6 +32,145 @@ async function deployTraderJoeStrategy() {
 
 async function upgradeTraderJoeStrategy() {
   return upgradeStrategy("TraderJoe")
+}
+
+function testTraderJoeAdjustBins() {
+  describe("Bins - TraderJoe Strategy Specific", async function () {
+    this.beforeEach(async function () {
+      await this.investHelper
+        .deposit(this.strategy, this.user0, {
+          amount: ethers.utils.parseUnits("3000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
+          investmentTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      const lbPairContract = await ethers.getContractAt(TraderJoeLBPairABI, TraderJoe.lbPair)
+      const [, , activeId] = await lbPairContract.getReservesAndId()
+      this.activeId = activeId
+    })
+
+    this.afterEach(async function () {
+      let assetValuations: any[]
+      let binAllocations: number[]
+
+      // Check valuation distribution after bins were adjusted.
+      assetValuations = await this.strategy.getAssetValuations(true, false)
+      binAllocations = await this.strategy.getBinAllocations()
+      checkValuationDistribution(assetValuations, binAllocations)
+
+      // Check if deposit and withdraw work well.
+      let availableTokenBalance = await this.investmentToken.balanceOf(this.user0.address)
+      await this.investHelper
+        .withdraw(this.investable, this.user0, {
+          amount: availableTokenBalance,
+          minimumDepositTokenAmountOut: BigNumber.from(0),
+          depositTokenReceiver: this.user0.address,
+          params: [],
+        })
+        .success()
+
+      await this.investHelper
+        .deposit(this.strategy, this.user1, {
+          amount: ethers.utils.parseUnits("3000", 6),
+          minimumDepositTokenAmountOut: BigNumber.from(0),
+          investmentTokenReceiver: this.user1.address,
+          params: [],
+        })
+        .success()
+
+      // Check valuation distribution after the first deposit with adjusted bins.
+      assetValuations = await this.strategy.getAssetValuations(true, false)
+      binAllocations = await this.strategy.getBinAllocations()
+      checkValuationDistribution(assetValuations, binAllocations)
+
+      availableTokenBalance = await this.investmentToken.balanceOf(this.user1.address)
+      await this.investHelper
+        .withdraw(this.investable, this.user1, {
+          amount: availableTokenBalance,
+          minimumDepositTokenAmountOut: BigNumber.from(0),
+          depositTokenReceiver: this.user1.address,
+          params: [],
+        })
+        .success()
+    })
+
+    async function checkValuationDistribution(assetValuations: any[], binAllocations: number[]) {
+      let totalValuation = BigNumber.from(0)
+      for (let i = 0; i < assetValuations.length - 1; i++) {
+        totalValuation = totalValuation.add(assetValuations[i].valuation)
+      }
+
+      for (let i = 0; i < assetValuations.length - 1; i++) {
+        expect(assetValuations[i].valuation.mul(1000).div(binAllocations[i])).to.be.approximately(
+          totalValuation,
+          getErrorRange(totalValuation)
+        )
+      }
+    }
+
+    it("should fail when the non-onwer user adjusts bins", async function () {
+      const binIds = [this.activeId]
+      const binAllocations = [1000]
+
+      await expect(this.strategy.connect(this.user0).adjustBins(binIds, binAllocations)).to.be.reverted
+    })
+
+    it("should succeed when adjust to consecutive bins include active bin", async function () {
+      const binIds = [
+        this.activeId.sub(2),
+        this.activeId.sub(1),
+        this.activeId,
+        this.activeId.add(1),
+        this.activeId.add(2),
+      ]
+      const binAllocations = [100, 200, 400, 200, 100]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
+
+    it("should succeed when adjust to nonconsecutive bins include active bin", async function () {
+      const binIds = [
+        this.activeId.sub(10),
+        this.activeId.sub(5),
+        this.activeId,
+        this.activeId.add(3),
+        this.activeId.add(7),
+      ]
+      const binAllocations = [100, 200, 400, 200, 100]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
+
+    it("should succeed when adjust to consecutive bins below active bin", async function () {
+      const binIds = [this.activeId.sub(3), this.activeId.sub(2), this.activeId.sub(1)]
+      const binAllocations = [300, 300, 400]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
+
+    it("should succeed when adjust to nonconsecutive bins below active bin", async function () {
+      const binIds = [this.activeId.sub(7), this.activeId.sub(3), this.activeId.sub(1)]
+      const binAllocations = [300, 300, 400]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
+
+    it("should succeed when adjust to consecutive bins above active bin", async function () {
+      const binIds = [this.activeId.add(2), this.activeId.add(3), this.activeId.add(4)]
+      const binAllocations = [300, 300, 400]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
+
+    it("should succeed when adjust to nonconsecutive bins above active bin", async function () {
+      const binIds = [this.activeId.add(3), this.activeId.add(7), this.activeId.add(5)]
+      const binAllocations = [300, 300, 400]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
+  })
 }
 
 function testTraderJoeAum() {
