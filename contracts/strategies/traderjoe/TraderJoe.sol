@@ -35,6 +35,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 binStep;
         uint256[] binIds;
         uint256[] binAllocations;
+        uint256 minValuation;
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -63,10 +64,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
     }
 
-    function reinitialize(
-        TraderJoeArgs calldata traderJoeArgs,
-        uint256 minValuation
-    ) external reinitializer(2) {
+    function reinitialize(TraderJoeArgs calldata traderJoeArgs)
+        external
+        reinitializer(2)
+    {
         __checkBinIdsAndAllocations(
             traderJoeArgs.binIds,
             traderJoeArgs.binAllocations
@@ -145,7 +146,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             valuation += assetValuations[i].valuation;
         }
 
-        if (valuation < minValuation) {
+        if (valuation < traderJoeArgs.minValuation) {
             revert TooBigValuationLoss();
         }
     }

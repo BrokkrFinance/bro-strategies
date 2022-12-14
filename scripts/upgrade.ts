@@ -1,5 +1,6 @@
 import { execSync } from "child_process"
 import { UpgradeConfig } from "./interfaces/configs"
+import { Library } from "./interfaces/library"
 import { readUpgradeConfig } from "./helper/paths"
 
 async function main() {
@@ -34,6 +35,15 @@ async function main() {
     if (upgradeConfig.functionName !== undefined && upgradeConfig.functionArgs !== undefined) {
       upgradeArgs["functionName"] = upgradeConfig.functionName
       upgradeArgs["functionArgs"] = JSON.stringify(upgradeConfig.functionArgs).replace(/["]/g, "")
+    }
+
+    if (upgradeConfig.libraries !== undefined) {
+      upgradeArgs["libraryNames"] = JSON.stringify(
+        upgradeConfig.libraries.map((library: Library) => library.name)
+      ).replace(/["]/g, "")
+      upgradeArgs["libraryDependencies"] = JSON.stringify(
+        upgradeConfig.libraries.map((library: Library) => library.dependencies)
+      ).replace(/["]/g, "")
     }
 
     await run("upgrade", upgradeArgs)
