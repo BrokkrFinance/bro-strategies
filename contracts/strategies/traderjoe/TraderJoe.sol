@@ -138,13 +138,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         );
 
         // 2. Check if valuation after migration is greater than or equal to minValuation.
-        Valuation[] memory assetValuations = _getAssetValuations(true, false);
-        uint256 valuationsAmount = assetValuations.length;
-        uint256 valuation;
-
-        for (uint256 i; i < valuationsAmount; i++) {
-            valuation += assetValuations[i].valuation;
-        }
+        uint256 valuation = getEquityValuation(true, false);
 
         if (valuation < traderJoeArgs.minValuation) {
             revert TooBigValuationLoss();
