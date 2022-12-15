@@ -208,7 +208,7 @@ library TraderJoeInvestmentLib {
         );
     }
 
-    function reapReward() public {
+    function reapReward() external {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
@@ -239,7 +239,7 @@ library TraderJoeInvestmentLib {
         uint256[] calldata binIds,
         uint256[] calldata binAllocations,
         uint256 investmentTokenSupply
-    ) public {
+    ) external {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
