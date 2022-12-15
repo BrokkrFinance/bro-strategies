@@ -338,6 +338,10 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 revert InvalidBinId();
             }
 
+            if (binAllocations[i] == 0) {
+                revert InvalidAllocations();
+            }
+
             allocations += binAllocations[i];
         }
 
