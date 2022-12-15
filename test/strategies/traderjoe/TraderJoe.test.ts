@@ -170,6 +170,27 @@ function testTraderJoeAdjustBins() {
 
       await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
     })
+
+    it("should succeed when adjust to only active bin", async function () {
+      const binIds = [this.activeId]
+      const binAllocations = [1000]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
+
+    it("should succeed when adjust to only one bin below active bin", async function () {
+      const binIds = [this.activeId.sub(1)]
+      const binAllocations = [1000]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
+
+    it("should succeed when adjust to only one bin above active bin", async function () {
+      const binIds = [this.activeId.add(1)]
+      const binAllocations = [1000]
+
+      await expect(this.strategy.connect(this.owner).adjustBins(binIds, binAllocations)).not.to.be.reverted
+    })
   })
 }
 
@@ -423,7 +444,7 @@ function testTraderJoeInitialize() {
               TraderJoe.lbRouter,
               1,
               [8388607, 8388608, 8388609],
-              [0, 700, 299], // It's sum should be 1e3.
+              [100, 700, 199], // It's sum should be 1e3.
               0,
             ],
           ],
@@ -436,7 +457,20 @@ function testTraderJoeInitialize() {
       await expect(
         upgrades.deployProxy(
           this.Strategy,
-          [this.strategyArgs, [TraderJoe.lbPair, TraderJoe.lbRouter, 1, [8388607, 8388608, 8388609], [0, 700, 301], 0]],
+          [
+            this.strategyArgs,
+            [TraderJoe.lbPair, TraderJoe.lbRouter, 1, [8388607, 8388608, 8388609], [100, 700, 201], 0],
+          ],
+          { kind: "uups", unsafeAllow: ["external-library-linking"] }
+        )
+      ).to.be.reverted
+    })
+
+    it("should fail when there is zero allocation", async function () {
+      await expect(
+        upgrades.deployProxy(
+          this.Strategy,
+          [this.strategyArgs, [TraderJoe.lbPair, TraderJoe.lbRouter, 1, [8388607, 8388608, 8388609], [0, 700, 300], 0]],
           { kind: "uups", unsafeAllow: ["external-library-linking"] }
         )
       ).to.be.reverted
