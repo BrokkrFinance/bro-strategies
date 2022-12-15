@@ -34,100 +34,14 @@ library TraderJoeInvestmentLib {
             amountYIn = depositTokenAmount;
         }
 
-        uint256 binsAmount = strategyStorage.binIds.length;
-
-        (, , uint256 activeId) = strategyStorage.lbPair.getReservesAndId();
-
-        // Assume that token X and token Y have the same price.
-        uint256 totalAmount = amountXIn + amountYIn;
-        uint256 amountX;
-        uint256 amountY;
-
-        // Delta IDs.
-        int256[] memory deltaIds = new int256[](binsAmount);
-
-        // Distributions.
-        uint256[] memory distributionX = new uint256[](binsAmount);
-        uint256[] memory distributionY = new uint256[](binsAmount);
-
-        // The maximum of the number of bins is 51.
-        uint256 activeBinIndex = type(uint256).max;
-
-        for (uint256 i; i < binsAmount; ++i) {
-            deltaIds[i] = int256(strategyStorage.binIds[i]) - int256(activeId);
-
-            // Bin allocation has precision of 1e3.
-            uint256 amount = (totalAmount * strategyStorage.binAllocations[i]) /
-                1e3;
-
-            if (strategyStorage.binIds[i] < activeId) {
-                distributionY[i] = amount;
-                amountY += amount;
-            } else if (strategyStorage.binIds[i] > activeId) {
-                distributionX[i] = amount;
-                amountX += amount;
-            } else {
-                activeBinIndex = i;
-            }
-        }
-
-        // If one of our target bins is active, allocate rest of amountXIn and amountYIn to it to minimize swap fee.
-        if (activeBinIndex != type(uint256).max) {
-            uint256 amount = totalAmount - amountX - amountY;
-
-            if (amountXIn > amountX) {
-                uint256 amountXActive = Math.min(amountXIn - amountX, amount);
-
-                distributionX[activeBinIndex] = amountXActive;
-                amountX += amountXActive;
-
-                amount -= amountXActive;
-            }
-
-            if (amountYIn > amountY) {
-                uint256 amountYActive = Math.min(amountYIn - amountY, amount);
-
-                distributionY[activeBinIndex] = amountYActive;
-                amountY += amountYActive;
-
-                amount -= amountYActive;
-            }
-
-            if (amount > 0) {
-                revert InvalidActiveBinAllocation();
-            }
-        }
-
-        // Calibrate distributions so that the sum of them equals to 1e18, a precision of TraderJoe V2.
-        for (uint256 i; i < binsAmount; ++i) {
-            if (strategyStorage.binIds[i] < activeId) {
-                distributionY[i] = (distributionY[i] * 1e18) / amountY;
-            } else if (strategyStorage.binIds[i] > activeId) {
-                distributionX[i] = (distributionX[i] * 1e18) / amountX;
-            } else {
-                distributionX[i] = (distributionX[i] * 1e18) / amountX;
-                distributionY[i] = (distributionY[i] * 1e18) / amountY;
-            }
-        }
-
-        // Swap only as much as is needed.
-        if (amountXIn > amountX) {
-            amountY =
-                amountYIn +
-                swapTokens(
-                    amountXIn - amountX,
-                    strategyStorage.tokenX,
-                    strategyStorage.tokenY
-                );
-        } else if (amountYIn > amountY) {
-            amountX =
-                amountXIn +
-                swapTokens(
-                    amountYIn - amountY,
-                    strategyStorage.tokenY,
-                    strategyStorage.tokenX
-                );
-        }
+        (
+            uint256 amountX,
+            uint256 amountY,
+            uint256 activeId,
+            int256[] memory deltaIds,
+            uint256[] memory distributionX,
+            uint256[] memory distributionY
+        ) = __prepareParams(amountXIn, amountYIn);
 
         // Deposit.
         ITraderJoeLBRouter.LiquidityParameters memory liquidityParameters = ITraderJoeLBRouter
@@ -168,7 +82,11 @@ library TraderJoeInvestmentLib {
             pairDepositTokenBefore;
 
         // Swap back remaining pairDepositToken to strategyStorage.depositToken if possible.
-        swapBack(pairDepositTokenIncrement);
+        swapTokens(
+            pairDepositTokenIncrement,
+            strategyStorage.pairDepositToken,
+            strategyStorage.depositToken
+        );
     }
 
     function withdraw(uint256 amount, uint256 investmentTokenSupply) public {
@@ -306,14 +224,121 @@ library TraderJoeInvestmentLib {
         );
     }
 
-    function swapBack(uint256 amountIn) public {
+    function __prepareParams(uint256 amountXIn, uint256 amountYIn)
+        private
+        returns (
+            uint256 amountX,
+            uint256 amountY,
+            uint256 activeId,
+            int256[] memory deltaIds,
+            uint256[] memory distributionX,
+            uint256[] memory distributionY
+        )
+    {
         TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
             .getStorage();
 
-        swapTokens(
-            amountIn,
-            strategyStorage.pairDepositToken,
-            strategyStorage.depositToken
-        );
+        uint256 binsAmount = strategyStorage.binIds.length;
+
+        (, , activeId) = strategyStorage.lbPair.getReservesAndId();
+
+        // Assume that token X and token Y have the same price.
+        uint256 totalAmount = amountXIn + amountYIn;
+
+        // Delta IDs.
+        deltaIds = new int256[](binsAmount);
+
+        // Distributions.
+        distributionX = new uint256[](binsAmount);
+        distributionY = new uint256[](binsAmount);
+
+        // The maximum of the number of bins is 51.
+        uint256 activeBinIndex = type(uint256).max;
+
+        for (uint256 i; i < binsAmount; ++i) {
+            deltaIds[i] = int256(strategyStorage.binIds[i]) - int256(activeId);
+
+            // Bin allocation has precision of 1e3.
+            uint256 amount = (totalAmount * strategyStorage.binAllocations[i]) /
+                1e3;
+
+            if (strategyStorage.binIds[i] < activeId) {
+                distributionY[i] = amount;
+                amountY += amount;
+            } else if (strategyStorage.binIds[i] > activeId) {
+                distributionX[i] = amount;
+                amountX += amount;
+            } else {
+                activeBinIndex = i;
+            }
+        }
+
+        // If one of our target bins is active, allocate rest of amountXIn and amountYIn to it to minimize swap fee.
+        if (activeBinIndex != type(uint256).max) {
+            uint256 amount = totalAmount - amountX - amountY;
+
+            if (amountXIn > amountX) {
+                uint256 amountXActive = Math.min(amountXIn - amountX, amount);
+
+                distributionX[activeBinIndex] = amountXActive;
+                amountX += amountXActive;
+
+                amount -= amountXActive;
+            }
+
+            if (amountYIn > amountY) {
+                uint256 amountYActive = Math.min(amountYIn - amountY, amount);
+
+                distributionY[activeBinIndex] = amountYActive;
+                amountY += amountYActive;
+
+                amount -= amountYActive;
+            }
+
+            if (amount > 0) {
+                revert InvalidActiveBinAllocation();
+            }
+        }
+
+        // Calibrate distributions so that the sum of them equals to 1e18, a precision of TraderJoe V2.
+        for (uint256 i; i < binsAmount; ++i) {
+            bool calibrateX;
+            bool calibrateY;
+
+            if (strategyStorage.binIds[i] < activeId) {
+                calibrateY = true;
+            } else if (strategyStorage.binIds[i] > activeId) {
+                calibrateX = true;
+            } else {
+                calibrateX = true;
+                calibrateY = true;
+            }
+
+            if (calibrateX && amountX != 0) {
+                distributionX[i] = (distributionX[i] * 1e18) / amountX;
+            }
+            if (calibrateY && amountY != 0) {
+                distributionY[i] = (distributionY[i] * 1e18) / amountY;
+            }
+        }
+
+        // Swap only as much as is needed.
+        if (amountXIn > amountX) {
+            amountY =
+                amountYIn +
+                swapTokens(
+                    amountXIn - amountX,
+                    strategyStorage.tokenX,
+                    strategyStorage.tokenY
+                );
+        } else if (amountYIn > amountY) {
+            amountX =
+                amountXIn +
+                swapTokens(
+                    amountYIn - amountY,
+                    strategyStorage.tokenY,
+                    strategyStorage.tokenX
+                );
+        }
     }
 }
