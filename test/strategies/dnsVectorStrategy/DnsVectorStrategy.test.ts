@@ -271,8 +271,11 @@ function testCollaterizationAndDeltaNeutrality() {
       expect(currentState.lowCollaterizationRatio).to.be.below(initialState.lowCollaterizationRatio)
       expect(currentState.highCollaterizationRatio).to.be.below(initialState.highCollaterizationRatio)
 
-      // check aave supply: it should not change
-      expect(currentState.aaveSupply).to.be.equal(initialState.aaveSupply)
+      // check aave supply: its value increases as time goes by but it should be very little (0.001%)
+      expect(currentState.aaveSupply).to.be.approximately(
+        initialState.aaveSupply,
+        getErrorRange(initialState.aaveSupply, BigNumber.from(1), BigNumber.from(1e5))
+      )
 
       // checking equity valuation and investment token supply
       checkEquityValuationAndInvestmentTokenSupply(initialState, currentState)
