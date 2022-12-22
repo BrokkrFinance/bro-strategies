@@ -163,7 +163,7 @@ contract DnsVectorStrategy is
     }
 
     function repayDebt(
-        uint256 traderJoePairAmount,
+        uint256 pangolinPairAmount,
         NameValuePair[] calldata params,
         uint256 minimumEquityAfterOperation
     )
@@ -171,7 +171,7 @@ contract DnsVectorStrategy is
         onlyRole(MAINTAINER_ROLE)
         checkMinimumEquityAfterOperation(minimumEquityAfterOperation)
     {
-        DnsVectorStrategyInvestmentLib.repayDebt(traderJoePairAmount, params);
+        DnsVectorStrategyInvestmentLib.repayDebt(pangolinPairAmount, params);
     }
 
     function increaseDebt(
