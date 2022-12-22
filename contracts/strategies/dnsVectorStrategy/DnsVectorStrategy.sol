@@ -116,7 +116,7 @@ contract DnsVectorStrategy is
         // Initialize.
         __initializePangolinParams(reinitializeParams.pangolinParams);
 
-        // TODO: Migrate.
+        DnsVectorStrategyInvestmentLib.migrate();
 
         // Check if valuation after migration is greater than or equal to minValuation.
         uint256 valuation = getEquityValuation(true, false);
