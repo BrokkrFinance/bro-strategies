@@ -292,34 +292,38 @@ library DnsVectorStrategyInvestmentLib {
         );
     }
 
-    function repayDebt(uint256 traderJoePairAmount, NameValuePair[] calldata)
+    function repayDebt(uint256 pangolinPairAmount, NameValuePair[] calldata)
         external
     {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
 
-        // withdrawing Trader Joe LP tokens from Vector
-        uint256 lpAmountChange = strategyStorage.traderJoePair.balanceOf(
+        // unstaking liquidity from Pangolin
+        uint256 lpAmountChange = strategyStorage.pangolinPair.balanceOf(
             address(this)
         );
-        strategyStorage.vectorPoolHelperJoe.withdraw(traderJoePairAmount);
+        strategyStorage.pangolinMiniChef.withdraw(
+            strategyStorage.pangolinPoolId,
+            pangolinPairAmount,
+            address(this)
+        );
         lpAmountChange =
-            strategyStorage.traderJoePair.balanceOf(address(this)) -
+            strategyStorage.pangolinPair.balanceOf(address(this)) -
             lpAmountChange;
-        assert(traderJoePairAmount == lpAmountChange);
+        assert(pangolinPairAmount == lpAmountChange);
 
-        // burning Trader Joe lp tokens
+        // withdrawing liquidity from Pangolin
         uint256 aaveBorrowTokenBefore = strategyStorage
             .aaveBorrowToken
             .balanceOf(address(this));
-        uint256 aaveSupplyTokenAmountChange = strategyStorage
-            .aaveSupplyToken
-            .balanceOf(address(this));
-        strategyStorage.traderJoePair.approve(
-            address(strategyStorage.traderJoeRouter),
+
+        strategyStorage.pangolinPair.approve(
+            address(strategyStorage.pangolinRouter),
             lpAmountChange
         );
-        strategyStorage.traderJoeRouter.removeLiquidity(
+        (uint256 aaveSupplyTokenAmountChange, ) = strategyStorage
+            .pangolinRouter
+            .removeLiquidity(
             address(strategyStorage.ammPairDepositToken),
             address(strategyStorage.aaveBorrowToken),
             lpAmountChange,
@@ -329,9 +333,6 @@ library DnsVectorStrategyInvestmentLib {
             // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
-        aaveSupplyTokenAmountChange =
-            strategyStorage.aaveSupplyToken.balanceOf(address(this)) -
-            aaveSupplyTokenAmountChange;
 
         // converting aaveSupplyToken to aaveBorrowToken
         address[] memory path = new address[](2);
