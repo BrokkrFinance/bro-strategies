@@ -282,12 +282,6 @@ contract DnsVectorStrategy is
         return DnsVectorStrategyAumLib.getPoolDebt();
     }
 
-    function getVectorLpBalance() external view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
-        return strategyStorage.vectorPoolHelperJoe.balanceOf(address(this));
-    }
-
     function getInverseCollateralRatio(
         bool shouldMaximise,
         bool shouldIncludeAmmPrice

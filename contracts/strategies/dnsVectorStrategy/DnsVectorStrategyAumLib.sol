@@ -5,6 +5,8 @@ import "./DnsVectorStrategyStorageLib.sol";
 import "../../common/interfaces/IAum.sol";
 
 library DnsVectorStrategyAumLib {
+    error InvalidPangolinPair();
+
     function getAssetBalances() public view returns (Balance[] memory) {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
@@ -14,8 +16,8 @@ library DnsVectorStrategyAumLib {
             strategyStorage.aAaveSupplyToken.balanceOf(address(this))
         );
         assetBalances[1] = Balance(
-            strategyStorage.vectorPoolHelperJoe.stakingToken(),
-            strategyStorage.vectorPoolHelperJoe.balanceOf(address(this))
+            address(strategyStorage.pangolinPair),
+            getPangolinLpBalance()
         );
 
         return assetBalances;
@@ -46,19 +48,15 @@ library DnsVectorStrategyAumLib {
             strategyStorage.aAaveSupplyToken.balanceOf(address(this))
         );
 
-        // get Traker Joe LP token reserves
-        // asuming a certain order of tokens
+        // get Pangolin LP token reserves
+        // assuming a certain order of tokens
         (
             uint112 reserve0, // wAvax (generally it can be aaveSupplyToken or aaveBorrowToken)
             uint112 reserve1, // usdc (generally it can be aaveSupplyToken or aaveBorrowToken)
 
-        ) = strategyStorage.traderJoePair.getReserves();
-        uint256 lpTokenTotalSupply = strategyStorage
-            .traderJoePair
-            .totalSupply();
-        uint256 lpTokenContractBalance = strategyStorage
-            .vectorPoolHelperJoe
-            .balanceOf(address(this));
+        ) = strategyStorage.pangolinPair.getReserves();
+        uint256 lpTokenTotalSupply = strategyStorage.pangolinPair.totalSupply();
+        uint256 lpTokenContractBalance = getPangolinLpBalance();
 
         // get the aaveBorrowToken AUM in depositToken
         uint256 lpBorrowTokenAumInDepositToken = (uint256(reserve0) *
@@ -77,7 +75,7 @@ library DnsVectorStrategyAumLib {
             lpTokenContractBalance) / lpTokenTotalSupply;
 
         assetValuations[1] = Valuation(
-            strategyStorage.vectorPoolHelperJoe.stakingToken(),
+            address(strategyStorage.pangolinPair),
             lpBorrowTokenAumInDepositToken + lpPairDepositAumInDepositCurrency
         );
 
@@ -128,13 +126,9 @@ library DnsVectorStrategyAumLib {
             uint112 reserve0, // wAvax (generally it can be aaveSupplyToken or aaveBorrowToken) // usdc (generally it can be aaveSupplyToken or aaveBorrowToken)
             ,
 
-        ) = strategyStorage.traderJoePair.getReserves();
-        uint256 lpTokenTotalSupply = strategyStorage
-            .traderJoePair
-            .totalSupply();
-        uint256 lpTokenContractBalance = strategyStorage
-            .vectorPoolHelperJoe
-            .balanceOf(address(this));
+        ) = strategyStorage.pangolinPair.getReserves();
+        uint256 lpTokenTotalSupply = strategyStorage.pangolinPair.totalSupply();
+        uint256 lpTokenContractBalance = getPangolinLpBalance();
 
         return (reserve0 * lpTokenContractBalance) / lpTokenTotalSupply;
     }
@@ -159,5 +153,42 @@ library DnsVectorStrategyAumLib {
             ) * liabilityBalances[0].balance) *
                 Math.SHORT_FIXED_DECIMAL_FACTOR) / 10**18) /
             (assetBalances[0].balance);
+    }
+
+    function getPangolinLpBalance() public view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        return
+            strategyStorage
+                .pangolinMiniChef
+                .userInfo(strategyStorage.pangolinPoolId, address(this))
+                .amount;
+    }
+
+    function getPangolinLpReserve(address token0, address token1)
+        external
+        view
+        returns (uint256 reserve0, uint256 reserve1)
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        (uint256 _reserve0, uint256 _reserve1, ) = strategyStorage
+            .pangolinPair
+            .getReserves();
+
+        address _token0 = strategyStorage.pangolinPair.token0();
+        address _token1 = strategyStorage.pangolinPair.token1();
+
+        if (_token0 == token0 && _token1 == token1) {
+            reserve0 = _reserve0;
+            reserve1 = _reserve1;
+        } else if (_token0 == token1 && _token1 == token0) {
+            reserve0 = _reserve1;
+            reserve1 = _reserve0;
+        } else {
+            revert InvalidPangolinPair();
+        }
     }
 }
