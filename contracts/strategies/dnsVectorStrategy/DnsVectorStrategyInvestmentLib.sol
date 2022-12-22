@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "./DnsVectorStrategyStorageLib.sol";
+import "./DnsVectorStrategyAumLib.sol";
 import "./DnsVectorStrategyCommon.sol";
+import "./DnsVectorStrategyStorageLib.sol";
 import "../../common/Common.sol";
 import "../../common/libraries/InvestableLib.sol";
 
@@ -149,46 +150,40 @@ library DnsVectorStrategyInvestmentLib {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
 
-        // withdrawing Trader Joe LP tokens from Vector
-        uint256 lpUserAmount = (strategyStorage.vectorPoolHelperJoe.balanceOf(
-            address(this)
-        ) * amount) / investmentTokenSupply;
-        uint256 lpUserAmountChange = strategyStorage.traderJoePair.balanceOf(
+        // unstaking liquidity from Pangolin
+        uint256 lpAmountChange = strategyStorage.pangolinPair.balanceOf(
             address(this)
         );
-        strategyStorage.vectorPoolHelperJoe.withdraw(lpUserAmount);
-        lpUserAmountChange =
-            strategyStorage.traderJoePair.balanceOf(address(this)) -
-            lpUserAmountChange;
-        assert(lpUserAmount == lpUserAmountChange);
+        uint256 lpTokenAmount = (DnsVectorStrategyAumLib
+            .getPangolinLpBalance() * amount) / investmentTokenSupply;
+        strategyStorage.pangolinMiniChef.withdraw(
+            strategyStorage.pangolinPoolId,
+            lpTokenAmount,
+            address(this)
+        );
+        lpAmountChange =
+            strategyStorage.pangolinPair.balanceOf(address(this)) -
+            lpAmountChange;
+        assert(lpTokenAmount == lpAmountChange);
 
-        // withdrawing liquidity from TraderJoe
-        uint256 aaveBorrowTokenChangeAmount = strategyStorage
-            .aaveBorrowToken
-            .balanceOf(address(this));
-        uint256 ammPairDepositTokenChangeAmount = strategyStorage
-            .ammPairDepositToken
-            .balanceOf(address(this));
-        strategyStorage.traderJoePair.approve(
-            address(strategyStorage.traderJoeRouter),
-            lpUserAmountChange
+        // withdrawing liquidity from Pangolin
+        strategyStorage.pangolinPair.approve(
+            address(strategyStorage.pangolinRouter),
+            lpTokenAmount
         );
-        strategyStorage.traderJoeRouter.removeLiquidity(
+        (
+            uint256 ammPairDepositTokenChangeAmount,
+            uint256 aaveBorrowTokenChangeAmount
+        ) = strategyStorage.pangolinRouter.removeLiquidity(
             address(strategyStorage.ammPairDepositToken),
             address(strategyStorage.aaveBorrowToken),
-            lpUserAmountChange,
+                lpTokenAmount,
             0,
             0,
             address(this),
             // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
-        aaveBorrowTokenChangeAmount =
-            strategyStorage.aaveBorrowToken.balanceOf(address(this)) -
-            aaveBorrowTokenChangeAmount;
-        ammPairDepositTokenChangeAmount =
-            strategyStorage.ammPairDepositToken.balanceOf(address(this)) -
-            ammPairDepositTokenChangeAmount;
 
         // repay Aave debt
         uint256 vAaveBorrowTokenUserAmount = ((strategyStorage
