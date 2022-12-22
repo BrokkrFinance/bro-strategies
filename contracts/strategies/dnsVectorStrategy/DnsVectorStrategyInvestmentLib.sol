@@ -85,22 +85,20 @@ library DnsVectorStrategyInvestmentLib {
             address(this)
         );
 
-        // providing liquidity to Trader Joe
-        uint256 lpAmountChange = strategyStorage.traderJoePair.balanceOf(
-            address(this)
-        );
+        // providing liquidity to Pangolin
         // assuming ammPairDepositToken == depositToken
         strategyStorage.ammPairDepositToken.approve(
-            address(strategyStorage.traderJoeRouter),
+            address(strategyStorage.pangolinRouter),
             poolTokenAllocationInDepositToken
         );
         strategyStorage.aaveBorrowToken.approve(
-            address(strategyStorage.traderJoeRouter),
+            address(strategyStorage.pangolinRouter),
             aaveBorrowAllocationInBorrowToken
         );
-        // assuming ammPairDepositToken == depositToken
-        strategyStorage.traderJoeRouter.addLiquidity(
-            address(strategyStorage.aaveSupplyToken),
+        (, , uint256 lpTokenAmountChange) = strategyStorage
+            .pangolinRouter
+            .addLiquidity(
+                address(strategyStorage.ammPairDepositToken),
             address(strategyStorage.aaveBorrowToken),
             poolTokenAllocationInDepositToken,
             aaveBorrowAllocationInBorrowToken,
@@ -110,9 +108,17 @@ library DnsVectorStrategyInvestmentLib {
             // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
-        lpAmountChange =
-            strategyStorage.traderJoePair.balanceOf(address(this)) -
-            lpAmountChange;
+
+        // staking LP token to Pangolin without locking period
+        strategyStorage.pangolinPair.approve(
+            address(strategyStorage.pangolinMiniChef),
+            lpTokenAmountChange
+        );
+        strategyStorage.pangolinMiniChef.deposit(
+            strategyStorage.pangolinPoolId,
+            lpTokenAmountChange,
+            address(this)
+        );
 
         // swapping back remnants amount of tokens to depositToken
         // assuming ammPairDepositToken == depositToken as we only
@@ -133,13 +139,6 @@ library DnsVectorStrategyInvestmentLib {
                 new uint256[](0)
             );
         }
-
-        // depositing Trader Joe LP tokens into Vector
-        strategyStorage.traderJoePair.approve(
-            address(strategyStorage.vectorPoolHelperJoe),
-            lpAmountChange
-        );
-        strategyStorage.vectorPoolHelperJoe.deposit(lpAmountChange);
     }
 
     function withdraw(
