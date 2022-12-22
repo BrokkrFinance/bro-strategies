@@ -264,24 +264,28 @@ library DnsVectorStrategyInvestmentLib {
     ) external {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
-        uint256 joeTokenBalanceChange = strategyStorage.joeToken.balanceOf(
+
+        uint256 pngTokenBalanceChange = strategyStorage.pngToken.balanceOf(
             address(this)
         );
-        strategyStorage.vectorPoolHelperJoe.getReward();
-        joeTokenBalanceChange =
-            strategyStorage.joeToken.balanceOf(address(this)) -
-            joeTokenBalanceChange;
 
-        strategyStorage.joeToken.approve(
-            address(strategyStorage.traderJoeRouter),
-            joeTokenBalanceChange
+        // reaping reward from Pangolin
+        strategyStorage.pangolinMiniChef.harvest(
+            strategyStorage.pangolinPoolId,
+            address(this)
         );
-        address[] memory path = new address[](2);
-        path[0] = address(strategyStorage.joeToken);
-        path[1] = address(strategyStorage.depositToken);
+
+        pngTokenBalanceChange =
+            strategyStorage.pngToken.balanceOf(address(this)) -
+            pngTokenBalanceChange;
+
+        address[] memory path = new address[](3);
+        path[0] = address(strategyStorage.pngToken);
+        path[1] = address(strategyStorage.aaveBorrowToken);
+        path[2] = address(strategyStorage.depositToken);
         SwapServiceLib.swapExactTokensForTokens(
             strategyStorage.swapService,
-            joeTokenBalanceChange,
+            pngTokenBalanceChange,
             0,
             path,
             new uint256[](0)
