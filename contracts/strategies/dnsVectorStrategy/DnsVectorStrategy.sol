@@ -99,6 +99,16 @@ contract DnsVectorStrategy is
         );
     }
 
+    function reinitialize(IVectorPoolHelperJoe vectorPoolHelperJoe)
+        external
+        reinitializer(2)
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        strategyStorage.vectorPoolHelperJoe = vectorPoolHelperJoe;
+    }
+
     function _deposit(uint256 amount, NameValuePair[] calldata params)
         internal
         virtual
