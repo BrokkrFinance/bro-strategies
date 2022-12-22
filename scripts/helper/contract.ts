@@ -11,7 +11,7 @@ import {
   StrategyExtraArgs,
   StrategyLibraries,
 } from "../interfaces/parameters"
-import { readLiveConfig, readUpgradeConfig } from "./paths"
+import { getLiveConfigPath, readLiveConfig, readUpgradeConfig, writeLiveConfig } from "./paths"
 
 export async function deployLibraries(
   strategyLibraries: StrategyLibraries
@@ -22,18 +22,40 @@ export async function deployLibraries(
   const libraries: { [libraryName: string]: string } = {}
 
   for (const strategyLibrary of strategyLibraries.libraries) {
+    const dependencies: { [libraryName: string]: string } = {}
+
+    for (const name of strategyLibrary.dependencies) {
+      if (name.length == 0) {
+        break
+      }
+
+      dependencies[name] = readLiveConfig(path.join("library", name)).address
+    }
+
     console.log(`Library: Deploy ${strategyLibrary.name}.`)
 
-    const Library = await ethers.getContractFactory(strategyLibrary.name)
+    const Library = await ethers.getContractFactory(strategyLibrary.name, { libraries: dependencies })
     const library = await Library.deploy()
 
     console.log(`Library: ${strategyLibrary.name} is deployed at ${library.address}`)
 
+    // Write live config file.
+    const name = path.join("library", strategyLibrary.name)
+
+    writeLiveConfig(name, {
+      name: strategyLibrary.name,
+      address: library.address,
+      owner: "",
+    })
+
+    console.log(`Library: Corresponding live config is created at ${getLiveConfigPath(name)}.`)
+
+    console.log("Library: Verify the library.\n")
+
+    // Verify contract.
     await verifyContract(library.address)
 
     libraries[strategyLibrary.name] = library.address
-
-    // TODO: The functionality of libraries depending on other libraries is not yet supported
   }
 
   return libraries
