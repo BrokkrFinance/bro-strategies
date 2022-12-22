@@ -100,15 +100,15 @@ library DnsVectorStrategyInvestmentLib {
             .pangolinRouter
             .addLiquidity(
                 address(strategyStorage.ammPairDepositToken),
-            address(strategyStorage.aaveBorrowToken),
-            poolTokenAllocationInDepositToken,
-            aaveBorrowAllocationInBorrowToken,
-            0,
-            0,
-            address(this),
-            // solhint-disable-next-line not-rely-on-time
-            block.timestamp
-        );
+                address(strategyStorage.aaveBorrowToken),
+                poolTokenAllocationInDepositToken,
+                aaveBorrowAllocationInBorrowToken,
+                0,
+                0,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            );
 
         // staking LP token to Pangolin without locking period
         strategyStorage.pangolinPair.approve(
@@ -175,15 +175,15 @@ library DnsVectorStrategyInvestmentLib {
             uint256 ammPairDepositTokenChangeAmount,
             uint256 aaveBorrowTokenChangeAmount
         ) = strategyStorage.pangolinRouter.removeLiquidity(
-            address(strategyStorage.ammPairDepositToken),
-            address(strategyStorage.aaveBorrowToken),
+                address(strategyStorage.ammPairDepositToken),
+                address(strategyStorage.aaveBorrowToken),
                 lpTokenAmount,
-            0,
-            0,
-            address(this),
-            // solhint-disable-next-line not-rely-on-time
-            block.timestamp
-        );
+                0,
+                0,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            );
 
         // repay Aave debt
         uint256 vAaveBorrowTokenUserAmount = ((strategyStorage
@@ -324,15 +324,15 @@ library DnsVectorStrategyInvestmentLib {
         (uint256 aaveSupplyTokenAmountChange, ) = strategyStorage
             .pangolinRouter
             .removeLiquidity(
-            address(strategyStorage.ammPairDepositToken),
-            address(strategyStorage.aaveBorrowToken),
-            lpAmountChange,
-            0,
-            0,
-            address(this),
-            // solhint-disable-next-line not-rely-on-time
-            block.timestamp
-        );
+                address(strategyStorage.ammPairDepositToken),
+                address(strategyStorage.aaveBorrowToken),
+                lpAmountChange,
+                0,
+                0,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            );
 
         // converting aaveSupplyToken to aaveBorrowToken
         address[] memory path = new address[](2);
@@ -426,5 +426,226 @@ library DnsVectorStrategyInvestmentLib {
         // reinvest into the strategy
         // assuming aaveSupplyToken == depositToken
         deposit(aaveSupplyTokenAmountChange, params);
+    }
+
+    function migrate() external {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        // Migration from Vector and TraderJoe to Pangolin consists of seven steps.
+        // 0. Withdraw all TraderJoe LP tokens from Vector.
+        // 1. Remove all liquidity from TraderJoe.
+        // 2. Swap only minimum amount to match Pangolin's pool assets ratio.
+        // 3. Add all liquidity to Pangolin.
+        // 4. Deposit LP token to Pangolin.
+        // 5. Swap remaining `AaveBorrowToken` to `DepositToken`.
+        // 6. Check if valuation after migration is greater than or equal to minValuation. (This is done by DnsVectorStrategy contract.)
+
+        // 0. Withdraw all TraderJoe LP tokens from Vector.
+        uint256 lpBalance = strategyStorage.vectorPoolHelperJoe.balanceOf(
+            address(this)
+        );
+
+        strategyStorage.vectorPoolHelperJoe.withdraw(lpBalance);
+
+        // 1. Remove all liquidity from TraderJoe.
+        uint256 ammPairDepositTokenAmountBefore = strategyStorage
+            .ammPairDepositToken
+            .balanceOf(address(this));
+        uint256 aaveBorrowTokenAmountBefore = strategyStorage
+            .aaveBorrowToken
+            .balanceOf(address(this));
+
+        strategyStorage.traderJoePair.approve(
+            address(strategyStorage.traderJoeRouter),
+            lpBalance
+        );
+        strategyStorage.traderJoeRouter.removeLiquidity(
+            address(strategyStorage.ammPairDepositToken),
+            address(strategyStorage.aaveBorrowToken),
+            lpBalance,
+            0,
+            0,
+            address(this),
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp
+        );
+
+        uint256 ammPairDepositTokenAmountIn = strategyStorage
+            .ammPairDepositToken
+            .balanceOf(address(this)) - ammPairDepositTokenAmountBefore;
+        uint256 aaveBorrowTokenAmountIn = strategyStorage
+            .aaveBorrowToken
+            .balanceOf(address(this)) - aaveBorrowTokenAmountBefore;
+
+        // 2. Swap only minimum amount to match Pangolin's pool assets ratio.
+        (
+            uint256 ammPairDepositTokenAmountDesired,
+            uint256 aaveBorrowTokenAmountDesired
+        ) = __prepareTokens(
+                ammPairDepositTokenAmountIn,
+                aaveBorrowTokenAmountIn
+            );
+
+        // 3. Add all liquidity to Pangolin.
+        // assuming ammPairDepositToken == depositToken
+        strategyStorage.ammPairDepositToken.approve(
+            address(strategyStorage.pangolinRouter),
+            ammPairDepositTokenAmountDesired
+        );
+        strategyStorage.aaveBorrowToken.approve(
+            address(strategyStorage.pangolinRouter),
+            aaveBorrowTokenAmountDesired
+        );
+        (, , uint256 lpTokenAmountChange) = strategyStorage
+            .pangolinRouter
+            .addLiquidity(
+                address(strategyStorage.ammPairDepositToken),
+                address(strategyStorage.aaveBorrowToken),
+                ammPairDepositTokenAmountDesired,
+                aaveBorrowTokenAmountDesired,
+                0,
+                0,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            );
+
+        // 4. Deposit LP token to Pangolin.
+        strategyStorage.pangolinPair.approve(
+            address(strategyStorage.pangolinMiniChef),
+            lpTokenAmountChange
+        );
+        strategyStorage.pangolinMiniChef.deposit(
+            strategyStorage.pangolinPoolId,
+            lpTokenAmountChange,
+            address(this)
+        );
+
+        // 5. Swap remaining `AaveBorrowToken` to `DepositToken`.
+        uint256 aaveBorrowTokenAmountAfter = strategyStorage
+            .aaveBorrowToken
+            .balanceOf(address(this));
+
+        if (aaveBorrowTokenAmountAfter > aaveBorrowTokenAmountBefore) {
+            address[] memory path = new address[](2);
+            path[0] = address(strategyStorage.aaveBorrowToken);
+            path[1] = address(strategyStorage.depositToken);
+
+            uint256 aaveBorrowTokenAmountRemaining = aaveBorrowTokenAmountAfter -
+                    aaveBorrowTokenAmountBefore;
+
+            SwapServiceLib.swapExactTokensForTokens(
+                strategyStorage.swapService,
+                aaveBorrowTokenAmountRemaining,
+                0,
+                path,
+                new uint256[](0)
+            );
+        }
+    }
+
+    function __prepareTokens(
+        uint256 ammPairDepositTokenAmountIn,
+        uint256 aaveBorrowTokenAmountIn
+    )
+        private
+        returns (
+            uint256 ammPairDepositTokenAmountDesired,
+            uint256 aaveBorrowTokenAmountDesired
+        )
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        // Calculate which token we have more than we need.
+        (
+            uint256 ammPairDepositTokenReserve,
+            uint256 aaveBorrowTokenReserve
+        ) = DnsVectorStrategyAumLib.getPangolinLpReserve(
+                address(strategyStorage.ammPairDepositToken),
+                address(strategyStorage.aaveBorrowToken)
+            );
+
+        bool swapAmmPairDepositTokenToAaveBorrowToken;
+        bool swapAaveBorrowTokenToAmmPairDepositToken;
+
+        uint256 ammPairDepositTokenDesiredMulByReserve = ammPairDepositTokenAmountIn *
+                aaveBorrowTokenReserve;
+        uint256 aaveBorrowTokenDesiredMulByReserve = aaveBorrowTokenAmountIn *
+            ammPairDepositTokenReserve;
+
+        if (
+            ammPairDepositTokenDesiredMulByReserve >
+            aaveBorrowTokenDesiredMulByReserve
+        ) {
+            swapAmmPairDepositTokenToAaveBorrowToken = true;
+        } else if (
+            ammPairDepositTokenDesiredMulByReserve <
+            aaveBorrowTokenDesiredMulByReserve
+        ) {
+            swapAaveBorrowTokenToAmmPairDepositToken = true;
+        }
+
+        address[] memory path = new address[](2);
+        uint256 amountToSwap;
+
+        // Swap only necessary amount to match Pangolin's pool assets ratio.
+        if (swapAmmPairDepositTokenToAaveBorrowToken) {
+            uint256 aaveBorrowTokenPriceInAmmPairDepositToken = strategyStorage
+                .priceOracle
+                .getPrice(strategyStorage.aaveBorrowToken, true, false);
+
+            amountToSwap =
+                (ammPairDepositTokenDesiredMulByReserve -
+                    aaveBorrowTokenDesiredMulByReserve) /
+                (aaveBorrowTokenPriceInAmmPairDepositToken *
+                    ammPairDepositTokenReserve +
+                    aaveBorrowTokenReserve);
+
+            path[0] = address(strategyStorage.ammPairDepositToken);
+            path[1] = address(strategyStorage.aaveBorrowToken);
+        } else if (swapAaveBorrowTokenToAmmPairDepositToken) {
+            uint256 ammPairDepositTokenPriceInAaveBorrowToken = 10 **
+                (InvestableLib.PRICE_PRECISION_DIGITS * 2) /
+                strategyStorage.priceOracle.getPrice(
+                    strategyStorage.aaveBorrowToken,
+                    true,
+                    false
+                );
+
+            amountToSwap =
+                (aaveBorrowTokenDesiredMulByReserve -
+                    ammPairDepositTokenDesiredMulByReserve) /
+                (ammPairDepositTokenPriceInAaveBorrowToken *
+                    aaveBorrowTokenReserve +
+                    ammPairDepositTokenReserve);
+
+            path[0] = address(strategyStorage.aaveBorrowToken);
+            path[1] = address(strategyStorage.ammPairDepositToken);
+        }
+
+        uint256 amountOut = SwapServiceLib.swapExactTokensForTokens(
+            strategyStorage.swapService,
+            amountToSwap,
+            0,
+            path,
+            new uint256[](0)
+        );
+
+        // Return desired amounts of tokens.
+        if (swapAmmPairDepositTokenToAaveBorrowToken) {
+            ammPairDepositTokenAmountDesired =
+                ammPairDepositTokenAmountIn -
+                amountToSwap;
+            aaveBorrowTokenAmountDesired = aaveBorrowTokenAmountIn + amountOut;
+        } else if (swapAaveBorrowTokenToAmmPairDepositToken) {
+            ammPairDepositTokenAmountDesired =
+                ammPairDepositTokenAmountIn +
+                amountOut;
+            aaveBorrowTokenAmountDesired =
+                aaveBorrowTokenAmountIn -
+                amountToSwap;
+        }
     }
 }
