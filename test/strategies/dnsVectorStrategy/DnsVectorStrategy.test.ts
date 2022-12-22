@@ -1,8 +1,8 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
+import Pangolin from "../../../constants/addresses/Pangolin.json"
 import Tokens from "../../../constants/addresses/Tokens.json"
-import Vector from "../../../constants/addresses/Vector.json"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import { TestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
@@ -252,7 +252,7 @@ function testCollaterizationAndDeltaNeutrality() {
       const initialState: StateSnapshot = await getStateSnapshot(this.strategy)
 
       // repay debt which involves
-      // 1. withdraw lp tokens from vector
+      // 1. unstake lp tokens from pangolin
       // 2. burn lp tokens
       // 3. convert borrow token to deposit token
       // 4. repay debt
@@ -428,7 +428,7 @@ function testAum() {
       const state: StateSnapshot = await getStateSnapshot(this.strategy)
 
       // checking assets
-      let expectedAssets = [{ asset: Tokens.aUsdc }, { asset: Vector.vectorAvaxUsdcStakingToken }]
+      let expectedAssets = [{ asset: Tokens.aUsdc }, { asset: Pangolin.wAvaxUsdcPair }]
       for (const [i, expectedAsset] of expectedAssets.entries()) {
         expect(expectedAsset.asset.toLowerCase()).to.be.equal(state.assetBalances[i].asset.toLowerCase())
         expect(expectedAsset.asset.toLowerCase()).to.be.equal(state.lowAssetValuations[i].asset.toLowerCase())
