@@ -23,6 +23,8 @@ contract DnsVectorStrategy is
 
     error SafetyFactorRangeError();
     error TooLowMinimumEquityAfterOperation();
+    error InvalidPangolinParams();
+    error TooBigValuationLoss();
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
@@ -38,20 +40,33 @@ contract DnsVectorStrategy is
         _disableInitializers();
     }
 
-    // workaround for the stack too deep error
-    struct InitializeParams {
+    struct AaveParams {
         uint256 safetyFactor;
         IERC20Upgradeable aaveSupplyToken;
         IERC20Upgradeable aAaveSupplyToken;
         ERC20Upgradeable aaveBorrowToken;
         IERC20Upgradeable vAaveBorrowToken;
-        IERC20Upgradeable ammPairDepositToken;
-        IERC20Upgradeable joeToken;
         IPool aavePool;
         AaveProtocolDataProvider aaveProtocolDataProvider;
-        IJoeRouter02 traderJoeRouter;
-        IJoePair traderJoePair;
-        IVectorPoolHelperJoe vectorPoolHelperJoe;
+    }
+
+    struct PangolinParams {
+        IERC20Upgradeable pngToken;
+        IPangolinRouter pangolinRouter;
+        IPangolinMiniChef pangolinMiniChef;
+        IPangolinPair pangolinPair;
+        uint256 pangolinPoolId;
+    }
+
+    struct InitializeParams {
+        AaveParams aaveParams;
+        IERC20Upgradeable ammPairDepositToken;
+        PangolinParams pangolinParams;
+    }
+
+    struct ReinitializeParams {
+        PangolinParams pangolinParams;
+        uint256 minValuation;
     }
 
     function initialize(
@@ -62,11 +77,13 @@ contract DnsVectorStrategy is
         __StrategyRoleablePausableBaseUpgradeable_init(strategyArgs);
 
         require(
-            address(initializeParams.aaveSupplyToken) == InvestableLib.USDC,
+            address(initializeParams.aaveParams.aaveSupplyToken) ==
+                InvestableLib.USDC,
             "aaveSupplyToken != USDC"
         );
         require(
-            address(initializeParams.aaveBorrowToken) == InvestableLib.WAVAX,
+            address(initializeParams.aaveParams.aaveBorrowToken) ==
+                InvestableLib.WAVAX,
             "aaveBorrowToken != WAVAX"
         );
         require(
@@ -76,21 +93,14 @@ contract DnsVectorStrategy is
 
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
-        strategyStorage.safetyFactor = initializeParams.safetyFactor;
-        strategyStorage.aaveSupplyToken = initializeParams.aaveSupplyToken;
-        strategyStorage.aAaveSupplyToken = initializeParams.aAaveSupplyToken;
-        strategyStorage.aaveBorrowToken = initializeParams.aaveBorrowToken;
-        strategyStorage.vAaveBorrowToken = initializeParams.vAaveBorrowToken;
+
+        __initializeAaveParams(initializeParams.aaveParams);
+
         strategyStorage.ammPairDepositToken = initializeParams
             .ammPairDepositToken;
-        strategyStorage.joeToken = initializeParams.joeToken;
-        strategyStorage.aavePool = initializeParams.aavePool;
-        strategyStorage.aaveProtocolDataProvider = initializeParams
-            .aaveProtocolDataProvider;
-        strategyStorage.traderJoeRouter = initializeParams.traderJoeRouter;
-        strategyStorage.traderJoePair = initializeParams.traderJoePair;
-        strategyStorage.vectorPoolHelperJoe = initializeParams
-            .vectorPoolHelperJoe;
+
+        __initializePangolinParams(initializeParams.pangolinParams);
+
         strategyStorage.depositToken = strategyArgs.depositToken;
         strategyStorage.priceOracle = strategyArgs.priceOracle;
         strategyStorage.swapService = SwapService(
@@ -99,14 +109,21 @@ contract DnsVectorStrategy is
         );
     }
 
-    function reinitialize(IVectorPoolHelperJoe vectorPoolHelperJoe)
+    function reinitialize(ReinitializeParams calldata reinitializeParams)
         external
-        reinitializer(2)
+        reinitializer(3)
     {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        // Initialize.
+        __initializePangolinParams(reinitializeParams.pangolinParams);
 
-        strategyStorage.vectorPoolHelperJoe = vectorPoolHelperJoe;
+        // TODO: Migrate.
+
+        // Check if valuation after migration is greater than or equal to minValuation.
+        uint256 valuation = getEquityValuation(true, false);
+
+        if (valuation < reinitializeParams.minValuation) {
+            revert TooBigValuationLoss();
+        }
     }
 
     function _deposit(uint256 amount, NameValuePair[] calldata params)
@@ -360,5 +377,40 @@ contract DnsVectorStrategy is
         returns (DnsVectorStorage memory)
     {
         return DnsVectorStorageLib.getStorage();
+    }
+
+    function __initializeAaveParams(AaveParams calldata aaveParams) private {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        strategyStorage.safetyFactor = aaveParams.safetyFactor;
+        strategyStorage.aaveSupplyToken = aaveParams.aaveSupplyToken;
+        strategyStorage.aAaveSupplyToken = aaveParams.aAaveSupplyToken;
+        strategyStorage.aaveBorrowToken = aaveParams.aaveBorrowToken;
+        strategyStorage.vAaveBorrowToken = aaveParams.vAaveBorrowToken;
+        strategyStorage.aavePool = aaveParams.aavePool;
+        strategyStorage.aaveProtocolDataProvider = aaveParams
+            .aaveProtocolDataProvider;
+    }
+
+    function __initializePangolinParams(PangolinParams calldata pangolinParams)
+        private
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        strategyStorage.pngToken = pangolinParams.pngToken;
+        strategyStorage.pangolinRouter = pangolinParams.pangolinRouter;
+        strategyStorage.pangolinMiniChef = pangolinParams.pangolinMiniChef;
+        strategyStorage.pangolinPair = pangolinParams.pangolinPair;
+        strategyStorage.pangolinPoolId = pangolinParams.pangolinPoolId;
+
+        address pangolinLpToken = strategyStorage.pangolinMiniChef.lpToken(
+            strategyStorage.pangolinPoolId
+        );
+
+        if (pangolinLpToken != address(strategyStorage.pangolinPair)) {
+            revert InvalidPangolinParams();
+        }
     }
 }

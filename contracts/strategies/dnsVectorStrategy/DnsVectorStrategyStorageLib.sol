@@ -6,6 +6,9 @@ import "../../common/interfaces/IPriceOracle.sol";
 import "../../common/libraries/SwapServiceLib.sol";
 
 import "../../dependencies/vector/IVectorPoolHelperJoe.sol";
+import "../../dependencies/pangolin/IPangolinMiniChef.sol";
+import "../../dependencies/pangolin/IPangolinPair.sol";
+import "../../dependencies/pangolin/IPangolinRouter.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@aave/core-v3/contracts/interfaces/IPool.sol";
@@ -20,18 +23,23 @@ struct DnsVectorStorage {
     ERC20Upgradeable aaveBorrowToken;
     IERC20Upgradeable vAaveBorrowToken;
     IERC20Upgradeable ammPairDepositToken;
-    IERC20Upgradeable joeToken;
+    IERC20Upgradeable joeToken; // Obsolete.
     IPool aavePool;
     AaveProtocolDataProvider aaveProtocolDataProvider;
-    IJoeRouter02 traderJoeRouter;
-    IJoePair traderJoePair;
-    IVectorPoolHelperJoe vectorPoolHelperJoe;
+    IJoeRouter02 traderJoeRouter; // Obsolete.
+    IJoePair traderJoePair; // Obsolete.
+    IVectorPoolHelperJoe vectorPoolHelperJoe; // Obsolete.
     // The following variables are stored both in the storage and the base class,
     // so the functions in the faucets don't need to take extra parameters.
     // The following variables are expected to change very rarely.
     IPriceOracle priceOracle;
     SwapService swapService;
     IERC20Upgradeable depositToken;
+    IERC20Upgradeable pngToken;
+    IPangolinRouter pangolinRouter;
+    IPangolinMiniChef pangolinMiniChef;
+    IPangolinPair pangolinPair;
+    uint256 pangolinPoolId;
 }
 
 library DnsVectorStorageLib {
