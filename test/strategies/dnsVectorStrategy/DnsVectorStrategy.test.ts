@@ -3,7 +3,7 @@ import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import Tokens from "../../../constants/addresses/Tokens.json"
 import Vector from "../../../constants/addresses/Vector.json"
-import { deployStrategy } from "../../../scripts/helper/contract"
+import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import { TestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
@@ -14,6 +14,11 @@ const dnsVectorTestOptions: TestOptions = {
 }
 
 testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, dnsVectorTestOptions, [
+  testAum,
+  testCollaterizationAndDeltaNeutrality,
+  testRebalanceSafetyLimits,
+])
+testStrategy("Dns Vector Strategy - Upgrade After Deploy", upgradeDnsStrategy, dnsVectorTestOptions, [
   testAum,
   testCollaterizationAndDeltaNeutrality,
   testRebalanceSafetyLimits,
@@ -422,4 +427,8 @@ function testAum() {
 
 async function deployDnsStrategy() {
   return await deployStrategy("DnsVector")
+}
+
+async function upgradeDnsStrategy() {
+  return upgradeStrategy("DnsVector")
 }
