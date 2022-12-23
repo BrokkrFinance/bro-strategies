@@ -3,7 +3,7 @@ import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import Tokens from "../../../constants/addresses/Tokens.json"
 import Vector from "../../../constants/addresses/Vector.json"
-import { deployStrategy } from "../../../scripts/helper/contract"
+import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import { TestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
@@ -18,6 +18,11 @@ testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, dnsVectorTestOpt
   testCollaterizationAndDeltaNeutrality,
   testRebalanceSafetyLimits,
 ])
+testStrategy("Dns Vector Strategy - Upgrade After Deploy", upgradeDnsStrategy, dnsVectorTestOptions, [
+  testAum,
+  testCollaterizationAndDeltaNeutrality,
+  testRebalanceSafetyLimits,
+])
 
 async function checkProperCollateralization(strategy: any) {
   const lowCollaterizationRatio = await strategy.getInverseCollateralRatio(true, false)
@@ -25,14 +30,14 @@ async function checkProperCollateralization(strategy: any) {
   const expectCollaterizationRatio = await strategy.getCombinedSafetyFactor()
 
   // check if lowCollaterizationRatio and expectCollaterizationRatio are within
-  // 1% error range of expectCollaterizationRatio
+  // Threshold of collateralization ratio is 5%.
   expect(lowCollaterizationRatio).to.be.approximately(
     expectCollaterizationRatio,
-    getErrorRange(lowCollaterizationRatio, BigNumber.from(1), BigNumber.from(100))
+    getErrorRange(lowCollaterizationRatio, BigNumber.from(5), BigNumber.from(100))
   )
   expect(highCollaterizationRatio).to.be.approximately(
     expectCollaterizationRatio,
-    getErrorRange(highCollaterizationRatio, BigNumber.from(1), BigNumber.from(100))
+    getErrorRange(highCollaterizationRatio, BigNumber.from(5), BigNumber.from(100))
   )
 }
 
@@ -40,7 +45,8 @@ async function checkDeltaNeutrality(strategy: any) {
   const aaveDebt = await strategy.getAaveDebt()
   const poolDebt = await strategy.getPoolDebt()
 
-  expect(aaveDebt).to.be.approximately(poolDebt, getErrorRange(aaveDebt, BigNumber.from(1), BigNumber.from(100)))
+  // Threshold of delta neutrality is 2%.
+  expect(aaveDebt).to.be.approximately(poolDebt, getErrorRange(aaveDebt, BigNumber.from(2), BigNumber.from(100)))
 }
 
 async function checkEquityValuationAndInvestmentTokenSupply(initialState: StateSnapshot, currentState: StateSnapshot) {
@@ -105,6 +111,7 @@ async function getStateSnapshot(strategy: any): Promise<StateSnapshot> {
 function testRebalanceSafetyLimits() {
   describe("Rebalance function's safety limit test", async function () {
     it("repay debt call should fail, if the limit is set too high", async function () {
+      const lpTokenAmountBefore = (await this.strategy.getAssetBalances())[1].balance
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("100", 6),
@@ -113,15 +120,20 @@ function testRebalanceSafetyLimits() {
           params: [],
         })
         .success()
-      const initialState: StateSnapshot = await getStateSnapshot(this.strategy)
+      const lpTokenAmountAfter = (await this.strategy.getAssetBalances())[1].balance
 
-      const repayDebtAmount = initialState.lpTokenAmount.div(10)
+      const lpTokenAmountIncrement = lpTokenAmountAfter.sub(lpTokenAmountBefore)
+
+      const repayDebtAmount = lpTokenAmountIncrement.div(10)
       await expect(
-        this.strategy.connect(this.maintainerMember).repayDebt(repayDebtAmount, [], ethers.utils.parseUnits("100", 6))
+        this.strategy
+          .connect(this.maintainerMember)
+          .repayDebt(repayDebtAmount, [], this.equityValuation.add(ethers.utils.parseUnits("100", 6)))
       ).to.be.reverted
     })
 
     it("repay debt call should succeed, if the limit is set too a reasonable level", async function () {
+      const lpTokenAmountBefore = (await this.strategy.getAssetBalances())[1].balance
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("100", 6),
@@ -130,15 +142,20 @@ function testRebalanceSafetyLimits() {
           params: [],
         })
         .success()
-      const initialState: StateSnapshot = await getStateSnapshot(this.strategy)
+      const lpTokenAmountAfter = (await this.strategy.getAssetBalances())[1].balance
 
-      const repayDebtAmount = initialState.lpTokenAmount.div(10)
+      const lpTokenAmountIncrement = lpTokenAmountAfter.sub(lpTokenAmountBefore)
+
+      const repayDebtAmount = lpTokenAmountIncrement.div(10)
       await expect(
-        this.strategy.connect(this.maintainerMember).repayDebt(repayDebtAmount, [], ethers.utils.parseUnits("99", 6))
+        this.strategy
+          .connect(this.maintainerMember)
+          .repayDebt(repayDebtAmount, [], this.equityValuation.add(ethers.utils.parseUnits("99", 6)))
       ).to.not.be.reverted
     })
 
     it("increase debt call should fail, if the limit is set too high", async function () {
+      const aaveDebtBefore = await this.strategy.getAaveDebt()
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("100", 6),
@@ -147,17 +164,20 @@ function testRebalanceSafetyLimits() {
           params: [],
         })
         .success()
-      const initialState: StateSnapshot = await getStateSnapshot(this.strategy)
+      const aaveDebtAfter = await this.strategy.getAaveDebt()
 
-      const increaseDebtAmount = initialState.aaveDebt.div(10)
+      const aaveDebtIncrement = aaveDebtAfter.sub(aaveDebtBefore)
+
+      const increaseDebtAmount = aaveDebtIncrement.div(10)
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .increaseDebt(increaseDebtAmount, [], ethers.utils.parseUnits("100", 6))
+          .increaseDebt(increaseDebtAmount, [], this.equityValuation.add(ethers.utils.parseUnits("100", 6)))
       ).to.be.reverted
     })
 
     it("increase debt call should succeed, if the limit is set too a reasonable level", async function () {
+      const aaveDebtBefore = await this.strategy.getAaveDebt()
       await this.investHelper
         .deposit(this.strategy, this.user0, {
           amount: ethers.utils.parseUnits("100", 6),
@@ -166,13 +186,15 @@ function testRebalanceSafetyLimits() {
           params: [],
         })
         .success()
-      const initialState: StateSnapshot = await getStateSnapshot(this.strategy)
+      const aaveDebtAfter = await this.strategy.getAaveDebt()
 
-      const increaseDebtAmount = initialState.aaveDebt.div(10)
+      const aaveDebtIncrement = aaveDebtAfter.sub(aaveDebtBefore)
+
+      const increaseDebtAmount = aaveDebtIncrement.div(10)
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .increaseDebt(increaseDebtAmount, [], ethers.utils.parseUnits("99", 6))
+          .increaseDebt(increaseDebtAmount, [], this.equityValuation.add(ethers.utils.parseUnits("99", 6)))
       ).to.not.be.reverted
     })
 
@@ -185,13 +207,12 @@ function testRebalanceSafetyLimits() {
           params: [],
         })
         .success()
-      const initialState: StateSnapshot = await getStateSnapshot(this.strategy)
 
-      const decreaseSupplyAmount = ethers.utils.parseUnits("3", 6)
+      const decreaseSupplyAmount = this.equityValuation.mul(3).div(100)
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .decreaseSupply(decreaseSupplyAmount, [], ethers.utils.parseUnits("100", 6))
+          .decreaseSupply(decreaseSupplyAmount, [], this.equityValuation.add(ethers.utils.parseUnits("100", 6)))
       ).to.be.reverted
     })
 
@@ -210,7 +231,7 @@ function testRebalanceSafetyLimits() {
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .decreaseSupply(decreaseSupplyAmount, [], ethers.utils.parseUnits("99", 6))
+          .decreaseSupply(decreaseSupplyAmount, [], this.equityValuation.add(ethers.utils.parseUnits("99", 6)))
       ).to.not.be.reverted
     })
   })
@@ -236,7 +257,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // 3. convert borrow token to deposit token
       // 4. repay debt
       const repayDebtAmount = initialState.lpTokenAmount.div(10)
-      await this.strategy.connect(this.maintainerMember).repayDebt(repayDebtAmount, [], BigNumber.from(0))
+      await this.strategy.connect(this.maintainerMember).repayDebt(repayDebtAmount, [], this.equityValuation)
       const currentState: StateSnapshot = await getStateSnapshot(this.strategy)
 
       // check delta neutrality: it should no longer be delta neutral
@@ -250,8 +271,11 @@ function testCollaterizationAndDeltaNeutrality() {
       expect(currentState.lowCollaterizationRatio).to.be.below(initialState.lowCollaterizationRatio)
       expect(currentState.highCollaterizationRatio).to.be.below(initialState.highCollaterizationRatio)
 
-      // check aave supply: it should not change
-      expect(currentState.aaveSupply).to.be.equal(initialState.aaveSupply)
+      // check aave supply: its value increases as time goes by but it should be very little (0.001%)
+      expect(currentState.aaveSupply).to.be.approximately(
+        initialState.aaveSupply,
+        getErrorRange(initialState.aaveSupply, BigNumber.from(1), BigNumber.from(1e5))
+      )
 
       // checking equity valuation and investment token supply
       checkEquityValuationAndInvestmentTokenSupply(initialState, currentState)
@@ -274,7 +298,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // 2. convert debt to deposit currency
       // 3. reinvest
       const increaseDebtAmount = initialState.aaveDebt.div(10)
-      await this.strategy.connect(this.maintainerMember).increaseDebt(increaseDebtAmount, [], BigNumber.from(0))
+      await this.strategy.connect(this.maintainerMember).increaseDebt(increaseDebtAmount, [], this.equityValuation)
       const currentState: StateSnapshot = await getStateSnapshot(this.strategy)
 
       // check delta neutrality: it should no longer be delta neutral
@@ -305,9 +329,9 @@ function testCollaterizationAndDeltaNeutrality() {
         .success()
       const initialState: StateSnapshot = await getStateSnapshot(this.strategy)
 
-      // decrease collateral by 3 units and reinvest
-      const decreaseSupplyAmount = ethers.utils.parseUnits("3", 6)
-      await this.strategy.connect(this.maintainerMember).decreaseSupply(decreaseSupplyAmount, [], BigNumber.from(0))
+      // decrease collateral by 3% and reinvest
+      const decreaseSupplyAmount = initialState.aaveSupply.mul(3).div(100)
+      await this.strategy.connect(this.maintainerMember).decreaseSupply(decreaseSupplyAmount, [], this.equityValuation)
       const currentState: StateSnapshot = await getStateSnapshot(this.strategy)
 
       // check delta neutrality: it should not be affected
@@ -422,4 +446,8 @@ function testAum() {
 
 async function deployDnsStrategy() {
   return await deployStrategy("DnsVector")
+}
+
+async function upgradeDnsStrategy() {
+  return upgradeStrategy("DnsVector")
 }

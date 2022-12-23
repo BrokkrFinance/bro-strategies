@@ -1,0 +1,18 @@
+[
+  {
+    "proxy": "0xc4a4EC0E78e4385bc835532Dc281BB5E17dEF0e1",
+    "newImplementation": "DnsVectorStrategy",
+    "functionName": "reinitialize",
+    "functionArgs": ["0x7854B77c252dA067AcB59C4A25DCd407764Bd8eE"],
+    "libraries": [
+      {
+        "name": "DnsVectorStrategyAumLib",
+        "dependencies": []
+      },
+      {
+        "name": "DnsVectorStrategyInvestmentLib",
+        "dependencies": []
+      }
+    ]
+  }
+]
