@@ -26,12 +26,12 @@ contract DnsVectorStrategy is
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.dns_vector_strategy.dns_vector_strategy_v1.0.0";
+        "brokkr.dns_vector_strategy.dns_vector_strategy_v1.0.1";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName =
         "Dns vector delta neutral strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.0.0";
+    string public constant version = "1.0.1";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
