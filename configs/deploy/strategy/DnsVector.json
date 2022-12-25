@@ -48,18 +48,23 @@
       ],
       "extraArgs": [
         [
-          800,
+          [
+            800,
+            { "$ref": "../../../constants/addresses/Tokens.json#/usdc" },
+            { "$ref": "../../../constants/addresses/Tokens.json#/aUsdc" },
+            { "$ref": "../../../constants/addresses/Tokens.json#/wAvax" },
+            { "$ref": "../../../constants/addresses/Tokens.json#/vWavax" },
+            { "$ref": "../../../constants/addresses/Aave.json#/aavePool" },
+            { "$ref": "../../../constants/addresses/Aave.json#/aaveProtocolDataProvider" }
+          ],
           { "$ref": "../../../constants/addresses/Tokens.json#/usdc" },
-          { "$ref": "../../../constants/addresses/Tokens.json#/aUsdc" },
-          { "$ref": "../../../constants/addresses/Tokens.json#/wAvax" },
-          { "$ref": "../../../constants/addresses/Tokens.json#/vWavax" },
-          { "$ref": "../../../constants/addresses/Tokens.json#/usdc" },
-          { "$ref": "../../../constants/addresses/TraderJoe.json#/joeToken" },
-          { "$ref": "../../../constants/addresses/Aave.json#/aavePool" },
-          { "$ref": "../../../constants/addresses/Aave.json#/aaveProtocolDataProvider" },
-          { "$ref": "../../../constants/addresses/TraderJoe.json#/router" },
-          { "$ref": "../../../constants/addresses/TraderJoe.json#/usdcWAvaxLpToken" },
-          { "$ref": "../../../constants/addresses/Vector.json#/poolHelperJoe" }
+          [
+            { "$ref": "../../../constants/addresses/Pangolin.json#/pngToken" },
+            { "$ref": "../../../constants/addresses/Pangolin.json#/router" },
+            { "$ref": "../../../constants/addresses/Pangolin.json#/miniChef" },
+            { "$ref": "../../../constants/addresses/Pangolin.json#/wAvaxUsdcPair" },
+            { "$ref": "../../../constants/addresses/Pangolin.json#/wAvaxUsdcPoolId" }
+          ]
         ]
       ],
       "libraries": [

@@ -3,7 +3,18 @@
     "proxy": "0xc4a4EC0E78e4385bc835532Dc281BB5E17dEF0e1",
     "newImplementation": "DnsVectorStrategy",
     "functionName": "reinitialize",
-    "functionArgs": ["0x7854B77c252dA067AcB59C4A25DCd407764Bd8eE"],
+    "functionArgs": [
+      [
+        [
+          "0x60781C2586D68229fde47564546784ab3fACA982",
+          "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106",
+          "0x1f806f7C8dED893fd3caE279191ad7Aa3798E928",
+          "0x0e0100Ab771E9288e0Aa97e11557E6654C3a9665",
+          55
+        ],
+        0
+      ]
+    ],
     "libraries": [
       {
         "name": "DnsVectorStrategyAumLib",
