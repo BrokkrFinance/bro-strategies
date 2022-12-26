@@ -1,8 +1,8 @@
-import $RefParser from "@apidevtools/json-schema-ref-parser"
 import { execSync } from "child_process"
 import path from "path"
 import Tokens from "../constants/addresses/Tokens.json"
-import { getDeployConfigPath, readLiveConfig } from "./helper/paths"
+import { readDeployConfig, readLiveConfig } from "./helper/files"
+import { DeployConfig } from "./interfaces/configs"
 import { Library } from "./interfaces/library"
 import { NameValuePair } from "./interfaces/name-value-pair"
 import { RoleToUsers } from "./interfaces/role-to-users"
@@ -10,14 +10,7 @@ import { RoleToUsers } from "./interfaces/role-to-users"
 export async function deploy(network: string, name: string) {
   const { run } = require("hardhat")
 
-  const deployConfigSchema = await $RefParser.dereference(getDeployConfigPath(name))
-
-  if (deployConfigSchema.properties === undefined) {
-    console.log("Deploy: Wrong config file. The config file must have 'properties' key.")
-    throw new Error("Wrong config file")
-  }
-
-  const deployConfigs = JSON.parse(JSON.stringify(deployConfigSchema.properties))
+  const deployConfigs: DeployConfig[] = await readDeployConfig(name)
 
   for (let deployConfig of deployConfigs) {
     let deployArgs: { [key: string]: string } = Object.assign({ targetNetwork: network }, parseSharedArgs(deployConfig))
@@ -43,7 +36,7 @@ export async function deploy(network: string, name: string) {
     }
   }
 
-  const last = deployConfigs.at(-1)
+  const last = deployConfigs.slice(-1)[0]
 
   if (last.type !== "portfolio") {
     console.log("Deploy: It looks like what we just deployed is not a portfolio. Skip investing $1.\n")

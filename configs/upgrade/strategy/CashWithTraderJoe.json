@@ -1,6 +1,8 @@
-[
-  {
-    "proxy": "0x217711F828D44Ba4d9055974DCE17bF1Aec42746",
-    "newImplementation": "Cash"
-  }
-]
+{
+  "properties": [
+    {
+      "proxy": { "$ref": "../../live/strategy/CashWithTraderJoe.json#/address" },
+      "newImplementation": "Cash"
+    }
+  ]
+}

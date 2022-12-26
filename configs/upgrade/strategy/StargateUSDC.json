@@ -1,6 +1,8 @@
-[
-  {
-    "proxy": "0x72126b4d9dd23093D54F94A64D7831D101ba13d5",
-    "newImplementation": "Stargate"
-  }
-]
+{
+  "properties": [
+    {
+      "proxy": { "$ref": "../../live/strategy/StargateUSDC.json#/address" },
+      "newImplementation": "Stargate"
+    }
+  ]
+}

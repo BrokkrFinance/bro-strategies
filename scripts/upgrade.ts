@@ -1,7 +1,7 @@
 import { execSync } from "child_process"
+import { readUpgradeConfig } from "./helper/files"
 import { UpgradeConfig } from "./interfaces/configs"
 import { Library } from "./interfaces/library"
-import { readUpgradeConfig } from "./helper/paths"
 
 async function main() {
   const { run } = require("hardhat")
@@ -22,7 +22,7 @@ async function main() {
   const name = args[1]
   const multisig = args[2]
 
-  const upgradeConfigs: UpgradeConfig[] = readUpgradeConfig(name)
+  const upgradeConfigs: UpgradeConfig[] = await readUpgradeConfig(name)
 
   for (let upgradeConfig of upgradeConfigs) {
     const upgradeArgs: { [key: string]: string } = {
