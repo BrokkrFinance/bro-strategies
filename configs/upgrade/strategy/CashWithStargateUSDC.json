@@ -1,6 +1,8 @@
-[
-  {
-    "proxy": "0xcc23fa2a377Ea6F43E34A8c43d08DC428B647a81",
-    "newImplementation": "Cash"
-  }
-]
+{
+  "properties": [
+    {
+      "proxy": { "$ref": "../../live/strategy/CashWithStargateUSDC.json#/address" },
+      "newImplementation": "Cash"
+    }
+  ]
+}

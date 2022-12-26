@@ -11,7 +11,8 @@ import {
   StrategyExtraArgs,
   StrategyLibraries,
 } from "../interfaces/parameters"
-import { getLiveConfigPath, readLiveConfig, readUpgradeConfig, writeLiveConfig } from "./paths"
+import { readLiveConfig, readUpgradeConfig, writeLiveConfig } from "./files"
+import { getLiveConfigPath } from "./paths"
 
 export async function deployLibraries(
   strategyLibraries: StrategyLibraries
@@ -254,7 +255,7 @@ async function upgradeInvestable(name: string): Promise<Contract> {
 
   // Upgrade the given investable and its all relevant investables.
   const liveConfig: LiveConfig = readLiveConfig(name)
-  const upgradeConfigs: UpgradeConfig[] = readUpgradeConfig(name)
+  const upgradeConfigs: UpgradeConfig[] = await readUpgradeConfig(name)
 
   const owner = await ethers.getImpersonatedSigner(liveConfig.owner)
 

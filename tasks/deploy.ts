@@ -17,7 +17,8 @@ import {
   deployUUPSUpgradeableStrategyRoleable,
   verifyContract,
 } from "../scripts/helper/contract"
-import { getLiveConfigPath, writeLiveConfig } from "../scripts/helper/paths"
+import { writeLiveConfig } from "../scripts/helper/files"
+import { getLiveConfigPath } from "../scripts/helper/paths"
 
 task("deploy", "Deploy an investable contract")
   .addParam("targetNetwork", "A network to deploy")

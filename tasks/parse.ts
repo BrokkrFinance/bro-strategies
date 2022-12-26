@@ -1,4 +1,4 @@
-import { readLiveConfig } from "../scripts/helper/paths"
+import { readLiveConfig } from "../scripts/helper/files"
 import { LiveConfig } from "../scripts/interfaces/configs"
 import { Library } from "../scripts/interfaces/library"
 import { NameValuePair } from "../scripts/interfaces/name-value-pair"
