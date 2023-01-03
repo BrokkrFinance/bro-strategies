@@ -117,6 +117,10 @@ contract DnsVectorStrategy is
         // Initialize.
         __initializePangolinParams(reinitializeParams.pangolinParams);
 
+        uint256 depositTokenBalanceBefore = depositToken.balanceOf(
+            address(this)
+        );
+
         DnsVectorStrategyInvestmentLib.migrate();
 
         // Check if valuation after migration is greater than or equal to minValuation.
@@ -125,6 +129,11 @@ contract DnsVectorStrategy is
         if (valuation < reinitializeParams.minValuation) {
             revert TooBigValuationLoss();
         }
+
+        // handling dust amount caused by providing liquidity
+        uninvestedDepositTokenAmount +=
+            depositToken.balanceOf(address(this)) -
+            depositTokenBalanceBefore;
     }
 
     function _deposit(uint256 amount, NameValuePair[] calldata params)
