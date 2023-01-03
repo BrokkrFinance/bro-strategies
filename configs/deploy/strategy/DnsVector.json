@@ -74,7 +74,7 @@
         },
         {
           "name": "DnsVectorStrategyInvestmentLib",
-          "dependencies": ["DnsVectorStrategyAumLib"]
+          "dependencies": []
         }
       ]
     }
