@@ -49,17 +49,19 @@ library DnsVectorStrategyAumLib {
         );
 
         // get Pangolin LP token reserves
-        // assuming a certain order of tokens
         (
-            uint112 reserve0, // wAvax (generally it can be aaveSupplyToken or aaveBorrowToken)
-            uint112 reserve1, // usdc (generally it can be aaveSupplyToken or aaveBorrowToken)
+            uint256 ammPairDepositTokenReserve,
+            uint256 aaveBorrowTokenReserve
+        ) = getPangolinLpReserve(
+                address(strategyStorage.ammPairDepositToken),
+                address(strategyStorage.aaveBorrowToken)
+            );
 
-        ) = strategyStorage.pangolinPair.getReserves();
-        uint256 lpTokenTotalSupply = strategyStorage.pangolinPair.totalSupply();
+        uint256 lpTokenTotalSupply = getPangolinLpTotalSupply();
         uint256 lpTokenContractBalance = getPangolinLpBalance();
 
         // get the aaveBorrowToken AUM in depositToken
-        uint256 lpBorrowTokenAumInDepositToken = (uint256(reserve0) *
+        uint256 lpBorrowTokenAumInDepositToken = (aaveBorrowTokenReserve *
             lpTokenContractBalance *
             strategyStorage.priceOracle.getPrice(
                 strategyStorage.aaveBorrowToken,
@@ -71,7 +73,7 @@ library DnsVectorStrategyAumLib {
 
         // assuming ammPairDepositToken == depositToken
         // get the ammPairDepositToken AUM in depositToken
-        uint256 lpPairDepositAumInDepositCurrency = (uint256(reserve1) *
+        uint256 lpPairDepositAumInDepositCurrency = (ammPairDepositTokenReserve *
             lpTokenContractBalance) / lpTokenTotalSupply;
 
         assetValuations[1] = Valuation(
@@ -120,17 +122,17 @@ library DnsVectorStrategyAumLib {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
 
-        // get Traker Joe LP token reserves
-        // asuming a certain order of tokens
-        (
-            uint112 reserve0, // wAvax (generally it can be aaveSupplyToken or aaveBorrowToken) // usdc (generally it can be aaveSupplyToken or aaveBorrowToken)
-            ,
+        (uint256 aaveBorrowTokenReserve, ) = getPangolinLpReserve(
+                address(strategyStorage.aaveBorrowToken),
+                address(strategyStorage.ammPairDepositToken)
+            );
 
-        ) = strategyStorage.pangolinPair.getReserves();
-        uint256 lpTokenTotalSupply = strategyStorage.pangolinPair.totalSupply();
+        uint256 lpTokenTotalSupply = getPangolinLpTotalSupply();
         uint256 lpTokenContractBalance = getPangolinLpBalance();
 
-        return (reserve0 * lpTokenContractBalance) / lpTokenTotalSupply;
+        return
+            (aaveBorrowTokenReserve * lpTokenContractBalance) /
+            lpTokenTotalSupply;
     }
 
     function getInverseCollateralRatio(
@@ -164,6 +166,13 @@ library DnsVectorStrategyAumLib {
                 .pangolinMiniChef
                 .userInfo(strategyStorage.pangolinPoolId, address(this))
                 .amount;
+    }
+
+    function getPangolinLpTotalSupply() public view returns (uint256) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
+            .getStorage();
+
+        return strategyStorage.pangolinPair.totalSupply();
     }
 
     function getPangolinLpReserve(address token0, address token1)
