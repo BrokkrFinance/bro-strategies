@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "./DnsVectorStrategyStorageLib.sol";
 import "./DnsVectorStrategyAumLib.sol";
+import "./DnsVectorStrategyCommon.sol";
 import "./DnsVectorStrategyInvestmentLib.sol";
+import "./DnsVectorStrategyStorageLib.sol";
 import "../../common/bases/StrategyRoleablePausableBaseUpgradeable.sol";
 import "../../common/InvestmentToken.sol";
 import "../../common/interfaces/IPriceOracle.sol";
@@ -312,7 +313,7 @@ contract DnsVectorStrategy is
             );
         return
             (strategyStorage.safetyFactor * maxLoanToValueFactor) /
-            AAVE_FIXED_DECIMAL_FACTOR;
+            DnsVectorStrategyCommon.AAVE_FIXED_DECIMAL_FACTOR;
     }
 
     function _authorizeUpgrade(address)

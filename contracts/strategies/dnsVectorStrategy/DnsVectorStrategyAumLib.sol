@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import "./DnsVectorStrategyCommon.sol";
 import "./DnsVectorStrategyStorageLib.sol";
 import "../../common/interfaces/IAum.sol";
 
 library DnsVectorStrategyAumLib {
-    error InvalidPangolinPair();
-
     function getAssetBalances() public view returns (Balance[] memory) {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
@@ -17,7 +16,7 @@ library DnsVectorStrategyAumLib {
         );
         assetBalances[1] = Balance(
             address(strategyStorage.pangolinPair),
-            getPangolinLpBalance()
+            DnsVectorStrategyCommon.getPangolinLpBalance()
         );
 
         return assetBalances;
@@ -48,17 +47,18 @@ library DnsVectorStrategyAumLib {
             strategyStorage.aAaveSupplyToken.balanceOf(address(this))
         );
 
-        // get Pangolin LP token reserves
         (
             uint256 ammPairDepositTokenReserve,
             uint256 aaveBorrowTokenReserve
-        ) = getPangolinLpReserve(
+        ) = DnsVectorStrategyCommon.getPangolinLpReserve(
                 address(strategyStorage.ammPairDepositToken),
                 address(strategyStorage.aaveBorrowToken)
             );
 
-        uint256 lpTokenTotalSupply = getPangolinLpTotalSupply();
-        uint256 lpTokenContractBalance = getPangolinLpBalance();
+        uint256 lpTokenTotalSupply = DnsVectorStrategyCommon
+            .getPangolinLpTotalSupply();
+        uint256 lpTokenContractBalance = DnsVectorStrategyCommon
+            .getPangolinLpBalance();
 
         // get the aaveBorrowToken AUM in depositToken
         uint256 lpBorrowTokenAumInDepositToken = (aaveBorrowTokenReserve *
@@ -74,7 +74,7 @@ library DnsVectorStrategyAumLib {
         // assuming ammPairDepositToken == depositToken
         // get the ammPairDepositToken AUM in depositToken
         uint256 lpPairDepositAumInDepositCurrency = (ammPairDepositTokenReserve *
-            lpTokenContractBalance) / lpTokenTotalSupply;
+                lpTokenContractBalance) / lpTokenTotalSupply;
 
         assetValuations[1] = Valuation(
             address(strategyStorage.pangolinPair),
@@ -122,13 +122,16 @@ library DnsVectorStrategyAumLib {
         DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
             .getStorage();
 
-        (uint256 aaveBorrowTokenReserve, ) = getPangolinLpReserve(
+        (uint256 aaveBorrowTokenReserve, ) = DnsVectorStrategyCommon
+            .getPangolinLpReserve(
                 address(strategyStorage.aaveBorrowToken),
                 address(strategyStorage.ammPairDepositToken)
             );
 
-        uint256 lpTokenTotalSupply = getPangolinLpTotalSupply();
-        uint256 lpTokenContractBalance = getPangolinLpBalance();
+        uint256 lpTokenTotalSupply = DnsVectorStrategyCommon
+            .getPangolinLpTotalSupply();
+        uint256 lpTokenContractBalance = DnsVectorStrategyCommon
+            .getPangolinLpBalance();
 
         return
             (aaveBorrowTokenReserve * lpTokenContractBalance) /
@@ -155,49 +158,5 @@ library DnsVectorStrategyAumLib {
             ) * liabilityBalances[0].balance) *
                 Math.SHORT_FIXED_DECIMAL_FACTOR) / 10**18) /
             (assetBalances[0].balance);
-    }
-
-    function getPangolinLpBalance() public view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
-
-        return
-            strategyStorage
-                .pangolinMiniChef
-                .userInfo(strategyStorage.pangolinPoolId, address(this))
-                .amount;
-    }
-
-    function getPangolinLpTotalSupply() public view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
-
-        return strategyStorage.pangolinPair.totalSupply();
-    }
-
-    function getPangolinLpReserve(address token0, address token1)
-        external
-        view
-        returns (uint256 reserve0, uint256 reserve1)
-    {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
-
-        (uint256 _reserve0, uint256 _reserve1, ) = strategyStorage
-            .pangolinPair
-            .getReserves();
-
-        address _token0 = strategyStorage.pangolinPair.token0();
-        address _token1 = strategyStorage.pangolinPair.token1();
-
-        if (_token0 == token0 && _token1 == token1) {
-            reserve0 = _reserve0;
-            reserve1 = _reserve1;
-        } else if (_token0 == token1 && _token1 == token0) {
-            reserve0 = _reserve1;
-            reserve1 = _reserve0;
-        } else {
-            revert InvalidPangolinPair();
-        }
     }
 }

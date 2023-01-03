@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "./DnsVectorStrategyAumLib.sol";
 import "./DnsVectorStrategyCommon.sol";
 import "./DnsVectorStrategyStorageLib.sol";
 import "../../common/Common.sol";
@@ -24,7 +23,7 @@ library DnsVectorStrategyInvestmentLib {
             );
 
         uint256 combinedFixedDecimalFactor = Math.SHORT_FIXED_DECIMAL_FACTOR *
-            AAVE_FIXED_DECIMAL_FACTOR;
+            DnsVectorStrategyCommon.AAVE_FIXED_DECIMAL_FACTOR;
 
         // without fixed point arithmetic
         // aaveSupplyAllocationInDepositToken = amount / (1 + strategyStorage.safetyFactor
@@ -81,7 +80,7 @@ library DnsVectorStrategyInvestmentLib {
         strategyStorage.aavePool.borrow(
             address(strategyStorage.aaveBorrowToken),
             aaveBorrowAllocationInBorrowToken,
-            VARIABLE_DEBT,
+            DnsVectorStrategyCommon.VARIABLE_DEBT,
             0,
             address(this)
         );
@@ -154,7 +153,7 @@ library DnsVectorStrategyInvestmentLib {
         uint256 lpAmountChange = strategyStorage.pangolinPair.balanceOf(
             address(this)
         );
-        uint256 lpTokenAmount = (DnsVectorStrategyAumLib
+        uint256 lpTokenAmount = (DnsVectorStrategyCommon
             .getPangolinLpBalance() * amount) / investmentTokenSupply;
         strategyStorage.pangolinMiniChef.withdraw(
             strategyStorage.pangolinPoolId,
@@ -236,7 +235,7 @@ library DnsVectorStrategyInvestmentLib {
         uint256 repayed = strategyStorage.aavePool.repay(
             address(strategyStorage.aaveBorrowToken),
             vAaveBorrowTokenUserAmount,
-            VARIABLE_DEBT,
+            DnsVectorStrategyCommon.VARIABLE_DEBT,
             address(this)
         );
         assert(repayed == vAaveBorrowTokenUserAmount);
@@ -357,7 +356,7 @@ library DnsVectorStrategyInvestmentLib {
         uint256 repayed = strategyStorage.aavePool.repay(
             address(strategyStorage.aaveBorrowToken),
             aaveBorrowTokenAmountChange,
-            VARIABLE_DEBT,
+            DnsVectorStrategyCommon.VARIABLE_DEBT,
             address(this)
         );
         assert(repayed == aaveBorrowTokenAmountChange);
@@ -374,7 +373,7 @@ library DnsVectorStrategyInvestmentLib {
         strategyStorage.aavePool.borrow(
             address(strategyStorage.aaveBorrowToken),
             aaveBorrowTokenAmount,
-            VARIABLE_DEBT,
+            DnsVectorStrategyCommon.VARIABLE_DEBT,
             0,
             address(this)
         );
@@ -562,7 +561,7 @@ library DnsVectorStrategyInvestmentLib {
         (
             uint256 ammPairDepositTokenReserve,
             uint256 aaveBorrowTokenReserve
-        ) = DnsVectorStrategyAumLib.getPangolinLpReserve(
+        ) = DnsVectorStrategyCommon.getPangolinLpReserve(
                 address(strategyStorage.ammPairDepositToken),
                 address(strategyStorage.aaveBorrowToken)
             );
