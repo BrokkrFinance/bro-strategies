@@ -29,12 +29,9 @@ struct DnsVectorStorage {
     IJoeRouter02 traderJoeRouter; // Obsolete.
     IJoePair traderJoePair; // Obsolete.
     IVectorPoolHelperJoe vectorPoolHelperJoe; // Obsolete.
-    // The following variables are stored both in the storage and the base class,
-    // so the functions in the faucets don't need to take extra parameters.
-    // The following variables are expected to change very rarely.
-    IPriceOracle priceOracle;
-    SwapService swapService;
-    IERC20Upgradeable depositToken;
+    IPriceOracle priceOracle; // To be used in library without receiving extra parameters.
+    SwapService swapService; // To be used in library without receiving extra parameters.
+    IERC20Upgradeable depositToken; // To be used in library without receiving extra parameters.
     IERC20Upgradeable pngToken;
     IPangolinRouter pangolinRouter;
     IPangolinMiniChef pangolinMiniChef;
