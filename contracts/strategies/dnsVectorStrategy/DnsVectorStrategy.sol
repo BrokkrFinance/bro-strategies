@@ -117,6 +117,12 @@ contract DnsVectorStrategy is
         // Initialize.
         __initializePangolinParams(reinitializeParams.pangolinParams);
 
+        // Use Pangolin to swap tokens because we provide liquidity there.
+        setSwapService(
+            SwapServiceProvider.Pangolin,
+            address(reinitializeParams.pangolinParams.pangolinRouter)
+        );
+
         uint256 depositTokenBalanceBefore = depositToken.balanceOf(
             address(this)
         );
