@@ -110,7 +110,7 @@ library SwapServiceLib {
                 maxAmountIn
             );
 
-            amountOut = traderjoeLBRouter.swapTokensForExactTokens(
+            amountIn = traderjoeLBRouter.swapTokensForExactTokens(
                 amountOut,
                 maxAmountIn,
                 binSteps,
