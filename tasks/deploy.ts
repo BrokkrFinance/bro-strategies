@@ -26,6 +26,7 @@ task("deploy", "Deploy an investable contract")
   .addParam("subtype", "A type of strategy such as ownable or roleable")
   .addParam("name", "A unique name of an investable such as StargateUSDC")
   .addOptionalParam("owner", "An address of owner")
+  .addOptionalParam("multisig", "An address of multisig that has role(s)") // Until we have different users for different role, let's keep this simple.
   .addParam("contractName", "A name of investable")
   .addParam("investmentTokenName", "A name of investment token")
   .addParam("investmentTokenSymbol", "A symbol of investment token")
@@ -109,11 +110,19 @@ task("deploy", "Deploy an investable contract")
     // Write live config file.
     const name = path.join(taskArgs.type, taskArgs.name)
 
-    writeLiveConfig(name, {
-      name: taskArgs.contractName,
-      address: investable.address,
-      owner: taskArgs.owner,
-    })
+    if (taskArgs.subtype === "roleable") {
+      writeLiveConfig(name, {
+        name: taskArgs.contractName,
+        address: investable.address,
+        multisig: taskArgs.multisig,
+      })
+    } else {
+      writeLiveConfig(name, {
+        name: taskArgs.contractName,
+        address: investable.address,
+        owner: taskArgs.owner,
+      })
+    }
 
     console.log(`Deploy: Corresponding live config is created at ${getLiveConfigPath(name)}.`)
 

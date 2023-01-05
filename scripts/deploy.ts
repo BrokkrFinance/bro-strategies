@@ -73,6 +73,7 @@ function parseSharedArgs(deployConfig: any): { [key: string]: string } {
     subtype: deployConfig.subtype,
     name: deployConfig.name,
     owner: deployConfig.owner,
+    multisig: deployConfig.multisig,
     contractName: deployConfig.contractName,
     investmentTokenName: deployConfig.investmentTokenName,
     investmentTokenSymbol: deployConfig.investmentTokenSymbol,
