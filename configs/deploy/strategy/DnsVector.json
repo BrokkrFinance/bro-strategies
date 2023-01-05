@@ -4,6 +4,7 @@
       "type": "strategy",
       "subtype": "roleable",
       "name": "DnsVector",
+      "multisig": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
       "contractName": "DnsVectorStrategy",
       "investmentTokenName": "Dns Vector Strategy Token",
       "investmentTokenSymbol": "DNS",

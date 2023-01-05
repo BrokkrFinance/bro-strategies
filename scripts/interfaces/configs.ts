@@ -7,7 +7,8 @@ export interface DeployConfig {
 export interface LiveConfig {
   name: string
   address: string
-  owner: string
+  owner?: string
+  multisig?: string
 }
 
 export interface UpgradeConfig {

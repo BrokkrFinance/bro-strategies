@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
-import { Contract, ContractFactory } from "ethers"
+import { Contract, ContractFactory, ethers } from "ethers"
 import path from "path"
 import { deploy } from "../deploy"
 import { LiveConfig, UpgradeConfig } from "../interfaces/configs"
@@ -257,7 +257,14 @@ async function upgradeInvestable(name: string): Promise<Contract> {
   const liveConfig: LiveConfig = readLiveConfig(name)
   const upgradeConfigs: UpgradeConfig[] = await readUpgradeConfig(name)
 
-  const owner = await ethers.getImpersonatedSigner(liveConfig.owner)
+  // Signer.
+  let signer: ethers.Signer | undefined = undefined
+
+  if (liveConfig.owner !== undefined) {
+    signer = await ethers.getImpersonatedSigner(liveConfig.owner)
+  } else if (liveConfig.multisig !== undefined) {
+    signer = await ethers.getImpersonatedSigner(liveConfig.multisig)
+  }
 
   for (let upgradeConfig of upgradeConfigs) {
     let call: { fn: string; args?: unknown[] } | undefined = undefined
@@ -278,7 +285,7 @@ async function upgradeInvestable(name: string): Promise<Contract> {
 
     // Contact factories.
     const NewImplementation = await ethers.getContractFactory(upgradeConfig.newImplementation, {
-      signer: owner,
+      signer,
       libraries,
     })
     const newImplementation = await upgrades.upgradeProxy(upgradeConfig.proxy, NewImplementation, {
