@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 import "./Math.sol";
 
+import "../../dependencies/swap/IUniswapV2LikeRouter.sol";
 import "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
-import "../../dependencies/traderjoe/ITraderJoeRouter.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
@@ -12,7 +12,8 @@ error InvalidSwapServiceProvider();
 
 enum SwapServiceProvider {
     TraderJoe,
-    TraderJoeV2
+    TraderJoeV2,
+    Pangolin
 }
 
 struct SwapService {
@@ -30,17 +31,20 @@ library SwapServiceLib {
         address[] memory path,
         uint256[] memory binSteps
     ) internal returns (uint256 amountOut) {
-        if (swapService_.provider == SwapServiceProvider.TraderJoe) {
-            ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(
+        if (
+            swapService_.provider == SwapServiceProvider.TraderJoe ||
+            swapService_.provider == SwapServiceProvider.Pangolin
+        ) {
+            IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
                 swapService_.router
             );
 
             IERC20Upgradeable(path[0]).approve(
-                address(traderjoeRouter),
+                address(uniswapV2LikeRouter),
                 amountIn
             );
 
-            amountOut = traderjoeRouter.swapExactTokensForTokens(
+            amountOut = uniswapV2LikeRouter.swapExactTokensForTokens(
                 amountIn,
                 minAmountOut,
                 path,
@@ -79,20 +83,23 @@ library SwapServiceLib {
         address[] memory path,
         uint256[] memory binSteps
     ) internal returns (uint256 amountIn) {
-        if (swapService_.provider == SwapServiceProvider.TraderJoe) {
-            ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(
+        if (
+            swapService_.provider == SwapServiceProvider.TraderJoe ||
+            swapService_.provider == SwapServiceProvider.Pangolin
+        ) {
+            IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
                 swapService_.router
             );
 
-            uint256[] memory maxAmountInCalculated = traderjoeRouter
+            uint256[] memory maxAmountInCalculated = uniswapV2LikeRouter
                 .getAmountsIn(amountOut, path);
 
             IERC20Upgradeable(path[0]).approve(
-                address(traderjoeRouter),
+                address(uniswapV2LikeRouter),
                 Math.min(maxAmountInCalculated[0], maxAmountIn)
             );
 
-            amountIn = traderjoeRouter.swapTokensForExactTokens(
+            amountIn = uniswapV2LikeRouter.swapTokensForExactTokens(
                 amountOut,
                 maxAmountIn,
                 path,
