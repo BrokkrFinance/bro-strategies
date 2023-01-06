@@ -132,4 +132,42 @@ library SwapServiceLib {
             revert InvalidSwapServiceProvider();
         }
     }
+
+    function getAmountsIn(
+        SwapService memory swapService_,
+        uint256 amountOut,
+        address[] memory path
+    ) internal view returns (uint256[] memory amounts) {
+        if (
+            swapService_.provider == SwapServiceProvider.TraderJoe ||
+            swapService_.provider == SwapServiceProvider.Pangolin
+        ) {
+            IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
+                swapService_.router
+            );
+
+            amounts = uniswapV2LikeRouter.getAmountsIn(amountOut, path);
+        } else {
+            revert InvalidSwapServiceProvider();
+        }
+    }
+
+    function getAmountsOut(
+        SwapService memory swapService_,
+        uint256 amountIn,
+        address[] memory path
+    ) internal view returns (uint256[] memory amounts) {
+        if (
+            swapService_.provider == SwapServiceProvider.TraderJoe ||
+            swapService_.provider == SwapServiceProvider.Pangolin
+        ) {
+            IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
+                swapService_.router
+            );
+
+            amounts = uniswapV2LikeRouter.getAmountsOut(amountIn, path);
+        } else {
+            revert InvalidSwapServiceProvider();
+        }
+    }
 }
