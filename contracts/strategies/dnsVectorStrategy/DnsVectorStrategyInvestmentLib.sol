@@ -131,13 +131,21 @@ library DnsVectorStrategyInvestmentLib {
             path[0] = address(strategyStorage.aaveBorrowToken);
             path[1] = address(strategyStorage.depositToken);
 
-            SwapServiceLib.swapExactTokensForTokens(
+            uint256 amountOut = SwapServiceLib.getAmountsOut(
                 strategyStorage.swapService,
                 aaveBorrowTokenBalanceChange,
-                0,
-                path,
-                new uint256[](0)
-            );
+                path
+            )[path.length - 1];
+
+            if (amountOut > 0) {
+                SwapServiceLib.swapExactTokensForTokens(
+                    strategyStorage.swapService,
+                    aaveBorrowTokenBalanceChange,
+                    0,
+                    path,
+                    new uint256[](0)
+                );
+            }
         }
     }
 
@@ -195,7 +203,7 @@ library DnsVectorStrategyInvestmentLib {
         // One remedy to the above would be to carefully withdraw aaveSupplyToken on the user behalf first,
         // before trying to pay off aaveBorrowToken debt.
         if (aaveBorrowTokenChangeAmount > vAaveBorrowTokenUserAmount) {
-            // traderJoe returned more borrowToken than the user needs to pay off debt,
+            // Pangolin returned more borrowToken than the user needs to pay off debt,
             // swapping the surplus borrowToken back to depositToken
             address[] memory path = new address[](2);
             path[0] = address(strategyStorage.aaveBorrowToken);
@@ -203,15 +211,22 @@ library DnsVectorStrategyInvestmentLib {
 
             uint256 amountIn = aaveBorrowTokenChangeAmount -
                 vAaveBorrowTokenUserAmount;
-            SwapServiceLib.swapExactTokensForTokens(
+            uint256 amountOut = SwapServiceLib.getAmountsOut(
                 strategyStorage.swapService,
                 amountIn,
-                0,
-                path,
-                new uint256[](0)
-            );
+                path
+            )[path.length - 1];
+            if (amountOut > 0) {
+                SwapServiceLib.swapExactTokensForTokens(
+                    strategyStorage.swapService,
+                    amountIn,
+                    0,
+                    path,
+                    new uint256[](0)
+                );
+            }
         } else if (aaveBorrowTokenChangeAmount < vAaveBorrowTokenUserAmount) {
-            // traderJoe returned less borrowToken than the user needs to pay off debt,
+            // Pangolin returned less borrowToken than the user needs to pay off debt,
             // swapping some ammPairDeposit token to borrowToken
             address[] memory path = new address[](2);
             path[0] = address(strategyStorage.ammPairDepositToken);
@@ -534,13 +549,21 @@ library DnsVectorStrategyInvestmentLib {
             uint256 aaveBorrowTokenAmountRemaining = aaveBorrowTokenAmountAfter -
                     aaveBorrowTokenAmountBefore;
 
-            SwapServiceLib.swapExactTokensForTokens(
+            uint256 amountOut = SwapServiceLib.getAmountsOut(
                 strategyStorage.swapService,
                 aaveBorrowTokenAmountRemaining,
-                0,
-                path,
-                new uint256[](0)
-            );
+                path
+            )[path.length - 1];
+
+            if (amountOut > 0) {
+                SwapServiceLib.swapExactTokensForTokens(
+                    strategyStorage.swapService,
+                    aaveBorrowTokenAmountRemaining,
+                    0,
+                    path,
+                    new uint256[](0)
+                );
+            }
         }
     }
 
@@ -589,7 +612,7 @@ library DnsVectorStrategyInvestmentLib {
         address[] memory path = new address[](2);
         uint256 amountToSwap;
 
-        // Swap only necessary amount to match Pangolin's pool assets ratio.
+        // Calculate only necessary amount to swap to match Pangolin's pool assets ratio.
         if (swapAmmPairDepositTokenToAaveBorrowToken) {
             uint256 aaveBorrowTokenPriceInAmmPairDepositToken = strategyStorage
                 .priceOracle
@@ -624,27 +647,40 @@ library DnsVectorStrategyInvestmentLib {
             path[1] = address(strategyStorage.ammPairDepositToken);
         }
 
-        uint256 amountOut = SwapServiceLib.swapExactTokensForTokens(
+        uint256 amountOut = SwapServiceLib.getAmountsOut(
             strategyStorage.swapService,
             amountToSwap,
-            0,
-            path,
-            new uint256[](0)
-        );
+            path
+        )[path.length - 1];
 
         // Return desired amounts of tokens.
-        if (swapAmmPairDepositTokenToAaveBorrowToken) {
-            ammPairDepositTokenAmountDesired =
-                ammPairDepositTokenAmountIn -
-                amountToSwap;
-            aaveBorrowTokenAmountDesired = aaveBorrowTokenAmountIn + amountOut;
-        } else if (swapAaveBorrowTokenToAmmPairDepositToken) {
-            ammPairDepositTokenAmountDesired =
-                ammPairDepositTokenAmountIn +
-                amountOut;
-            aaveBorrowTokenAmountDesired =
-                aaveBorrowTokenAmountIn -
-                amountToSwap;
+        if (amountOut > 0) {
+            SwapServiceLib.swapExactTokensForTokens(
+                strategyStorage.swapService,
+                amountToSwap,
+                0,
+                path,
+                new uint256[](0)
+            );
+
+            if (swapAmmPairDepositTokenToAaveBorrowToken) {
+                ammPairDepositTokenAmountDesired =
+                    ammPairDepositTokenAmountIn -
+                    amountToSwap;
+                aaveBorrowTokenAmountDesired =
+                    aaveBorrowTokenAmountIn +
+                    amountOut;
+            } else if (swapAaveBorrowTokenToAmmPairDepositToken) {
+                ammPairDepositTokenAmountDesired =
+                    ammPairDepositTokenAmountIn +
+                    amountOut;
+                aaveBorrowTokenAmountDesired =
+                    aaveBorrowTokenAmountIn -
+                    amountToSwap;
+            }
+        } else {
+            ammPairDepositTokenAmountDesired = ammPairDepositTokenAmountIn;
+            aaveBorrowTokenAmountDesired = aaveBorrowTokenAmountIn;
         }
     }
 }
