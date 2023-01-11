@@ -178,7 +178,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
             pairdepositTokenBefore;
 
-        TraderJoeInvestmentLib.swapTokens(
+        TraderJoeInvestmentLib.swapExactTokensForTokens(
             pairDepositTokenIncrement,
             strategyStorage.pairDepositToken,
             depositToken

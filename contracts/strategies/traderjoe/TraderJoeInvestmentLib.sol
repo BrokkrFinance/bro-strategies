@@ -82,7 +82,7 @@ library TraderJoeInvestmentLib {
             pairDepositTokenBefore;
 
         // Swap back remaining pairDepositToken to strategyStorage.depositToken if possible.
-        swapTokens(
+        swapExactTokensForTokens(
             pairDepositTokenIncrement,
             strategyStorage.pairDepositToken,
             strategyStorage.depositToken
@@ -146,7 +146,7 @@ library TraderJoeInvestmentLib {
         uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
             pairdepositTokenBefore;
 
-        swapTokens(
+        swapExactTokensForTokens(
             pairDepositTokenIncrement,
             strategyStorage.pairDepositToken,
             strategyStorage.depositToken
@@ -190,7 +190,7 @@ library TraderJoeInvestmentLib {
         deposit(depositTokenIncrement, pairDepositTokenIncrement);
     }
 
-    function swapTokens(
+    function swapExactTokensForTokens(
         uint256 amountIn,
         IERC20Upgradeable tokenIn,
         IERC20Upgradeable tokenOut
@@ -201,7 +201,7 @@ library TraderJoeInvestmentLib {
         (amountOut, ) = strategyStorage.lbRouter.getSwapOut(
             address(strategyStorage.lbPair),
             amountIn,
-            strategyStorage.tokenY == strategyStorage.depositToken
+            tokenOut == strategyStorage.tokenY
         );
 
         if (amountOut == 0) {
@@ -224,6 +224,30 @@ library TraderJoeInvestmentLib {
         );
     }
 
+    function swapTokensForExactTokens(
+        uint256 amountOut,
+        IERC20Upgradeable tokenIn,
+        IERC20Upgradeable tokenOut
+    ) public returns (uint256 amountIn) {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        address[] memory path = new address[](2);
+        path[0] = address(tokenIn);
+        path[1] = address(tokenOut);
+
+        uint256[] memory binSteps = new uint256[](1);
+        binSteps[0] = strategyStorage.binStep;
+
+        amountIn = SwapServiceLib.swapTokensForExactTokens(
+            strategyStorage.swapService,
+            amountOut,
+            type(uint256).max,
+            path,
+            binSteps
+        );
+    }
+
     function __prepareParams(uint256 amountXIn, uint256 amountYIn)
         private
         returns (
@@ -240,17 +264,88 @@ library TraderJoeInvestmentLib {
 
         uint256 binsAmount = strategyStorage.binIds.length;
 
-        (, , activeId) = strategyStorage.lbPair.getReservesAndId();
-
-        // Assume that token X and token Y have the same price.
-        uint256 totalAmount = amountXIn + amountYIn;
-
         // Delta IDs.
         deltaIds = new int256[](binsAmount);
 
         // Distributions.
         distributionX = new uint256[](binsAmount);
         distributionY = new uint256[](binsAmount);
+
+        while (true) {
+            uint256 reserveX;
+            uint256 reserveY;
+
+            (, , activeId) = strategyStorage.lbPair.getReservesAndId();
+
+            (reserveX, reserveY) = strategyStorage.lbPair.getBin(
+                uint24(activeId)
+            );
+
+            (amountX, amountY) = __calculateParams(
+                amountXIn,
+                amountYIn,
+                activeId,
+                deltaIds,
+                distributionX,
+                distributionY
+            );
+
+            // Swap only as much as is needed.
+            uint256 amountInDesired;
+            uint256 amountIn;
+            uint256 amountOut;
+
+            if (amountXIn > amountX) {
+                amountInDesired = amountXIn - amountX;
+
+                (amountIn, amountOut) = __swapOptimalAmount(
+                    amountInDesired,
+                    reserveY,
+                    strategyStorage.tokenX,
+                    strategyStorage.tokenY
+                );
+
+                amountX = amountXIn - amountIn;
+                amountY = amountYIn + amountOut;
+            } else if (amountYIn > amountY) {
+                amountInDesired = amountYIn - amountY;
+
+                (amountIn, amountOut) = __swapOptimalAmount(
+                    amountInDesired,
+                    reserveX,
+                    strategyStorage.tokenY,
+                    strategyStorage.tokenX
+                );
+
+                amountX = amountXIn + amountOut;
+                amountY = amountYIn - amountIn;
+            }
+
+            if (amountInDesired == amountIn) {
+                break;
+            }
+
+            // We don't have the amounts of X and Y we need yet. Reiterate the loop.
+            amountXIn = amountX;
+            amountYIn = amountY;
+        }
+    }
+
+    function __calculateParams(
+        uint256 amountXIn,
+        uint256 amountYIn,
+        uint256 activeId,
+        int256[] memory deltaIds,
+        uint256[] memory distributionX,
+        uint256[] memory distributionY
+    ) private view returns (uint256 amountX, uint256 amountY) {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        uint256 binsAmount = strategyStorage.binIds.length;
+
+        // Assume that token X and token Y have the same price.
+        uint256 totalAmount = amountXIn + amountYIn;
 
         // The maximum of the number of bins is 51.
         uint256 activeBinIndex = type(uint256).max;
@@ -263,12 +358,19 @@ library TraderJoeInvestmentLib {
                 1e3;
 
             if (strategyStorage.binIds[i] < activeId) {
+                distributionX[i] = 0;
                 distributionY[i] = amount;
+
                 amountY += amount;
             } else if (strategyStorage.binIds[i] > activeId) {
                 distributionX[i] = amount;
+                distributionY[i] = 0;
+
                 amountX += amount;
             } else {
+                distributionX[i] = 0;
+                distributionY[i] = 0;
+
                 activeBinIndex = i;
             }
         }
@@ -321,24 +423,40 @@ library TraderJoeInvestmentLib {
                 distributionY[i] = (distributionY[i] * 1e18) / amountY;
             }
         }
+    }
 
-        // Swap only as much as is needed.
-        if (amountXIn > amountX) {
-            amountY =
-                amountYIn +
-                swapTokens(
-                    amountXIn - amountX,
-                    strategyStorage.tokenX,
-                    strategyStorage.tokenY
-                );
-        } else if (amountYIn > amountY) {
-            amountX =
-                amountXIn +
-                swapTokens(
-                    amountYIn - amountY,
-                    strategyStorage.tokenY,
-                    strategyStorage.tokenX
-                );
+    function __swapOptimalAmount(
+        uint256 amountInDesired,
+        uint256 reserveOut,
+        IERC20Upgradeable tokenIn,
+        IERC20Upgradeable tokenOut
+    ) private returns (uint256 amountIn, uint256 amountOut) {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
+            .getStorage();
+
+        (uint256 amountOutDesired, ) = strategyStorage.lbRouter.getSwapOut(
+            address(strategyStorage.lbPair),
+            amountInDesired,
+            tokenOut == strategyStorage.tokenY
+        );
+
+        if (amountOutDesired > reserveOut) {
+            // This swap will move active ID and new active ID requires new distributions.
+            // Since we have to swap anyway to deposit, swap only as much as needed to move active ID.
+            amountIn = swapTokensForExactTokens(
+                reserveOut + 1,
+                tokenIn,
+                tokenOut
+            );
+            amountOut = reserveOut + 1;
+        } else {
+            // Swap as much as needed.
+            amountIn = amountInDesired;
+            amountOut = swapExactTokensForTokens(
+                amountInDesired,
+                tokenIn,
+                tokenOut
+            );
         }
     }
 }
