@@ -29,12 +29,12 @@ contract DnsVectorStrategy is
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.dns_vector_strategy.dns_vector_strategy_v1.1.0";
+        "brokkr.dns_vector_strategy.dns_vector_strategy_v1.1.1";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName =
         "Dns vector delta neutral strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.1.0";
+    string public constant version = "1.1.1";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -78,17 +78,18 @@ contract DnsVectorStrategy is
         __StrategyRoleablePausableBaseUpgradeable_init(strategyArgs);
 
         require(
-            address(initializeParams.aaveParams.aaveSupplyToken) ==
-                InvestableLib.USDC,
+            initializeParams.aaveParams.aaveSupplyToken ==
+                InvestableLib.AVALANCHE_USDC,
             "aaveSupplyToken != USDC"
         );
         require(
-            address(initializeParams.aaveParams.aaveBorrowToken) ==
-                InvestableLib.WAVAX,
-            "aaveBorrowToken != WAVAX"
+            initializeParams.aaveParams.aaveBorrowToken ==
+                InvestableLib.AVALANCHE_WAVAX,
+            "aaveBorrowToken!= WAVAX"
         );
         require(
-            address(initializeParams.ammPairDepositToken) == InvestableLib.USDC,
+            initializeParams.ammPairDepositToken ==
+                InvestableLib.AVALANCHE_USDC,
             "ammPairDepositToken != USDC"
         );
 
@@ -119,7 +120,7 @@ contract DnsVectorStrategy is
 
         // Use Pangolin to swap tokens because we provide liquidity there.
         setSwapService(
-            SwapServiceProvider.Pangolin,
+            SwapServiceProvider.AvalanchePangolin,
             address(reinitializeParams.pangolinParams.pangolinRouter)
         );
 

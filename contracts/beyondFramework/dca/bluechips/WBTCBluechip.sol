@@ -267,7 +267,7 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
     //         newPtpIntoAvaxSwapPath[0] == address(platypusInfo.platypusToken) &&
     //             newPtpIntoAvaxSwapPath[newPtpIntoAvaxSwapPath.length - 1] ==
     //             address(bluechipTokenInfo.token) &&
-    //             newAvaxIntoBluechipSwapPath[0] == InvestableLib.WAVAX &&
+    //             newAvaxIntoBluechipSwapPath[0] == InvestableLib.AVALANCHE_WAVAX &&
     //             newAvaxIntoBluechipSwapPath[
     //                 newAvaxIntoBluechipSwapPath.length - 1
     //             ] ==

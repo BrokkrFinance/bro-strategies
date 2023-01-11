@@ -61,8 +61,8 @@ export async function getExecutionGasAmount(transactionResponse: TransactionResp
 }
 
 export async function increaseEvmTimeBySeconds(seconds: number) {
-  await expectSuccess(ethers.provider.send("evm_increaseTime", [3600 * 48]))
-  await expectSuccess(ethers.provider.send("evm_mine", []))
+  await ethers.provider.send("evm_increaseTime", [seconds])
+  await ethers.provider.send("evm_mine", [])
 }
 
 export async function deployPriceOracle(oracleType: string, vendorFeed: string, baseCurrency: string) {
