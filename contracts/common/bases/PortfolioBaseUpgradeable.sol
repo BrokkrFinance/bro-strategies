@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./FeeUpgradeable.sol";
 import "./InvestmentLimitUpgradeable.sol";
+import "../interfaces/IERC20UpgradeableExt.sol";
 import "../interfaces/IInvestmentToken.sol";
 import "../interfaces/IPortfolio.sol";
 import "../libraries/InvestableLib.sol";
@@ -16,7 +17,7 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeab
 
 struct PortfolioArgs {
     IInvestmentToken investmentToken;
-    IERC20Upgradeable depositToken;
+    IERC20UpgradeableExt depositToken;
     uint24 depositFee;
     NameValuePair[] depositFeeParams;
     uint24 withdrawalFee;
@@ -38,13 +39,14 @@ abstract contract PortfolioBaseUpgradeable is
     IPortfolio
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeERC20Upgradeable for IERC20UpgradeableExt;
     using SafeERC20Upgradeable for IInvestmentToken;
     using EnumerableMapUpgradeable for EnumerableMapUpgradeable.AddressToUintMap;
 
     InvestableDesc[] private investableDescs;
 
     IInvestmentToken internal investmentToken;
-    IERC20Upgradeable internal depositToken;
+    IERC20UpgradeableExt internal depositToken;
     uint256[20] private __gap;
 
     enum FeeType {
@@ -283,14 +285,17 @@ abstract contract PortfolioBaseUpgradeable is
         if (actualInvested < minimumDepositTokenAmountOut)
             revert TooSmallDepositTokenAmountOut();
 
-        // minting should be based on the actual amount invested versus the deposited amount
-        // to take defi fees and losses into consideration
+        // 1. Minting should be based on the actual amount invested versus the deposited amount
+        //    to take defi fees and losses into consideration.
+        // 2. Calling  depositToken.decimals() should be cached into a state variable, but that
+        //    would require us to update all previous contracts.
         investmentToken.mint(
             investmentTokenReceiver,
             InvestableLib.calculateMintAmount(
                 equityValuationBeforeInvestment,
                 actualInvested,
-                investmentTokenSupply
+                investmentTokenSupply,
+                depositToken.decimals()
             )
         );
     }

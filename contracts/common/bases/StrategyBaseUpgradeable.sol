@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./FeeUpgradeable.sol";
 import "./InvestmentLimitUpgradeable.sol";
+import "../interfaces/IERC20UpgradeableExt.sol";
 import "../interfaces/IInvestmentToken.sol";
 import "../interfaces/IPriceOracle.sol";
 import "../interfaces/IStrategy.sol";
@@ -22,7 +23,7 @@ struct RoleToUsers {
 
 struct StrategyArgs {
     IInvestmentToken investmentToken;
-    IERC20Upgradeable depositToken;
+    IERC20UpgradeableExt depositToken;
     uint24 depositFee;
     NameValuePair[] depositFeeParams;
     uint24 withdrawalFee;
@@ -49,9 +50,10 @@ abstract contract StrategyBaseUpgradeable is
 {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeERC20Upgradeable for IERC20UpgradeableExt;
 
     IInvestmentToken internal investmentToken;
-    IERC20Upgradeable internal depositToken;
+    IERC20UpgradeableExt internal depositToken;
     IPriceOracle public priceOracle;
     SwapService public swapService;
     uint256 public uninvestedDepositTokenAmount;
@@ -88,9 +90,15 @@ abstract contract StrategyBaseUpgradeable is
         );
     }
 
-    function _deposit(uint256 amount, NameValuePair[] calldata params)
-        internal
-        virtual;
+    function _deposit(
+        uint256 depositTokenAmountIn,
+        NameValuePair[] calldata params
+    ) internal virtual;
+
+    function _beforeDepositEquityValuation(
+        uint256 depositTokenAmountIn,
+        NameValuePair[] calldata params
+    ) internal virtual {}
 
     function deposit(
         uint256 depositTokenAmountIn,
@@ -104,6 +112,7 @@ abstract contract StrategyBaseUpgradeable is
 
         // check investment limits
         // the underlying defi protocols might take fees, but for limit check we can safely ignore it
+        _beforeDepositEquityValuation(depositTokenAmountIn, params);
         uint256 equityValuationBeforeInvestment = getEquityValuation(
             true,
             false
@@ -154,14 +163,17 @@ abstract contract StrategyBaseUpgradeable is
         if (totalEquityChange < minimumDepositTokenAmountOut)
             revert TooSmallDepositTokenAmountOut();
 
-        // minting should be based on the actual amount invested versus the deposited amount
-        // to take defi fees and losses into consideration
+        // 1. Minting should be based on the actual amount invested versus the deposited amount
+        //    to take defi fees and losses into consideration.
+        // 2. Calling  depositToken.decimals() should be cached into a state variable, but that
+        //    would require us to update all previous contracts.
         investmentToken.mint(
             investmentTokenReceiver,
             InvestableLib.calculateMintAmount(
                 equityValuationBeforeInvestment,
                 totalEquityChange,
-                investmentTokenSupply
+                investmentTokenSupply,
+                depositToken.decimals()
             )
         );
 
@@ -336,7 +348,7 @@ abstract contract StrategyBaseUpgradeable is
             balances[i] = balancesReturned[i];
         }
         balances[balancesLength - 1] = Balance(
-            InvestableLib.USDC,
+            address(depositToken),
             uninvestedDepositTokenAmount
         );
     }
@@ -386,7 +398,7 @@ abstract contract StrategyBaseUpgradeable is
             valuations[i] = valuationsReturned[i];
         }
         valuations[valuationsLength - 1] = Valuation(
-            InvestableLib.USDC,
+            address(depositToken),
             uninvestedDepositTokenAmount
         );
     }
@@ -421,7 +433,7 @@ abstract contract StrategyBaseUpgradeable is
             equityValuation += assetValuations[i].valuation;
 
         Valuation[] memory liabilityValuations = getLiabilityValuations(
-            shouldMaximise,
+            !shouldMaximise,
             shouldIncludeAmmPrice
         );
         uint256 liabilityValuationsLength = liabilityValuations.length;

@@ -98,7 +98,7 @@ library DnsVectorStrategyAumLib {
                 (
                     strategyStorage.priceOracle.getPrice(
                         strategyStorage.aaveBorrowToken,
-                        !shouldMaximise,
+                        shouldMaximise,
                         shouldIncludeAmmPrice
                     )
                 )) / 10**18
