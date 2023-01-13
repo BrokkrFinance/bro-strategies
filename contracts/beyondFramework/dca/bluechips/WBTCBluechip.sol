@@ -222,7 +222,7 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
             avaxIntoBluechipSwapPath
         );
         if (avaxToBluechip > 0) {
-            receivedBleuchip += router.swapAvaxForTokens(
+            receivedBleuchip += router.swapNativeForTokens(
                 address(this).balance,
                 avaxIntoBluechipSwapPath
             );
