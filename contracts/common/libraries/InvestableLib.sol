@@ -64,7 +64,7 @@ library InvestableLib {
                 convertPricePrecision(
                     amountInvestedNow,
                     10**depositTokenDecimalCount,
-                    10**6
+                    PRICE_PRECISION_FACTOR
                 );
         } else
             return

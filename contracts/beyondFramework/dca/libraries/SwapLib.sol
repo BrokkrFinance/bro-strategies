@@ -45,7 +45,7 @@ library SwapLib {
         }
     }
 
-    function swapAvaxForTokens(
+    function swapNativeForTokens(
         Router memory router,
         uint256 amountIn,
         address[] memory path
