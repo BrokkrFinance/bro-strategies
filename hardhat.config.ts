@@ -7,8 +7,8 @@ import "@openzeppelin/hardhat-defender"
 import "@openzeppelin/hardhat-upgrades"
 import "@typechain/hardhat"
 import * as dotenv from "dotenv"
-import "hardhat-contract-sizer"
 import "hardhat-change-network"
+import "hardhat-contract-sizer"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
 import "solidity-coverage"
@@ -78,7 +78,7 @@ const config: HardhatUserConfig = {
     currency: "USD",
   },
   mocha: {
-    timeout: 120000,
+    timeout: 150000,
   },
   // contractSizer: {
   //   alphaSort: true,
