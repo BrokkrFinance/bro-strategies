@@ -5,7 +5,7 @@ interface ITraderJoeRouter {
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] memory path,
+        address[] calldata path,
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amounts);
@@ -13,14 +13,14 @@ interface ITraderJoeRouter {
     function swapTokensForExactTokens(
         uint256 amountOut,
         uint256 amountInMax,
-        address[] memory path,
+        address[] calldata path,
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amounts);
 
     function swapExactAVAXForTokens(
         uint256 amountOutMin,
-        address[] memory path,
+        address[] calldata path,
         address to,
         uint256 deadline
     ) external payable returns (uint256[] memory amounts);
@@ -28,7 +28,7 @@ interface ITraderJoeRouter {
     function swapExactTokensForAVAX(
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] memory path,
+        address[] calldata path,
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amounts);
@@ -60,12 +60,12 @@ interface ITraderJoeRouter {
         uint256 deadline
     ) external returns (uint256 amountA, uint256 amountB);
 
-    function getAmountsIn(uint256 amountOut, address[] memory path)
+    function getAmountsIn(uint256 amountOut, address[] calldata path)
         external
         view
         returns (uint256[] memory amounts);
 
-    function getAmountsOut(uint256 amountIn, address[] memory path)
+    function getAmountsOut(uint256 amountIn, address[] calldata path)
         external
         view
         returns (uint256[] memory amounts);

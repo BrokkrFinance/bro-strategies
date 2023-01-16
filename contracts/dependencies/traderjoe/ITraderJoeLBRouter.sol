@@ -29,8 +29,8 @@ interface ITraderJoeLBRouter {
         uint16 binStep,
         uint256 amountXMin,
         uint256 amountYMin,
-        uint256[] memory ids,
-        uint256[] memory amounts,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
         address to,
         uint256 deadline
     ) external returns (uint256 amountX, uint256 amountY);
@@ -43,8 +43,8 @@ interface ITraderJoeLBRouter {
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
-        uint256[] memory binSteps,
-        address[] memory path,
+        uint256[] calldata binSteps,
+        address[] calldata path,
         address to,
         uint256 deadline
     ) external returns (uint256 amountOut);
@@ -52,8 +52,8 @@ interface ITraderJoeLBRouter {
     function swapTokensForExactTokens(
         uint256 amountOut,
         uint256 amountInMax,
-        uint256[] memory binSteps,
-        address[] memory path,
+        uint256[] calldata binSteps,
+        address[] calldata path,
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amountsIn);

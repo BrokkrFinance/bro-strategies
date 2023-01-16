@@ -15,7 +15,7 @@ interface IMasterPlatypusV4 {
         external
         returns (uint256 reward, uint256[] memory additionalRewards);
 
-    function multiClaim(uint256[] memory _pids)
+    function multiClaim(uint256[] calldata _pids)
         external
         returns (
             uint256 reward,
