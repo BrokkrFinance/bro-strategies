@@ -2,7 +2,9 @@
   "properties": [
     {
       "proxy": { "$ref": "../../live/strategy/StargateUSDT.json#/address" },
-      "newImplementation": "Stargate"
+      "newImplementation": "Stargate",
+      "functionName": "reinitialize",
+      "functionArgs": [[{ "$ref": "../../../constants/addresses/TraderJoe.json#/lbRouter" }, 1]]
     }
   ]
 }

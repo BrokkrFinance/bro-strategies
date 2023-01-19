@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import "../../common/libraries/SwapServiceLib.sol";
 import "../../dependencies/stargate/IStargateLpStaking.sol";
 import "../../dependencies/stargate/IStargatePool.sol";
 import "../../dependencies/stargate/IStargateRouter.sol";
@@ -16,6 +17,8 @@ struct StargateStorage {
     IERC20Upgradeable stgToken;
     uint256 poolId;
     uint256 farmId;
+    SwapService swapServiceForStgToken; // $STG is not supported by TraderJoe V2 yet.
+    mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) binSteps;
 }
 
 library StargateStorageLib {
