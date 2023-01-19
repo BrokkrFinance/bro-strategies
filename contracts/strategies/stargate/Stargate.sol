@@ -20,10 +20,11 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.stargate_strategy.stargate_strategy_v1.1.1";
+        "brokkr.stargate_strategy.stargate_strategy_v1.1.2";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";
     // solhint-disable-next-line const-name-snakecase
+    string public constant version = "1.1.2";
 
     struct StargateArgs {
         address traderjoeLBRouter;
