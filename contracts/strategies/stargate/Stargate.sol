@@ -14,16 +14,22 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    error InvalidBinStep();
     error InvalidStargateLpToken();
     error NotEnoughDeltaCredit();
 
     // solhint-disable-next-line const-name-snakecase
     string public constant trackingName =
-        "brokkr.stargate_strategy.stargate_strategy_v1.1.1";
+        "brokkr.stargate_strategy.stargate_strategy_v1.1.2";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";
     // solhint-disable-next-line const-name-snakecase
-    string public constant version = "1.1.1";
+    string public constant version = "1.1.2";
+
+    struct StargateArgs {
+        address traderjoeLBRouter;
+        uint256 binStep;
+    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -36,7 +42,8 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         IStargatePool pool,
         IStargateLpStaking lpStaking,
         IERC20Upgradeable lpToken,
-        IERC20Upgradeable stgToken
+        IERC20Upgradeable stgToken,
+        StargateArgs calldata stargateArgs
     ) external initializer {
         __UUPSUpgradeable_init();
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
@@ -68,6 +75,15 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         if (!isPoolFound) {
             revert InvalidStargateLpToken();
         }
+
+        __switchSwapService(stargateArgs);
+    }
+
+    function reinitialize(StargateArgs calldata stargateArgs)
+        external
+        reinitializer(2)
+    {
+        __switchSwapService(stargateArgs);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
@@ -81,17 +97,10 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             .getStorage();
 
         if (depositToken != strategyStorage.poolDepositToken) {
-            address[] memory path = new address[](3);
-            path[0] = address(depositToken);
-            path[1] = address(InvestableLib.AVALANCHE_WAVAX);
-            path[2] = address(strategyStorage.poolDepositToken);
-
-            amount = SwapServiceLib.swapExactTokensForTokens(
-                swapService,
+            amount = __swapTokens(
                 amount,
-                0,
-                path,
-                new uint256[](0)
+                depositToken,
+                strategyStorage.poolDepositToken
             );
         }
 
@@ -157,17 +166,11 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         if (depositToken != strategyStorage.poolDepositToken) {
             uint256 poolDepositTokenBalanceIncrement = poolDepositTokenBalanceAfter -
                     poolDepositTokenBalanceBefore;
-            address[] memory path = new address[](3);
-            path[0] = address(strategyStorage.poolDepositToken);
-            path[1] = address(InvestableLib.AVALANCHE_WAVAX);
-            path[2] = address(depositToken);
 
-            SwapServiceLib.swapExactTokensForTokens(
-                swapService,
+            __swapTokens(
                 poolDepositTokenBalanceIncrement,
-                0,
-                path,
-                new uint256[](0)
+                strategyStorage.poolDepositToken,
+                depositToken
             );
         }
     }
@@ -178,16 +181,10 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
         strategyStorage.lpStaking.deposit(strategyStorage.farmId, 0);
 
-        address[] memory path = new address[](2);
-        path[0] = address(strategyStorage.stgToken);
-        path[1] = address(depositToken);
-
-        SwapServiceLib.swapExactTokensForTokens(
-            swapService,
+        __swapTokens(
             strategyStorage.stgToken.balanceOf(address(this)),
-            0,
-            path,
-            new uint256[](0)
+            strategyStorage.stgToken,
+            depositToken
         );
     }
 
@@ -265,5 +262,72 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
                 .lpStaking
                 .userInfo(strategyStorage.farmId, address(this))
                 .amount;
+    }
+
+    function setBinStep(
+        IERC20Upgradeable tokenX,
+        IERC20Upgradeable tokenY,
+        uint256 binStep
+    ) public onlyOwner {
+        StargateStorage storage strategyStorage = StargateStorageLib
+            .getStorage();
+
+        strategyStorage.binSteps[tokenX][tokenY] = binStep;
+        strategyStorage.binSteps[tokenY][tokenX] = binStep;
+    }
+
+    function __swapTokens(
+        uint256 amountIn,
+        IERC20Upgradeable tokenIn,
+        IERC20Upgradeable tokenOut
+    ) private returns (uint256 amountOut) {
+        StargateStorage storage strategyStorage = StargateStorageLib
+            .getStorage();
+
+        address[] memory path = new address[](2);
+        path[0] = address(tokenIn);
+        path[1] = address(tokenOut);
+
+        uint256[] memory binStep = new uint256[](1);
+        binStep[0] = strategyStorage.binSteps[tokenIn][tokenOut];
+
+        SwapService memory _swapService;
+
+        // We switched to TraderJoe V2 for swapping since Stargate USDT v1.1.2,
+        // but $STG is not supported at the moment.
+        // The `binStep[0] == 0` condition will enable us to use TraderJoe V2
+        // for swapping $STG once it is supported without requiring an upgrade.
+        if (tokenIn == strategyStorage.stgToken && binStep[0] == 0) {
+            _swapService = strategyStorage.swapServiceForStgToken;
+        } else {
+            _swapService = swapService;
+        }
+
+        amountOut = SwapServiceLib.swapExactTokensForTokens(
+            _swapService,
+            amountIn,
+            0,
+            path,
+            binStep
+        );
+    }
+
+    function __switchSwapService(StargateArgs calldata stargateArgs) private {
+        StargateStorage storage strategyStorage = StargateStorageLib
+            .getStorage();
+
+        // $STG token is not supported by TraderJoe V2 yet.
+        strategyStorage.swapServiceForStgToken = swapService;
+
+        setSwapService(
+            SwapServiceProvider.AvalancheTraderJoeV2,
+            stargateArgs.traderjoeLBRouter
+        );
+
+        setBinStep(
+            depositToken,
+            strategyStorage.poolDepositToken,
+            stargateArgs.binStep
+        );
     }
 }

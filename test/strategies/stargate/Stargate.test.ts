@@ -1,8 +1,9 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
-import Tokens from "../../../constants/addresses/Tokens.json"
 import Stargate from "../../../constants/addresses/Stargate.json"
+import Tokens from "../../../constants/addresses/Tokens.json"
+import TraderJoe from "../../../constants/addresses/TraderJoe.json"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import StargateLPTokenABI from "../../helper/abi/StargateLPToken.json"
 import { TestOptions } from "../../helper/interfaces/options"
@@ -197,6 +198,7 @@ function testStargateUSDCInitialize() {
             Stargate.lpStaking,
             Tokens.usdc,
             Stargate.stgToken,
+            [TraderJoe.lbRouter, 1],
           ],
           { kind: "uups" }
         )
@@ -357,6 +359,7 @@ function testStargateUSDTInitialize() {
             Stargate.lpStaking,
             Tokens.usdc,
             Stargate.stgToken,
+            [TraderJoe.lbRouter, 1],
           ],
           { kind: "uups" }
         )

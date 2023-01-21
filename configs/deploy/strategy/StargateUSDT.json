@@ -27,7 +27,8 @@
         { "$ref": "../../../constants/addresses/Stargate.json#/usdtPool" },
         { "$ref": "../../../constants/addresses/Stargate.json#/lpStaking" },
         { "$ref": "../../../constants/addresses/Stargate.json#/usdtLPToken" },
-        { "$ref": "../../../constants/addresses/Stargate.json#/stgToken" }
+        { "$ref": "../../../constants/addresses/Stargate.json#/stgToken" },
+        [{ "$ref": "../../../constants/addresses/TraderJoe.json#/lbRouter" }, 1]
       ],
       "libraries": []
     }
