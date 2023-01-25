@@ -12,6 +12,7 @@ library TraderJoeInvestmentLib {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     error InvalidActiveBinAllocation();
+    error TooLargeDepositAmount();
 
     function deposit(uint256 depositTokenAmount, uint256 pairDepositTokenAmount)
         public
@@ -271,63 +272,69 @@ library TraderJoeInvestmentLib {
         distributionX = new uint256[](binsAmount);
         distributionY = new uint256[](binsAmount);
 
-        while (true) {
-            uint256 reserveX;
-            uint256 reserveY;
+        // Active ID.
+        (, , activeId) = strategyStorage.lbPair.getReservesAndId();
 
-            (, , activeId) = strategyStorage.lbPair.getReservesAndId();
+        // Calculate parameters.
+        (amountX, amountY) = __calculateParams(
+            amountXIn,
+            amountYIn,
+            activeId,
+            deltaIds,
+            distributionX,
+            distributionY
+        );
 
-            (reserveX, reserveY) = strategyStorage.lbPair.getBin(
-                uint24(activeId)
-            );
-
-            (amountX, amountY) = __calculateParams(
-                amountXIn,
-                amountYIn,
-                activeId,
-                deltaIds,
-                distributionX,
-                distributionY
-            );
-
-            // Swap only as much as is needed.
-            uint256 amountInDesired;
-            uint256 amountIn;
-            uint256 amountOut;
-
-            if (amountXIn > amountX) {
-                amountInDesired = amountXIn - amountX;
-
-                (amountIn, amountOut) = __swapOptimalAmount(
-                    amountInDesired,
-                    reserveY,
+        // Swap tokens.
+        if (amountXIn > amountX) {
+            amountY =
+                amountYIn +
+                swapExactTokensForTokens(
+                    amountXIn - amountX,
                     strategyStorage.tokenX,
                     strategyStorage.tokenY
                 );
-
-                amountX = amountXIn - amountIn;
-                amountY = amountYIn + amountOut;
-            } else if (amountYIn > amountY) {
-                amountInDesired = amountYIn - amountY;
-
-                (amountIn, amountOut) = __swapOptimalAmount(
-                    amountInDesired,
-                    reserveX,
+        } else if (amountYIn > amountY) {
+            amountX =
+                amountXIn +
+                swapExactTokensForTokens(
+                    amountYIn - amountY,
                     strategyStorage.tokenY,
                     strategyStorage.tokenX
                 );
+        }
 
-                amountX = amountXIn + amountOut;
-                amountY = amountYIn - amountIn;
+        // Check how many target bins active ID passed by.
+        (, , uint256 _activeId) = strategyStorage.lbPair.getReservesAndId();
+
+        uint256[2] memory activeIds = [activeId, _activeId];
+        uint256[2] memory positions; // Position equals to i, where i-th target bin ID <= active ID < (i + 1)-th target bin ID.
+
+        for (uint256 i; i < 2; i++) {
+            for (uint256 j; j < binsAmount; j++) {
+                if (activeIds[i] >= strategyStorage.binIds[j]) {
+                    positions[i] = j + 1;
+                }
+            }
+        }
+
+        // Revert if active ID moved more than 1 target bin.
+        // This won't happen unless deposit is $0.1M under certain situation as of v1.2.2.
+        if (
+            positions[0] + 1 < positions[1] || positions[0] > positions[1] + 1
+        ) {
+            revert TooLargeDepositAmount();
+        }
+
+        // Adjust params if active ID shifted.
+        if (activeId != _activeId) {
+            int256 shift = int256(activeId) - int256(_activeId);
+
+            for (uint256 i; i < binsAmount; i++) {
+                deltaIds[i] += shift;
             }
 
-            if (amountInDesired == amountIn) {
-                break;
-            }
-
-            // We don't have the amounts of X and Y we need yet. Reiterate the loop.
-            amountXIn = amountX;
-            amountYIn = amountY;
+            activeId = _activeId;
         }
     }
 
@@ -422,41 +429,6 @@ library TraderJoeInvestmentLib {
             if (calibrateY && amountY != 0) {
                 distributionY[i] = (distributionY[i] * 1e18) / amountY;
             }
-        }
-    }
-
-    function __swapOptimalAmount(
-        uint256 amountInDesired,
-        uint256 reserveOut,
-        IERC20Upgradeable tokenIn,
-        IERC20Upgradeable tokenOut
-    ) private returns (uint256 amountIn, uint256 amountOut) {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
-
-        (uint256 amountOutDesired, ) = strategyStorage.lbRouter.getSwapOut(
-            address(strategyStorage.lbPair),
-            amountInDesired,
-            tokenOut == strategyStorage.tokenY
-        );
-
-        if (amountOutDesired > reserveOut) {
-            // This swap will move active ID and new active ID requires new distributions.
-            // Since we have to swap anyway to deposit, swap only as much as needed to move active ID.
-            amountIn = swapTokensForExactTokens(
-                reserveOut + 1,
-                tokenIn,
-                tokenOut
-            );
-            amountOut = reserveOut + 1;
-        } else {
-            // Swap as much as needed.
-            amountIn = amountInDesired;
-            amountOut = swapExactTokensForTokens(
-                amountInDesired,
-                tokenIn,
-                tokenOut
-            );
         }
     }
 }
