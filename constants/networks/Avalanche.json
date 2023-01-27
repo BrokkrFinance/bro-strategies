@@ -1,0 +1,5 @@
+{
+  "url": "https://api.avax.network/ext/bc/C/rpc",
+  "chainId": 43114,
+  "forkAt": 24120000
+}

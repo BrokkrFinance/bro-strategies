@@ -12,7 +12,10 @@ import "hardhat-change-network"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
 import "solidity-coverage"
-import blockNumber from "./constants/BlockNumber.json"
+import avalanche from "./constants/networks/Avalanche.json"
+import avalancheTest from "./constants/networks/AvalancheTest.json"
+import bsc from "./constants/networks/BSC.json"
+import bscTest from "./constants/networks/BSCTest.json"
 
 import "./tasks/deploy"
 import "./tasks/upgrade"
@@ -41,31 +44,35 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       avalanche: `${process.env.SNOWTRACE_API_KEY}`,
+      bsc: `${process.env.BSC_SCAN_API_KEY}`,
     },
   },
   networks: {
-    hardhat: {
-      allowUnlimitedContractSize: false,
-      blockGasLimit: 30_000_000,
-      forking: {
-        url: "https://api.avax.network/ext/bc/C/rpc",
-        enabled: true,
-        blockNumber: blockNumber.forkAt,
-      },
+    hardhat: {},
+    localhost: {
+      url: "http://127.0.0.1:8545/",
     },
     avalanche: {
-      url: "https://api.avax.network/ext/bc/C/rpc",
-      chainId: 43114,
+      url: avalanche.url,
+      chainId: avalanche.chainId,
       accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
     },
-    fuji: {
-      url: "https://api.avax-test.network/ext/bc/C/rpc",
-      chainId: 43113,
+    avalanche_test: {
+      url: avalancheTest.url,
+      chainId: avalancheTest.chainId,
       accounts: [`0x${process.env.TESTNET_PRIVATE_KEY}`],
       gas: 5_000_000,
     },
-    localhost: {
-      url: "http://127.0.0.1:8545/",
+    bsc: {
+      url: bsc.url,
+      chainId: bsc.chainId,
+      accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
+    },
+    bsc_test: {
+      url: bscTest.url,
+      chainId: bscTest.chainId,
+      accounts: [`0x${process.env.TESTNET_PRIVATE_KEY}`],
+      gasPrice: 20_000_000_000,
     },
     tenderly: {
       url: `${process.env.TENDERLY_FORK_URL}`,
