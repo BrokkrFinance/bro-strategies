@@ -1,12 +1,14 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
+import Avalanche from "../../../constants/networks/Avalanche.json"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
-import { TestOptions } from "../../helper/interfaces/options"
+import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-const cashTestOptions: TestOptions = {
+const cashTestOptions: StrategyTestOptions = {
+  network: Avalanche,
   upgradeTo: "OwnableV2",
   runReapRewardExtra: false,
   runReapUninvestedReward: false,

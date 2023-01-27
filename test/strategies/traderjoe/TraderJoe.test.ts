@@ -4,12 +4,14 @@ import { ethers, upgrades } from "hardhat"
 import TraderJoeLBPairABI from "../../helper/abi/TraderJoeLBPair.json"
 import Tokens from "../../../constants/addresses/Tokens.json"
 import TraderJoe from "../../../constants/addresses/TraderJoe.json"
+import Avalanche from "../../../constants/networks/Avalanche.json"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
-import { TestOptions } from "../../helper/interfaces/options"
+import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-const traderjoeTestOptions: TestOptions = {
+const traderjoeTestOptions: StrategyTestOptions = {
+  network: Avalanche,
   upgradeTo: "OwnableV2",
   runReapReward: false,
   runReapRewardExtra: false,

@@ -2,10 +2,9 @@ import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpe
 import { ethers, network } from "hardhat"
 import AccessControlRoles from "../../constants/AccessControlRoles.json"
 import Tokens from "../../constants/addresses/Tokens.json"
-import blockNumber from "../../constants/BlockNumber.json"
 import { WhaleAddrs } from "../helper/addresses"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
-import { TestOptions } from "../helper/interfaces/options"
+import { StrategyTestOptions } from "../helper/interfaces/options"
 import { InvestHelper } from "../helper/invest"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
@@ -23,7 +22,7 @@ import { execSync } from "child_process"
 export function testStrategy(
   description: string,
   deployStrategy: () => Promise<Contract>,
-  testOptions: TestOptions,
+  testOptions: StrategyTestOptions,
   strategySpecificTests: (() => void)[]
 ) {
   describe(description, function () {
@@ -35,9 +34,9 @@ export function testStrategy(
             allowUnlimitedContractSize: false,
             blockGasLimit: 30_000_000,
             forking: {
-              jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+              jsonRpcUrl: testOptions.network.url,
               enabled: true,
-              blockNumber: blockNumber.forkAt,
+              blockNumber: testOptions.network.forkAt,
             },
           },
         ],

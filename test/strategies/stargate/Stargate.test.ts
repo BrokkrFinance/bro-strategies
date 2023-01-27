@@ -4,13 +4,15 @@ import { ethers, upgrades } from "hardhat"
 import Stargate from "../../../constants/addresses/Stargate.json"
 import Tokens from "../../../constants/addresses/Tokens.json"
 import TraderJoe from "../../../constants/addresses/TraderJoe.json"
+import Avalanche from "../../../constants/networks/Avalanche.json"
 import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
 import StargateLPTokenABI from "../../helper/abi/StargateLPToken.json"
-import { TestOptions } from "../../helper/interfaces/options"
+import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-const stargateTestOptions: TestOptions = {
+const stargateTestOptions: StrategyTestOptions = {
+  network: Avalanche,
   upgradeTo: "OwnableV2",
   runReapUninvestedReward: false,
 }

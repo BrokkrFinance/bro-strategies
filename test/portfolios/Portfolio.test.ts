@@ -1,9 +1,9 @@
 import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import Tokens from "../../constants/addresses/Tokens.json"
-import blockNumber from "../../constants/BlockNumber.json"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
 import { WhaleAddrs } from "../helper/addresses"
+import { PortfolioTestOptions } from "../helper/interfaces/options"
 import { InvestHelper } from "../helper/invest"
 import { testPortfolioAccessControl } from "./PortfolioAccessControl.test"
 import { testPortfolioAllocations } from "./PortfolioAllocations.test"
@@ -20,7 +20,7 @@ import { Contract } from "ethers"
 export function testPortfolio(
   description: string,
   deployPortfolio: () => Promise<Contract>,
-  upgradeTo: string,
+  testOptions: PortfolioTestOptions,
   portfolioSpecificTests: (() => void)[]
 ) {
   describe(description, function () {
@@ -32,9 +32,9 @@ export function testPortfolio(
             allowUnlimitedContractSize: false,
             blockGasLimit: 30_000_000,
             forking: {
-              jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+              jsonRpcUrl: testOptions.network.url,
               enabled: true,
-              blockNumber: blockNumber.forkAt,
+              blockNumber: testOptions.network.forkAt,
             },
           },
         ],
@@ -65,7 +65,7 @@ export function testPortfolio(
       this.portfolio = await deployPortfolio()
 
       // Portfolio upgradeability test to.
-      this.upgradeTo = upgradeTo
+      this.upgradeTo = testOptions.upgradeTo
 
       // Portfolio owner.
       const ownerAddr = await this.portfolio.owner()
