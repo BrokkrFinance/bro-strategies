@@ -114,6 +114,33 @@ contract PercentageAllocationPortfolio is
         }
     }
 
+    function depositSelected(
+        uint256 amount,
+        uint256[] calldata selectedInvestables
+    ) external nonReentrant {
+        if (selectedInvestables.length > investables.length) {
+            revert(
+                "Selected investables length is higher then actual investables"
+            );
+        }
+
+        depositToken.safeTransferFrom(_msgSender(), address(this), amount);
+
+        uint256 perInvestableDeposit = amount / selectedInvestables.length;
+        for (uint256 i = 0; i < selectedInvestables.length; i++) {
+            depositToken.safeApprove(
+                address(investables[selectedInvestables[i]].investable),
+                perInvestableDeposit
+            );
+
+            investables[selectedInvestables[i]].investable.depositFor(
+                _msgSender(),
+                perInvestableDeposit,
+                investAmountSplit
+            );
+        }
+    }
+
     function withdrawAll(bool convertBluechipIntoDepositAsset)
         external
         nonReentrant
