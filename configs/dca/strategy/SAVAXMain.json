@@ -1,0 +1,54 @@
+{
+  "owner": "0xE8855828fEC29dc6860A4362BCb386CCf6C0c601",
+  "dcaBaseArgs": {
+    "depositFee": {
+      "feeReceiver": "0xE8855828fEC29dc6860A4362BCb386CCf6C0c601",
+      "fee": 0
+    },
+    "dcaInvestor": "0xe3b30829a9d585297988a4f14d49aa67333eeb4b",
+    "depositTokenInfo": {
+      "token": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "decimals": 6
+    },
+    "investmentPeriod": 604800,
+    "lastInvestmentTimestamp": -1,
+    "minDepositAmount": 50000000,
+    "positionsLimit": 52,
+    "router": {
+      "dex": 0,
+      "router": "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
+    },
+    "depositToBluechipSwapPath": [
+      "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e",
+      "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+      "0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be"
+    ],
+    "bluechipToDepositSwapPath": [
+      "0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be",
+      "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+      "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e"
+    ]
+  },
+  "bluechipTokenInfo": {
+    "token": "0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be",
+    "decimals": 8
+  },
+  "platypusInfo": {
+    "altPoolAvax": "0x4658EA7e9960D6158a261104aAA160cC953bb6ba",
+    "masterPlatypusV4": "0xfF6934aAC9C94E1C39358D4fDCF70aeca77D0AB0",
+    "altSAvaxLpToken": "0xA2A7EE49750Ff12bb60b407da2531dB3c50A1789",
+    "platypusToken": "0x22d4002028f537599be9f666d1c4fa138522f9c8",
+    "qiToken": "0x8729438eb15e2c8b576fcc6aecda6a148776c0f5",
+    "poolId": 13
+  },
+  "ptpIntoBluechipSwapPath": [
+    "0x22d4002028f537599bE9f666d1c4Fa138522f9c8",
+    "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+    "0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be"
+  ],
+  "qiIntoBluechipSwapPath": [
+    "0x8729438eb15e2c8b576fcc6aecda6a148776c0f5",
+    "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+    "0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be"
+  ]
+}
