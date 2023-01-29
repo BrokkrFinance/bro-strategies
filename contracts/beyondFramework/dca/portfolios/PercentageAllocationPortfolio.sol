@@ -119,6 +119,7 @@ contract PercentageAllocationPortfolio is
         uint256[] calldata selectedInvestables
     ) external nonReentrant {
         if (selectedInvestables.length > investables.length) {
+            // solhint-disable-next-line
             revert(
                 "Selected investables length is higher then actual investables"
             );
