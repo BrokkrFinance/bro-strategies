@@ -27,24 +27,10 @@ getExecutionCostInUsd
 getExecutionGasAmount
 increaseEvmTimeBySeconds
 
-async function printInternalState(strategy: Contract) {
-  console.log("Aave debt: ", (await strategy.getAaveDebt()).toString())
-  console.log("Pool debt: ", (await strategy.getPoolDebt()).toString())
-  console.log(
-    "Collateral ratio with minimum price: ",
-    (await strategy.getInverseCollateralRatio(false, false)).toString()
-  )
-  console.log(
-    "Collateral ratio with maximum price: ",
-    (await strategy.getInverseCollateralRatio(true, false)).toString()
-  )
-  console.log("Investment token total supply: ", (await strategy.getInvestmentTokenSupply()).toString())
-}
-
 async function printBalances(strategy: Contract) {
-  for (const assetValuation of await strategy.getAssetBalances()) {
-    console.log("asset:", assetValuation.asset)
-    console.log("asset balance:", assetValuation.balance.toString())
+  for (const assetBalance of await strategy.getAssetBalances()) {
+    console.log("asset:", assetBalance.asset)
+    console.log("asset balance:", assetBalance.balance.toString())
   }
   for (const liabilityValuation of await strategy.getLiabilityBalances()) {
     console.log("liability:", liabilityValuation.asset)
@@ -52,118 +38,93 @@ async function printBalances(strategy: Contract) {
   }
 }
 
-async function printValuation(strategy: Contract) {
-  console.log("getting minimum total AUM: ", (await strategy.getEquityValuation(false, false)).toString())
-  console.log("getting maximum total AUM: ", (await strategy.getEquityValuation(true, false)).toString())
+async function printValuations(strategy: Contract) {
+  for (const assetValuation of await strategy.getAssetValuations(false, false)) {
+    console.log("asset:", assetValuation.asset)
+    console.log("asset valuation:", assetValuation.valuation.toString())
+  }
+  for (const liabilityValuation of await strategy.getLiabilityValuations(false, false)) {
+    console.log("liability:", liabilityValuation.asset)
+    console.log("liability valuation:", liabilityValuation.valuation.toString())
+  }
+  console.log("getting minimum total equity AUM: ", (await strategy.getEquityValuation(false, false)).toString())
+  console.log("getting maximum total equity AUM: ", (await strategy.getEquityValuation(true, false)).toString())
+}
+
+async function printInternalState(strategy: Contract) {
+  console.log("Lending pool borrow amount: ", (await strategy.getLendingPoolBorrowAmount()).toString())
+  console.log("Lending pool supply amount: ", (await strategy.getLendingPoolSupplyAmount()).toString())
+  console.log("Liquidity pool borrow amount: ", (await strategy.getLiquidityPoolBorrowAmount()).toString())
+  console.log(
+    "Inverse collateral ratio with maximum price: ",
+    (await strategy.getInverseCollateralRatio(true, false)).toString()
+  )
+  console.log(
+    "Inverse collateral ratio with minimum price: ",
+    (await strategy.getInverseCollateralRatio(false, false)).toString()
+  )
+  const res = await strategy.getCombinedSafetyFactor()
+  console.log("Combined safety factor: ", JSON.stringify(res))
+}
+
+export async function getBUsdcContract() {
+  return await ethers.getContractAt(
+    "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+    "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
+  )
 }
 
 describe("DNS Vector", function () {
   this.timeout(60 * 60 * 1000)
 
-  it("Smoke test", async function () {
-    // setup accounts
-    const accounts = await ethers.getSigners()
-    const Alice = accounts[0].address
-
-    let impersonatedSigner = await expectSuccess(
-      ethers.getImpersonatedSigner("0x42d6ce661bb2e5f5cc639e7befe74ff9fd649541")
-    )
-    const usdcContract = await expectSuccess(getUsdcContract())
-
-    console.log("funding Alice account with native currency")
-    let tx = await expectSuccess(
-      impersonatedSigner.sendTransaction({
-        to: Alice,
-        value: ethers.utils.parseEther("10000"),
-      })
-    )
-    console.log("funding Alice account with usdc currency")
-    await expectSuccess(usdcContract.connect(impersonatedSigner).transfer(Alice, ethers.utils.parseUnits("2000", 6)))
-
-    // depoloy contracts
-    const priceOracle = await expectSuccess(
-      deployPriceOracle("GmxOracle", ContractAddrs.gmxOracle, (await getUsdcContract()).address)
-    )
-
-    // deposit
-    console.log("\n\n**** deposit ****")
-    const strategy = await getUsdcStrategy(priceOracle)
-    console.log("getCombinedSafetyFactor: ", (await strategy.getCombinedSafetyFactor()).toString())
-    const depositAmount = ethers.utils.parseUnits("2000", 6)
-    await expectSuccess(usdcContract.approve(strategy.address, depositAmount))
-    let transactionResponse: TransactionResponse = await expectSuccess(strategy.deposit(depositAmount, 0, Alice, []))
-    console.log("deposit cost in USD: ", await getExecutionCostInUsd(transactionResponse))
-    console.log("deposit cost in Gas: ", await getExecutionGasAmount(transactionResponse))
-    await printInternalState(strategy)
-    await printBalances(strategy)
-    await printValuation(strategy)
-
-    // repay debt
-    console.log("**** repay debt ****")
-    await strategy.repayDebt(BigNumber.from(13918153133989), [])
-    await printInternalState(strategy)
-    await printBalances(strategy)
-    await printValuation(strategy)
-
-    // increase debt
-    // console.log("**** increase debt ****")
-    // await strategy.increaseDebt(BigNumber.from("4220910200000000000"), [])
-    // await printInternalState(strategy)
-    // await printBalances(strategy)
-    // await printValuation(strategy)
-
-    // decrease collateral
-    // console.log("**** decrease collateral ****")
-    // await strategy.decreaseSupply(BigNumber.from("119047619"), [])
-    // await printInternalState(strategy)
-    // await printBalances(strategy)
-    // await printValuation(strategy)
-
-    // withdraw
-    // console.log("\n\n**** withdrawal ****")
-    // const investmentTokenBalance = await strategy.getInvestmentTokenBalanceOf(Alice)
-    // const investmentToken = await getTokenContract(await strategy.getInvestmentToken())
-    // const withdrawAmount = Math.floor(investmentTokenBalance / 2)
-    // investmentToken.approve(strategy.address, withdrawAmount)
-    // transactionResponse = await expectSuccess(strategy.withdraw(withdrawAmount, 0, Alice, []))
-    // console.log("withdraw cost in USD: ", await getExecutionCostInUsd(transactionResponse))
-    // console.log("withdraw cost in Gas: ", await getExecutionGasAmount(transactionResponse))
-    // await printInternalState(strategy)
-    // await printBalances(strategy)
-
-    // reaping rewards
-    // await increaseEvmTimeBySeconds(3600 * 24)
-    // console.log("Investment token supply before reaping rewards: ", await strategy.getInvestmentTokenSupply())
-    // await ethers.provider.send("evm_increaseTime", [3600 * 48])
-    // await ethers.provider.send("evm_mine", [])
-    // await expectSuccess(strategy.processReward([], []))
-    // console.log("Investment token supply after reaping rewards: ", await strategy.getInvestmentTokenSupply())
+  it("Deploy price oracle to prod", async function () {
+    const priceOracle = await deployVenusOracle()
+    console.log("Price oracle deployed: ", priceOracle.address)
   })
 })
 
-async function getUsdcStrategy(priceOracle: any) {
+async function deployVenusOracle() {
+  const priceOracle = await expectSuccess(
+    deployPriceOracle(
+      "VenusOracle",
+      "0x516c18DC440f107f12619a6d2cc320622807d0eE",
+      "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
+    )
+  )
+  await priceOracle.setTokenToVToken(
+    "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+    "0x95c78222B3D6e262426483D42CfA53685A67Ab9D"
+  )
+  await priceOracle.setTokenToVToken(
+    "0x0000000000000000000000000000000000000002",
+    "0xa07c5b74c9b40447a954e1466938b865b6bbea36"
+  )
+  return priceOracle
+}
+
+async function getBusdStrategy(priceOracle: any) {
   const accounts = await ethers.getSigners()
   const Alice = accounts[0].address
 
-  const usdcContract = await expectSuccess(getUsdcContract())
+  const busdContract = await expectSuccess(getBUsdcContract())
 
-  const DnsVectorStrategyAumLib = await ethers.getContractFactory("DnsVectorStrategyAumLib")
-  const dnsVectorStrategyAumLib = await DnsVectorStrategyAumLib.deploy()
+  const DnsCakeStrategyAumLib = await ethers.getContractFactory("DnsCakeStrategyAumLib")
+  const dnsCakeStrategyAumLib = await DnsCakeStrategyAumLib.deploy()
 
-  const DnsVectorStrategyInvestmentLib = await ethers.getContractFactory("DnsVectorStrategyInvestmentLib")
-  const dnsVectorStrategyInvestmentLib = await DnsVectorStrategyInvestmentLib.deploy()
+  const DnsCakeStrategyInvestmentLib = await ethers.getContractFactory("DnsCakeStrategyInvestmentLib")
+  const dnsCakeStrategyInvestmentLib = await DnsCakeStrategyInvestmentLib.deploy()
 
   const libraries = {
-    DnsVectorStrategyAumLib: dnsVectorStrategyAumLib.address,
-    DnsVectorStrategyInvestmentLib: dnsVectorStrategyInvestmentLib.address,
+    DnsCakeStrategyAumLib: dnsCakeStrategyAumLib.address,
+    DnsCakeStrategyInvestmentLib: dnsCakeStrategyInvestmentLib.address,
   }
 
   return await expectSuccess(
     deployUpgradeableStrategy(
-      "DnsVectorStrategy",
-      "Super Strategy Token 2",
-      "SUP2",
-      usdcContract,
+      "DnsCakeStrategy",
+      "Super Strategy Token 1",
+      "SUP1",
+      busdContract,
       0,
       [],
       0,
@@ -172,11 +133,11 @@ async function getUsdcStrategy(priceOracle: any) {
       [],
       "0xce70b9444c4e22ae150C81dA7375542B49D15efA", // fee receiver
       [],
-      BigInt(10 ** 20),
-      BigInt(10 ** 20),
+      BigInt(10 ** 28),
+      BigInt(10 ** 28),
       priceOracle.address,
-      0,
-      "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", // swap service address
+      3,
+      "0x10ED43C718714eb63d5aA57B78B54704E256024E", // swap service address
       [
         { role: "0x0000000000000000000000000000000000000000000000000000000000000000", users: [Alice] },
         { role: "0x7935bd0ae54bc31f548c14dba4d37c5c64b3f8ca900cb468fb8abd54d5894f55", users: [Alice] },
@@ -188,17 +149,12 @@ async function getUsdcStrategy(priceOracle: any) {
       [
         [
           800, // safetyFactor
-          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // aaveSupplyToken
-          "0x625E7708f30cA75bfd92586e17077590C60eb4cD", // aAaveSupplyToken
-          "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", // aaveBorrowToken
-          "0x4a1c3aD6Ed28a636ee1751C69071f6be75DEb8B8", // vAaveBorrowToken
-          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // ammPairDepositToken
-          "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd", // Joe token
-          "0x794a61358D6845594F94dc1DB02A252b5b4814aD", // Aave pool
-          "0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654", // Aave protocol data provider
-          "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", // TraderJoe router
-          "0xf4003F4efBE8691B60249E6afbD307aBE7758adb", // TraderJeo pair (same as the LP token in TraderJoe's implementation)
-          "0x9ef319429c4d32bc98957881723070dbca036b39", // Vector pool helper joe (call getPoolInfo on MainStaking: 0x0E25c07748f727D6CCcD7D2711fD7bD13d13422d)
+          "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", // venusSupplyToken
+          "0x95c78222B3D6e262426483D42CfA53685A67Ab9D", // venusSupplyMarket
+          "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", // ammPairDepositToken
+          "0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16", // BUSD/WBNB pancakePair
+          "0x10ED43C718714eb63d5aA57B78B54704E256024E", // pancakeRouter
+          "0xa5f8c5dbd5f286960b9d90548680ae5ebff07652", // pancakeMasterChefV2
         ],
       ],
       libraries

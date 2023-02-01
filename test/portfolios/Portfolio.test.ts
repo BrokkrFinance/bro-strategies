@@ -1,4 +1,6 @@
 import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
+import { execSync } from "child_process"
+import { Contract } from "ethers"
 import { ethers, network } from "hardhat"
 import Tokens from "../../constants/addresses/Tokens.json"
 import blockNumber from "../../constants/BlockNumber.json"
@@ -14,8 +16,6 @@ import { testPortfolioPausable } from "./PortfolioPausable.test"
 import { testPortfolioRebalance } from "./PortfolioRebalance.test"
 import { testPortfolioUpgradeable } from "./PortfolioUpgradeable.test"
 import { testPortfolioWithdraw } from "./PortfolioWithdraw.test"
-import { execSync } from "child_process"
-import { Contract } from "ethers"
 
 export function testPortfolio(
   description: string,
@@ -32,7 +32,7 @@ export function testPortfolio(
             allowUnlimitedContractSize: false,
             blockGasLimit: 30_000_000,
             forking: {
-              jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+              jsonRpcUrl: "https://nd-297-861-567.p2pify.com/763dd8e4dd3f92cfab52baea4bda7661",
               enabled: true,
               blockNumber: blockNumber.forkAt,
             },

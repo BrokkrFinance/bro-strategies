@@ -6,5 +6,9 @@
   "gmx": {
     "name": "GmxOracle",
     "address": "0x81b7e71a1d9e08a6ca016a0f4d6fa50dbce89ee3"
+  },
+  "bscVenus": {
+    "name": "GmxOracle",
+    "address": "0xFC1dF5f9d3F82D1183681c10a84c178bE6800709"
   }
 }

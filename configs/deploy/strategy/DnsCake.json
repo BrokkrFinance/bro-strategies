@@ -1,0 +1,73 @@
+{
+  "properties": [
+    {
+      "type": "strategy",
+      "subtype": "roleable",
+      "name": "DnsCake",
+      "multisig": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
+      "contractName": "DnsCakeStrategy",
+      "investmentTokenName": "Dns Cake Strategy Token",
+      "investmentTokenSymbol": "DNS",
+      "depositToken": { "$ref": "../../../constants/addresses/Tokens.json#/bscBusd" },
+      "depositFee": 0,
+      "depositFeeParams": [],
+      "withdrawalFee": 500,
+      "withdrawalFeeParams": [],
+      "performanceFee": 0,
+      "performanceFeeParams": [],
+      "feeReceiver": { "$ref": "../../../constants/addresses/DAO.json#/multisig" },
+      "feeReceiverParams": [],
+      "totalInvestmentLimit": 1e20,
+      "investmentLimitPerAddress": 1e20,
+      "oracle": { "$ref": "../../../constants/Oracles.json#/bscVenus" },
+      "swapService": { "$ref": "../../../constants/SwapServices.json#/bscCake" },
+      "roleToUsers": [
+        {
+          "role": { "$ref": "../../../constants/AccessControlRoles.json#/admin" },
+          "users": [{ "$ref": "../../../constants/addresses/DAO.json#/multisig" }]
+        },
+        {
+          "role": { "$ref": "../../../constants/AccessControlRoles.json#/governor" },
+          "users": [{ "$ref": "../../../constants/addresses/DAO.json#/multisig" }]
+        },
+        {
+          "role": { "$ref": "../../../constants/AccessControlRoles.json#/strategist" },
+          "users": [{ "$ref": "../../../constants/addresses/DAO.json#/multisig" }]
+        },
+        {
+          "role": { "$ref": "../../../constants/AccessControlRoles.json#/maintainer" },
+          "users": [{ "$ref": "../../../constants/addresses/DAO.json#/multisig" }]
+        },
+        {
+          "role": { "$ref": "../../../constants/AccessControlRoles.json#/upgrade" },
+          "users": [{ "$ref": "../../../constants/addresses/DAO.json#/multisig" }]
+        },
+        {
+          "role": { "$ref": "../../../constants/AccessControlRoles.json#/pause" },
+          "users": [{ "$ref": "../../../constants/addresses/DAO.json#/multisig" }]
+        }
+      ],
+      "extraArgs": [
+        [
+          800,
+          { "$ref": "../../../constants/addresses/Tokens.json#/bscBusd" },
+          { "$ref": "../../../constants/addresses/Tokens.json#/bscVenusBusdToken" },
+          { "$ref": "../../../constants/addresses/Tokens.json#/bscBusd" },
+          { "$ref": "../../../constants/addresses/Pancake.json#/bsc/busdWbnbPair" },
+          { "$ref": "../../../constants/addresses/Pancake.json#/bsc/router" },
+          { "$ref": "../../../constants/addresses/Pancake.json#/bsc/masterChef" }
+        ]
+      ],
+      "libraries": [
+        {
+          "name": "DnsCakeStrategyAumLib",
+          "dependencies": []
+        },
+        {
+          "name": "DnsCakeStrategyInvestmentLib",
+          "dependencies": []
+        }
+      ]
+    }
+  ]
+}

@@ -11,7 +11,7 @@ export async function deploy(network: string, name: string) {
   const { run } = require("hardhat")
 
   const deployConfigs: DeployConfig[] = await readDeployConfig(name)
-
+  console.log("deploy configs: ", JSON.stringify(deployConfigs))
   for (let deployConfig of deployConfigs) {
     let deployArgs: { [key: string]: string } = Object.assign({ targetNetwork: network }, parseSharedArgs(deployConfig))
 

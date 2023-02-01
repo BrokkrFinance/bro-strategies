@@ -1,0 +1,7 @@
+{
+  "bsc": {
+    "router": "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+    "masterChef": "0xa5f8c5dbd5f286960b9d90548680ae5ebff07652",
+    "busdWbnbPair": "0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16"
+  }
+}

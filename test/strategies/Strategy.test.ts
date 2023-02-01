@@ -1,10 +1,12 @@
 import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
+import { execSync } from "child_process"
+import { Contract } from "ethers"
 import { ethers, network } from "hardhat"
 import AccessControlRoles from "../../constants/AccessControlRoles.json"
 import Tokens from "../../constants/addresses/Tokens.json"
 import blockNumber from "../../constants/BlockNumber.json"
-import { WhaleAddrs } from "../helper/addresses"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
+import { WhaleAddrs } from "../helper/addresses"
 import { TestOptions } from "../helper/interfaces/options"
 import { InvestHelper } from "../helper/invest"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
@@ -17,8 +19,6 @@ import { testStrategyReapRewardExtra } from "./StrategyReapRewardExtra.test"
 import { testStrategyReapUninvestedReward } from "./StrategyReapUninvestedReward.test"
 import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
-import { Contract } from "ethers"
-import { execSync } from "child_process"
 
 export function testStrategy(
   description: string,
@@ -35,7 +35,7 @@ export function testStrategy(
             allowUnlimitedContractSize: false,
             blockGasLimit: 30_000_000,
             forking: {
-              jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+              jsonRpcUrl: "https://nd-297-861-567.p2pify.com/763dd8e4dd3f92cfab52baea4bda7661",
               enabled: true,
               blockNumber: blockNumber.forkAt,
             },
@@ -44,7 +44,7 @@ export function testStrategy(
       })
 
       // Get ERC20 tokens.
-      this.usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.usdc)
+      this.usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.bscBusd)
 
       // Users.
       this.signers = await ethers.getSigners()
@@ -55,18 +55,23 @@ export function testStrategy(
 
       // Airdrop signers.
       this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.usdc)
+      console.log("!!!!1")
       await setBalance(this.impersonatedSigner.address, ethers.utils.parseEther("10000"))
+      console.log("!!!!2")
       for (let i = 0; i <= this.userCount; i++) {
+        console.log("!!!!3")
         await setBalance(this.signers[i].address, ethers.utils.parseEther("10000"))
+        console.log("!!!!4")
         await this.usdc
           .connect(this.impersonatedSigner)
           .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
         // TODO: Add USDC setter helper.
       }
+      console.log("RRRRRRRRRRRRRRRRRRRRRR0")
 
       // Deploy strategy.
       this.strategy = await deployStrategy()
-
+      console.log("RRRRRRRRRRRRRRRRRRRRRR1")
       // Portfolio upgradeability test to.
       this.upgradeTo = testOptions.upgradeTo
 
@@ -98,6 +103,7 @@ export function testStrategy(
         this.owner = await ethers.getImpersonatedSigner(ownerAddr)
       }
 
+      console.log("RRRRRRRRRRRRRRRRRRRRRRxxxx")
       // Strategy token.
       const investmentTokenAddr = await this.strategy.getInvestmentToken()
       this.investmentToken = await ethers.getContractAt("InvestmentToken", investmentTokenAddr)
@@ -110,10 +116,12 @@ export function testStrategy(
       this.swapServiceProvider = swapService.provider
       this.swapServiceRouter = swapService.router
 
+      console.log("RRRRRRRRRRRRRRRRRRRRRRxxxx10")
       // Set investment limits of strategy to big enough value and all kinds of fee to zero
       // to prevent any test being affected by the limits.
       await removeInvestmentLimitsAndFees(this.strategy, this.owner)
 
+      console.log("RRRRRRRRRRRRRRRRRRRRRRxxxx11")
       // Strategy parameters.
       this.depositFee = await this.strategy.getDepositFee([])
       this.depositFeeParams = [] // Not implemented yet.
@@ -125,7 +133,7 @@ export function testStrategy(
       this.feeReceiverParams = [] // Not implemented yet.
       this.totalInvestmentLimit = await this.strategy.getTotalInvestmentLimit()
       this.investmentLimitPerAddress = await this.strategy.getInvestmentLimitPerAddress()
-
+      console.log("RRRRRRRRRRRRRRRRRRRRRRxxxx3")
       // Store equity valuation and investment token supply to make tests also work for existing strategies.
       this.equityValuation = await this.strategy.getEquityValuation(true, false)
       this.investmentTokenSupply = await this.strategy.getInvestmentTokenSupply()
@@ -133,7 +141,7 @@ export function testStrategy(
       // Store investment token price for fee tests.
       this.investmentTokenPrice =
         this.investmentTokenSupply == 0 ? 1 : this.equityValuation / this.investmentTokenSupply
-
+      console.log("RRRRRRRRRRRRRRRRRRRRRRxxxx6")
       // Set investable to strategy for shared tests.
       this.investable = this.strategy
 
@@ -141,13 +149,14 @@ export function testStrategy(
       this.investHelper = new InvestHelper(this.usdc)
 
       this.snapshot = await takeSnapshot()
+      console.log("RRRRRRRRRRRRRRRRRRRRRR2")
     })
 
     beforeEach(async function () {
       // Restore snapshot.
       await this.snapshot.restore()
     })
-
+    console.log("RRRRRRRRRRRRRRRRRRRRRR3")
     testStrategyAccessControl()
     testStrategyDeposit()
     testStrategyERC165()

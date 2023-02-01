@@ -10,5 +10,9 @@
   "pangolin": {
     "provider": 2,
     "router": "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106"
+  },
+  "bscCake": {
+    "provider": 3,
+    "router": "0x10ED43C718714eb63d5aA57B78B54704E256024E"
   }
 }

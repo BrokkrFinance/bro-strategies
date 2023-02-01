@@ -12,7 +12,6 @@ import "hardhat-contract-sizer"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
 import "solidity-coverage"
-import blockNumber from "./constants/BlockNumber.json"
 
 import "./tasks/deploy"
 import "./tasks/upgrade"
@@ -48,10 +47,16 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: false,
       blockGasLimit: 30_000_000,
       forking: {
-        url: "https://api.avax.network/ext/bc/C/rpc",
+        //url: "https://bsc.getblock.io/bc79cd50-8a54-413c-b0f6-5af795da0345/mainnet/",
+        url: "https://nd-297-861-567.p2pify.com/763dd8e4dd3f92cfab52baea4bda7661",
         enabled: true,
-        blockNumber: blockNumber.forkAt,
+        //blockNumber: 23892471,
       },
+    },
+    bsc: {
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
+      accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
     },
     avalanche: {
       url: "https://api.avax.network/ext/bc/C/rpc",
