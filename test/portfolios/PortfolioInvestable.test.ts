@@ -24,9 +24,9 @@ export function testPortfolioInvestable() {
         allocations.push(0)
       }
 
-      expect(await this.portfolio.connect(this.owner).addInvestable(this.usdc.address, allocations, []))
+      expect(await this.portfolio.connect(this.owner).addInvestable(this.depositToken.address, allocations, []))
         .to.emit(this.portfolio, "InvestableAdd")
-        .withArgs(this.usdc.address, allocations, [])
+        .withArgs(this.depositToken.address, allocations, [])
 
       const investables = await this.portfolio.getInvestables()
       expect(investables.length).to.be.equal(investableLength + 1)
@@ -43,7 +43,7 @@ export function testPortfolioInvestable() {
       }
 
       await expect(
-        this.portfolio.connect(this.owner).removeInvestable(this.usdc.address, allocations, [])
+        this.portfolio.connect(this.owner).removeInvestable(this.depositToken.address, allocations, [])
       ).to.be.revertedWithCustomError(this.portfolio, "InvestableNotYetAdded")
     })
 
@@ -102,7 +102,7 @@ export function testPortfolioInvestable() {
       }
 
       await expect(
-        this.portfolio.connect(this.owner).changeInvestable(this.usdc.address, [])
+        this.portfolio.connect(this.owner).changeInvestable(this.depositToken.address, [])
       ).to.be.revertedWithCustomError(this.portfolio, "InvestableNotYetAdded")
     })
 

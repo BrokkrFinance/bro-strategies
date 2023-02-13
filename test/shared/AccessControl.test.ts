@@ -18,7 +18,7 @@ export function testAccessControl() {
   })
 
   it("should fail when the non-owner user sets investment token", async function () {
-    await expect(this.investable.connect(this.user0).setInvestmentToken(this.usdc.address)).to.be.reverted
+    await expect(this.investable.connect(this.user0).setInvestmentToken(this.depositToken.address)).to.be.reverted
   })
 
   it("should fail when the non-owner user sets total investment limit", async function () {
@@ -62,9 +62,9 @@ export function testAccessControl() {
   })
 
   it("should succeed when the owner user sets investment token", async function () {
-    expect(await this.investable.connect(this.owner).setInvestmentToken(this.usdc.address)).not.to.be.reverted
+    expect(await this.investable.connect(this.owner).setInvestmentToken(this.depositToken.address)).not.to.be.reverted
 
-    expect(await this.investable.getInvestmentToken()).to.equal(this.usdc.address)
+    expect(await this.investable.getInvestmentToken()).to.equal(this.depositToken.address)
   })
 
   it("should succeed when the owner user sets total investment limit", async function () {

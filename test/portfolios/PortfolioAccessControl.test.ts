@@ -7,15 +7,17 @@ export function testPortfolioAccessControl() {
     testAccessControl()
 
     it("should fail when the non-owner user adds investable", async function () {
-      await expect(this.portfolio.connect(this.user0).addInvestable(this.usdc.address, [], [])).to.be.reverted
+      await expect(this.portfolio.connect(this.user0).addInvestable(this.depositToken.address, [], [])).to.be.reverted
     })
 
     it("should fail when the non-owner user removes investable", async function () {
-      await expect(this.portfolio.connect(this.user0).removeInvestable(this.usdc.address, [], [])).to.be.reverted
+      await expect(this.portfolio.connect(this.user0).removeInvestable(this.depositToken.address, [], [])).to.be
+        .reverted
     })
 
     it("should fail when the non-owner user changes investable", async function () {
-      await expect(this.portfolio.connect(this.user0).changeInvestable(this.usdc.address, [], [])).to.be.reverted
+      await expect(this.portfolio.connect(this.user0).changeInvestable(this.depositToken.address, [], [])).to.be
+        .reverted
     })
 
     it("should fail when the non-owner user sets target investable allocations", async function () {

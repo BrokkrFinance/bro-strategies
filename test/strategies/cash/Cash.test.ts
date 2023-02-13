@@ -63,7 +63,7 @@ function testCashAum() {
         .success()
 
       const assetBalancesAfter = await this.strategy.getAssetBalances()
-      expect(assetBalancesAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetBalancesAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetBalancesAfter[0].balance).to.approximately(
         ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance),
         getErrorRange(ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance))
@@ -72,7 +72,7 @@ function testCashAum() {
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuationsAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetValuationsAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetValuationsAfter[0].valuation).to.be.approximately(
         ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation),
         getErrorRange(ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation))
@@ -132,7 +132,7 @@ function testCashAum() {
         .success()
 
       const assetBalancesAfter = await this.strategy.getAssetBalances()
-      expect(assetBalancesAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetBalancesAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetBalancesAfter[0].balance).to.approximately(
         ethers.utils.parseUnits("50", 6).add(assetBalancesBefore[0].balance),
         getErrorRange(ethers.utils.parseUnits("50", 6).add(assetBalancesBefore[0].balance))
@@ -141,7 +141,7 @@ function testCashAum() {
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuationsAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetValuationsAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetValuationsAfter[0].valuation).to.approximately(
         ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation),
         getErrorRange(ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation))

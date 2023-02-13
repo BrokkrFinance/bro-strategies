@@ -1,4 +1,5 @@
 {
+  "name": "bsc",
   "url": "https://bsc-dataseed.binance.org/",
   "chainId": 56,
   "forkAt": 25143300

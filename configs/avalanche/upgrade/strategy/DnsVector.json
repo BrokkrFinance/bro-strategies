@@ -7,11 +7,11 @@
       "functionArgs": [
         [
           [
-            { "$ref": "../../../constants/addresses/Pangolin.json#/pngToken" },
-            { "$ref": "../../../constants/addresses/Pangolin.json#/router" },
-            { "$ref": "../../../constants/addresses/Pangolin.json#/miniChef" },
-            { "$ref": "../../../constants/addresses/Pangolin.json#/wAvaxUsdcPair" },
-            { "$ref": "../../../constants/addresses/Pangolin.json#/wAvaxUsdcPoolId" }
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/pngToken" },
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/router" },
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/miniChef" },
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/wAvaxUsdcPair" },
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/wAvaxUsdcPoolId" }
           ],
           0
         ]

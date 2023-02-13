@@ -1,7 +1,7 @@
 import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { ethers, network } from "hardhat"
 import AccessControlRoles from "../../constants/AccessControlRoles.json"
-import Tokens from "../../constants/addresses/Tokens.json"
+import { DepositTokens } from "../../scripts/constants/deposit-tokens"
 import { WhaleAddrs } from "../helper/addresses"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
 import { StrategyTestOptions } from "../helper/interfaces/options"
@@ -42,8 +42,28 @@ export function testStrategy(
         ],
       })
 
+      // Set chain specific parameters.
+      const depositTokenAddr: string = DepositTokens.get(testOptions.network.name)!
+      let whaleAddr: string
+
+      switch (testOptions.network.chainId) {
+        case 56:
+          // BNB Smart Chain.
+          whaleAddr = WhaleAddrs.bsc.busd
+          break
+        case 43114:
+          // Avalanche C-Chain.
+          whaleAddr = WhaleAddrs.avalanche.usdc
+          break
+        default:
+          throw new Error("Selected chain for test is not one of supported mainnets.")
+      }
+
       // Get ERC20 tokens.
-      this.usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.usdc)
+      this.depositToken = await ethers.getContractAt(
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+        depositTokenAddr
+      )
 
       // Users.
       this.signers = await ethers.getSigners()
@@ -53,11 +73,11 @@ export function testStrategy(
       this.userCount = 3
 
       // Airdrop signers.
-      this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.usdc)
+      this.impersonatedSigner = await ethers.getImpersonatedSigner(whaleAddr)
       await setBalance(this.impersonatedSigner.address, ethers.utils.parseEther("10000"))
       for (let i = 0; i <= this.userCount; i++) {
         await setBalance(this.signers[i].address, ethers.utils.parseEther("10000"))
-        await this.usdc
+        await this.depositToken
           .connect(this.impersonatedSigner)
           .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
         // TODO: Add USDC setter helper.
@@ -137,7 +157,7 @@ export function testStrategy(
       this.investable = this.strategy
 
       // Set invest helper.
-      this.investHelper = new InvestHelper(this.usdc)
+      this.investHelper = new InvestHelper(this.depositToken)
 
       this.snapshot = await takeSnapshot()
     })
@@ -170,7 +190,10 @@ export function testStrategy(
       })
 
       // Reset live configs.
-      execSync("git checkout -- ./configs/live && git clean -fd ./configs/live", { stdio: "inherit" })
+      execSync(
+        `git checkout -- ./configs/${testOptions.network.name}/live && git clean -fd ./configs/${testOptions.network.name}/live`,
+        { stdio: "inherit" }
+      )
     })
   })
 }
