@@ -1,5 +1,5 @@
-import { readLiveConfig, writeLiveConfig } from "../../helper/files"
-import { getLiveConfigPath } from "../../helper/paths"
+import { readLiveConfig, writeLiveConfig } from "../../files/io"
+import { getLiveConfigPath } from "../../files/paths"
 import { LibraryArgs } from "../../interfaces/parameters"
 import { Libraries } from "../../types/library"
 import { deployLibrary } from "../core/library"

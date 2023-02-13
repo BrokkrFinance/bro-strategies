@@ -6,8 +6,8 @@ import {
 } from "../core/deploy"
 import { verifyContract } from "../core/verify"
 import { DepositTokens } from "../../constants/deposit-tokens"
-import { readDeployConfig, readLiveConfig, writeLiveConfig } from "../../helper/files"
-import { getLiveConfigPath } from "../../helper/paths"
+import { readDeployConfig, readLiveConfig, writeLiveConfig } from "../../files/io"
+import { getLiveConfigPath } from "../../files/paths"
 import { DeployConfig, LiveConfig } from "../../interfaces/configs"
 import { Investable } from "../../interfaces/investable"
 import {

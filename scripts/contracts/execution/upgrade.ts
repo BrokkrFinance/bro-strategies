@@ -2,7 +2,7 @@ import { AdminClient, ProposalResponseWithUrl } from "defender-admin-client/lib/
 import { PartialContract } from "defender-admin-client/lib/models/proposal"
 import { Contract, Signer } from "ethers"
 import { config, defender, ethers, upgrades } from "hardhat"
-import { readLiveConfig, readUpgradeConfig } from "../../helper/files"
+import { readLiveConfig, readUpgradeConfig } from "../../files/io"
 import { LiveConfig, UpgradeConfig } from "../../interfaces/configs"
 import { Investable } from "../../interfaces/investable"
 import { Library } from "../../interfaces/library"
