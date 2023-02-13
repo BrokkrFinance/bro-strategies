@@ -1,6 +1,6 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser"
 import { execSync } from "child_process"
-import { readFileSync, writeFileSync } from "fs"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
 import { DeployConfig, LiveConfig, UpgradeConfig } from "../interfaces/configs"
 import { Investable } from "../interfaces/investable"
 import { getDeployConfigPath, getLiveConfigPath, getUpgradeConfigPath } from "./paths"
@@ -19,6 +19,12 @@ export async function readUpgradeConfig(investable: Investable): Promise<Upgrade
 
 export function writeLiveConfig(investable: Investable, liveConfig: LiveConfig): void {
   const path = getLiveConfigPath(investable)
+
+  if (existsSync(path) === false) {
+    const leafDir = path.slice(0, path.lastIndexOf("/"))
+
+    mkdirSync(leafDir, { recursive: true })
+  }
 
   writeFileSync(path, JSON.stringify(liveConfig), {
     encoding: "utf-8",
