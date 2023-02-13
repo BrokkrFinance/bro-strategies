@@ -17,9 +17,6 @@ import avalancheTest from "./constants/networks/AvalancheTest.json"
 import bsc from "./constants/networks/BSC.json"
 import bscTest from "./constants/networks/BSCTest.json"
 
-import "./tasks/deploy"
-import "./tasks/upgrade"
-
 dotenv.config()
 
 const config: HardhatUserConfig = {

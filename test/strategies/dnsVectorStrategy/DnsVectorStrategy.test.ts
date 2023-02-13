@@ -4,7 +4,8 @@ import { ethers } from "hardhat"
 import Pangolin from "../../../constants/avalanche/addresses/Pangolin.json"
 import Tokens from "../../../constants/avalanche/addresses/Tokens.json"
 import Avalanche from "../../../constants/networks/Avalanche.json"
-import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
+import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
+import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
@@ -447,9 +448,9 @@ function testAum() {
 }
 
 async function deployDnsStrategy() {
-  return await deployStrategy("DnsVector")
+  return await deployStrategy("avalanche", "DnsVector")
 }
 
 async function upgradeDnsStrategy() {
-  return upgradeStrategy("DnsVector")
+  return await upgradeStrategy("avalanche", "DnsVector")
 }

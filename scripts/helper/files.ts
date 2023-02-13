@@ -2,22 +2,23 @@ import $RefParser from "@apidevtools/json-schema-ref-parser"
 import { execSync } from "child_process"
 import { readFileSync, writeFileSync } from "fs"
 import { DeployConfig, LiveConfig, UpgradeConfig } from "../interfaces/configs"
+import { Investable } from "../interfaces/investable"
 import { getDeployConfigPath, getLiveConfigPath, getUpgradeConfigPath } from "./paths"
 
-export async function readDeployConfig(name: string): Promise<DeployConfig[]> {
-  return (await readRefConfig(getDeployConfigPath(name))) as DeployConfig[]
+export async function readDeployConfig(investable: Investable): Promise<DeployConfig[]> {
+  return (await readRefConfig(getDeployConfigPath(investable))) as DeployConfig[]
 }
 
-export function readLiveConfig(name: string): LiveConfig {
-  return JSON.parse(readFileSync(getLiveConfigPath(name), { encoding: "utf-8" }))
+export function readLiveConfig(investable: Investable): LiveConfig {
+  return JSON.parse(readFileSync(getLiveConfigPath(investable), { encoding: "utf-8" }))
 }
 
-export async function readUpgradeConfig(name: string): Promise<UpgradeConfig[]> {
-  return (await readRefConfig(getUpgradeConfigPath(name))) as UpgradeConfig[]
+export async function readUpgradeConfig(investable: Investable): Promise<UpgradeConfig[]> {
+  return (await readRefConfig(getUpgradeConfigPath(investable))) as UpgradeConfig[]
 }
 
-export function writeLiveConfig(name: string, liveConfig: LiveConfig): void {
-  const path = getLiveConfigPath(name)
+export function writeLiveConfig(investable: Investable, liveConfig: LiveConfig): void {
+  const path = getLiveConfigPath(investable)
 
   writeFileSync(path, JSON.stringify(liveConfig), {
     encoding: "utf-8",

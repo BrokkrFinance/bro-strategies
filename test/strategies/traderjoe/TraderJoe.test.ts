@@ -8,6 +8,8 @@ import Avalanche from "../../../constants/networks/Avalanche.json"
 import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
+import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
+import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 
 const traderjoeTestOptions: StrategyTestOptions = {
   network: Avalanche,
@@ -28,11 +30,11 @@ testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTra
 ])
 
 async function deployTraderJoeStrategy() {
-  return await deployStrategy("TraderJoe")
+  return await deployStrategy("avalanche", "TraderJoe")
 }
 
 async function upgradeTraderJoeStrategy() {
-  return upgradeStrategy("TraderJoe")
+  return await upgradeStrategy("avalanche", "TraderJoe")
 }
 
 function testTraderJoeAdjustBins() {

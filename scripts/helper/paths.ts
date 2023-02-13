@@ -1,17 +1,19 @@
 import path from "path"
+import { Investable } from "../interfaces/investable"
 
-const DeployConfigDir = "./configs/deploy"
-const LiveConfigDir = "./configs/live"
-const UpgradeConfigDir = "./configs/upgrade"
+const ConfigDir = "./configs"
+const DeployDir = "./deploy"
+const LiveDir = "./live"
+const UpgradeDir = "./upgrade"
 
-export function getDeployConfigPath(name: string): string {
-  return path.resolve(path.join(DeployConfigDir, name + ".json"))
+export function getDeployConfigPath(investable: Investable): string {
+  return path.resolve(path.join(ConfigDir, investable.network, DeployDir, investable.type, investable.name + ".json"))
 }
 
-export function getLiveConfigPath(name: string): string {
-  return path.resolve(path.join(LiveConfigDir, name + ".json"))
+export function getLiveConfigPath(investable: Investable): string {
+  return path.resolve(path.join(ConfigDir, investable.network, LiveDir, investable.type, investable.name + ".json"))
 }
 
-export function getUpgradeConfigPath(name: string): string {
-  return path.resolve(path.join(UpgradeConfigDir, name + ".json"))
+export function getUpgradeConfigPath(investable: Investable): string {
+  return path.resolve(path.join(ConfigDir, investable.network, UpgradeDir, investable.type, investable.name + ".json"))
 }

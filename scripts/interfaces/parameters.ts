@@ -32,6 +32,9 @@ export interface InvestArgs {
   tokenReceiver: string
   params: any[]
 }
+export interface LibraryArgs {
+  libraries: Library[]
+}
 
 export interface PortfolioArgs {
   depositToken: string
@@ -60,8 +63,4 @@ export interface StrategyArgs {
 
 export interface StrategyExtraArgs {
   extraArgs: any[]
-}
-
-export interface StrategyLibraries {
-  libraries: Library[]
 }

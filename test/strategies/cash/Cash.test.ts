@@ -2,7 +2,8 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import Avalanche from "../../../constants/networks/Avalanche.json"
-import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
+import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
+import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
@@ -32,19 +33,19 @@ testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashW
 ])
 
 async function deployCashStrategy() {
-  return await deployStrategy("Cash")
+  return await deployStrategy("avalanche", "Cash")
 }
 
 async function upgradeCashWithStargateUsdcStrategy() {
-  return await upgradeStrategy("CashWithStargateUSDC")
+  return await upgradeStrategy("avalanche", "CashWithStargateUSDC")
 }
 
 async function upgradeCashWithStargateUsdtStrategy() {
-  return await upgradeStrategy("CashWithStargateUSDT")
+  return await upgradeStrategy("avalanche", "CashWithStargateUSDT")
 }
 
 async function upgradeCashWithTraderJoeStrategy() {
-  return await upgradeStrategy("CashWithTraderJoe")
+  return await upgradeStrategy("avalanche", "CashWithTraderJoe")
 }
 
 function testCashAum() {
