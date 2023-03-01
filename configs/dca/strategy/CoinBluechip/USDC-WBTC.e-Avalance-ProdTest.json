@@ -1,0 +1,39 @@
+{
+  "owner": "0xecbaEd801370d5f5CcE3F6313470E59F7aa212DC",
+  "contractName": "CoinBluechip",
+  "dcaBaseArgs": {
+    "depositFee": {
+      "feeReceiver": "0xecbaEd801370d5f5CcE3F6313470E59F7aa212DC",
+      "fee": 0
+    },
+    "dcaInvestor": "0x8ea32d4378eb9891ceffc9e7ff1651f63151f0a1",
+    "depositTokenInfo": {
+      "token": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "decimals": 6
+    },
+    "investmentPeriod": 43200,
+    "lastInvestmentTimestamp": 1677603256,
+    "minDepositAmount": 200,
+    "positionsLimit": 52,
+    "router": {
+      "dex": 0,
+      "router": "0x60ae616a2155ee3d9a68541ba4544862310933d4"
+    },
+    "depositToBluechipSwapPath": [
+      "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "0x50b7545627a5162F82A992c33b87aDc75187B218"
+    ],
+    "bluechipToDepositSwapPath": [
+      "0x50b7545627a5162F82A992c33b87aDc75187B218",
+      "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"
+    ],
+    "depositToBluechipSwapBins": [0],
+    "bluechipToDepositSwapBins": [0]
+  },
+  "strategyArgs": [
+    {
+      "token": "0x50b7545627a5162F82A992c33b87aDc75187B218",
+      "decimals": 8
+    }
+  ]
+}

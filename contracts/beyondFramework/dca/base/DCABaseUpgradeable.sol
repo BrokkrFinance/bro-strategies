@@ -728,7 +728,8 @@ abstract contract DCABaseUpgradeable is
             uint256 receivedEmergencyExitDepositAsset = router
                 .swapTokensForTokens(
                     currentDepositTokenBalance,
-                    depositSwapPath
+                    depositSwapPath,
+                    new uint256[](1) // todo: proper bin size needs to be passed
                 );
 
             // store token price for future conversions
@@ -745,7 +746,11 @@ abstract contract DCABaseUpgradeable is
         if (_bluechipAddress() != address(emergencyExitBluechipToken.token)) {
             // swap bluechip into emergency exit token
             uint256 receivedEmergencyExitBluechipAsset = router
-                .swapTokensForTokens(currentBluechipBalance, bluechipSwapPath);
+                .swapTokensForTokens(
+                    currentBluechipBalance,
+                    bluechipSwapPath,
+                    new uint256[](1) // todo: proper bin size needs to be passed
+                );
 
             // store token price for future conversions
             emergencySellBluechipPrice =
@@ -1011,11 +1016,21 @@ abstract contract DCABaseUpgradeable is
         private
         returns (uint256)
     {
-        return router.swapTokensForTokens(amountIn, depositToBluechipSwapPath);
+        return
+            router.swapTokensForTokens(
+                amountIn,
+                depositToBluechipSwapPath,
+                new uint256[](1) // todo: proper bin size needs to be passed
+            );
     }
 
     function _swapIntoDepositAsset(uint256 amountIn) private returns (uint256) {
-        return router.swapTokensForTokens(amountIn, bluechipToDepositSwapPath);
+        return
+            router.swapTokensForTokens(
+                amountIn,
+                bluechipToDepositSwapPath,
+                new uint256[](1) // todo: proper bin size needs to be passed
+            );
     }
 
     function _getPassedInvestPeriods() private view returns (uint256) {

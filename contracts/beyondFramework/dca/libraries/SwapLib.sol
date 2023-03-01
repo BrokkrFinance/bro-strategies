@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import { ITraderJoeRouter } from "../../../dependencies/traderjoe/ITraderJoeRouter.sol";
-
+import { ITraderJoeLBRouter } from "../../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
@@ -10,7 +10,8 @@ library SwapLib {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     enum Dex {
-        TraderJoeV2
+        AvalancheTraderJoe,
+        AvalancheTraderJoeV2
     }
 
     struct Router {
@@ -21,9 +22,10 @@ library SwapLib {
     function swapTokensForTokens(
         Router memory router,
         uint256 amountIn,
-        address[] memory path
+        address[] memory path,
+        uint256[] memory binSteps
     ) internal returns (uint256 amountOut) {
-        if (router.dex == Dex.TraderJoeV2) {
+        if (router.dex == Dex.AvalancheTraderJoe) {
             ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(router.router);
 
             IERC20Upgradeable(path[0]).safeIncreaseAllowance(
@@ -39,6 +41,25 @@ library SwapLib {
                 // solhint-disable-next-line not-rely-on-time
                 block.timestamp
             )[path.length - 1];
+        } else if (router.dex == Dex.AvalancheTraderJoeV2) {
+            ITraderJoeLBRouter traderjoeLBRouter = ITraderJoeLBRouter(
+                router.router
+            );
+
+            IERC20Upgradeable(path[0]).approve(
+                address(traderjoeLBRouter),
+                amountIn
+            );
+
+            amountOut = traderjoeLBRouter.swapExactTokensForTokens(
+                amountIn,
+                0,
+                binSteps,
+                path,
+                address(this),
+                // solhint-disable-next-line not-rely-on-time
+                block.timestamp
+            );
         } else {
             // solhint-disable-next-line reason-string
             revert("SwapLib: Invalid swap service provider");
@@ -50,7 +71,7 @@ library SwapLib {
         uint256 amountIn,
         address[] memory path
     ) internal returns (uint256 amountOut) {
-        if (router.dex == Dex.TraderJoeV2) {
+        if (router.dex == Dex.AvalancheTraderJoe) {
             amountOut = ITraderJoeRouter(router.router).swapExactAVAXForTokens{
                 value: amountIn
             }(
@@ -71,7 +92,7 @@ library SwapLib {
         uint256 amountIn,
         address[] memory path
     ) internal returns (uint256 amountOut) {
-        if (router.dex == Dex.TraderJoeV2) {
+        if (router.dex == Dex.AvalancheTraderJoe) {
             ITraderJoeRouter traderjoeRouter = ITraderJoeRouter(router.router);
 
             IERC20Upgradeable(path[0]).safeIncreaseAllowance(
@@ -98,7 +119,7 @@ library SwapLib {
         uint256 amountIn,
         address[] memory path
     ) internal view returns (uint256) {
-        if (router.dex == Dex.TraderJoeV2) {
+        if (router.dex == Dex.AvalancheTraderJoe) {
             return
                 ITraderJoeRouter(router.router).getAmountsOut(amountIn, path)[
                     path.length - 1

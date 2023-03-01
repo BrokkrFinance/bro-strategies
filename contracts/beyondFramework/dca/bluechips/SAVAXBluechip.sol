@@ -215,7 +215,8 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         if (ptpToBluechip > 0) {
             receivedBleuchip += router.swapTokensForTokens(
                 ptpReward,
-                ptpIntoBluechipSwapPath
+                ptpIntoBluechipSwapPath,
+                new uint256[](1) // assuming swap path with length of 2
             );
         }
 
@@ -226,7 +227,8 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         if (qiToBluechip > 0) {
             receivedBleuchip += router.swapTokensForTokens(
                 qiReward,
-                qiIntoBluechipSwapPath
+                qiIntoBluechipSwapPath,
+                new uint256[](1) // assuming swap path with length of 2
             );
         }
     }
