@@ -58,6 +58,8 @@ abstract contract DCABaseUpgradeableCutted is
         SwapLib.Router router;
         address[] depositToBluechipSwapPath;
         address[] bluechipToDepositSwapPath;
+        uint256[] depositToBluechipSwapBins;
+        uint256[] bluechipToDepositSwapBins;
     }
 
     struct DepositFee {
@@ -121,7 +123,10 @@ abstract contract DCABaseUpgradeableCutted is
 
     mapping(address => DCADepositor) private depositors;
 
-    uint256[10] private __gap;
+    uint256[] public depositToBluechipSwapBins;
+    uint256[] public bluechipToDepositSwapBins;
+
+    uint256[8] private __gap;
 
     // solhint-disable-next-line
     function __DCABaseUpgradeable_init(DCAStrategyInitArgs calldata args)
@@ -145,7 +150,9 @@ abstract contract DCABaseUpgradeableCutted is
         setRouter(args.router);
         setSwapPath(
             args.depositToBluechipSwapPath,
-            args.bluechipToDepositSwapPath
+            args.bluechipToDepositSwapPath,
+            args.depositToBluechipSwapBins,
+            args.bluechipToDepositSwapBins
         );
     }
 
@@ -292,7 +299,8 @@ abstract contract DCABaseUpgradeableCutted is
             // swap deposit amount into invest token
             uint256 receivedBluechip = router.swapTokensForTokens(
                 depositedAmount,
-                depositToBluechipSwapPath
+                depositToBluechipSwapPath,
+                depositToBluechipSwapBins
             );
 
             if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
@@ -396,7 +404,8 @@ abstract contract DCABaseUpgradeableCutted is
             if (convertBluechipIntoDepositAsset) {
                 notInvestedYet += router.swapTokensForTokens(
                     investedIntoBluechip,
-                    bluechipToDepositSwapPath
+                    bluechipToDepositSwapPath,
+                    bluechipToDepositSwapBins
                 );
                 investedIntoBluechip = 0;
             }
@@ -543,8 +552,10 @@ abstract contract DCABaseUpgradeableCutted is
     function emergencyWithdrawFunds(
         TokenInfo calldata emergencyExitDepositToken_,
         address[] calldata depositSwapPath,
+        uint256[] calldata depositSwapBins,
         TokenInfo calldata emergencyExitBluechipToken_,
-        address[] calldata bluechipSwapPath
+        address[] calldata bluechipSwapPath,
+        uint256[] calldata bluechipSwapBins
     ) external onlyOwner nonEmergencyExited {
         // if status Investing we should first withdraw bluechip from pool
         uint256 currentBluechipBalance;
@@ -571,7 +582,8 @@ abstract contract DCABaseUpgradeableCutted is
             uint256 receivedEmergencyExitDepositAsset = router
                 .swapTokensForTokens(
                     currentDepositTokenBalance,
-                    depositSwapPath
+                    depositSwapPath,
+                    depositSwapBins
                 );
 
             // store token price for future conversions
@@ -588,7 +600,11 @@ abstract contract DCABaseUpgradeableCutted is
         if (_bluechipAddress() != address(emergencyExitBluechipToken.token)) {
             // swap bluechip into emergency exit token
             uint256 receivedEmergencyExitBluechipAsset = router
-                .swapTokensForTokens(currentBluechipBalance, bluechipSwapPath);
+                .swapTokensForTokens(
+                    currentBluechipBalance,
+                    bluechipSwapPath,
+                    bluechipSwapBins
+                );
 
             // store token price for future conversions
             emergencySellBluechipPrice =
@@ -730,19 +746,31 @@ abstract contract DCABaseUpgradeableCutted is
     }
 
     function setSwapPath(
-        address[] memory depositToBluechip,
-        address[] memory bluechipToDeposit
+        address[] memory depositToBluechipPath,
+        address[] memory bluechipToDepositPath,
+        uint256[] memory depositToBluechipBins,
+        uint256[] memory bluechipToDepositBins
     ) public onlyOwner {
         require(
-            depositToBluechip[0] ==
-                bluechipToDeposit[bluechipToDeposit.length - 1] &&
-                depositToBluechip[depositToBluechip.length - 1] ==
-                bluechipToDeposit[0],
+            depositToBluechipPath[0] ==
+                bluechipToDepositPath[bluechipToDepositPath.length - 1] &&
+                depositToBluechipPath[depositToBluechipPath.length - 1] ==
+                bluechipToDepositPath[0],
             "Invalid swap path"
         );
+        require(
+            depositToBluechipBins.length + 1 == depositToBluechipPath.length,
+            "depToBlue length incorrect"
+        );
+        require(
+            bluechipToDepositBins.length + 1 == bluechipToDepositPath.length,
+            "BlueToDep length incorrect"
+        );
 
-        depositToBluechipSwapPath = depositToBluechip;
-        bluechipToDepositSwapPath = bluechipToDeposit;
+        depositToBluechipSwapPath = depositToBluechipPath;
+        bluechipToDepositSwapPath = bluechipToDepositPath;
+        depositToBluechipSwapBins = depositToBluechipBins;
+        bluechipToDepositSwapBins = bluechipToDepositBins;
     }
 
     // ----- Pausable -----

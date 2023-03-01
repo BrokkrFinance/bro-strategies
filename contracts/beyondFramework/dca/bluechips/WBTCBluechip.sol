@@ -213,7 +213,8 @@ contract WBTCBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         if (ptpToBluechip > 0) {
             receivedBleuchip += router.swapTokensForTokens(
                 ptpReward,
-                ptpIntoBluechipSwapPath
+                ptpIntoBluechipSwapPath,
+                new uint256[](1) // assuming swap path with length of 2
             );
         }
 

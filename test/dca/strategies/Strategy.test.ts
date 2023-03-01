@@ -1,12 +1,27 @@
 import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import type * as ethersTypes from "ethers"
 import { ethers, network } from "hardhat"
-import { CoinAddrs, getTokenContract } from "../../../scripts/helper/helper"
-import { WhaleAddrs } from "../../helper/addresses"
+import { getTokenContract } from "../../../scripts/helper/helper"
+import { WhaleAddrs } from "../helper/WhaleAddrs"
+import { testStrategyDeposit } from "./StrategyDeposit.test"
+import { testStrategyLimit } from "./StrategyLimit.test"
+import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
-export function testDcaStrategy(description: string, deployStrategy: Function, strategySpecificTests: (() => any)[]) {
+testStrategyDeposit
+testStrategyLimit
+testStrategyWithdraw
+
+export async function testDcaStrategy(
+  description: string,
+  deployStrategy: Function,
+  strategySpecificTests: ((testConfigFile: string) => any)[],
+  testConfigPromise: Promise<any>
+) {
   describe(description, function () {
     before(async function () {
+      const testConfig = await testConfigPromise
+      this.testConfig = testConfig
+
       await network.provider.request({
         method: "hardhat_reset",
         params: [
@@ -16,17 +31,17 @@ export function testDcaStrategy(description: string, deployStrategy: Function, s
             forking: {
               jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
               enabled: true,
-              blockNumber: 21777750,
+              blockNumber: 26621370,
             },
           },
         ],
       })
 
       // Get ERC20 tokens.
-      this.usdc = await getTokenContract(CoinAddrs.usdc)
+      this.depositTokenContract = await getTokenContract(this.testConfig.depositToken.address)
+      this.bluechipTokenContract = await getTokenContract(this.testConfig.bluechipToken.address)
 
-      // Signers.
-      this.signers = await ethers.getSigners()
+      this.signers = testConfig.signers
       this.user0 = this.signers[1]
       this.user1 = this.signers[2]
       this.user2 = this.signers[3]
@@ -34,18 +49,17 @@ export function testDcaStrategy(description: string, deployStrategy: Function, s
       this.userCount = 4
 
       // Airdrop signers.
-      this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.usdc)
+      this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs[this.testConfig.depositToken.address])
       await setBalance(this.impersonatedSigner.address, ethers.utils.parseEther("10000"))
       for (let i = 0; i <= this.userCount; i++) {
         await setBalance(this.signers[i].address, ethers.utils.parseEther("10000"))
-        await this.usdc
+        await this.depositTokenContract
           .connect(this.impersonatedSigner)
-          .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
-        // TODO: Add USDC setter helper.
+          .transfer(this.signers[i].address, ethers.utils.parseUnits("3000", testConfig.depositToken.digits))
       }
 
       // Deploy strategy.
-      this.strategy = await deployStrategy()
+      this.strategy = await deployStrategy(testConfig)
 
       const ownerAddr = await this.strategy.owner()
       this.owner = await ethers.getImpersonatedSigner(ownerAddr)
@@ -56,6 +70,10 @@ export function testDcaStrategy(description: string, deployStrategy: Function, s
     beforeEach(async function () {
       await this.snapshot.restore()
     })
+
+    testStrategyDeposit()
+    testStrategyWithdraw()
+    testStrategyLimit()
 
     for (const strategySpecificTest of strategySpecificTests) {
       strategySpecificTest()

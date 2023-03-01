@@ -1,28 +1,27 @@
 import { Contract } from "ethers"
-import { deployProxyContract, getUsdcContract, logBlue, retryUntilSuccess } from "./helper"
-
-import portfolioConfig from "../configs/dca/portfolio/PercAllocation.json"
-import wBtcConfig from "../configs/dca/strategy/BTCBMain.json"
-
-let usdc: Contract
+import portfolioConfig from "../../configs/dca/portfolio/PercAllocation.json"
+import wBtcConfig from "../../configs/dca/strategy/BTCBMain.json"
+import { deployProxyContract, logBlue, retryUntilSuccess } from "../helper/helper"
 
 async function deployWBTCDcaStrategy(): Promise<Contract> {
-  return await deployProxyContract("WBTCBluechip", [
-    wBtcConfig.dcaBaseArgs,
-    wBtcConfig.bluechipTokenInfo,
-    wBtcConfig.platypusInfo,
-    wBtcConfig.ptpIntoBluechipSwapPath,
-    wBtcConfig.avaxIntoBluechipSwapPath,
-  ])
+  return await deployProxyContract(
+    "WBTCBluechip",
+    [
+      wBtcConfig.dcaBaseArgs,
+      wBtcConfig.bluechipTokenInfo,
+      wBtcConfig.platypusInfo,
+      wBtcConfig.ptpIntoBluechipSwapPath,
+      wBtcConfig.avaxIntoBluechipSwapPath,
+    ],
+    {}
+  )
 }
 
 async function deployDcaPortfolio(): Promise<Contract> {
-  return await deployProxyContract("PercentageAllocationPortfolio", [portfolioConfig.initArgs])
+  return await deployProxyContract("PercentageAllocationPortfolio", [portfolioConfig.initArgs], {})
 }
 
 async function main() {
-  usdc = await getUsdcContract()
-
   let dcaWBTC = await retryUntilSuccess(deployWBTCDcaStrategy())
   portfolioConfig.initArgs.investables = [dcaWBTC.address] as never[]
 

@@ -237,8 +237,7 @@ export async function deployProxyContract(name: string, args: any[], libraries: 
   } else {
     contract = await upgrades.deployProxy(contractFactory, args)
   }
-  const argStr = args.map((i) => `"${i}"`).join(" ")
-  logGrey(`Deploying proxy -> name: ${info} || address: ${contract.address} || arguments: ${argStr}`)
+  logGrey(`Deploying proxy -> name: ${info} || address: ${contract.address} || arguments: ${JSON.stringify(args)}`)
   await contract.deployTransaction.wait()
   return contract
 }
