@@ -14,7 +14,7 @@ testStrategyWithdraw
 export async function testDcaStrategy(
   description: string,
   deployStrategy: Function,
-  strategySpecificTests: ((testConfigFile: string) => any)[],
+  strategySpecificTests: (() => any)[],
   testConfigPromise: Promise<any>
 ) {
   describe(description, function () {
