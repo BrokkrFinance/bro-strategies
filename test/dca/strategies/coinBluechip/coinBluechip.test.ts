@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { deployUUPSUpgradeableContract } from "../../../../scripts/helper/contract"
+import { deployUUPSUpgradeableContract } from "../../../../scripts/contracts/core/deploy"
 import { getTokenContract } from "../../../../scripts/helper/helper"
 import { currentBlockchainTime, testDcaStrategy } from "../Strategy.test"
 import { depositEthHoldBtcConfig } from "./config/depositEthHoldBtcConfig"
