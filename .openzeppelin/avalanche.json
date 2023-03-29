@@ -219,6 +219,11 @@
       "address": "0x6e25e57B0Dc35eFe3688c2850568Ff59931d1182",
       "txHash": "0xc42cdd87520c92957c83bb171ba819512665e7b90c01a28164d88fe1fba8ef27",
       "kind": "uups"
+    },
+    {
+      "address": "0x016d9BB7FDA80995d8385e6D1d1c19b1B435f83b",
+      "txHash": "0x25b9adc50392c0983f3505063e393468500445d4e57cd7fc174efffbd729aade",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -1131,7 +1136,12 @@
           },
           "t_enum(SwapServiceProvider)7954": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7960_storage": {
@@ -1449,7 +1459,12 @@
           },
           "t_enum(SwapServiceProvider)7954": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7960_storage": {
@@ -1767,7 +1782,12 @@
           },
           "t_enum(SwapServiceProvider)7954": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7960_storage": {
@@ -2418,7 +2438,12 @@
           },
           "t_enum(SwapServiceProvider)7959": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7965_storage": {
@@ -2736,7 +2761,12 @@
           },
           "t_enum(SwapServiceProvider)7959": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7965_storage": {
@@ -3054,7 +3084,12 @@
           },
           "t_enum(SwapServiceProvider)7959": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7965_storage": {
@@ -3717,7 +3752,12 @@
           },
           "t_enum(SwapServiceProvider)7530": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7536_storage": {
@@ -4047,7 +4087,12 @@
           },
           "t_enum(SwapServiceProvider)7530": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7536_storage": {
@@ -4377,7 +4422,12 @@
           },
           "t_enum(SwapServiceProvider)7530": {
             "label": "enum StrategyBaseUpgradeable.SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)7536_storage": {
@@ -4731,7 +4781,12 @@
           },
           "t_enum(SwapServiceProvider)15874": {
             "label": "enum SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -5125,7 +5180,12 @@
           },
           "t_enum(SwapServiceProvider)15874": {
             "label": "enum SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)15880_storage": {
@@ -5507,12 +5567,18 @@
           },
           "t_enum(BluechipInvestmentState)7208": {
             "label": "enum DCABaseUpgradeableCutted.BluechipInvestmentState",
-            "members": ["Investing", "Withdrawn", "EmergencyExited"],
+            "members": [
+              "Investing",
+              "Withdrawn",
+              "EmergencyExited"
+            ],
             "numberOfBytes": "1"
           },
           "t_enum(Dex)10387": {
             "label": "enum SwapLib.Dex",
-            "members": ["TraderJoeV2"],
+            "members": [
+              "TraderJoeV2"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_struct(DCADepositor)7204_storage)": {
@@ -6203,7 +6269,12 @@
           },
           "t_enum(SwapServiceProvider)22905": {
             "label": "enum SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_struct(SwapService)22911_storage": {
@@ -6556,7 +6627,12 @@
           },
           "t_enum(SwapServiceProvider)22905": {
             "label": "enum SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -6974,7 +7050,12 @@
           },
           "t_enum(SwapServiceProvider)22905": {
             "label": "enum SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -7392,7 +7473,12 @@
           },
           "t_enum(SwapServiceProvider)22906": {
             "label": "enum SwapServiceProvider",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2", "AvalanchePangolin", "BscPancakeSwap"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2",
+              "AvalanchePangolin",
+              "BscPancakeSwap"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -7826,12 +7912,19 @@
           },
           "t_enum(BluechipInvestmentState)4286": {
             "label": "enum DCABaseUpgradeableCutted.BluechipInvestmentState",
-            "members": ["Investing", "Withdrawn", "EmergencyExited"],
+            "members": [
+              "Investing",
+              "Withdrawn",
+              "EmergencyExited"
+            ],
             "numberOfBytes": "1"
           },
           "t_enum(Dex)8408": {
             "label": "enum SwapLib.Dex",
-            "members": ["AvalancheTraderJoe", "AvalancheTraderJoeV2"],
+            "members": [
+              "AvalancheTraderJoe",
+              "AvalancheTraderJoeV2"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_struct(DCADepositor)4282_storage)": {
@@ -7991,6 +8084,113 @@
           "t_uint16": {
             "label": "uint16",
             "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "ee1ee99b4be323d359e51833303cff1ae75ffee096d6089f877f1cd9c1eed3c9": {
+      "address": "0x9cb4bC77CFa63fa65ab52FEaB3d48B72e2cE84fa",
+      "txHash": "0xb0d46ade7ce8fc791676bf98db551845f82e66634128f9db4f63a0b62b7843f9",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:87"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "priceFeeds",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_address,t_contract(IChainlinkAggregatorV3)28919)",
+            "contract": "OracleAvalanche",
+            "src": "contracts/index/oracles/OracleAvalanche.sol:18"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(IChainlinkAggregatorV3)28919": {
+            "label": "contract IChainlinkAggregatorV3",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_contract(IChainlinkAggregatorV3)28919)": {
+            "label": "mapping(address => contract IChainlinkAggregatorV3)",
+            "numberOfBytes": "32"
           },
           "t_uint256": {
             "label": "uint256",

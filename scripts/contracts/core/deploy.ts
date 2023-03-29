@@ -1,6 +1,9 @@
 import { Contract, ContractFactory } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import {
+  IndexArgs,
+  IndexExtraArgs,
+  IndexTokenArgs,
   InvestmentTokenArgs,
   PortfolioArgs,
   PortfolioExtraArgs,
@@ -138,6 +141,56 @@ async function deployUUPSUpgradeableStrategy(
   await investmentToken.transferOwnership(strategy.address)
 
   return strategy
+}
+
+export async function deployUUPSUpgradeableIndexOwnable(
+  indexName: string,
+  indexOwner: string,
+  indexTokenArgs: IndexTokenArgs,
+  indexArgs: IndexArgs,
+  indexExtraArgs: IndexExtraArgs,
+  indexLibraries: Libraries = {}
+): Promise<Contract> {
+  const index = await deployUUPSUpgradeableIndex(indexName, indexTokenArgs, indexArgs, indexExtraArgs, indexLibraries)
+
+  // Transfer ownership of index to index owner.
+  await index.transferOwnership(indexOwner)
+
+  return index
+}
+
+async function deployUUPSUpgradeableIndex(
+  indexName: string,
+  indexTokenArgs: IndexTokenArgs,
+  indexArgs: IndexArgs,
+  indexExtraArgs: IndexExtraArgs,
+  indexLibraries: Libraries = {}
+): Promise<Contract> {
+  // Contact factories.
+  const IndexToken = await ethers.getContractFactory("IndexToken")
+  const IndexStrategy = await ethers.getContractFactory(indexName, { libraries: indexLibraries })
+
+  // Deploy index token.
+  const indexToken = await deployUUPSUpgradeableContract(IndexToken, [indexTokenArgs.name, indexTokenArgs.symbol])
+
+  // Deploy index.
+  const index = await deployUUPSUpgradeableContract(IndexStrategy, [
+    [
+      indexArgs.wETH,
+      indexToken.address,
+      indexArgs.components,
+      indexArgs.swapRoutes,
+      indexArgs.whitelistedTokens,
+      indexArgs.oracle.address,
+      indexArgs.equityValuationLimit,
+    ],
+    ...indexExtraArgs.extraArgs,
+  ])
+
+  // Transfer ownership of strategy token to strategy.
+  await indexToken.transferOwnership(index.address)
+
+  return index
 }
 
 export async function deployUUPSUpgradeableContract(factory: ContractFactory, args: any[]): Promise<Contract> {

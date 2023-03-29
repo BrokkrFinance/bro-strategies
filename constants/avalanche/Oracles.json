@@ -6,5 +6,9 @@
   "gmx": {
     "name": "GmxOracle",
     "address": "0x81b7e71a1d9e08a6ca016a0f4d6fa50dbce89ee3"
+  },
+  "index": {
+    "name": "OracleAvalanche",
+    "address": "0x016d9BB7FDA80995d8385e6D1d1c19b1B435f83b"
   }
 }

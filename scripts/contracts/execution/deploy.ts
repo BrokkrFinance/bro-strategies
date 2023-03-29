@@ -1,16 +1,14 @@
 import { BigNumber, Contract } from "ethers"
-import {
-  deployUUPSUpgradeablePortfolio,
-  deployUUPSUpgradeableStrategyOwnable,
-  deployUUPSUpgradeableStrategyRoleable,
-} from "../core/deploy"
-import { verifyContract } from "../core/verify"
 import { DepositTokens } from "../../constants/deposit-tokens"
 import { readDeployConfig, readLiveConfig, writeLiveConfig } from "../../files/io"
 import { getLiveConfigPath } from "../../files/paths"
 import { DeployConfig, LiveConfig } from "../../interfaces/configs"
 import { Investable } from "../../interfaces/investable"
+import { DeployOptions } from "../../interfaces/options"
 import {
+  IndexArgs,
+  IndexExtraArgs,
+  IndexTokenArgs,
   InvestmentTokenArgs,
   LibraryArgs,
   PortfolioArgs,
@@ -18,8 +16,14 @@ import {
   StrategyArgs,
   StrategyExtraArgs,
 } from "../../interfaces/parameters"
+import {
+  deployUUPSUpgradeableIndexOwnable,
+  deployUUPSUpgradeablePortfolio,
+  deployUUPSUpgradeableStrategyOwnable,
+  deployUUPSUpgradeableStrategyRoleable,
+} from "../core/deploy"
+import { verifyContract } from "../core/verify"
 import { deployLibraries } from "./library"
-import { DeployOptions } from "../../interfaces/options"
 
 export async function deploy(investable: Investable, options?: DeployOptions): Promise<Contract> {
   // Switch to target network.
@@ -72,10 +76,19 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
               getStrategyExtraArgs(deployConfig),
               libraries
             )
-          } else {
-            console.log("Deploy: The config file must define 'type' key and value of 'portfolio' or 'strategy'.")
-            throw new Error("Wrong config file")
+          } else if (deployConfig.subtype === "index") {
+            contract = await deployUUPSUpgradeableIndexOwnable(
+              deployConfig.contractName,
+              deployConfig.owner,
+              getIndexTokenArgs(deployConfig),
+              getIndexArgs(deployConfig),
+              getIndexExtraArgs(deployConfig),
+              libraries
+            )
           }
+        } else {
+          console.log(`Deploy: The config file has 'type' of ${deployConfig.type}.`)
+          throw new Error("Wrong config file")
         }
         break
       } catch (e: unknown) {
@@ -117,12 +130,20 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
     await verifyContract(contract!.address)
 
     console.log()
+
+    if (deployConfig.type === "strategy" || deployConfig.subtype === "index") {
+      console.log("Deploy: Deposit $2 to and withdraw $1 from the index strategy.")
+
+      await investOneDollarToIndex(investable)
+
+      console.log()
+    }
   }
 
   if (investable.type === "portfolio") {
     console.log("Deploy: Deposit $2 to and withdraw $1 from the top level portfolio.")
 
-    await investOneDollar(investable)
+    await investOneDollarToPortfolio(investable)
 
     console.log()
   } else {
@@ -136,6 +157,13 @@ function getInvestmentTokenArgs(deployConfig: DeployConfig): InvestmentTokenArgs
   return {
     name: deployConfig.investmentTokenName,
     symbol: deployConfig.investmentTokenSymbol,
+  }
+}
+
+function getIndexTokenArgs(deployConfig: DeployConfig): IndexTokenArgs {
+  return {
+    name: deployConfig.indexTokenName,
+    symbol: deployConfig.indexTokenSymbol,
   }
 }
 
@@ -236,7 +264,24 @@ function getStrategyExtraArgs(deployConfig: DeployConfig): StrategyExtraArgs {
   }
 }
 
-async function investOneDollar(investable: Investable): Promise<void> {
+function getIndexArgs(deployConfig: any): IndexArgs {
+  return {
+    wETH: deployConfig.wETH,
+    components: deployConfig.components,
+    swapRoutes: deployConfig.swapRoutes,
+    whitelistedTokens: deployConfig.whitelistedTokens,
+    oracle: deployConfig.oracle,
+    equityValuationLimit: deployConfig.equityValuationLimit,
+  }
+}
+
+function getIndexExtraArgs(deployConfig: any): IndexExtraArgs {
+  return {
+    extraArgs: deployConfig.extraArgs,
+  }
+}
+
+async function investOneDollarToPortfolio(investable: Investable): Promise<void> {
   // Get an instance of HRE.
   const { ethers } = require("hardhat")
 
@@ -269,4 +314,49 @@ async function investOneDollar(investable: Investable): Promise<void> {
   await portfolio.connect(deployer).withdraw(portfolioTokenBalance.div(2), 0, deployer.address, [])
 
   console.log(`Deploy: Successfully withdrew $1 from ${portfolioLiveConfig.address}.`)
+}
+
+async function investOneDollarToIndex(investable: Investable): Promise<void> {
+  // Get an instance of HRE.
+  const { ethers } = require("hardhat")
+
+  // Get portfolio and its token.
+  const strategyLiveConfig = readLiveConfig(investable)
+  const strategy = await ethers.getContractAt(strategyLiveConfig.name, strategyLiveConfig.address)
+  const indexToken = await ethers.getContractAt("IndexToken", await strategy.indexToken())
+
+  // Get deployer account and USDC.
+  const deployer = (await ethers.getSigners())[0]
+  const usdc = await ethers.getContractAt(
+    "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+    DepositTokens.get(investable.network)
+  )
+
+  // Deposit $2.
+  const depositAmount = ethers.utils.parseUnits("2", 6)
+  const [amountIndex] = await strategy.connect(deployer).getAmountIndexFromToken(usdc.address, depositAmount)
+
+  const indexTokenBalanceBefore = await indexToken.balanceOf(deployer.address)
+
+  await usdc.connect(deployer).approve(strategy.address, depositAmount)
+  await strategy.connect(deployer).mintExactIndexFromToken(usdc.address, depositAmount, amountIndex, deployer.address)
+
+  const indexTokenBalanceAfter = await indexToken.balanceOf(deployer.address)
+
+  console.log(`Deploy: Successfully deposited $2 to ${strategyLiveConfig.address}.`)
+
+  // Withdraw $1.
+  const indexTokenBalance = indexTokenBalanceAfter.sub(indexTokenBalanceBefore)
+
+  const withdrawAmount = indexTokenBalance.div(2)
+
+  const amountToken = await strategy.connect(deployer).getAmountTokenFromExactIndex(usdc.address, withdrawAmount)
+  const amountTokenMin = amountToken.mul(BigNumber.from(1e2).sub(1)).div(1e2)
+
+  await indexToken.connect(deployer).approve(strategy.address, withdrawAmount)
+  await strategy
+    .connect(deployer)
+    .burnExactIndexForToken(usdc.address, amountTokenMin, withdrawAmount, deployer.address)
+
+  console.log(`Deploy: Successfully withdrew $1 from ${strategyLiveConfig.address}.`)
 }
