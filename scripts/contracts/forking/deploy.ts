@@ -1,6 +1,6 @@
 import { Contract } from "ethers"
-import { deploy } from "../execution/deploy"
 import { Investable } from "../../interfaces/investable"
+import { deploy } from "../execution/deploy"
 
 export async function deployPortfolio(network: string, name: string): Promise<Contract> {
   return await deployInvestable({

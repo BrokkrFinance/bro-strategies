@@ -12,3 +12,7 @@ export interface StrategyTestOptions {
   runReapRewardExtra?: boolean
   runReapUninvestedReward?: boolean
 }
+
+export interface IndexTestOptions {
+  network: Network
+}
