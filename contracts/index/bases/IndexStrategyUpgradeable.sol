@@ -497,10 +497,6 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     function _setWeight(address token, uint256 weight) internal {
-        if (weight > Constants.PRECISION) {
-            revert Errors.Index_WrongWeightPrecision();
-        }
-
         weights[token] = weight;
     }
 

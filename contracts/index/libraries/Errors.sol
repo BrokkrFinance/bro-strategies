@@ -9,7 +9,6 @@ library Errors {
     error Index_BelowMinAmount();
     error Index_ZeroAddress();
     error Index_WrongSwapAmount();
-    error Index_WrongWeightPrecision();
 
     // SwapAdapter errors.
     error SwapAdapter_WrongDEX();
