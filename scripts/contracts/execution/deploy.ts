@@ -131,7 +131,7 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
 
     console.log()
 
-    if (deployConfig.type === "strategy" || deployConfig.subtype === "index") {
+    if (deployConfig.type === "strategy" && deployConfig.subtype === "index") {
       console.log("Deploy: Deposit $2 to and withdraw $1 from the index strategy.")
 
       await investOneDollarToIndex(investable)
