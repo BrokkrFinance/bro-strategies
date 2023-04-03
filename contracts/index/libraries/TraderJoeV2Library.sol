@@ -22,6 +22,7 @@ library TraderJoeV2Library {
             binSteps,
             path,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         );
     }
@@ -41,6 +42,7 @@ library TraderJoeV2Library {
             binSteps,
             path,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         )[0];
     }

@@ -21,6 +21,7 @@ library UniswapV2Library {
             amountOutMin,
             path,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         )[path.length - 1];
     }
@@ -38,6 +39,7 @@ library UniswapV2Library {
             amountInMax,
             path,
             address(this),
+            // solhint-disable-next-line not-rely-on-time
             block.timestamp
         )[0];
     }

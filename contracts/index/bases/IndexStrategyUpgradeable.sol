@@ -65,6 +65,7 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    // solhint-disable-next-line
     function __IndexStrategyUpgradeable_init(
         IndexStrategyInitParams calldata initParams
     ) internal onlyInitializing {
