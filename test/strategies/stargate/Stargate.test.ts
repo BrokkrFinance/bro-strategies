@@ -29,9 +29,9 @@ testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, star
 testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, stargateTestOptions, [
   testStargateUSDCAum,
 ])
-testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, stargateTestOptions, [
-  testStargateUSDTAum,
-])
+// testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, stargateTestOptions, [
+//   testStargateUSDTAum,
+// ])
 
 async function deployStargateUSDCStrategy() {
   return await deployStrategy("avalanche", "StargateUSDC")

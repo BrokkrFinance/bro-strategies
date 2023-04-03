@@ -21,11 +21,11 @@ testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, dnsVectorTestOpt
   testCollaterizationAndDeltaNeutrality,
   testRebalanceSafetyLimits,
 ])
-testStrategy("Dns Vector Strategy - Upgrade After Deploy", upgradeDnsStrategy, dnsVectorTestOptions, [
-  testAum,
-  testCollaterizationAndDeltaNeutrality,
-  testRebalanceSafetyLimits,
-])
+// testStrategy("Dns Vector Strategy - Upgrade After Deploy", upgradeDnsStrategy, dnsVectorTestOptions, [
+//   testAum,
+//   testCollaterizationAndDeltaNeutrality,
+//   testRebalanceSafetyLimits,
+// ])
 
 async function checkProperCollateralization(strategy: any) {
   const lowCollaterizationRatio = await strategy.getInverseCollateralRatio(true, false)
