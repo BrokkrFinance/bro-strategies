@@ -39,10 +39,20 @@
         {
           "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
           "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
+          "dex": 1,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_usdc_v1" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_usdc" },
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_usdc_v2" },
             "data": "0x0000000000000000000000000000000000000000000000000000000000000014"
           }
         },
@@ -52,7 +62,7 @@
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
           "dex": 1,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_ptp" },
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_ptp_v1" },
             "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
           }
         },
@@ -62,7 +72,7 @@
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_joe" },
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_joe_v2" },
             "data": "0x000000000000000000000000000000000000000000000000000000000000000f"
           }
         },
@@ -72,7 +82,7 @@
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_gmx" },
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_gmx_v2" },
             "data": "0x0000000000000000000000000000000000000000000000000000000000000014"
           }
         },
@@ -82,7 +92,7 @@
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_qi" },
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_qi_v2" },
             "data": "0x0000000000000000000000000000000000000000000000000000000000000019"
           }
         },
@@ -92,7 +102,7 @@
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_vtx" },
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_vtx_v2" },
             "data": "0x0000000000000000000000000000000000000000000000000000000000000032"
           }
         },
@@ -102,7 +112,7 @@
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
           "dex": 1,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_bro" },
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_bro_v1" },
             "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
           }
         }
