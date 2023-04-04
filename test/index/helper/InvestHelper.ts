@@ -5,20 +5,21 @@ import { BigNumber, Contract } from "ethers"
 export async function mint(
   indexStrategy: Contract,
   indexToken: Contract,
-  user: SignerWithAddress,
+  spender: SignerWithAddress,
+  recipient: SignerWithAddress,
   token: Contract,
   tokenAmount: BigNumber
 ) {
-  const [amountIndex] = await indexStrategy.connect(user).getAmountIndexFromToken(token.address, tokenAmount)
+  const [amountIndex] = await indexStrategy.connect(spender).getAmountIndexFromToken(token.address, tokenAmount)
 
-  const indexTokenBalanceBefore = await indexToken.balanceOf(user.address)
+  const indexTokenBalanceBefore = await indexToken.balanceOf(recipient.address)
 
-  await token.connect(user).approve(indexStrategy.address, tokenAmount)
+  await token.connect(spender).approve(indexStrategy.address, tokenAmount)
   await expect(
-    indexStrategy.connect(user).mintExactIndexFromToken(token.address, tokenAmount, amountIndex, user.address)
+    indexStrategy.connect(spender).mintExactIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
   ).to.emit(indexStrategy, "Mint")
 
-  const indexTokenBalanceAfter = await indexToken.balanceOf(user.address)
+  const indexTokenBalanceAfter = await indexToken.balanceOf(recipient.address)
 
   const indexTokenBalance = indexTokenBalanceAfter - indexTokenBalanceBefore
 
@@ -28,22 +29,23 @@ export async function mint(
 export async function burn(
   indexStrategy: Contract,
   indexToken: Contract,
-  user: SignerWithAddress,
+  spender: SignerWithAddress,
+  recipient: SignerWithAddress,
   token: Contract,
   indexAmount: BigNumber,
   slippageTolerance: BigNumber
 ) {
-  const amountToken = await indexStrategy.connect(user).getAmountTokenFromExactIndex(token.address, indexAmount)
+  const amountToken = await indexStrategy.connect(spender).getAmountTokenFromExactIndex(token.address, indexAmount)
   const amountTokenMin = amountToken.mul(BigNumber.from(1e2).sub(slippageTolerance)).div(1e2)
 
-  const tokenBalanceBefore = await token.balanceOf(user.address)
+  const tokenBalanceBefore = await token.balanceOf(recipient.address)
 
-  await indexToken.connect(user).approve(indexStrategy.address, indexAmount)
+  await indexToken.connect(spender).approve(indexStrategy.address, indexAmount)
   await expect(
-    indexStrategy.connect(user).burnExactIndexForToken(token.address, amountTokenMin, indexAmount, user.address)
+    indexStrategy.connect(spender).burnExactIndexForToken(token.address, amountTokenMin, indexAmount, recipient.address)
   ).to.emit(indexStrategy, "Burn")
 
-  const tokenBalanceAfter = await token.balanceOf(user.address)
+  const tokenBalanceAfter = await token.balanceOf(recipient.address)
 
   const tokenBalance = tokenBalanceAfter - tokenBalanceBefore
 

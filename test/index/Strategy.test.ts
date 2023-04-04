@@ -5,6 +5,7 @@ import { ethers, network } from "hardhat"
 import { DepositTokens } from "../../scripts/constants/deposit-tokens"
 import { WhaleAddrs } from "../helper/addresses"
 import { IndexTestOptions } from "../helper/interfaces/options"
+import { testStrategyAccessControl } from "./StrategyAccessControl.test"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyLimit } from "./StrategyLimit.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
@@ -76,6 +77,10 @@ export function testStrategy(
       // Deploy strategy.
       this.strategy = await deployStrategy()
 
+      // Strategy owner.
+      const ownerAddr = await this.strategy.owner()
+      this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+
       // Strategy token.
       const indexTokenAddr = await this.strategy.indexToken()
       this.indexToken = await ethers.getContractAt("IndexToken", indexTokenAddr)
@@ -88,6 +93,7 @@ export function testStrategy(
       await this.snapshot.restore()
     })
 
+    testStrategyAccessControl()
     testStrategyDeposit()
     testStrategyLimit()
     testStrategyWithdraw()

@@ -33,27 +33,72 @@ function testIndexAvalancheDeFiSetSwapRoute() {
       ).not.to.be.reverted
 
       // User 0 deposits.
-      await mint(this.strategy, this.indexToken, this.user0, this.depositToken, ethers.utils.parseUnits("1000", 6))
+      await mint(
+        this.strategy,
+        this.indexToken,
+        this.user0,
+        this.user0,
+        this.depositToken,
+        ethers.utils.parseUnits("1000", 6)
+      )
 
       // User 1 deposits.
-      await mint(this.strategy, this.indexToken, this.user1, this.depositToken, ethers.utils.parseUnits("500", 6))
+      await mint(
+        this.strategy,
+        this.indexToken,
+        this.user1,
+        this.user1,
+        this.depositToken,
+        ethers.utils.parseUnits("500", 6)
+      )
 
       // User 2 deposits.
-      await mint(this.strategy, this.indexToken, this.user2, this.depositToken, ethers.utils.parseUnits("500.123", 6))
+      await mint(
+        this.strategy,
+        this.indexToken,
+        this.user2,
+        this.user2,
+        this.depositToken,
+        ethers.utils.parseUnits("500.123", 6)
+      )
 
       let indexTokenBalance: BigNumber
 
       // User 1 withdraws.
       indexTokenBalance = await this.indexToken.balanceOf(this.user1.address)
-      await burn(this.strategy, this.indexToken, this.user1, this.depositToken, indexTokenBalance, BigNumber.from(1))
+      await burn(
+        this.strategy,
+        this.indexToken,
+        this.user1,
+        this.user1,
+        this.depositToken,
+        indexTokenBalance,
+        BigNumber.from(1)
+      )
 
       // User 2 withdraws.
       indexTokenBalance = await this.indexToken.balanceOf(this.user2.address)
-      await burn(this.strategy, this.indexToken, this.user2, this.depositToken, indexTokenBalance, BigNumber.from(1))
+      await burn(
+        this.strategy,
+        this.indexToken,
+        this.user2,
+        this.user2,
+        this.depositToken,
+        indexTokenBalance,
+        BigNumber.from(1)
+      )
 
       // User 0 withdraws.
       indexTokenBalance = await this.indexToken.balanceOf(this.user0.address)
-      await burn(this.strategy, this.indexToken, this.user0, this.depositToken, indexTokenBalance, BigNumber.from(1))
+      await burn(
+        this.strategy,
+        this.indexToken,
+        this.user0,
+        this.user0,
+        this.depositToken,
+        indexTokenBalance,
+        BigNumber.from(1)
+      )
     })
   })
 }
