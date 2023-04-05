@@ -12,27 +12,27 @@
       "components": [
         {
           "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/ptp" },
-          "weight": "1349750296195200000"
+          "weight": "1349750296195200000000"
         },
         {
           "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/joe" },
-          "weight": "657617845117845000"
+          "weight": "657617845117845000000"
         },
         {
           "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/gmx" },
-          "weight": "4710632570659490"
+          "weight": "4710632570659490000"
         },
         {
           "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/qi" },
-          "weight": "12074219127319300000"
+          "weight": "12074219127319300000000"
         },
         {
           "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/vtx" },
-          "weight": "372153029325659000"
+          "weight": "372153029325659000000"
         },
         {
           "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/bro" },
-          "weight": "2073277935346900000"
+          "weight": "2073277935346900000000"
         }
       ],
       "swapRoutes": [
