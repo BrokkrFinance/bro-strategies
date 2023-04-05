@@ -337,6 +337,14 @@ abstract contract IndexStrategyUpgradeable is
         equityValuationLimit = _equityValuationLimit;
     }
 
+    function allComponents() external view override returns (address[] memory) {
+        return components;
+    }
+
+    function allWhitelistedTokens() external view returns (address[] memory) {
+        return whitelistedTokens;
+    }
+
     function equityValuation(bool maximize, bool includeAmmPrice)
         public
         view
