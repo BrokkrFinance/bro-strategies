@@ -8,7 +8,7 @@
       "contractName": "IndexAvalancheDeFi",
       "indexTokenName": "Index Avalanche DeFi Token",
       "indexTokenSymbol": "IXAD",
-      "wETH": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+      "wNATIVE": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
       "components": [
         {
           "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/ptp" },

@@ -266,7 +266,7 @@ function getStrategyExtraArgs(deployConfig: DeployConfig): StrategyExtraArgs {
 
 function getIndexArgs(deployConfig: any): IndexArgs {
   return {
-    wETH: deployConfig.wETH,
+    wNATIVE: deployConfig.wNATIVE,
     components: deployConfig.components,
     swapRoutes: deployConfig.swapRoutes,
     whitelistedTokens: deployConfig.whitelistedTokens,

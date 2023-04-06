@@ -7,7 +7,7 @@ import { IIndexStrategy } from "./IIndexStrategy.sol";
 
 interface IIndexInit {
     struct IndexStrategyInitParams {
-        address wETH;
+        address wNATIVE;
         address indexToken;
         Component[] components;
         SwapRoute[] swapRoutes;

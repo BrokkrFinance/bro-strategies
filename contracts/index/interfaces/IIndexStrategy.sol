@@ -58,6 +58,8 @@ interface IIndexStrategy {
 
     function addWhitelistedTokens(address[] memory tokens) external;
 
+    function removeWhitelistedTokens(address[] memory tokens) external;
+
     function allComponents() external view returns (address[] memory);
 
     function allWhitelistedTokens() external view returns (address[] memory);

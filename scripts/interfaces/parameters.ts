@@ -73,7 +73,7 @@ export interface IndexTokenArgs {
 }
 
 export interface IndexArgs {
-  wETH: string
+  wNATIVE: string
   components: Component[]
   swapRoutes: SwapRoute[]
   whitelistedTokens: string[]

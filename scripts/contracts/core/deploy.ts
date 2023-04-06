@@ -176,7 +176,7 @@ async function deployUUPSUpgradeableIndex(
   // Deploy index.
   const index = await deployUUPSUpgradeableContract(IndexStrategy, [
     [
-      indexArgs.wETH,
+      indexArgs.wNATIVE,
       indexToken.address,
       indexArgs.components,
       indexArgs.swapRoutes,

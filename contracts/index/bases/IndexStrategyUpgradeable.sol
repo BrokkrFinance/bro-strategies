@@ -34,13 +34,13 @@ abstract contract IndexStrategyUpgradeable is
 
     struct MintingData {
         uint256 amountIndex;
-        uint256 amountWETHTotal;
-        uint256[] amountWETHs;
+        uint256 amountWNATIVETotal;
+        uint256[] amountWNATIVEs;
         address[] bestRouters;
         uint256[] amountComponents;
     }
 
-    address public wETH;
+    address public wNATIVE;
 
     address[] public whitelistedTokens;
     IIndexToken public indexToken;
@@ -83,7 +83,7 @@ abstract contract IndexStrategyUpgradeable is
         __Ownable_init();
         __Pausable_init();
 
-        wETH = initParams.wETH;
+        wNATIVE = initParams.wNATIVE;
 
         indexToken = IIndexToken(initParams.indexToken);
 
@@ -158,6 +158,10 @@ abstract contract IndexStrategyUpgradeable is
             amountTokenMax
         );
 
+        if (amountToken > amountTokenMax) {
+            revert Errors.Index_AboveMaxAmount();
+        }
+
         if (mintingData.amountIndex < amountIndexMin) {
             revert Errors.Index_BelowMinAmount();
         }
@@ -172,22 +176,22 @@ abstract contract IndexStrategyUpgradeable is
 
         uint256 amountTokenSpent = _swapTokenForExactToken(
             bestRouter,
-            mintingData.amountWETHTotal,
+            mintingData.amountWNATIVETotal,
             amountToken,
             token,
-            wETH
+            wNATIVE
         );
 
         if (amountTokenSpent != amountToken) {
             revert Errors.Index_WrongSwapAmount();
         }
 
-        uint256 amountWETHSpent = _mintExactIndexFromWETH(
+        uint256 amountWNATIVESpent = _mintExactIndexFromWNATIVE(
             mintingData,
             recipient
         );
 
-        if (amountWETHSpent != mintingData.amountWETHTotal) {
+        if (amountWNATIVESpent != mintingData.amountWNATIVETotal) {
             revert Errors.Index_WrongSwapAmount();
         }
 
@@ -210,20 +214,20 @@ abstract contract IndexStrategyUpgradeable is
             revert Errors.Index_ZeroAddress();
         }
 
-        uint256 amountWETH = _burnExactIndexForWETH(amountIndex);
+        uint256 amountWNATIVE = _burnExactIndexForWNATIVE(amountIndex);
 
         (uint256 amountTokenOut, address bestRouter) = _getAmountOutMax(
             routers[token],
-            amountWETH,
-            wETH,
+            amountWNATIVE,
+            wNATIVE,
             token
         );
 
         amountToken = _swapExactTokenForToken(
             bestRouter,
-            amountWETH,
+            amountWNATIVE,
             amountTokenOut,
-            wETH,
+            wNATIVE,
             token
         );
 
@@ -262,12 +266,12 @@ abstract contract IndexStrategyUpgradeable is
         onlyWhitelistedToken(token)
         returns (uint256 amountToken)
     {
-        uint256 amountWETH = _getAmountWETHFromExactIndex(amountIndex);
+        uint256 amountWNATIVE = _getAmountWNATIVEFromExactIndex(amountIndex);
 
         (amountToken, ) = _getAmountOutMax(
             routers[token],
-            amountWETH,
-            wETH,
+            amountWNATIVE,
+            wNATIVE,
             token
         );
     }
@@ -295,6 +299,20 @@ abstract contract IndexStrategyUpgradeable is
         for (uint256 i = 0; i < tokens.length; i++) {
             if (!isTokenWhitelisted(tokens[i])) {
                 whitelistedTokens.push(tokens[i]);
+            }
+        }
+    }
+
+    function removeWhitelistedTokens(address[] memory tokens) public onlyOwner {
+        for (uint256 i = 0; i < tokens.length; i++) {
+            for (uint256 j = 0; j < whitelistedTokens.length; j++) {
+                if (whitelistedTokens[j] == tokens[i]) {
+                    whitelistedTokens[j] = whitelistedTokens[
+                        whitelistedTokens.length - 1
+                    ];
+                    whitelistedTokens.pop();
+                    break;
+                }
             }
         }
     }
@@ -330,20 +348,20 @@ abstract contract IndexStrategyUpgradeable is
         return false;
     }
 
-    function _mintExactIndexFromWETH(
+    function _mintExactIndexFromWNATIVE(
         MintingData memory mintingData,
         address recipient
-    ) internal returns (uint256 amountWETHSpent) {
+    ) internal returns (uint256 amountWNATIVESpent) {
         for (uint256 i = 0; i < components.length; i++) {
             if (mintingData.amountComponents[i] == 0) {
                 revert Errors.Index_TooSmallAmountIndex();
             }
 
-            amountWETHSpent += _swapTokenForExactToken(
+            amountWNATIVESpent += _swapTokenForExactToken(
                 mintingData.bestRouters[i],
                 mintingData.amountComponents[i],
-                mintingData.amountWETHs[i],
-                wETH,
+                mintingData.amountWNATIVEs[i],
+                wNATIVE,
                 components[i]
             );
         }
@@ -351,9 +369,9 @@ abstract contract IndexStrategyUpgradeable is
         indexToken.mint(recipient, mintingData.amountIndex);
     }
 
-    function _burnExactIndexForWETH(uint256 amountIndex)
+    function _burnExactIndexForWNATIVE(uint256 amountIndex)
         internal
-        returns (uint256 amountWETH)
+        returns (uint256 amountWNATIVE)
     {
         for (uint256 i = 0; i < components.length; i++) {
             uint256 amountComponent = (amountIndex * weights[components[i]]) /
@@ -363,19 +381,19 @@ abstract contract IndexStrategyUpgradeable is
                 revert Errors.Index_TooSmallAmountIndex();
             }
 
-            (uint256 amountWETHOut, address bestRouter) = _getAmountOutMax(
+            (uint256 amountWNATIVEOut, address bestRouter) = _getAmountOutMax(
                 routers[components[i]],
                 amountComponent,
                 components[i],
-                wETH
+                wNATIVE
             );
 
-            amountWETH += _swapExactTokenForToken(
+            amountWNATIVE += _swapExactTokenForToken(
                 bestRouter,
                 amountComponent,
-                amountWETHOut,
+                amountWNATIVEOut,
                 components[i],
-                wETH
+                wNATIVE
             );
         }
 
@@ -388,7 +406,7 @@ abstract contract IndexStrategyUpgradeable is
         returns (MintingData memory mintingData)
     {
         mintingData.amountIndex = amountIndex;
-        mintingData.amountWETHs = new uint256[](components.length);
+        mintingData.amountWNATIVEs = new uint256[](components.length);
         mintingData.bestRouters = new address[](components.length);
         mintingData.amountComponents = new uint256[](components.length);
 
@@ -398,16 +416,16 @@ abstract contract IndexStrategyUpgradeable is
                 Constants.PRECISION;
 
             (
-                mintingData.amountWETHs[i],
+                mintingData.amountWNATIVEs[i],
                 mintingData.bestRouters[i]
             ) = _getAmountInMin(
                 routers[components[i]],
                 mintingData.amountComponents[i],
-                wETH,
+                wNATIVE,
                 components[i]
             );
 
-            mintingData.amountWETHTotal += mintingData.amountWETHs[i];
+            mintingData.amountWNATIVETotal += mintingData.amountWNATIVEs[i];
         }
     }
 
@@ -420,24 +438,24 @@ abstract contract IndexStrategyUpgradeable is
             MintingData memory mintingData
         )
     {
-        (uint256 amountWETH, ) = _getAmountOutMax(
+        (uint256 amountWNATIVE, ) = _getAmountOutMax(
             routers[token],
             amountTokenMax,
             token,
-            wETH
+            wNATIVE
         );
 
-        mintingData = _getMintingDataFromWETH(amountWETH);
+        mintingData = _getMintingDataFromWNATIVE(amountWNATIVE);
 
         (amountToken, bestRouter) = _getAmountInMin(
             routers[token],
-            mintingData.amountWETHTotal,
+            mintingData.amountWNATIVETotal,
             token,
-            wETH
+            wNATIVE
         );
     }
 
-    function _getMintingDataFromWETH(uint256 amountWETHMax)
+    function _getMintingDataFromWNATIVE(uint256 amountWNATIVEMax)
         internal
         view
         returns (MintingData memory mintingData)
@@ -449,14 +467,14 @@ abstract contract IndexStrategyUpgradeable is
         uint256 amountIndex = type(uint256).max;
 
         for (uint256 i = 0; i < components.length; i++) {
-            uint256 amountWETH = (amountWETHMax *
-                mintingDataUnit.amountWETHs[i]) /
-                mintingDataUnit.amountWETHTotal;
+            uint256 amountWNATIVE = (amountWNATIVEMax *
+                mintingDataUnit.amountWNATIVEs[i]) /
+                mintingDataUnit.amountWNATIVETotal;
 
             (uint256 amountComponent, ) = _getAmountOutMax(
                 routers[components[i]],
-                amountWETH,
-                wETH,
+                amountWNATIVE,
+                wNATIVE,
                 components[i]
             );
 
@@ -469,23 +487,23 @@ abstract contract IndexStrategyUpgradeable is
         mintingData = _getMintingDataForExactIndex(amountIndex);
     }
 
-    function _getAmountWETHFromExactIndex(uint256 amountIndex)
+    function _getAmountWNATIVEFromExactIndex(uint256 amountIndex)
         internal
         view
-        returns (uint256 amountWETH)
+        returns (uint256 amountWNATIVE)
     {
         for (uint256 i = 0; i < components.length; i++) {
             uint256 amountComponent = (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
 
-            (uint256 amountWETHOut, ) = _getAmountOutMax(
+            (uint256 amountWNATIVEOut, ) = _getAmountOutMax(
                 routers[components[i]],
                 amountComponent,
                 components[i],
-                wETH
+                wNATIVE
             );
 
-            amountWETH += amountWETHOut;
+            amountWNATIVE += amountWNATIVEOut;
         }
     }
 

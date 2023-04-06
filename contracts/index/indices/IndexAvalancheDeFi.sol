@@ -37,11 +37,15 @@ contract IndexAvalancheDeFi is UUPSUpgradeable, IndexStrategyUpgradeable {
             return 0;
         }
 
-        uint256 amountWETH = _getAmountWETHFromExactIndex(totalSupply);
+        uint256 amountWNATIVE = _getAmountWNATIVEFromExactIndex(totalSupply);
 
-        uint256 priceWETH = oracle.getPrice(wETH, maximize, includeAmmPrice);
+        uint256 priceWNATIVE = oracle.getPrice(
+            wNATIVE,
+            maximize,
+            includeAmmPrice
+        );
 
-        return (amountWETH * priceWETH) / Constants.DECIMALS;
+        return (amountWNATIVE * priceWNATIVE) / Constants.DECIMALS;
     }
 
     function addSwapRoute(
