@@ -37,7 +37,7 @@ library SwapAdapter {
         uint256 amountOutMin,
         address[] memory path
     ) internal returns (uint256 amountOut) {
-        if (setup.dex == DEX.None) {
+        if (path[0] == path[path.length - 1]) {
             return amountIn;
         }
 
@@ -63,7 +63,7 @@ library SwapAdapter {
                 );
         }
 
-        revert Errors.SwapAdapter_WrongDEX();
+        revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
     function swapTokensForExactTokens(
@@ -72,7 +72,7 @@ library SwapAdapter {
         uint256 amountInMax,
         address[] memory path
     ) internal returns (uint256 amountIn) {
-        if (setup.dex == DEX.None) {
+        if (path[0] == path[path.length - 1]) {
             return amountOut;
         }
 
@@ -98,7 +98,7 @@ library SwapAdapter {
                 );
         }
 
-        revert Errors.SwapAdapter_WrongDEX();
+        revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
     function getAmountOut(
@@ -107,7 +107,7 @@ library SwapAdapter {
         address tokenIn,
         address tokenOut
     ) internal view returns (uint256 amountOut) {
-        if (setup.dex == DEX.None) {
+        if (tokenIn == tokenOut) {
             return amountIn;
         }
 
@@ -131,7 +131,7 @@ library SwapAdapter {
                 );
         }
 
-        revert Errors.SwapAdapter_WrongDEX();
+        revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
     function getAmountIn(
@@ -140,7 +140,7 @@ library SwapAdapter {
         address tokenIn,
         address tokenOut
     ) internal view returns (uint256 amountIn) {
-        if (setup.dex == DEX.None) {
+        if (tokenIn == tokenOut) {
             return amountOut;
         }
 
@@ -164,6 +164,6 @@ library SwapAdapter {
                 );
         }
 
-        revert Errors.SwapAdapter_WrongDEX();
+        revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 }

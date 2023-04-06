@@ -90,7 +90,7 @@ library UniswapV2Library {
         } else if (tokenIn == token1 && tokenOut == token0) {
             (reserveIn, reserveOut) = (reserve1, reserve0);
         } else {
-            revert Errors.SwapAdapter_WrongPair();
+            revert Errors.SwapAdapter_WrongPair(tokenIn, tokenOut);
         }
     }
 }

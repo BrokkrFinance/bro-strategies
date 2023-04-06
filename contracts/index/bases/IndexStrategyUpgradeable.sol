@@ -32,6 +32,14 @@ abstract contract IndexStrategyUpgradeable is
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SwapAdapter for SwapAdapter.Setup;
 
+    struct MintingData {
+        uint256 amountIndex;
+        uint256 amountWETHTotal;
+        uint256[] amountWETHs;
+        address[] bestRouters;
+        uint256[] amountComponents;
+    }
+
     address public wETH;
 
     address[] public whitelistedTokens;
@@ -89,7 +97,7 @@ abstract contract IndexStrategyUpgradeable is
         }
 
         for (uint256 i = 0; i < initParams.swapRoutes.length; i++) {
-            setSwapRoute(
+            addSwapRoute(
                 initParams.swapRoutes[i].token0,
                 initParams.swapRoutes[i].token1,
                 initParams.swapRoutes[i].router,
@@ -98,7 +106,7 @@ abstract contract IndexStrategyUpgradeable is
             );
         }
 
-        setWhitelistedTokens(initParams.whitelistedTokens);
+        addWhitelistedTokens(initParams.whitelistedTokens);
 
         setOracle(initParams.oracle);
 
@@ -125,10 +133,10 @@ abstract contract IndexStrategyUpgradeable is
             super.supportsInterface(interfaceId);
     }
 
-    function mintExactIndexFromToken(
+    function mintIndexFromToken(
         address token,
         uint256 amountTokenMax,
-        uint256 amountIndex,
+        uint256 amountIndexMin,
         address recipient
     )
         external
@@ -136,72 +144,54 @@ abstract contract IndexStrategyUpgradeable is
         whenNotPaused
         onlyWhitelistedToken(token)
         whenNotReachedEquityValuationLimit
-        returns (uint256 amountTokenSpent)
+        returns (uint256 amountIndex, uint256 amountToken)
     {
         if (recipient == address(0)) {
             revert Errors.Index_ZeroAddress();
         }
 
-        IERC20Upgradeable(token).safeTransferFrom(
-            _msgSender(),
-            address(this),
+        address bestRouter;
+        MintingData memory mintingData;
+
+        (amountToken, bestRouter, mintingData) = _getMintingDataFromToken(
+            token,
             amountTokenMax
         );
 
-        (
-            uint256 amountWETHTotal,
-            uint256[] memory amountWETHs,
-            address[] memory bestRouters,
-            uint256[] memory amountComponents
-        ) = _getMintingDataForExactIndex(amountIndex);
-
-        if (token != wETH) {
-            (uint256 amountTokenIn, address bestRouter) = _getAmountInMin(
-                routers[token],
-                amountWETHTotal,
-                token,
-                wETH
-            );
-
-            amountTokenSpent = _swapTokenForExactToken(
-                bestRouter,
-                amountWETHTotal,
-                amountTokenIn,
-                token,
-                wETH
-            );
-
-            if (amountTokenSpent != amountTokenIn) {
-                revert Errors.Index_WrongSwapAmount();
-            }
-        } else {
-            amountTokenSpent = amountWETHTotal;
+        if (mintingData.amountIndex < amountIndexMin) {
+            revert Errors.Index_BelowMinAmount();
         }
 
-        if (amountTokenSpent > amountTokenMax) {
-            revert Errors.Index_AboveMaxAmount();
-        }
+        amountIndex = mintingData.amountIndex;
 
-        uint256 amountWETHSpent = _mintExactIndexFromWETH(
-            amountWETHs,
-            bestRouters,
-            amountComponents,
-            amountIndex,
-            recipient
+        IERC20Upgradeable(token).safeTransferFrom(
+            _msgSender(),
+            address(this),
+            amountToken
         );
 
-        if (amountWETHSpent != amountWETHTotal) {
+        uint256 amountTokenSpent = _swapTokenForExactToken(
+            bestRouter,
+            mintingData.amountWETHTotal,
+            amountToken,
+            token,
+            wETH
+        );
+
+        if (amountTokenSpent != amountToken) {
             revert Errors.Index_WrongSwapAmount();
         }
 
-        uint256 amountTokenRefund = amountTokenMax - amountTokenSpent;
+        uint256 amountWETHSpent = _mintExactIndexFromWETH(
+            mintingData,
+            recipient
+        );
 
-        if (amountTokenRefund > 0) {
-            IERC20Upgradeable(token).safeTransfer(
-                _msgSender(),
-                amountTokenRefund
-            );
+        if (amountWETHSpent != mintingData.amountWETHTotal) {
+            revert Errors.Index_WrongSwapAmount();
         }
+
+        emit Mint(_msgSender(), recipient, token, amountToken, amountIndex);
     }
 
     function burnExactIndexForToken(
@@ -220,29 +210,25 @@ abstract contract IndexStrategyUpgradeable is
             revert Errors.Index_ZeroAddress();
         }
 
-        uint256 amountWETH = _burnExactIndexForWETH(amountIndex, recipient);
+        uint256 amountWETH = _burnExactIndexForWETH(amountIndex);
 
-        if (token != wETH) {
-            (uint256 amountTokenOut, address bestRouter) = _getAmountOutMax(
-                routers[token],
-                amountWETH,
-                wETH,
-                token
-            );
+        (uint256 amountTokenOut, address bestRouter) = _getAmountOutMax(
+            routers[token],
+            amountWETH,
+            wETH,
+            token
+        );
 
-            amountToken = _swapExactTokenForToken(
-                bestRouter,
-                amountWETH,
-                amountTokenOut,
-                wETH,
-                token
-            );
+        amountToken = _swapExactTokenForToken(
+            bestRouter,
+            amountWETH,
+            amountTokenOut,
+            wETH,
+            token
+        );
 
-            if (amountToken != amountTokenOut) {
-                revert Errors.Index_WrongSwapAmount();
-            }
-        } else {
-            amountToken = amountWETH;
+        if (amountToken != amountTokenOut) {
+            revert Errors.Index_WrongSwapAmount();
         }
 
         if (amountToken < amountTokenMin) {
@@ -250,37 +236,24 @@ abstract contract IndexStrategyUpgradeable is
         }
 
         IERC20Upgradeable(token).safeTransfer(recipient, amountToken);
+
+        emit Burn(_msgSender(), recipient, token, amountToken, amountIndex);
     }
 
-    function getAmountIndexFromToken(address token, uint256 amountToken)
+    function getAmountIndexFromToken(address token, uint256 amountTokenMax)
         external
         view
         onlyWhitelistedToken(token)
-        returns (uint256 amountIndex, uint256 amountTokenSpent)
+        returns (uint256 amountIndex, uint256 amountToken)
     {
-        uint256 amountWETH;
+        MintingData memory mintingData;
 
-        if (token != wETH) {
-            (amountWETH, ) = _getAmountOutMax(
-                routers[token],
-                amountToken,
-                token,
-                wETH
-            );
-        } else {
-            amountWETH = amountToken;
-        }
-
-        uint256 amountWETHSpent;
-
-        (amountIndex, amountWETHSpent) = _getAmountIndexFromWETH(amountWETH);
-
-        (amountTokenSpent, ) = _getAmountInMin(
-            routers[token],
-            amountWETHSpent,
+        (amountToken, , mintingData) = _getMintingDataFromToken(
             token,
-            wETH
+            amountTokenMax
         );
+
+        amountIndex = mintingData.amountIndex;
     }
 
     function getAmountTokenFromExactIndex(address token, uint256 amountIndex)
@@ -291,38 +264,34 @@ abstract contract IndexStrategyUpgradeable is
     {
         uint256 amountWETH = _getAmountWETHFromExactIndex(amountIndex);
 
-        if (token != wETH) {
-            (amountToken, ) = _getAmountOutMax(
-                routers[token],
-                amountWETH,
-                wETH,
-                token
-            );
-        } else {
-            amountToken = amountWETH;
-        }
+        (amountToken, ) = _getAmountOutMax(
+            routers[token],
+            amountWETH,
+            wETH,
+            token
+        );
     }
 
     function setOracle(address _oracle) public onlyOwner {
         oracle = IIndexOracle(_oracle);
     }
 
-    function setSwapRoute(
+    function addSwapRoute(
         address token0,
         address token1,
         address router,
         SwapAdapter.DEX dex,
         SwapAdapter.PairData memory _pairData
     ) public onlyOwner {
-        _setRouter(token0, router);
-        _setRouter(token1, router);
+        _addRouter(token0, router);
+        _addRouter(token1, router);
 
         _setDEX(router, dex);
 
         _setPairData(router, token0, token1, _pairData);
     }
 
-    function setWhitelistedTokens(address[] memory tokens) public onlyOwner {
+    function addWhitelistedTokens(address[] memory tokens) public onlyOwner {
         for (uint256 i = 0; i < tokens.length; i++) {
             if (!isTokenWhitelisted(tokens[i])) {
                 whitelistedTokens.push(tokens[i]);
@@ -362,34 +331,37 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     function _mintExactIndexFromWETH(
-        uint256[] memory amountWETHs,
-        address[] memory bestRouters,
-        uint256[] memory amountComponents,
-        uint256 amountIndex,
+        MintingData memory mintingData,
         address recipient
     ) internal returns (uint256 amountWETHSpent) {
         for (uint256 i = 0; i < components.length; i++) {
+            if (mintingData.amountComponents[i] == 0) {
+                revert Errors.Index_TooSmallAmountIndex();
+            }
+
             amountWETHSpent += _swapTokenForExactToken(
-                bestRouters[i],
-                amountComponents[i],
-                amountWETHs[i],
+                mintingData.bestRouters[i],
+                mintingData.amountComponents[i],
+                mintingData.amountWETHs[i],
                 wETH,
                 components[i]
             );
         }
 
-        indexToken.mint(recipient, amountIndex);
-
-        emit Mint(_msgSender(), recipient, amountWETHSpent, amountIndex);
+        indexToken.mint(recipient, mintingData.amountIndex);
     }
 
-    function _burnExactIndexForWETH(uint256 amountIndex, address recipient)
+    function _burnExactIndexForWETH(uint256 amountIndex)
         internal
         returns (uint256 amountWETH)
     {
         for (uint256 i = 0; i < components.length; i++) {
             uint256 amountComponent = (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
+
+            if (amountComponent == 0) {
+                revert Errors.Index_TooSmallAmountIndex();
+            }
 
             (uint256 amountWETHOut, address bestRouter) = _getAmountOutMax(
                 routers[components[i]],
@@ -408,80 +380,93 @@ abstract contract IndexStrategyUpgradeable is
         }
 
         indexToken.burnFrom(_msgSender(), amountIndex);
-
-        emit Burn(_msgSender(), recipient, amountWETH, amountIndex);
     }
 
     function _getMintingDataForExactIndex(uint256 amountIndex)
         internal
         view
-        returns (
-            uint256 amountWETHTotal,
-            uint256[] memory amountWETHs,
-            address[] memory bestRouters,
-            uint256[] memory amountComponents
-        )
+        returns (MintingData memory mintingData)
     {
-        amountWETHs = new uint256[](components.length);
-        bestRouters = new address[](components.length);
-        amountComponents = new uint256[](components.length);
+        mintingData.amountIndex = amountIndex;
+        mintingData.amountWETHs = new uint256[](components.length);
+        mintingData.bestRouters = new address[](components.length);
+        mintingData.amountComponents = new uint256[](components.length);
 
         for (uint256 i = 0; i < components.length; i++) {
-            amountComponents[i] =
+            mintingData.amountComponents[i] =
                 (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
 
-            (amountWETHs[i], bestRouters[i]) = _getAmountInMin(
+            (
+                mintingData.amountWETHs[i],
+                mintingData.bestRouters[i]
+            ) = _getAmountInMin(
                 routers[components[i]],
-                amountComponents[i],
+                mintingData.amountComponents[i],
                 wETH,
                 components[i]
             );
 
-            amountWETHTotal += amountWETHs[i];
+            mintingData.amountWETHTotal += mintingData.amountWETHs[i];
         }
     }
 
-    function _getAmountIndexFromWETH(uint256 amountWETHIn)
+    function _getMintingDataFromToken(address token, uint256 amountTokenMax)
         internal
         view
-        returns (uint256 amountIndex, uint256 amountWETHSpent)
+        returns (
+            uint256 amountToken,
+            address bestRouter,
+            MintingData memory mintingData
+        )
     {
-        uint256 amountIndexUnit = Constants.PRECISION;
+        (uint256 amountWETH, ) = _getAmountOutMax(
+            routers[token],
+            amountTokenMax,
+            token,
+            wETH
+        );
 
-        (
-            uint256 amountWETHTotalUnit,
-            uint256[] memory amountWETHUnits,
-            ,
+        mintingData = _getMintingDataFromWETH(amountWETH);
 
-        ) = _getMintingDataForExactIndex(amountIndexUnit);
+        (amountToken, bestRouter) = _getAmountInMin(
+            routers[token],
+            mintingData.amountWETHTotal,
+            token,
+            wETH
+        );
+    }
 
-        amountIndex = type(uint256).max;
+    function _getMintingDataFromWETH(uint256 amountWETHMax)
+        internal
+        view
+        returns (MintingData memory mintingData)
+    {
+        MintingData memory mintingDataUnit = _getMintingDataForExactIndex(
+            Constants.PRECISION
+        );
+
+        uint256 amountIndex = type(uint256).max;
 
         for (uint256 i = 0; i < components.length; i++) {
-            uint256 amountWETH = (amountWETHIn * amountWETHUnits[i]) /
-                amountWETHTotalUnit;
+            uint256 amountWETH = (amountWETHMax *
+                mintingDataUnit.amountWETHs[i]) /
+                mintingDataUnit.amountWETHTotal;
 
-            uint256 amountComponent;
-
-            if (components[i] != wETH) {
-                (amountComponent, ) = _getAmountOutMax(
-                    routers[components[i]],
-                    amountWETH,
-                    wETH,
-                    components[i]
-                );
-            } else {
-                amountComponent = amountWETH;
-            }
+            (uint256 amountComponent, ) = _getAmountOutMax(
+                routers[components[i]],
+                amountWETH,
+                wETH,
+                components[i]
+            );
 
             amountIndex = MathUpgradeable.min(
                 amountIndex,
                 (amountComponent * Constants.PRECISION) / weights[components[i]]
             );
-
-            amountWETHSpent += amountWETH;
         }
+
+        mintingData = _getMintingDataForExactIndex(amountIndex);
     }
 
     function _getAmountWETHFromExactIndex(uint256 amountIndex)
@@ -508,7 +493,7 @@ abstract contract IndexStrategyUpgradeable is
         weights[token] = weight;
     }
 
-    function _setRouter(address token, address router) internal {
+    function _addRouter(address token, address router) internal {
         for (uint256 i = 0; i < routers[token].length; i++) {
             if (routers[token][i] == router) {
                 return;
@@ -578,6 +563,14 @@ abstract contract IndexStrategyUpgradeable is
         address tokenIn,
         address tokenOut
     ) internal view returns (uint256 amountOutMax, address bestRouter) {
+        if (tokenIn == tokenOut) {
+            return (amountIn, address(0));
+        }
+
+        if (_routers.length == 0) {
+            revert Errors.Index_WrongPair(tokenIn, tokenOut);
+        }
+
         amountOutMax = type(uint256).min;
 
         for (uint256 i = 0; i < _routers.length; i++) {
@@ -604,6 +597,14 @@ abstract contract IndexStrategyUpgradeable is
         address tokenIn,
         address tokenOut
     ) internal view returns (uint256 amountInMin, address bestRouter) {
+        if (tokenIn == tokenOut) {
+            return (amountOut, address(0));
+        }
+
+        if (_routers.length == 0) {
+            revert Errors.Index_WrongPair(tokenIn, tokenOut);
+        }
+
         amountInMin = type(uint256).max;
 
         for (uint256 i = 0; i < _routers.length; i++) {

@@ -44,7 +44,7 @@ contract IndexAvalancheDeFi is UUPSUpgradeable, IndexStrategyUpgradeable {
         return (amountWETH * priceWETH) / Constants.DECIMALS;
     }
 
-    function setSwapRoute(
+    function addSwapRoute(
         address token0,
         address token1,
         address router,
@@ -56,10 +56,10 @@ contract IndexAvalancheDeFi is UUPSUpgradeable, IndexStrategyUpgradeable {
             abi.encode(0)
         );
 
-        setSwapRoute(token0, token1, router, dex, pairData);
+        addSwapRoute(token0, token1, router, dex, pairData);
     }
 
-    function setSwapRoute(
+    function addSwapRoute(
         address token0,
         address token1,
         address router,
@@ -72,6 +72,6 @@ contract IndexAvalancheDeFi is UUPSUpgradeable, IndexStrategyUpgradeable {
             abi.encode(binStep)
         );
 
-        setSwapRoute(token0, token1, router, dex, pairData);
+        addSwapRoute(token0, token1, router, dex, pairData);
     }
 }

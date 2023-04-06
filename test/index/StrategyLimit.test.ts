@@ -27,7 +27,7 @@ export function testStrategyLimit() {
       await expect(
         this.strategy
           .connect(this.whale)
-          .mintExactIndexFromToken(this.depositToken.address, depositAmount, amountIndex, this.whale.address)
+          .mintIndexFromToken(this.depositToken.address, depositAmount, amountIndex, this.whale.address)
       ).to.be.reverted
     })
   })

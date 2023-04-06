@@ -9,23 +9,25 @@ interface IIndexStrategy {
     event Mint(
         address indexed sender,
         address indexed recipient,
-        uint256 amountWETH,
+        address token,
+        uint256 amountToken,
         uint256 amountIndex
     );
 
     event Burn(
         address indexed sender,
         address indexed recipient,
-        uint256 amountWETH,
+        address token,
+        uint256 amountToken,
         uint256 amountIndex
     );
 
-    function mintExactIndexFromToken(
+    function mintIndexFromToken(
         address token,
         uint256 amountTokenMax,
-        uint256 amountIndex,
+        uint256 amountIndexMin,
         address recipient
-    ) external returns (uint256 amountTokenSpent);
+    ) external returns (uint256 amountIndex, uint256 amountToken);
 
     function burnExactIndexForToken(
         address token,
@@ -34,10 +36,10 @@ interface IIndexStrategy {
         address recipient
     ) external returns (uint256 amountToken);
 
-    function getAmountIndexFromToken(address token, uint256 amountToken)
+    function getAmountIndexFromToken(address token, uint256 amountTokenMax)
         external
         view
-        returns (uint256 amountIndex, uint256 amountTokenSpent);
+        returns (uint256 amountIndex, uint256 amountToken);
 
     function getAmountTokenFromExactIndex(address token, uint256 amountIndex)
         external
@@ -46,7 +48,7 @@ interface IIndexStrategy {
 
     function setOracle(address oracle) external;
 
-    function setSwapRoute(
+    function addSwapRoute(
         address token0,
         address token1,
         address router,
@@ -54,7 +56,7 @@ interface IIndexStrategy {
         SwapAdapter.PairData memory pairData
     ) external;
 
-    function setWhitelistedTokens(address[] memory tokens) external;
+    function addWhitelistedTokens(address[] memory tokens) external;
 
     function allComponents() external view returns (address[] memory);
 

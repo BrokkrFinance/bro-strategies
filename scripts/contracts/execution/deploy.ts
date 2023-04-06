@@ -335,11 +335,14 @@ async function investOneDollarToIndex(investable: Investable): Promise<void> {
   // Deposit $2.
   const depositAmount = ethers.utils.parseUnits("2", 6)
   const [amountIndex] = await strategy.connect(deployer).getAmountIndexFromToken(usdc.address, depositAmount)
+  const amountIndexWithSlippage = amountIndex.mul(995).div(1000)
 
   const indexTokenBalanceBefore = await indexToken.balanceOf(deployer.address)
 
   await usdc.connect(deployer).approve(strategy.address, depositAmount)
-  await strategy.connect(deployer).mintExactIndexFromToken(usdc.address, depositAmount, amountIndex, deployer.address)
+  await strategy
+    .connect(deployer)
+    .mintIndexFromToken(usdc.address, depositAmount, amountIndexWithSlippage, deployer.address)
 
   const indexTokenBalanceAfter = await indexToken.balanceOf(deployer.address)
 

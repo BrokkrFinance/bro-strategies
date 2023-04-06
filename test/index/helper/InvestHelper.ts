@@ -16,7 +16,7 @@ export async function mint(
 
   await token.connect(spender).approve(indexStrategy.address, tokenAmount)
   await expect(
-    indexStrategy.connect(spender).mintExactIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
+    indexStrategy.connect(spender).mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
   ).to.emit(indexStrategy, "Mint")
 
   const indexTokenBalanceAfter = await indexToken.balanceOf(recipient.address)
