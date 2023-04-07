@@ -1,6 +1,7 @@
+import { BigNumber } from "ethers"
 import { NameValuePair } from "./name-value-pair"
 
 export interface Fee {
-  amount: number
+  amount: BigNumber
   params: NameValuePair[]
 }

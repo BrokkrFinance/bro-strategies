@@ -9,11 +9,11 @@ export function testStrategyFee() {
       const feeReceiver = await this.strategy.getFeeReceiver([])
       const feeAmount = await this.strategy.getCurrentAccumulatedFee()
 
-      const usdcBalanceBefore = await this.usdc.balanceOf(feeReceiver)
+      const usdcBalanceBefore = await this.depositToken.balanceOf(feeReceiver)
       await expect(this.strategy.connect(this.user1).claimFee([]))
         .to.emit(this.strategy, "FeeClaim")
         .withArgs(feeAmount)
-      const usdcBalanceAfter = await this.usdc.balanceOf(feeReceiver)
+      const usdcBalanceAfter = await this.depositToken.balanceOf(feeReceiver)
 
       expect(await this.strategy.getCurrentAccumulatedFee()).to.equal(0)
       expect(await this.strategy.getClaimedFee()).to.equal(feeAmount)
@@ -44,7 +44,7 @@ export function testStrategyFee() {
     it("should succeed when a single user withdraws and withdrawal fee is 30%", async function () {
       await this.strategy.connect(this.owner).setWithdrawalFee(30000, [])
 
-      await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
+      await this.depositToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
       await this.strategy
         .connect(this.user0)
         .deposit(ethers.utils.parseUnits("10000", 6), BigNumber.from(0), this.user0.address, [])
@@ -57,7 +57,7 @@ export function testStrategyFee() {
         .to.emit(this.strategy, "Withdrawal")
         .withArgs(this.user0.address, this.user0.address, availableTokenBalance)
 
-      expect(await this.usdc.balanceOf(this.user0.address)).to.be.approximately(
+      expect(await this.depositToken.balanceOf(this.user0.address)).to.be.approximately(
         ethers.utils.parseUnits("7000", 6),
         getErrorRange(ethers.utils.parseUnits("7000", 6))
       )
@@ -74,7 +74,7 @@ export function testStrategyFee() {
 
     it("should succeed when multiple users withdraw and withdrawal fee is 30%", async function () {
       // The first user deposits.
-      await this.usdc.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
+      await this.depositToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
       await this.strategy
         .connect(this.user0)
         .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user0.address, [])
@@ -94,7 +94,7 @@ export function testStrategyFee() {
       await this.strategy.connect(this.owner).setWithdrawalFee(30000, [])
 
       // The second user deposits.
-      await this.usdc.connect(this.user1).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
+      await this.depositToken.connect(this.user1).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
       await this.strategy
         .connect(this.user1)
         .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user1.address, [])
@@ -111,7 +111,7 @@ export function testStrategyFee() {
         .withArgs(this.user1.address, this.user1.address, availableTokenBalance.div(5))
 
       // The third user deposits.
-      await this.usdc.connect(this.user2).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
+      await this.depositToken.connect(this.user2).approve(this.strategy.address, ethers.utils.parseUnits("5000", 6))
       await this.strategy
         .connect(this.user2)
         .deposit(ethers.utils.parseUnits("5000", 6), BigNumber.from(0), this.user2.address, [])
@@ -134,15 +134,15 @@ export function testStrategyFee() {
         Math.floor(ethers.utils.parseUnits("12000", 6).toNumber() / this.investmentTokenPrice)
       )
 
-      expect(await this.usdc.balanceOf(this.user0.address)).to.be.approximately(
+      expect(await this.depositToken.balanceOf(this.user0.address)).to.be.approximately(
         ethers.utils.parseUnits("6000", 6),
         getErrorRange(ethers.utils.parseUnits("6000", 6))
       )
-      expect(await this.usdc.balanceOf(this.user1.address)).to.be.approximately(
+      expect(await this.depositToken.balanceOf(this.user1.address)).to.be.approximately(
         ethers.utils.parseUnits("5700", 6),
         getErrorRange(ethers.utils.parseUnits("5700", 6))
       )
-      expect(await this.usdc.balanceOf(this.user2.address)).to.be.approximately(
+      expect(await this.depositToken.balanceOf(this.user2.address)).to.be.approximately(
         ethers.utils.parseUnits("5700", 6),
         getErrorRange(ethers.utils.parseUnits("5700", 6))
       )

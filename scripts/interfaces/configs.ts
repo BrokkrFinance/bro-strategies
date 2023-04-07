@@ -1,4 +1,4 @@
-import { Library } from "./library"
+import { LibraryArgs } from "./parameters"
 
 export interface DeployConfig {
   [key: string]: any
@@ -16,5 +16,5 @@ export interface UpgradeConfig {
   newImplementation: string
   functionName?: string
   functionArgs?: any[]
-  libraries?: Library[]
+  libraries?: LibraryArgs
 }

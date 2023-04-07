@@ -1,10 +1,12 @@
 import { BigNumber } from "ethers"
+import { Component } from "./component"
 import { Fee } from "./fee"
 import { FeeReceiver } from "./fee-receiver"
 import { InvestmentLimit } from "./investment-limit"
 import { Library } from "./library"
 import { Oracle } from "./oracle"
 import { RoleToUsers } from "./role-to-users"
+import { SwapRoute } from "./swap-route"
 import { SwapService } from "./swap-service"
 
 export interface DepositArgs {
@@ -31,6 +33,9 @@ export interface InvestArgs {
   minimumDepositTokenAmountOut: BigNumber
   tokenReceiver: string
   params: any[]
+}
+export interface LibraryArgs {
+  libraries: Library[]
 }
 
 export interface PortfolioArgs {
@@ -62,6 +67,20 @@ export interface StrategyExtraArgs {
   extraArgs: any[]
 }
 
-export interface StrategyLibraries {
-  libraries: Library[]
+export interface IndexTokenArgs {
+  name: string
+  symbol: string
+}
+
+export interface IndexArgs {
+  wNATIVE: string
+  components: Component[]
+  swapRoutes: SwapRoute[]
+  whitelistedTokens: string[]
+  oracle: Oracle
+  equityValuationLimit: BigNumber
+}
+
+export interface IndexExtraArgs {
+  extraArgs: any[]
 }

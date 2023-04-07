@@ -1,9 +1,10 @@
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
+import { testWithdraw } from "../shared/Withdraw.test"
 
 export function testPortfolioWithdraw() {
   describe("Withdraw", async function () {
-    // testWithdraw()
+    testWithdraw()
 
     it("should succeed when a single user withdraws and another user withdrew from investable directly before that", async function () {
       const investableDecs = await this.portfolio.getInvestables()

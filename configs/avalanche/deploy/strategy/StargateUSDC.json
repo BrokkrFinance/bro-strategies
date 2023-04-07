@@ -1,0 +1,36 @@
+{
+  "properties": [
+    {
+      "type": "strategy",
+      "subtype": "ownable",
+      "name": "StargateUSDC",
+      "owner": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
+      "contractName": "Stargate",
+      "investmentTokenName": "Stargate USDC Strategy Token",
+      "investmentTokenSymbol": "SS-USDC",
+      "depositToken": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
+      "depositFee": 0,
+      "depositFeeParams": [],
+      "withdrawalFee": 500,
+      "withdrawalFeeParams": [],
+      "performanceFee": 0,
+      "performanceFeeParams": [],
+      "feeReceiver": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
+      "feeReceiverParams": [],
+      "totalInvestmentLimit": 1e20,
+      "investmentLimitPerAddress": 1e20,
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
+      "swapService": { "$ref": "../../../../constants/avalanche/SwapServices.json#/traderjoe" },
+      "roleToUsers": [],
+      "extraArgs": [
+        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/router" },
+        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/usdcPool" },
+        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/lpStaking" },
+        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/usdcLPToken" },
+        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/stgToken" },
+        [{ "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" }, 1]
+      ],
+      "libraries": []
+    }
+  ]
+}

@@ -1,4 +1,6 @@
+import { BigNumber } from "ethers"
+
 export interface SwapService {
-  provider: number
+  provider: BigNumber
   router: string
 }

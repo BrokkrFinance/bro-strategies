@@ -21,7 +21,7 @@ export function testPausable() {
   })
 
   it("should fail when any user withdraws and the investable is paused", async function () {
-    await this.usdc.connect(this.user0).approve(this.investable.address, ethers.utils.parseUnits("3000", 6))
+    await this.depositToken.connect(this.user0).approve(this.investable.address, ethers.utils.parseUnits("3000", 6))
     await this.investable
       .connect(this.user0)
       .deposit(ethers.utils.parseUnits("3000", 6), BigNumber.from(0), this.user0.address, [])
@@ -37,6 +37,6 @@ export function testPausable() {
       })
       .revertedWith("Pausable: paused")
 
-    expect(await this.usdc.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("7000", 6))
+    expect(await this.depositToken.balanceOf(this.user0.address)).to.equal(ethers.utils.parseUnits("7000", 6))
   })
 }

@@ -1,12 +1,15 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
-import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
-import { TestOptions } from "../../helper/interfaces/options"
+import Avalanche from "../../../constants/networks/Avalanche.json"
+import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
+import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
+import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-const cashTestOptions: TestOptions = {
+const cashTestOptions: StrategyTestOptions = {
+  network: Avalanche,
   upgradeTo: "OwnableV2",
   runReapRewardExtra: false,
   runReapUninvestedReward: false,
@@ -30,19 +33,19 @@ testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashW
 ])
 
 async function deployCashStrategy() {
-  return await deployStrategy("Cash")
+  return await deployStrategy("avalanche", "Cash")
 }
 
 async function upgradeCashWithStargateUsdcStrategy() {
-  return await upgradeStrategy("CashWithStargateUSDC")
+  return await upgradeStrategy("avalanche", "CashWithStargateUSDC")
 }
 
 async function upgradeCashWithStargateUsdtStrategy() {
-  return await upgradeStrategy("CashWithStargateUSDT")
+  return await upgradeStrategy("avalanche", "CashWithStargateUSDT")
 }
 
 async function upgradeCashWithTraderJoeStrategy() {
-  return await upgradeStrategy("CashWithTraderJoe")
+  return await upgradeStrategy("avalanche", "CashWithTraderJoe")
 }
 
 function testCashAum() {
@@ -61,7 +64,7 @@ function testCashAum() {
         .success()
 
       const assetBalancesAfter = await this.strategy.getAssetBalances()
-      expect(assetBalancesAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetBalancesAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetBalancesAfter[0].balance).to.approximately(
         ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance),
         getErrorRange(ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance))
@@ -70,7 +73,7 @@ function testCashAum() {
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuationsAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetValuationsAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetValuationsAfter[0].valuation).to.be.approximately(
         ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation),
         getErrorRange(ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation))
@@ -130,7 +133,7 @@ function testCashAum() {
         .success()
 
       const assetBalancesAfter = await this.strategy.getAssetBalances()
-      expect(assetBalancesAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetBalancesAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetBalancesAfter[0].balance).to.approximately(
         ethers.utils.parseUnits("50", 6).add(assetBalancesBefore[0].balance),
         getErrorRange(ethers.utils.parseUnits("50", 6).add(assetBalancesBefore[0].balance))
@@ -139,7 +142,7 @@ function testCashAum() {
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
 
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
-      expect(assetValuationsAfter[0].asset).to.equal(this.usdc.address)
+      expect(assetValuationsAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetValuationsAfter[0].valuation).to.approximately(
         ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation),
         getErrorRange(ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation))

@@ -1,0 +1,31 @@
+{
+  "properties": [
+    {
+      "proxy": { "$ref": "../../live/strategy/DnsVector.json#/address" },
+      "newImplementation": "DnsVectorStrategy",
+      "functionName": "reinitialize",
+      "functionArgs": [
+        [
+          [
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/pngToken" },
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/router" },
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/miniChef" },
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/wAvaxUsdcPair" },
+            { "$ref": "../../../../constants/avalanche/addresses/Pangolin.json#/wAvaxUsdcPoolId" }
+          ],
+          0
+        ]
+      ],
+      "libraries": [
+        {
+          "name": "DnsVectorStrategyAumLib",
+          "dependencies": []
+        },
+        {
+          "name": "DnsVectorStrategyInvestmentLib",
+          "dependencies": []
+        }
+      ]
+    }
+  ]
+}

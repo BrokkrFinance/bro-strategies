@@ -1,13 +1,21 @@
-import { deployPortfolio, upgradePortfolio } from "../../../scripts/helper/contract"
+import Avalanche from "../../../constants/networks/Avalanche.json"
+import { deployPortfolio } from "../../../scripts/contracts/forking/deploy"
+import { upgradePortfolio } from "../../../scripts/contracts/forking/upgrade"
+import { PortfolioTestOptions } from "../../helper/interfaces/options"
 import { testPortfolio } from "../Portfolio.test"
 
-testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, "PercentageAllocationV2", [])
-testPortfolio("Calm Portfolio - Upgrade After Deploy", upgradeCalmPortfolio, "PercentageAllocationV2", [])
+const calmTestOptions: PortfolioTestOptions = {
+  network: Avalanche,
+  upgradeTo: "PercentageAllocationV2",
+}
+
+testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, calmTestOptions, [])
+testPortfolio("Calm Portfolio - Upgrade After Deploy", upgradeCalmPortfolio, calmTestOptions, [])
 
 async function deployCalmPortfolio() {
-  return await deployPortfolio("Calm")
+  return await deployPortfolio("avalanche", "Calm")
 }
 
 async function upgradeCalmPortfolio() {
-  return await upgradePortfolio("Calm")
+  return await upgradePortfolio("avalanche", "Calm")
 }

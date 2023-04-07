@@ -2,14 +2,17 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import TraderJoeLBPairABI from "../../helper/abi/TraderJoeLBPair.json"
-import Tokens from "../../../constants/addresses/Tokens.json"
-import TraderJoe from "../../../constants/addresses/TraderJoe.json"
-import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
-import { TestOptions } from "../../helper/interfaces/options"
+import Tokens from "../../../constants/avalanche/addresses/Tokens.json"
+import TraderJoe from "../../../constants/avalanche/addresses/TraderJoe.json"
+import Avalanche from "../../../constants/networks/Avalanche.json"
+import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
+import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
+import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 
-const traderjoeTestOptions: TestOptions = {
+const traderjoeTestOptions: StrategyTestOptions = {
+  network: Avalanche,
   upgradeTo: "OwnableV2",
   runReapReward: false,
   runReapRewardExtra: false,
@@ -27,11 +30,11 @@ testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTra
 ])
 
 async function deployTraderJoeStrategy() {
-  return await deployStrategy("TraderJoe")
+  return await deployStrategy("avalanche", "TraderJoe")
 }
 
 async function upgradeTraderJoeStrategy() {
-  return upgradeStrategy("TraderJoe")
+  return await upgradeStrategy("avalanche", "TraderJoe")
 }
 
 function testTraderJoeAdjustBins() {

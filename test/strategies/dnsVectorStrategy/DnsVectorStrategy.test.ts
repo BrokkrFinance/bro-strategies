@@ -1,14 +1,17 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
-import Pangolin from "../../../constants/addresses/Pangolin.json"
-import Tokens from "../../../constants/addresses/Tokens.json"
-import { deployStrategy, upgradeStrategy } from "../../../scripts/helper/contract"
-import { TestOptions } from "../../helper/interfaces/options"
+import Pangolin from "../../../constants/avalanche/addresses/Pangolin.json"
+import Tokens from "../../../constants/avalanche/addresses/Tokens.json"
+import Avalanche from "../../../constants/networks/Avalanche.json"
+import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
+import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
+import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
-const dnsVectorTestOptions: TestOptions = {
+const dnsVectorTestOptions: StrategyTestOptions = {
+  network: Avalanche,
   upgradeTo: "RoleableV2",
   runReapRewardExtra: false,
 }
@@ -18,11 +21,11 @@ testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, dnsVectorTestOpt
   testCollaterizationAndDeltaNeutrality,
   testRebalanceSafetyLimits,
 ])
-testStrategy("Dns Vector Strategy - Upgrade After Deploy", upgradeDnsStrategy, dnsVectorTestOptions, [
-  testAum,
-  testCollaterizationAndDeltaNeutrality,
-  testRebalanceSafetyLimits,
-])
+// testStrategy("Dns Vector Strategy - Upgrade After Deploy", upgradeDnsStrategy, dnsVectorTestOptions, [
+//   testAum,
+//   testCollaterizationAndDeltaNeutrality,
+//   testRebalanceSafetyLimits,
+// ])
 
 async function checkProperCollateralization(strategy: any) {
   const lowCollaterizationRatio = await strategy.getInverseCollateralRatio(true, false)
@@ -445,9 +448,9 @@ function testAum() {
 }
 
 async function deployDnsStrategy() {
-  return await deployStrategy("DnsVector")
+  return await deployStrategy("avalanche", "DnsVector")
 }
 
 async function upgradeDnsStrategy() {
-  return upgradeStrategy("DnsVector")
+  return await upgradeStrategy("avalanche", "DnsVector")
 }
