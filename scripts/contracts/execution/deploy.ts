@@ -176,21 +176,27 @@ function getLibraries(deployConfig: DeployConfig): LibraryArgs {
 function getPortfolioArgs(deployConfig: DeployConfig): PortfolioArgs {
   return {
     depositToken: deployConfig.depositToken,
-    depositFee: {
-      amount: BigNumber.from(deployConfig.depositFee),
-      params: deployConfig.depositFeeParams,
-    },
-    withdrawalFee: {
-      amount: BigNumber.from(deployConfig.withdrawalFee),
-      params: deployConfig.withdrawalFeeParams,
-    },
-    performanceFee: {
-      amount: BigNumber.from(deployConfig.performanceFee),
-      params: deployConfig.performanceFeeParams,
-    },
-    feeReceiver: {
-      address: deployConfig.feeReceiver,
-      params: deployConfig.feeReceiverParams,
+    feeArgs: {
+      depositFee: {
+        amount: BigNumber.from(deployConfig.depositFee),
+        params: deployConfig.depositFeeParams,
+      },
+      withdrawalFee: {
+        amount: BigNumber.from(deployConfig.withdrawalFee),
+        params: deployConfig.withdrawalFeeParams,
+      },
+      performanceFee: {
+        amount: BigNumber.from(deployConfig.performanceFee),
+        params: deployConfig.performanceFeeParams,
+      },
+      managementFee: {
+        amount: BigNumber.from(deployConfig.managementFee),
+        params: deployConfig.managementFeeParams,
+      },
+      feeReceiver: {
+        address: deployConfig.feeReceiver,
+        params: deployConfig.feeReceiverParams,
+      },
     },
     investmentLimit: {
       total: BigInt(deployConfig.totalInvestmentLimit),
@@ -229,21 +235,27 @@ function getPortfolioAllocations(deployConfig: DeployConfig): number[][] {
 function getStrategyArgs(deployConfig: any): StrategyArgs {
   return {
     depositToken: deployConfig.depositToken,
-    depositFee: {
-      amount: BigNumber.from(deployConfig.depositFee),
-      params: deployConfig.depositFeeParams,
-    },
-    withdrawalFee: {
-      amount: BigNumber.from(deployConfig.withdrawalFee),
-      params: deployConfig.withdrawalFeeParams,
-    },
-    performanceFee: {
-      amount: BigNumber.from(deployConfig.performanceFee),
-      params: deployConfig.performanceFeeParams,
-    },
-    feeReceiver: {
-      address: deployConfig.feeReceiver,
-      params: deployConfig.feeReceiverParams,
+    feeArgs: {
+      depositFee: {
+        amount: BigNumber.from(deployConfig.depositFee),
+        params: deployConfig.depositFeeParams,
+      },
+      withdrawalFee: {
+        amount: BigNumber.from(deployConfig.withdrawalFee),
+        params: deployConfig.withdrawalFeeParams,
+      },
+      performanceFee: {
+        amount: BigNumber.from(deployConfig.performanceFee),
+        params: deployConfig.performanceFeeParams,
+      },
+      managementFee: {
+        amount: BigNumber.from(deployConfig.managementFee),
+        params: deployConfig.performanceFeeParams,
+      },
+      feeReceiver: {
+        address: deployConfig.feeReceiver,
+        params: deployConfig.feeReceiverParams,
+      },
     },
     investmentLimit: {
       total: BigInt(deployConfig.totalInvestmentLimit),

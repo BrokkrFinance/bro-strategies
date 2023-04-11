@@ -38,6 +38,9 @@ library InvestableLib {
     IVBNB public constant BINANCE_VENUS_BNB_MARKET =
         IVBNB(0xA07c5b74C9B40447a954e1466938b865b6BBea36);
 
+    // Price precision is used to determine the precision for
+    // 1. Oracle price returned from an oracle implementing IPriceOracle interface
+    // 2. Investment token
     uint8 public constant PRICE_PRECISION_DIGITS = 6;
     uint256 public constant PRICE_PRECISION_FACTOR = 10**PRICE_PRECISION_DIGITS;
 

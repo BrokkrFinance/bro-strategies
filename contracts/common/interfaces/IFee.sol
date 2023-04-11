@@ -10,6 +10,7 @@ interface IFee {
     event DepositFeeChange(uint256 fee, NameValuePair[] params);
     event WithdrawalFeeChange(uint256 fee, NameValuePair[] params);
     event PerformanceFeeChange(uint256 fee, NameValuePair[] params);
+    event ManagementFeeChange(uint256 fee, NameValuePair[] params);
     event FeeReceiverChange(address feeReceiver, NameValuePair[] params);
     event FeeClaim(uint256 fee);
 
@@ -51,6 +52,23 @@ interface IFee {
 
     function setPerformanceFee(uint24 fee, NameValuePair[] calldata params)
         external;
+
+    function takePerformanceFee(NameValuePair[] calldata params) external;
+
+    function getManagementFee(NameValuePair[] calldata params)
+        external
+        view
+        returns (uint24);
+
+    function getTotalManagementFee(NameValuePair[] calldata params)
+        external
+        view
+        returns (uint24);
+
+    function setManagementFee(uint24 fee, NameValuePair[] calldata params)
+        external;
+
+    function takeManagementFee(NameValuePair[] calldata params) external;
 
     function getFeeReceiver(NameValuePair[] calldata params)
         external

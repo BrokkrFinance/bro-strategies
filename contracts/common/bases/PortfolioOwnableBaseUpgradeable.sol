@@ -85,6 +85,30 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         super._setPerformanceFee(fee_, params);
     }
 
+    function takePerformanceFee(NameValuePair[] calldata params)
+        external
+        virtual
+        onlyOwner
+    {
+        super._takePerformanceFee(params);
+    }
+
+    function setManagementFee(uint24 fee_, NameValuePair[] calldata params)
+        public
+        virtual
+        onlyOwner
+    {
+        super._setManagementFee(fee_, params);
+    }
+
+    function takeManagementFee(NameValuePair[] calldata params)
+        external
+        virtual
+        onlyOwner
+    {
+        super._takeManagementFee(params);
+    }
+
     function setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params

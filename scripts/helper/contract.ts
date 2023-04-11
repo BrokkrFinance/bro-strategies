@@ -36,4 +36,5 @@ async function setFees(investable: Contract, owner: SignerWithAddress, fee: numb
   await investable.connect(owner).setDepositFee(fee, [])
   await investable.connect(owner).setWithdrawalFee(fee, [])
   await investable.connect(owner).setPerformanceFee(fee, [])
+  await investable.connect(owner).setManagementFee(fee, [])
 }

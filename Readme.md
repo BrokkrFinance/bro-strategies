@@ -43,7 +43,7 @@ The most important thing is to bump the major version number at each breaking ch
 
 ### High priority
 
-1. <s>remove unsafeSkipStorageCheck in the next release:</s>
+1. remove unsafeSkipStorageCheck in the next release
 1. <s>create a cash strategy for the wrapper portfolio</s>
 1. <s>add a new price oracle supporting USDT</s>
 1. <s>allow changing the name of ERC-20 tokens</s>

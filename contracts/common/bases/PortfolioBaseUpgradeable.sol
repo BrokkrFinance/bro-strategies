@@ -18,14 +18,7 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeab
 struct PortfolioArgs {
     IInvestmentToken investmentToken;
     IERC20UpgradeableExt depositToken;
-    uint24 depositFee;
-    NameValuePair[] depositFeeParams;
-    uint24 withdrawalFee;
-    NameValuePair[] withdrawFeeParams;
-    uint24 performanceFee;
-    NameValuePair[] performanceFeeParams;
-    address feeReceiver;
-    NameValuePair[] feeReceiverParams;
+    FeeArgs feeArgs;
     uint256 totalInvestmentLimit;
     uint256 investmentLimitPerAddress;
 }
@@ -52,26 +45,23 @@ abstract contract PortfolioBaseUpgradeable is
     enum FeeType {
         Deposit,
         Withdrawal,
-        Performance
+        Performance,
+        Management
     }
 
     // solhint-disable-next-line
     function __PortfolioBaseUpgradeable_init(
         PortfolioArgs calldata portfolioArgs
     ) internal onlyInitializing {
+        __Context_init();
         __ReentrancyGuard_init();
         __ERC165_init();
-        __Context_init();
+
         __FeeUpgradeable_init(
-            portfolioArgs.depositFee,
-            portfolioArgs.depositFeeParams,
-            portfolioArgs.withdrawalFee,
-            portfolioArgs.withdrawFeeParams,
-            portfolioArgs.performanceFee,
-            portfolioArgs.performanceFeeParams,
-            portfolioArgs.feeReceiver,
-            portfolioArgs.feeReceiverParams
+            portfolioArgs.feeArgs,
+            portfolioArgs.depositToken.decimals()
         );
+
         __InvestmentLimitUpgradeable_init(
             portfolioArgs.totalInvestmentLimit,
             portfolioArgs.investmentLimitPerAddress
@@ -357,6 +347,16 @@ abstract contract PortfolioBaseUpgradeable is
         );
     }
 
+    function _takePerformanceFee(NameValuePair[] calldata params)
+        internal
+        virtual
+    {}
+
+    function _takeManagementFee(NameValuePair[] calldata params)
+        internal
+        virtual
+    {}
+
     // workaround for 'stack too deep' error
     struct RebalanceLocalVars {
         uint256 totalEquityBeforeRebalance;
@@ -585,7 +585,9 @@ abstract contract PortfolioBaseUpgradeable is
         override
         returns (uint24)
     {
-        return getEmbeddedDepositFee(params) + getDepositFee(params);
+        return
+            calculateEmbeddedFeeTargetAllocation(FeeType.Deposit, params) +
+            getDepositFee(params);
     }
 
     function getTotalWithdrawalFee(NameValuePair[] calldata params)
@@ -595,7 +597,9 @@ abstract contract PortfolioBaseUpgradeable is
         override
         returns (uint24)
     {
-        return getEmbeddedWithdrawalFee(params) + getWithdrawalFee(params);
+        return
+            calculateEmbeddedFeeActualAllocation(FeeType.Withdrawal, params) +
+            getWithdrawalFee(params);
     }
 
     function getTotalPerformanceFee(NameValuePair[] calldata params)
@@ -605,24 +609,27 @@ abstract contract PortfolioBaseUpgradeable is
         override
         returns (uint24)
     {
-        return getEmbeddedPerformanceFee(params) + getPerformanceFee(params);
+        return
+            calculateEmbeddedFeeTargetAllocation(FeeType.Performance, params) +
+            getPerformanceFee(params);
     }
 
-    function getEmbeddedDepositFee(NameValuePair[] calldata params)
-        internal
+    function getTotalManagementFee(NameValuePair[] calldata params)
+        external
         view
         virtual
+        override
         returns (uint24)
     {
-        return calculateEmbeddedFee(FeeType.Deposit, params);
+        return
+            calculateEmbeddedFeeActualAllocation(FeeType.Management, params) +
+            getManagementFee(params);
     }
 
-    function getEmbeddedWithdrawalFee(NameValuePair[] calldata params)
-        internal
-        view
-        virtual
-        returns (uint24)
-    {
+    function calculateEmbeddedFeeActualAllocation(
+        FeeType feeType,
+        NameValuePair[] calldata params
+    ) internal view virtual returns (uint24) {
         uint256 embeddedFee;
         uint256 totalEquity;
         uint256 investableDescsLength = investableDescs.length;
@@ -645,31 +652,25 @@ abstract contract PortfolioBaseUpgradeable is
 
         // no prior investment into any of the strategies by the portfolio
         if (totalEquity == 0) {
-            return calculateEmbeddedFee(FeeType.Withdrawal, params);
+            return calculateEmbeddedFeeTargetAllocation(feeType, params);
         }
         // there is at least one strategy with investment by the portfolio
         else {
             for (uint256 i = 0; i < investableDescsLength; i++) {
                 IInvestable embeddedInvestable = investableDescs[i].investable;
                 embeddedFee +=
-                    (uint256(embeddedInvestable.getTotalWithdrawalFee(params)) *
-                        currentInvestableEquities[i]) /
+                    (uint256(
+                        (feeType == FeeType.Withdrawal)
+                            ? embeddedInvestable.getTotalWithdrawalFee(params)
+                            : embeddedInvestable.getTotalManagementFee(params)
+                    ) * currentInvestableEquities[i]) /
                     totalEquity;
             }
             return uint24(embeddedFee);
         }
     }
 
-    function getEmbeddedPerformanceFee(NameValuePair[] calldata params)
-        internal
-        view
-        virtual
-        returns (uint24)
-    {
-        return calculateEmbeddedFee(FeeType.Performance, params);
-    }
-
-    function calculateEmbeddedFee(
+    function calculateEmbeddedFeeTargetAllocation(
         FeeType feeType,
         NameValuePair[] calldata params
     ) internal view returns (uint24) {
@@ -686,8 +687,12 @@ abstract contract PortfolioBaseUpgradeable is
                                 ? embeddedInvestable.getTotalWithdrawalFee(
                                     params
                                 )
-                                : embeddedInvestable.getTotalPerformanceFee(
-                                    params
+                                : (
+                                    (feeType == FeeType.Performance)
+                                        ? embeddedInvestable
+                                            .getTotalPerformanceFee(params)
+                                        : embeddedInvestable
+                                            .getTotalManagementFee(params)
                                 )
                         )
                 ) *

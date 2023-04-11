@@ -40,10 +40,13 @@ export interface LibraryArgs {
 
 export interface PortfolioArgs {
   depositToken: string
-  depositFee: Fee
-  withdrawalFee: Fee
-  performanceFee: Fee
-  feeReceiver: FeeReceiver
+  feeArgs: {
+    depositFee: Fee
+    withdrawalFee: Fee
+    performanceFee: Fee
+    managementFee: Fee
+    feeReceiver: FeeReceiver
+  }
   investmentLimit: InvestmentLimit
 }
 
@@ -53,10 +56,13 @@ export interface PortfolioExtraArgs {
 
 export interface StrategyArgs {
   depositToken: string
-  depositFee: Fee
-  withdrawalFee: Fee
-  performanceFee: Fee
-  feeReceiver: FeeReceiver
+  feeArgs: {
+    depositFee: Fee
+    withdrawalFee: Fee
+    performanceFee: Fee
+    managementFee: Fee
+    feeReceiver: FeeReceiver
+  }
   investmentLimit: InvestmentLimit
   oracle: Oracle
   swapService: SwapService
