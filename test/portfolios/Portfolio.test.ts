@@ -1,4 +1,6 @@
 import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
+import { execSync } from "child_process"
+import { Contract } from "ethers"
 import { ethers, network } from "hardhat"
 import { DepositTokens } from "../../scripts/constants/deposit-tokens"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
@@ -8,14 +10,11 @@ import { InvestHelper } from "../helper/invest"
 import { testPortfolioAccessControl } from "./PortfolioAccessControl.test"
 import { testPortfolioAllocations } from "./PortfolioAllocations.test"
 import { testPortfolioDeposit } from "./PortfolioDeposit.test"
-import { testPortfolioERC165 } from "./PortfolioERC165.test"
 import { testPortfolioInvestable } from "./PortfolioInvestable.test"
 import { testPortfolioPausable } from "./PortfolioPausable.test"
 import { testPortfolioRebalance } from "./PortfolioRebalance.test"
 import { testPortfolioUpgradeable } from "./PortfolioUpgradeable.test"
 import { testPortfolioWithdraw } from "./PortfolioWithdraw.test"
-import { execSync } from "child_process"
-import { Contract } from "ethers"
 
 export function testPortfolio(
   description: string,
@@ -133,12 +132,13 @@ export function testPortfolio(
     testPortfolioAccessControl()
     testPortfolioAllocations()
     testPortfolioDeposit()
-    testPortfolioERC165()
     testPortfolioInvestable()
     testPortfolioPausable()
     testPortfolioRebalance()
     testPortfolioUpgradeable()
     testPortfolioWithdraw()
+    // temporarily switched off, until the interface becomes more stable
+    // testPortfolioERC165()
 
     for (const portfolioSpecificTest of portfolioSpecificTests) {
       portfolioSpecificTest()

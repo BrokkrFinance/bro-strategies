@@ -3,8 +3,114 @@ import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { getErrorRange } from "../helper/utils"
 
+BigNumber
+expect
+ethers
+getErrorRange
+
 export function testStrategyFee() {
   describe("Fee", async function () {
+    it("management fee handling", async function () {
+      const initialAccumulatedFee = await this.strategy.getCurrentAccumulatedFee()
+      const initialEquityValuation = await this.strategy.getEquityValuation(false, false)
+      const initialInvestmentTokenSupply = await this.strategy.getInvestmentTokenSupply()
+
+      // should fail when the non-owner tries to set the management fee
+      await expect(this.strategy.connect(this.user0).setManagementFee(0, [])).to.be.reverted
+
+      // should fail when the non-owner tries to take management fee
+      await expect(this.strategy.connect(this.user0).takeManagementFee([])).to.be.reverted
+
+      if (initialEquityValuation == 0) {
+        // taking zero management fee from an uninvested strategy
+        await expect(this.strategy.connect(this.owner).setManagementFee(0, [])).not.to.be.reverted
+        await expect(this.strategy.connect(this.owner).takeManagementFee([])).not.to.be.reverted
+        expect(await this.strategy.getCurrentAccumulatedFee()).to.equal(initialAccumulatedFee)
+
+        // taking 20% management fee from an uninvested strategy
+        await expect(this.strategy.connect(this.owner).setManagementFee(20000, [])).not.to.be.reverted
+        await expect(this.strategy.connect(this.owner).takeManagementFee([])).not.to.be.reverted
+        expect(await this.strategy.getCurrentAccumulatedFee()).to.equal(initialAccumulatedFee)
+      }
+
+      // user0 deposits 10000 into the strategy
+      let user0UsdcBalanceBeforeInvestment = await this.depositToken.balanceOf(this.user0.address)
+      await this.depositToken.connect(this.user0).approve(this.strategy.address, ethers.utils.parseUnits("10000", 6))
+      await this.strategy
+        .connect(this.user0)
+        .deposit(ethers.utils.parseUnits("10000", 6), BigNumber.from(0), this.user0.address, [])
+      const investmentTokenSupplyAfterInvestment = await this.strategy.getInvestmentTokenSupply()
+      let investmentTokenSupplyIncrement = investmentTokenSupplyAfterInvestment.sub(initialInvestmentTokenSupply)
+      let equityValuationAfterInvestment = await this.strategy.getEquityValuation(false, false)
+
+      // taking zero management fee from an invested strategy
+      await expect(this.strategy.connect(this.owner).setManagementFee(0, [])).not.to.be.reverted
+      await expect(this.strategy.connect(this.owner).takeManagementFee([])).not.to.be.reverted
+      expect(await this.strategy.getCurrentAccumulatedFee()).to.equal(initialAccumulatedFee)
+
+      // taking 10% management fee from an invested strategy first time
+      await expect(this.strategy.connect(this.owner).setManagementFee(10000, [])).not.to.be.reverted
+      await expect(this.strategy.connect(this.owner).takeManagementFee([])).not.to.be.reverted
+      let expectedAccumulatedFee = BigNumber.from(equityValuationAfterInvestment.div(10)).add(initialAccumulatedFee)
+
+      expect(await this.strategy.getCurrentAccumulatedFee()).to.be.approximately(
+        expectedAccumulatedFee,
+        getErrorRange(BigNumber.from(expectedAccumulatedFee))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.equal(
+        initialInvestmentTokenSupply.add(investmentTokenSupplyIncrement)
+      )
+
+      // taking 10% management fee from an invested strategy second time
+      await expect(this.strategy.connect(this.owner).setManagementFee(10000, [])).not.to.be.reverted
+      await expect(this.strategy.connect(this.owner).takeManagementFee([])).not.to.be.reverted
+      expectedAccumulatedFee = BigNumber.from(equityValuationAfterInvestment.mul(19).div(100)).add(
+        initialAccumulatedFee
+      )
+      expect(await this.strategy.getCurrentAccumulatedFee()).to.be.approximately(
+        expectedAccumulatedFee,
+        getErrorRange(BigNumber.from(expectedAccumulatedFee))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.equal(
+        initialInvestmentTokenSupply.add(investmentTokenSupplyIncrement)
+      )
+
+      // setting up 20% withdrawal fee and withdraw everything
+      await expect(this.strategy.connect(this.owner).setWithdrawalFee(20000, [])).not.to.be.reverted
+      await expect(
+        this.investmentToken.connect(this.user0).approve(this.strategy.address, investmentTokenSupplyIncrement)
+      ).not.to.be.reverted
+      await expect(
+        this.strategy
+          .connect(this.user0)
+          .withdraw(investmentTokenSupplyIncrement, BigNumber.from(0), this.user0.address, [])
+      ).not.to.be.reverted
+
+      let user0ActualLossOfBalance =
+        user0UsdcBalanceBeforeInvestment - (await this.depositToken.balanceOf(this.user0.address))
+      let user0ExpectedLossOfBalance = equityValuationAfterInvestment.sub(initialEquityValuation).mul(352).div(1000)
+      expect(user0ActualLossOfBalance).to.be.approximately(
+        user0ExpectedLossOfBalance,
+        getErrorRange(BigNumber.from(user0ExpectedLossOfBalance))
+      )
+      expect(await this.strategy.getInvestmentTokenSupply()).to.be.equal(initialInvestmentTokenSupply)
+      if (initialEquityValuation == 0) expect(await this.strategy.getEquityValuation(false, false)).to.be.equal(0)
+
+      // claiming all the unclaimed fees (management and withdrawal fee)
+      let feeReceiver = await this.strategy.getFeeReceiver([])
+      let feeReceiverBalanceBeforeClaiming = await this.depositToken.balanceOf(feeReceiver)
+      let feeAmount = await this.strategy.getCurrentAccumulatedFee()
+
+      await expect(this.strategy.connect(this.owner).claimFee([]))
+        .to.emit(this.strategy, "FeeClaim")
+        .withArgs(feeAmount)
+      let feeReceiverBalanceAfterClaiming = await this.depositToken.balanceOf(feeReceiver)
+
+      expect(await this.strategy.getCurrentAccumulatedFee()).to.equal(0)
+      expect(await this.strategy.getClaimedFee()).to.equal(feeAmount)
+      expect(feeReceiverBalanceAfterClaiming - feeReceiverBalanceBeforeClaiming).to.equal(feeAmount)
+    })
+
     it("should succeed when any user calls claim fee", async function () {
       const feeReceiver = await this.strategy.getFeeReceiver([])
       const feeAmount = await this.strategy.getCurrentAccumulatedFee()

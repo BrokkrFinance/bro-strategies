@@ -2,10 +2,24 @@
 pragma solidity ^0.8.0;
 
 import "../Common.sol";
+import "../libraries/InvestableLib.sol";
 import "../interfaces/IFee.sol";
 import "../libraries/Math.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+struct FeeArgs {
+    uint24 depositFee;
+    NameValuePair[] depositFeeParams;
+    uint24 withdrawalFee;
+    NameValuePair[] withdrawFeeParams;
+    uint24 performanceFee;
+    NameValuePair[] performanceFeeParams;
+    uint24 managementFee;
+    NameValuePair[] managementFeeParams;
+    address feeReceiver;
+    NameValuePair[] feeReceiverParams;
+}
 
 abstract contract FeeUpgradeable is Initializable, IFee {
     uint24 internal withdrawalFee;
@@ -14,23 +28,30 @@ abstract contract FeeUpgradeable is Initializable, IFee {
     uint256 internal currentAccumulatedFee;
     uint256 internal claimedFee;
     address internal feeReceiver;
-    uint256[40] private __gap;
+    uint24 internal managementFee;
+    uint256 public tokenPriceHighWatermark;
+    uint256[39] private __gap;
 
     // solhint-disable-next-line func-name-mixedcase
     function __FeeUpgradeable_init(
-        uint24 depositFee_,
-        NameValuePair[] calldata depositFeeParams_,
-        uint24 withdrawalFee_,
-        NameValuePair[] calldata withdrawFeeParams_,
-        uint24 performanceFee_,
-        NameValuePair[] calldata performanceFeeParams_,
-        address feeReceiver_,
-        NameValuePair[] calldata feeReceiverParams_
+        FeeArgs calldata feeArgs,
+        uint8 depositTokenDecimalCount
     ) internal onlyInitializing {
-        _setDepositFee(depositFee_, depositFeeParams_);
-        _setWithdrawalFee(withdrawalFee_, withdrawFeeParams_);
-        _setPerformanceFee(performanceFee_, performanceFeeParams_);
-        _setFeeReceiver(feeReceiver_, feeReceiverParams_);
+        // assumption: depositTokenDecimalCount >= InvestableLib.PRICE_PRECISION_DIGITS
+        _setTokenPriceHighWatermark(
+            (10 **
+                (depositTokenDecimalCount -
+                    InvestableLib.PRICE_PRECISION_DIGITS)) *
+                Math.MEDIUM_FIXED_DECIMAL_FACTOR
+        );
+        _setDepositFee(feeArgs.depositFee, feeArgs.depositFeeParams);
+        _setWithdrawalFee(feeArgs.withdrawalFee, feeArgs.withdrawFeeParams);
+        _setPerformanceFee(
+            feeArgs.performanceFee,
+            feeArgs.performanceFeeParams
+        );
+        _setManagementFee(feeArgs.managementFee, feeArgs.managementFeeParams);
+        _setFeeReceiver(feeArgs.feeReceiver, feeArgs.feeReceiverParams);
     }
 
     modifier checkFee(uint24 fee) {
@@ -92,6 +113,31 @@ abstract contract FeeUpgradeable is Initializable, IFee {
     {
         performanceFee = fee;
         emit PerformanceFeeChange(performanceFee, params);
+    }
+
+    function _setTokenPriceHighWatermark(uint256 newTokenPriceHighWaterMark)
+        internal
+        virtual
+    {
+        tokenPriceHighWatermark = newTokenPriceHighWaterMark;
+    }
+
+    function getManagementFee(NameValuePair[] calldata)
+        public
+        view
+        virtual
+        returns (uint24)
+    {
+        return managementFee;
+    }
+
+    function _setManagementFee(uint24 fee, NameValuePair[] calldata params)
+        internal
+        virtual
+        checkFee(fee)
+    {
+        managementFee = fee;
+        emit ManagementFeeChange(managementFee, params);
     }
 
     function getFeeReceiver(NameValuePair[] calldata)

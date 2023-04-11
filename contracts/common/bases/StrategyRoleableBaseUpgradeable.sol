@@ -90,6 +90,30 @@ abstract contract StrategyRoleableBaseUpgradeable is
         super._setPerformanceFee(fee_, params);
     }
 
+    function takePerformanceFee(NameValuePair[] calldata params)
+        external
+        virtual
+        onlyRole(MAINTAINER_ROLE)
+    {
+        super._takePerformanceFee(params);
+    }
+
+    function setManagementFee(uint24 fee_, NameValuePair[] calldata params)
+        public
+        virtual
+        onlyRole(GOVERNOR_ROLE)
+    {
+        super._setManagementFee(fee_, params);
+    }
+
+    function takeManagementFee(NameValuePair[] calldata params)
+        external
+        virtual
+        onlyRole(MAINTAINER_ROLE)
+    {
+        super._takeManagementFee(params);
+    }
+
     function setFeeReceiver(
         address feeReceiver_,
         NameValuePair[] calldata params

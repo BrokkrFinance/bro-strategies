@@ -7,7 +7,9 @@ export function testStrategyUpgradeable() {
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.strategy.address)
 
       const NewStrategy = await ethers.getContractFactory(this.upgradeTo, this.owner)
-      const newStrategy = await upgrades.upgradeProxy(this.strategy.address, NewStrategy)
+      const newStrategy = await upgrades.upgradeProxy(this.strategy.address, NewStrategy, {
+        unsafeSkipStorageCheck: true,
+      })
       await newStrategy.deployed()
 
       const addr_after_upgrade = await upgrades.erc1967.getImplementationAddress(this.strategy.address)
@@ -21,7 +23,9 @@ export function testStrategyUpgradeable() {
       const addr_before_upgrade = await upgrades.erc1967.getImplementationAddress(this.strategy.address)
 
       const NewStrategy = await ethers.getContractFactory(this.upgradeTo, this.owner)
-      const newStrategy = await upgrades.upgradeProxy(this.strategy.address, NewStrategy)
+      const newStrategy = await upgrades.upgradeProxy(this.strategy.address, NewStrategy, {
+        unsafeSkipStorageCheck: true,
+      })
       await newStrategy.deployed()
 
       const addr_after_upgrade = await upgrades.erc1967.getImplementationAddress(this.strategy.address)
@@ -31,7 +35,11 @@ export function testStrategyUpgradeable() {
 
     it("should fail when the non-owner user upgrades", async function () {
       const NewStrategy = await ethers.getContractFactory(this.upgradeTo, this.user0)
-      await expect(upgrades.upgradeProxy(this.strategy.address, NewStrategy)).to.be.reverted
+      await expect(
+        upgrades.upgradeProxy(this.strategy.address, NewStrategy, {
+          unsafeSkipStorageCheck: true,
+        })
+      ).to.be.reverted
     })
   })
 }

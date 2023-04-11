@@ -24,14 +24,7 @@ struct RoleToUsers {
 struct StrategyArgs {
     IInvestmentToken investmentToken;
     IERC20UpgradeableExt depositToken;
-    uint24 depositFee;
-    NameValuePair[] depositFeeParams;
-    uint24 withdrawalFee;
-    NameValuePair[] withdrawFeeParams;
-    uint24 performanceFee;
-    NameValuePair[] performanceFeeParams;
-    address feeReceiver;
-    NameValuePair[] feeReceiverParams;
+    FeeArgs feeArgs;
     uint256 totalInvestmentLimit;
     uint256 investmentLimitPerAddress;
     IPriceOracle priceOracle;
@@ -68,14 +61,8 @@ abstract contract StrategyBaseUpgradeable is
         __ReentrancyGuard_init();
         __ERC165_init();
         __FeeUpgradeable_init(
-            strategyArgs.depositFee,
-            strategyArgs.depositFeeParams,
-            strategyArgs.withdrawalFee,
-            strategyArgs.withdrawFeeParams,
-            strategyArgs.performanceFee,
-            strategyArgs.performanceFeeParams,
-            strategyArgs.feeReceiver,
-            strategyArgs.feeReceiverParams
+            strategyArgs.feeArgs,
+            strategyArgs.depositToken.decimals()
         );
         __InvestmentLimitUpgradeable_init(
             strategyArgs.totalInvestmentLimit,
@@ -258,6 +245,93 @@ abstract contract StrategyBaseUpgradeable is
             _msgSender(),
             depositTokenReceiver,
             investmentTokenAmountIn
+        );
+    }
+
+    function _takePerformanceFee(NameValuePair[] calldata params)
+        internal
+        virtual
+    {
+        // return early, if perfomance fee or investmentTokeySupply is zero
+        uint256 investmentTokenSupply = getInvestmentTokenSupply();
+        uint256 performanceFee = getPerformanceFee(params);
+        if (performanceFee == 0 || investmentTokenSupply == 0) return;
+
+        // return early, if performance was not good enough to take fees
+        uint256 equityValuation = getEquityValuation(false, false);
+        uint256 oldTokenPricehighWatermark = tokenPriceHighWatermark;
+        uint256 newTokenPriceHighWatermark = (equityValuation *
+            Math.MEDIUM_FIXED_DECIMAL_FACTOR) / investmentTokenSupply;
+        if (newTokenPriceHighWatermark <= oldTokenPricehighWatermark) return;
+
+        uint256 performanceFeeInInvestmentTokenNumber = ((newTokenPriceHighWatermark -
+            oldTokenPricehighWatermark) *
+            performanceFee *
+            investmentTokenSupply *
+            investmentTokenSupply) /
+            equityValuation /
+            Math.SHORT_FIXED_DECIMAL_FACTOR / // precision for performance fee
+            Math.MEDIUM_FIXED_DECIMAL_FACTOR / // precisioin for watermark
+            100; // scaling for percentage
+
+        // withdrawing from the DeFi protocols
+        uint256 depositTokenBalanceBefore = _beforeWithdraw(
+            performanceFeeInInvestmentTokenNumber,
+            params
+        );
+        _withdraw(performanceFeeInInvestmentTokenNumber, params);
+        uint256 withdrawnTotalDepositTokenAmount = _afterWithdraw(
+            performanceFeeInInvestmentTokenNumber,
+            params
+        ) - depositTokenBalanceBefore;
+
+        // withdrawing from the uninvested balance
+        uint256 withdrawnUninvestedDepositTokenAmount = (uninvestedDepositTokenAmount *
+                performanceFeeInInvestmentTokenNumber) / investmentTokenSupply;
+        withdrawnTotalDepositTokenAmount += withdrawnUninvestedDepositTokenAmount;
+        uninvestedDepositTokenAmount -= withdrawnUninvestedDepositTokenAmount;
+
+        // increasing accumulated fee
+        setCurrentAccumulatedFee(
+            getCurrentAccumulatedFee() + withdrawnTotalDepositTokenAmount
+        );
+
+        tokenPriceHighWatermark = newTokenPriceHighWatermark;
+    }
+
+    function _takeManagementFee(NameValuePair[] calldata params)
+        internal
+        virtual
+    {
+        uint256 managementFee = getManagementFee(params);
+        uint256 investmentTokenSupply = getInvestmentTokenSupply();
+        if (managementFee == 0 || investmentTokenSupply == 0) return;
+
+        uint256 managementFeeInInvestmentTokenNumber = (investmentTokenSupply *
+            managementFee) /
+            Math.SHORT_FIXED_DECIMAL_FACTOR /
+            100;
+
+        // withdrawing from the DeFi protocols
+        uint256 depositTokenBalanceBefore = _beforeWithdraw(
+            managementFeeInInvestmentTokenNumber,
+            params
+        );
+        _withdraw(managementFeeInInvestmentTokenNumber, params);
+        uint256 withdrawnTotalDepositTokenAmount = _afterWithdraw(
+            managementFeeInInvestmentTokenNumber,
+            params
+        ) - depositTokenBalanceBefore;
+
+        // withdrawing from the uninvested balance
+        uint256 withdrawnUninvestedDepositTokenAmount = (uninvestedDepositTokenAmount *
+                managementFeeInInvestmentTokenNumber) / investmentTokenSupply;
+        withdrawnTotalDepositTokenAmount += withdrawnUninvestedDepositTokenAmount;
+        uninvestedDepositTokenAmount -= withdrawnUninvestedDepositTokenAmount;
+
+        // increasing accumulated fee
+        setCurrentAccumulatedFee(
+            getCurrentAccumulatedFee() + withdrawnTotalDepositTokenAmount
         );
     }
 
@@ -486,6 +560,16 @@ abstract contract StrategyBaseUpgradeable is
         returns (uint24)
     {
         return getPerformanceFee(params);
+    }
+
+    function getTotalManagementFee(NameValuePair[] calldata params)
+        external
+        view
+        virtual
+        override
+        returns (uint24)
+    {
+        return getManagementFee(params);
     }
 
     function getDepositToken() external view returns (IERC20Upgradeable) {

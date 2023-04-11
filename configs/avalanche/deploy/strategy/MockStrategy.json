@@ -3,11 +3,11 @@
     {
       "type": "strategy",
       "subtype": "ownable",
-      "name": "StargateUSDT",
+      "name": "MockStrategy",
       "owner": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
-      "contractName": "Stargate",
-      "investmentTokenName": "Stargate USDT Strategy Token",
-      "investmentTokenSymbol": "SS-USDT",
+      "contractName": "MockStrategy",
+      "investmentTokenName": "Mock Strategy Token",
+      "investmentTokenSymbol": "Mock",
       "depositToken": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
       "depositFee": 0,
       "depositFeeParams": [],
@@ -24,14 +24,7 @@
       "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
       "swapService": { "$ref": "../../../../constants/avalanche/SwapServices.json#/traderjoe" },
       "roleToUsers": [],
-      "extraArgs": [
-        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/router" },
-        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/usdtPool" },
-        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/lpStaking" },
-        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/usdtLPToken" },
-        { "$ref": "../../../../constants/avalanche/addresses/Stargate.json#/stgToken" },
-        [{ "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" }, 1]
-      ],
+      "extraArgs": [],
       "libraries": []
     }
   ]

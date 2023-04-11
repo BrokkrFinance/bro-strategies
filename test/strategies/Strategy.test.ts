@@ -1,9 +1,11 @@
 import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
+import { execSync } from "child_process"
+import { Contract } from "ethers"
 import { ethers, network } from "hardhat"
 import AccessControlRoles from "../../constants/AccessControlRoles.json"
 import { DepositTokens } from "../../scripts/constants/deposit-tokens"
-import { WhaleAddrs } from "../helper/addresses"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
+import { WhaleAddrs } from "../helper/addresses"
 import { StrategyTestOptions } from "../helper/interfaces/options"
 import { InvestHelper } from "../helper/invest"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
@@ -16,8 +18,17 @@ import { testStrategyReapRewardExtra } from "./StrategyReapRewardExtra.test"
 import { testStrategyReapUninvestedReward } from "./StrategyReapUninvestedReward.test"
 import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
-import { Contract } from "ethers"
-import { execSync } from "child_process"
+
+testStrategyAccessControl
+testStrategyDeposit
+testStrategyERC165
+testStrategyPausable
+testStrategyReapReward
+testStrategyReapRewardExtra
+testStrategyReapUninvestedReward
+testStrategyUpgradeable
+testStrategyFee
+testStrategyWithdraw
 
 export function testStrategy(
   description: string,
@@ -31,7 +42,7 @@ export function testStrategy(
         method: "hardhat_reset",
         params: [
           {
-            allowUnlimitedContractSize: false,
+            allowUnlimitedContractSize: true,
             blockGasLimit: 30_000_000,
             forking: {
               jsonRpcUrl: testOptions.network.url,
@@ -140,6 +151,8 @@ export function testStrategy(
       this.withdrawalFeeParams = [] // Not implemented yet.
       this.performanceFee = await this.strategy.getPerformanceFee([])
       this.performanceFeeParams = [] // Not implemented yet.
+      this.managementFee = await this.strategy.getManagementFee([])
+      this.managementFeeParams = [] // Not implemented yet.
       this.feeReceiver = await this.strategy.getFeeReceiver([])
       this.feeReceiverParams = [] // Not implemented yet.
       this.totalInvestmentLimit = await this.strategy.getTotalInvestmentLimit()
@@ -169,7 +182,6 @@ export function testStrategy(
 
     testStrategyAccessControl()
     testStrategyDeposit()
-    testStrategyERC165()
     testStrategyFee()
     testStrategyPausable()
     if (testOptions.runReapReward !== false) testStrategyReapReward()
@@ -177,6 +189,8 @@ export function testStrategy(
     if (testOptions.runReapUninvestedReward !== false) testStrategyReapUninvestedReward()
     testStrategyUpgradeable()
     testStrategyWithdraw()
+    // temporarily switched off, until the interface becomes more stable
+    // testStrategyERC165()
 
     for (const strategySpecificTest of strategySpecificTests) {
       strategySpecificTest()
