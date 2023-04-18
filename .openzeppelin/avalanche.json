@@ -234,6 +234,16 @@
       "address": "0xB0E2880D4429d10eF1956062B260aDf09557A1da",
       "txHash": "0xa9edcde8241abd890cb409af67ab2f883ad7e6a2cf2bb11511f5c80332850f74",
       "kind": "uups"
+    },
+    {
+      "address": "0x014188e77EF422122C96B322c3151d3072C105d4",
+      "txHash": "0xfdfcf7baa4d93b43822031f7fce6179d258f79644729c0268206ed6c4d4ff069",
+      "kind": "uups"
+    },
+    {
+      "address": "0x5C06f08807778fb84e25A00aEfafBF9C8d528267",
+      "txHash": "0xbe6f21450e8b835e20fec2a122c308c78bf6c537696f4fee342eadef13b636b1",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -8631,7 +8641,8 @@
             "numberOfBytes": "1"
           }
         }
-      }
+      },
+      "allAddresses": ["0xE7540Bf7B8099D0C4D67b3f1785374d51057d30D", "0xf1bf2263e867e1003DaBF0e45BbA2c3cbfd4d18d"]
     },
     "ebd79d8f6a4c542261ea820027bd4f2c5ad83291bdc8183835fc00c5dd92fb98": {
       "address": "0x18E548f4c459ac5b923FD89c4427DAC2C8896559",
@@ -8917,7 +8928,8 @@
             "numberOfBytes": "1"
           }
         }
-      }
+      },
+      "allAddresses": ["0x18E548f4c459ac5b923FD89c4427DAC2C8896559", "0xb7C5B7E5C1357ED56b7be1E16B725D4cd47C23A4"]
     }
   }
 }
