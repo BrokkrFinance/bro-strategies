@@ -9,7 +9,7 @@ import { Constants } from "../libraries/Constants.sol";
 import { Errors } from "../libraries/Errors.sol";
 import { SwapAdapter } from "../libraries/SwapAdapter.sol";
 
-contract IndexAvalancheDeFi is UUPSUpgradeable, IndexAvalanche {
+contract IndexAvalancheGamingNFT is UUPSUpgradeable, IndexAvalanche {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
