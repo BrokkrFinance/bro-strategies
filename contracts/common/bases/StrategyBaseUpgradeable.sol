@@ -296,7 +296,7 @@ abstract contract StrategyBaseUpgradeable is
             getCurrentAccumulatedFee() + withdrawnTotalDepositTokenAmount
         );
 
-        tokenPriceHighWatermark = newTokenPriceHighWatermark;
+        _setTokenPriceHighWatermark(newTokenPriceHighWatermark);
     }
 
     function _takeManagementFee(NameValuePair[] calldata params)
