@@ -610,7 +610,7 @@ abstract contract PortfolioBaseUpgradeable is
         returns (uint24)
     {
         return
-            calculateEmbeddedFeeTargetAllocation(FeeType.Performance, params) +
+            calculateEmbeddedFeeActualAllocation(FeeType.Performance, params) +
             getPerformanceFee(params);
     }
 
@@ -662,7 +662,15 @@ abstract contract PortfolioBaseUpgradeable is
                     (uint256(
                         (feeType == FeeType.Withdrawal)
                             ? embeddedInvestable.getTotalWithdrawalFee(params)
-                            : embeddedInvestable.getTotalManagementFee(params)
+                            : (
+                                (feeType == FeeType.Management)
+                                    ? embeddedInvestable.getTotalManagementFee(
+                                        params
+                                    )
+                                    : embeddedInvestable.getTotalPerformanceFee(
+                                        params
+                                    )
+                            )
                     ) * currentInvestableEquities[i]) /
                     totalEquity;
             }
