@@ -1,0 +1,127 @@
+{
+  "properties": [
+    {
+      "type": "strategy",
+      "subtype": "index",
+      "name": "IndexAvalancheGamingNFT",
+      "owner": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
+      "contractName": "IndexAvalancheGamingNFT",
+      "indexTokenName": "Index Avalanche Gaming NFT Token",
+      "indexTokenSymbol": "IXAG",
+      "wNATIVE": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+      "components": [
+        {
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/egg" },
+          "weight": "7851912922285690000000"
+        },
+        {
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/slime" },
+          "weight": "30030480938152200000000"
+        },
+        {
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/hec" },
+          "weight": "4177667858694560000000"
+        },
+        {
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/cra" },
+          "weight": "17062553453780700000000"
+        },
+        {
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/hon" },
+          "weight": "10925313344056300000000"
+        },
+        {
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/bro" },
+          "weight": "3900232063807800000000"
+        }
+      ],
+      "swapRoutes": [
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
+          "dex": 1,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_usdc_v1" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
+          "dex": 2,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_usdc_v2" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000014"
+          }
+        },
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/egg" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
+          "dex": 1,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_egg_v1" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/slime" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
+          "dex": 1,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_slime_v1" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/hec" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
+          "dex": 1,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_hec_v1" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/cra" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
+          "dex": 1,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_cra_v1" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/hon" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
+          "dex": 1,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_hon_v1" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/bro" },
+          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
+          "dex": 1,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_bro_v1" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "whitelistedTokens": [{ "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" }],
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/index" },
+      "equityValuationLimit": 2e13,
+      "extraArgs": [],
+      "libraries": []
+    }
+  ]
+}

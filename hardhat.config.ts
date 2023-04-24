@@ -88,11 +88,11 @@ const config: HardhatUserConfig = {
   mocha: {
     timeout: 150000,
   },
-  contractSizer: {
-    alphaSort: true,
-    runOnCompile: true,
-    strict: true,
-  },
+  // contractSizer: {
+  //   alphaSort: true,
+  //   runOnCompile: true,
+  //   strict: true,
+  // },
 }
 
 export default config

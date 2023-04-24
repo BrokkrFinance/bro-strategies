@@ -12,14 +12,24 @@ const indexAvalancheTestOptions: IndexTestOptions = {
 }
 
 testStrategy("IndexAvalancheDeFi Strategy - Deploy", deployIndexAvalancheDeFiStrategy, indexAvalancheTestOptions, [
-  testIndexAvalancheDeFiSetSwapRoute,
+  testIndexAvalancheSetSwapRoute,
 ])
+testStrategy(
+  "IndexAvalancheGamingNFT Strategy - Deploy",
+  deployIndexAvalancheGamingNFTStrategy,
+  indexAvalancheTestOptions,
+  [testIndexAvalancheSetSwapRoute]
+)
 
 async function deployIndexAvalancheDeFiStrategy() {
   return await deployStrategy("avalanche", "IndexAvalancheDeFi")
 }
 
-function testIndexAvalancheDeFiSetSwapRoute() {
+async function deployIndexAvalancheGamingNFTStrategy() {
+  return await deployStrategy("avalanche", "IndexAvalancheGamingNFT")
+}
+
+function testIndexAvalancheSetSwapRoute() {
   describe("SetSwapRoute - IndexAvalancheDeFi Strategy Specific", async function () {
     it("should succeed after adding pangolin swap route of USDC-wAVAX", async function () {
       await expect(
