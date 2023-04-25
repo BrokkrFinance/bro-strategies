@@ -20,7 +20,9 @@ contract IndexAvalanche is IndexStrategyUpgradeable {
             return 0;
         }
 
-        uint256 amountWNATIVE = _getAmountWNATIVEFromExactIndex(totalSupply);
+        uint256 amountWNATIVEUnit = _getAmountWNATIVEFromExactIndex(
+            Constants.PRECISION
+        );
 
         uint256 priceWNATIVE = oracle.getPrice(
             wNATIVE,
@@ -28,7 +30,9 @@ contract IndexAvalanche is IndexStrategyUpgradeable {
             includeAmmPrice
         );
 
-        return (amountWNATIVE * priceWNATIVE) / Constants.DECIMALS;
+        return
+            (amountWNATIVEUnit * priceWNATIVE * totalSupply) /
+            (Constants.DECIMALS * Constants.PRECISION);
     }
 
     function addSwapRoute(
