@@ -2,5 +2,5 @@
   "name": "avalanche",
   "url": "https://api.avax.network/ext/bc/C/rpc",
   "chainId": 43114,
-  "forkAt": 28060000
+  "forkAt": 29197000
 }
