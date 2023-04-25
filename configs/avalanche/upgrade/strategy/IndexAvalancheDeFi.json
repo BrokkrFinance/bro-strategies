@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "proxy": { "$ref": "../../live/strategy/IndexAvalancheDeFi.json#/address" },
+      "newImplementation": "IndexAvalancheDeFi"
+    }
+  ]
+}
