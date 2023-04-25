@@ -13,8 +13,7 @@ export function testStrategyAccessControl() {
 
     it("should fail when the non-owner user adds swap route", async function () {
       await expect(
-        this.strategy.connect(this.user0)["addSwapRoute(address,address,address,uint8,address)"](
-          "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", // wAVAX
+        this.strategy.connect(this.user0)["addSwapRoute(address,address,uint8,address)"](
           "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
           "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // Pangolin Router
           ethers.utils.solidityPack(["uint8"], [0]),
@@ -25,12 +24,49 @@ export function testStrategyAccessControl() {
 
     it("should succeed when the owner user adds swap route", async function () {
       await expect(
-        this.strategy.connect(this.owner)["addSwapRoute(address,address,address,uint8,address)"](
-          "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", // wAVAX
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
           "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
           "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // Pangolin Router
           ethers.utils.solidityPack(["uint8"], [0]),
           "0x0e0100Ab771E9288e0Aa97e11557E6654C3a9665" // Pangolin wAVAX-USDC pair
+        )
+      ).not.to.be.reverted
+    })
+
+    it("should fail when the non-owner user removes swap route", async function () {
+      // Add a swap route to be removed right after.
+      await expect(
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
+          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
+          "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // Pangolin Router
+          ethers.utils.solidityPack(["uint8"], [0]),
+          "0x0e0100Ab771E9288e0Aa97e11557E6654C3a9665" // Pangolin wAVAX-USDC pair
+        )
+      ).not.to.be.reverted
+
+      await expect(
+        this.strategy.connect(this.user0).removeSwapRoute(
+          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
+          "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106" // Pangolin Router
+        )
+      ).to.be.reverted
+    })
+
+    it("should succeed when the owner user removes swap route", async function () {
+      // Add a swap route to be removed right after.
+      await expect(
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
+          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
+          "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // Pangolin Router
+          ethers.utils.solidityPack(["uint8"], [0]),
+          "0x0e0100Ab771E9288e0Aa97e11557E6654C3a9665" // Pangolin wAVAX-USDC pair
+        )
+      ).not.to.be.reverted
+
+      await expect(
+        this.strategy.connect(this.owner).removeSwapRoute(
+          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
+          "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106" // Pangolin Router
         )
       ).not.to.be.reverted
     })
