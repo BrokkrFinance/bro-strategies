@@ -37,8 +37,7 @@
       ],
       "swapRoutes": [
         {
-          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
-          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
           "dex": 1,
           "pairData": {
@@ -47,8 +46,7 @@
           }
         },
         {
-          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
-          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
@@ -57,8 +55,7 @@
           }
         },
         {
-          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/ptp" },
-          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/ptp" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
           "dex": 1,
           "pairData": {
@@ -67,8 +64,7 @@
           }
         },
         {
-          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/joe" },
-          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/joe" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
@@ -77,8 +73,7 @@
           }
         },
         {
-          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/gmx" },
-          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/gmx" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
@@ -87,8 +82,7 @@
           }
         },
         {
-          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/qi" },
-          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/qi" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
@@ -97,8 +91,7 @@
           }
         },
         {
-          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/vtx" },
-          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/vtx" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
           "dex": 2,
           "pairData": {
@@ -107,8 +100,7 @@
           }
         },
         {
-          "token0": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/bro" },
-          "token1": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
+          "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/bro" },
           "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router" },
           "dex": 1,
           "pairData": {

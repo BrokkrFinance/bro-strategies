@@ -22,8 +22,7 @@ interface IIndexInit {
     }
 
     struct SwapRoute {
-        address token0;
-        address token1;
+        address token;
         address router;
         SwapAdapter.DEX dex;
         SwapAdapter.PairData pairData;

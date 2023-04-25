@@ -49,14 +49,15 @@ interface IIndexStrategy {
     function setOracle(address oracle) external;
 
     function addSwapRoute(
-        address token0,
-        address token1,
+        address token,
         address router,
         SwapAdapter.DEX dex,
         SwapAdapter.PairData memory pairData
     ) external;
 
     function addWhitelistedTokens(address[] memory tokens) external;
+
+    function removeSwapRoute(address token, address router) external;
 
     function removeWhitelistedTokens(address[] memory tokens) external;
 
