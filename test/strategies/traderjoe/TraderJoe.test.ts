@@ -1,18 +1,19 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
-import TraderJoeLBPairABI from "../../helper/abi/TraderJoeLBPair.json"
 import Tokens from "../../../constants/avalanche/addresses/Tokens.json"
 import TraderJoe from "../../../constants/avalanche/addresses/TraderJoe.json"
 import Avalanche from "../../../constants/networks/Avalanche.json"
+import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
+import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
+import TraderJoeLBPairABI from "../../helper/abi/TraderJoeLBPair.json"
 import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
-import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
-import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 
 const traderjoeTestOptions: StrategyTestOptions = {
   network: Avalanche,
+  forkAt: 29197000,
   upgradeTo: "OwnableV2",
   runReapReward: false,
   runReapRewardExtra: false,

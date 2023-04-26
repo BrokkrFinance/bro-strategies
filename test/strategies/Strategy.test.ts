@@ -47,7 +47,7 @@ export function testStrategy(
             forking: {
               jsonRpcUrl: testOptions.network.url,
               enabled: true,
-              blockNumber: testOptions.network.forkAt,
+              blockNumber: testOptions.forkAt,
             },
           },
         ],

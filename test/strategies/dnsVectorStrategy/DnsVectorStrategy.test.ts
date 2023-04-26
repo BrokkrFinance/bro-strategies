@@ -12,6 +12,7 @@ import { testStrategy } from "../Strategy.test"
 
 const dnsVectorTestOptions: StrategyTestOptions = {
   network: Avalanche,
+  forkAt: 28060000,
   upgradeTo: "RoleableV2",
   runReapRewardExtra: false,
 }

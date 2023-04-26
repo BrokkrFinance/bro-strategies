@@ -10,6 +10,7 @@ import { testStrategy } from "../Strategy.test"
 
 const cashTestOptions: StrategyTestOptions = {
   network: Avalanche,
+  forkAt: 29197000,
   upgradeTo: "OwnableV2",
   runReapRewardExtra: false,
   runReapUninvestedReward: false,
