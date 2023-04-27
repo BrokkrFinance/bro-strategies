@@ -349,19 +349,21 @@ async function investOneDollarToIndex(investable: Investable): Promise<void> {
   const [amountIndex] = await strategy.connect(deployer).getAmountIndexFromToken(usdc.address, depositAmount)
   const amountIndexWithSlippage = amountIndex.mul(995).div(1000)
 
-  const indexTokenBalanceBefore = await indexToken.balanceOf(deployer.address)
-
   await usdc.connect(deployer).approve(strategy.address, depositAmount)
   await strategy
     .connect(deployer)
     .mintIndexFromToken(usdc.address, depositAmount, amountIndexWithSlippage, deployer.address)
 
-  const indexTokenBalanceAfter = await indexToken.balanceOf(deployer.address)
-
   console.log(`Deploy: Successfully deposited $2 to ${strategyLiveConfig.address}.`)
 
+  console.log("Deploy: Wait 1 min for block confirmation before withdrawing.")
+
+  await new Promise((timeout) => setTimeout(timeout, 60000))
+
+  console.log("Deploy: Withdraw $1.")
+
   // Withdraw $1.
-  const indexTokenBalance = indexTokenBalanceAfter.sub(indexTokenBalanceBefore)
+  const indexTokenBalance = await indexToken.balanceOf(deployer.address)
 
   const withdrawAmount = indexTokenBalance.div(2)
 

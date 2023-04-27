@@ -98,8 +98,7 @@ abstract contract IndexStrategyUpgradeable is
 
         for (uint256 i = 0; i < initParams.swapRoutes.length; i++) {
             addSwapRoute(
-                initParams.swapRoutes[i].token0,
-                initParams.swapRoutes[i].token1,
+                initParams.swapRoutes[i].token,
                 initParams.swapRoutes[i].router,
                 initParams.swapRoutes[i].dex,
                 initParams.swapRoutes[i].pairData
@@ -281,18 +280,16 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     function addSwapRoute(
-        address token0,
-        address token1,
+        address token,
         address router,
         SwapAdapter.DEX dex,
         SwapAdapter.PairData memory _pairData
     ) public onlyOwner {
-        _addRouter(token0, router);
-        _addRouter(token1, router);
+        _addRouter(token, router);
 
         _setDEX(router, dex);
 
-        _setPairData(router, token0, token1, _pairData);
+        _setPairData(router, token, wNATIVE, _pairData);
     }
 
     function addWhitelistedTokens(address[] memory tokens) public onlyOwner {
@@ -301,6 +298,17 @@ abstract contract IndexStrategyUpgradeable is
                 whitelistedTokens.push(tokens[i]);
             }
         }
+    }
+
+    function removeSwapRoute(address token, address router) external onlyOwner {
+        _removeRouter(token, router);
+
+        _setPairData(
+            router,
+            token,
+            wNATIVE,
+            SwapAdapter.PairData(address(0), abi.encode(0))
+        );
     }
 
     function removeWhitelistedTokens(address[] memory tokens) public onlyOwner {
@@ -541,6 +549,16 @@ abstract contract IndexStrategyUpgradeable is
 
         pairData[router][token0][token1] = _pairData;
         pairData[router][token1][token0] = _pairData;
+    }
+
+    function _removeRouter(address token, address router) internal {
+        for (uint256 i = 0; i < routers[token].length; i++) {
+            if (routers[token][i] == router) {
+                routers[token][i] = routers[token][routers[token].length - 1];
+                routers[token].pop();
+                break;
+            }
+        }
     }
 
     function _swapExactTokenForToken(

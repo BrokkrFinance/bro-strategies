@@ -6,6 +6,7 @@ import { testPortfolio } from "../Portfolio.test"
 
 const calmTestOptions: PortfolioTestOptions = {
   network: Avalanche,
+  forkAt: 29197000,
   upgradeTo: "PercentageAllocationV2",
 }
 

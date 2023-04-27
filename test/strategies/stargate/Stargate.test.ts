@@ -14,6 +14,7 @@ import { testStrategy } from "../Strategy.test"
 
 const stargateTestOptions: StrategyTestOptions = {
   network: Avalanche,
+  forkAt: 29197000,
   upgradeTo: "OwnableV2",
   runReapUninvestedReward: false,
 }

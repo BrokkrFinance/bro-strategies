@@ -18,6 +18,7 @@ Tokens
 
 const mockTestOptions: StrategyTestOptions = {
   network: Avalanche,
+  forkAt: 29197000,
   upgradeTo: "OwnableV2",
   runReapRewardExtra: false,
   runReapUninvestedReward: false,

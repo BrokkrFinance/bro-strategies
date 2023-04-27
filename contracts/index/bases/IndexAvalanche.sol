@@ -36,8 +36,7 @@ contract IndexAvalanche is IndexStrategyUpgradeable {
     }
 
     function addSwapRoute(
-        address token0,
-        address token1,
+        address token,
         address router,
         SwapAdapter.DEX dex,
         address pair
@@ -47,12 +46,11 @@ contract IndexAvalanche is IndexStrategyUpgradeable {
             abi.encode(0)
         );
 
-        addSwapRoute(token0, token1, router, dex, pairData);
+        addSwapRoute(token, router, dex, pairData);
     }
 
     function addSwapRoute(
-        address token0,
-        address token1,
+        address token,
         address router,
         SwapAdapter.DEX dex,
         address pair,
@@ -63,6 +61,6 @@ contract IndexAvalanche is IndexStrategyUpgradeable {
             abi.encode(binStep)
         );
 
-        addSwapRoute(token0, token1, router, dex, pairData);
+        addSwapRoute(token, router, dex, pairData);
     }
 }
