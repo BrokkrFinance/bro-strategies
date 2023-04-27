@@ -3,5 +3,6 @@
   "router": "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106",
   "miniChef": "0x1f806f7C8dED893fd3caE279191ad7Aa3798E928",
   "wAvaxUsdcPair": "0x0e0100Ab771E9288e0Aa97e11557E6654C3a9665",
-  "wAvaxUsdcPoolId": 55
+  "wAvaxUsdcPoolId": 55,
+  "wAvax_qi": "0xE530dC2095Ef5653205CF5ea79F8979a7028065c"
 }
