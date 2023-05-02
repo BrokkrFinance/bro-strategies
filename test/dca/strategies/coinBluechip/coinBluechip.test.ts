@@ -1,20 +1,45 @@
 import { ethers } from "hardhat"
 import { deployUUPSUpgradeableContract } from "../../../../scripts/contracts/core/deploy"
 import { getTokenContract } from "../../../../scripts/helper/helper"
+import { Arbitrum } from "../../chains/Arbitrum"
+import { Avalanche } from "../../chains/Avalanche"
 import { currentBlockchainTime, testDcaStrategy } from "../Strategy.test"
-import { depositEthHoldBtcConfig } from "./config/depositEthHoldBtcConfig"
-import { depositUsdcHoldBtcConfig } from "./config/depositUsdcHoldBtcConfig"
-import { depositUsdcHoldEthConfig } from "./config/depositUsdcHoldEthConfig"
+import { depositEthHoldBtcConfigAvalanche } from "./config/depositEthHoldBtcConfigAvalanche"
+import { depositUsdcHoldBtcConfigArbitrum } from "./config/depositUsdcHoldBtcConfigArbitrum"
+import { depositUsdcHoldBtcConfigAvalanche } from "./config/depositUsdcHoldBtcConfigAvalanche"
+import { depositUsdcHoldEthConfigAvalanche } from "./config/depositUsdcHoldEthConfigAvalanche"
 
 getTokenContract
-depositUsdcHoldEthConfig
-depositUsdcHoldBtcConfig
-depositEthHoldBtcConfig
+depositUsdcHoldEthConfigAvalanche
+depositUsdcHoldBtcConfigAvalanche
+depositEthHoldBtcConfigAvalanche
+depositUsdcHoldBtcConfigArbitrum
+Avalanche
+Arbitrum
 
-testDcaStrategy("CoinBluechip usdc -> btc DCA Strategy", deployCoinBluechipDcaStrategy, [], depositUsdcHoldBtcConfig())
-testDcaStrategy("CoinBluechip usdc -> eth DCA Strategy", deployCoinBluechipDcaStrategy, [], depositUsdcHoldEthConfig())
+testDcaStrategy(
+  "CoinBluechip usdc -> btc DCA Strategy on Arbitrum",
+  deployCoinBluechipDcaStrategy,
+  [],
+  depositUsdcHoldBtcConfigArbitrum(),
+  Arbitrum()
+)
+testDcaStrategy(
+  "CoinBluechip usdc -> btc DCA Strategy on Avalanche",
+  deployCoinBluechipDcaStrategy,
+  [],
+  depositUsdcHoldBtcConfigAvalanche(),
+  Avalanche()
+)
+testDcaStrategy(
+  "CoinBluechip usdc -> eth DCA Strategy on Avalanche",
+  deployCoinBluechipDcaStrategy,
+  [],
+  depositUsdcHoldEthConfigAvalanche(),
+  Avalanche()
+)
 // uncomment after the test script has been changed to properly handle decimals
-// testDcaStrategy("CoinBluechip eth -> btc DCA Strategy", deployCoinBluechipDcaStrategy, [], depositEthHoldBtcConfig())
+// testDcaStrategy("CoinBluechip eth -> btc DCA Strategy", deployCoinBluechipDcaStrategyAvalanche, [], depositEthHoldBtcConfig())
 
 async function deployCoinBluechipDcaStrategy(testConfig: any) {
   const signers = await ethers.getSigners()

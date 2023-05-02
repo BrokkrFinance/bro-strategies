@@ -1,7 +1,7 @@
 import { ethers } from "hardhat"
 import { CoinAddrs } from "../../../../../scripts/helper/helper"
 
-export async function depositUsdcHoldEthConfig() {
+export async function depositUsdcHoldEthConfigAvalanche() {
   const signers = await ethers.getSigners()
 
   return {
