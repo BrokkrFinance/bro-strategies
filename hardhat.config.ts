@@ -8,7 +8,7 @@ import "@openzeppelin/hardhat-upgrades"
 import "@typechain/hardhat"
 import * as dotenv from "dotenv"
 import "hardhat-change-network"
-//import "hardhat-contract-sizer"
+import "hardhat-contract-sizer"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
 import "solidity-coverage"
@@ -16,8 +16,10 @@ import avalanche from "./constants/networks/Avalanche.json"
 import avalancheTest from "./constants/networks/AvalancheTest.json"
 import bsc from "./constants/networks/BSC.json"
 import bscTest from "./constants/networks/BSCTest.json"
+import { Arbitrum } from "./test/dca/chains/Arbitrum"
 
 dotenv.config()
+const arbitrumChainConfig = Arbitrum()
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -42,6 +44,7 @@ const config: HardhatUserConfig = {
     apiKey: {
       avalanche: `${process.env.SNOWTRACE_API_KEY}`,
       bsc: `${process.env.BSC_SCAN_API_KEY}`,
+      arbitrumOne: `${process.env.ARBI_SCAN_API_KEY}`,
     },
   },
   networks: {
@@ -64,6 +67,11 @@ const config: HardhatUserConfig = {
       accounts: [`0x${process.env.TESTNET_PRIVATE_KEY}`],
       gas: 5_000_000,
     },
+    arbitrum: {
+      url: `${arbitrumChainConfig.url}`,
+      chainId: arbitrumChainConfig.chainId,
+      accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
+    },
     bsc: {
       url: bsc.url,
       chainId: bsc.chainId,
@@ -85,14 +93,14 @@ const config: HardhatUserConfig = {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
   },
-  mocha: {
-    timeout: 150000,
-  },
   // contractSizer: {
   //   alphaSort: true,
   //   runOnCompile: true,
   //   strict: true,
   // },
+  mocha: {
+    timeout: 150000,
+  },
 }
 
 export default config

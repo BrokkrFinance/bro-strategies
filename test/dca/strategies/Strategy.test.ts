@@ -2,7 +2,7 @@ import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpe
 import type * as ethersTypes from "ethers"
 import { ethers, network } from "hardhat"
 import { getTokenContract } from "../../../scripts/helper/helper"
-import { WhaleAddrs } from "../helper/WhaleAddrs"
+import { Chain } from "../helper/HelperInterfaces"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyLimit } from "./StrategyLimit.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
@@ -15,7 +15,8 @@ export async function testDcaStrategy(
   description: string,
   deployStrategy: Function,
   strategySpecificTests: (() => any)[],
-  testConfigPromise: Promise<any>
+  testConfigPromise: Promise<any>,
+  chain: Chain
 ) {
   describe(description, function () {
     before(async function () {
@@ -29,9 +30,9 @@ export async function testDcaStrategy(
             allowUnlimitedContractSize: false,
             blockGasLimit: 30_000_000,
             forking: {
-              jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+              jsonRpcUrl: chain.url,
               enabled: true,
-              blockNumber: 26621370,
+              blockNumber: chain.forkAt,
             },
           },
         ],
@@ -49,7 +50,9 @@ export async function testDcaStrategy(
       this.userCount = 4
 
       // Airdrop signers.
-      this.impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs[this.testConfig.depositToken.address])
+      this.impersonatedSigner = await ethers.getImpersonatedSigner(
+        chain.whaleAddrs[this.testConfig.depositToken.address]
+      )
       await setBalance(this.impersonatedSigner.address, ethers.utils.parseEther("10000"))
       for (let i = 0; i <= this.userCount; i++) {
         await setBalance(this.signers[i].address, ethers.utils.parseEther("10000"))

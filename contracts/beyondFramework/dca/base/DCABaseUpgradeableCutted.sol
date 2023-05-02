@@ -5,7 +5,7 @@ import { InvestQueueLib } from "../libraries/InvestQueueLib.sol";
 import { DCAHistoryLib } from "../libraries/DCAHistoryLib.sol";
 import { IDCAStrategy } from "../interfaces/IDCAStrategy.sol";
 import { SwapLib } from "../libraries/SwapLib.sol";
-import { PortfolioAccessBaseUpgradeable } from "./PortfolioAccessBaseUpgradeable.sol";
+import { PortfolioAccessBaseUpgradeableCutted } from "./PortfolioAccessBaseUpgradeableCutted.sol";
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -17,7 +17,7 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 abstract contract DCABaseUpgradeableCutted is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
-    PortfolioAccessBaseUpgradeable
+    PortfolioAccessBaseUpgradeableCutted
 {
     error TooSmallDeposit();
     error PositionsLimitReached();
@@ -133,7 +133,7 @@ abstract contract DCABaseUpgradeableCutted is
         internal
         onlyInitializing
     {
-        __PortfolioAccessBaseUpgradeable_init();
+        __PortfolioAccessBaseUpgradeableCutted_init();
         __Pausable_init();
         __ReentrancyGuard_init();
 
@@ -176,21 +176,6 @@ abstract contract DCABaseUpgradeableCutted is
         nonEmergencyExited
     {
         _deposit(_msgSender(), amount, amountSplit);
-    }
-
-    function depositFor(
-        address sender,
-        uint256 amount,
-        uint8 amountSplit
-    )
-        public
-        virtual
-        onlyPortfolio
-        nonReentrant
-        whenNotPaused
-        nonEmergencyExited
-    {
-        _deposit(sender, amount, amountSplit);
     }
 
     function _deposit(
@@ -356,17 +341,6 @@ abstract contract DCABaseUpgradeableCutted is
             return;
         }
         _withdrawAll(_msgSender(), convertBluechipIntoDepositAsset);
-    }
-
-    function withdrawAllFor(
-        address sender,
-        bool convertBluechipIntoDepositAsset
-    ) public virtual onlyPortfolio nonReentrant whenNotPaused {
-        if (isEmergencyExited()) {
-            _emergencyWithdrawUserDeposit(sender);
-            return;
-        }
-        _withdrawAll(sender, convertBluechipIntoDepositAsset);
     }
 
     function _withdrawAll(address sender, bool convertBluechipIntoDepositAsset)

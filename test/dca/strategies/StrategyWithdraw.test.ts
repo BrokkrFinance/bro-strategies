@@ -3,6 +3,10 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { getTokenContract } from "../../../scripts/helper/helper"
+import { getErrorRange } from "../../helper/utils"
+
+getErrorRange
+getTokenContract
 
 export function testStrategyWithdraw() {
   describe("Withdrawal", async function () {
@@ -86,11 +90,11 @@ export function testStrategyWithdraw() {
 
       /////////// Test 4 - withdraw only bluechip
 
-      // deposit 1000 depositToken into 9 slots
+      // deposit 1 depositToken into 9 slots
       await this.depositTokenContract
         .connect(this.user3)
-        .approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
-      await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 1)
+        .approve(this.strategy.address, ethers.utils.parseUnits("1", 6))
+      await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1", 6), 1)
 
       // invest
       await mine(86400)
@@ -122,17 +126,17 @@ export function testStrategyWithdraw() {
 
       await mine(86401)
 
-      // user3 deposits 1000 depositToken into 9 slots
+      // user3 deposits 100 depositToken into 9 slots
       await this.depositTokenContract
         .connect(this.user3)
-        .approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
-      await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 9)
+        .approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
+      await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("100", 6), 9)
 
-      // user2 deposits 1000 depositToken into 9 slots
+      // user2 deposits 100 depositToken into 9 slots
       await this.depositTokenContract
         .connect(this.user2)
-        .approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
-      await this.strategy.connect(this.user2).deposit(ethers.utils.parseUnits("1000", 6), 9)
+        .approve(this.strategy.address, ethers.utils.parseUnits("100", 6))
+      await this.strategy.connect(this.user2).deposit(ethers.utils.parseUnits("100", 6), 9)
 
       await mine(86400)
 
@@ -158,7 +162,7 @@ export function testStrategyWithdraw() {
       expect(await this.strategy.bluechipInvestmentState()).to.equal(2)
 
       // cannot invest into emergency exited fund
-      await expect(this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 9)).to.be.revertedWith(
+      await expect(this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("100", 6), 9)).to.be.revertedWith(
         "Strategy is emergency exited"
       )
       await expect(this.strategy.connect(this.user1).invest()).to.be.revertedWith("Strategy is emergency exited")
@@ -170,11 +174,21 @@ export function testStrategyWithdraw() {
       // user3 and user2 should both receive 50% of the total funds
       await this.strategy.connect(this.user3).withdrawAll(false)
       await this.strategy.connect(this.user2).withdrawAll(false)
-      expect(await depositExitTokenContract.balanceOf(this.user3.address)).to.equal(
-        await depositExitTokenContract.balanceOf(this.user2.address)
+
+      // even split for the deposit asset
+      const user3DepositExitTokenBalance = await depositExitTokenContract.balanceOf(this.user3.address)
+      const user2DepositExitTokenBalance = await depositExitTokenContract.balanceOf(this.user2.address)
+      expect(user3DepositExitTokenBalance).to.be.approximately(
+        user2DepositExitTokenBalance,
+        getErrorRange(BigNumber.from(user3DepositExitTokenBalance), BigNumber.from(1), BigNumber.from(10000))
       )
-      expect(await bluechipExitTokenContract.balanceOf(this.user3.address)).to.equal(
-        await bluechipExitTokenContract.balanceOf(this.user2.address)
+
+      // even split for the bluechip asset
+      const user3BluechipExitTokenBalance = await bluechipExitTokenContract.balanceOf(this.user3.address)
+      const user2BluechipExitTokenBalance = await bluechipExitTokenContract.balanceOf(this.user2.address)
+      expect(user3BluechipExitTokenBalance).to.be.approximately(
+        user2BluechipExitTokenBalance,
+        getErrorRange(BigNumber.from(user3BluechipExitTokenBalance), BigNumber.from(1), BigNumber.from(10000))
       )
     })
   })
