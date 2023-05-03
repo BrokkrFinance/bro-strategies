@@ -275,8 +275,14 @@ abstract contract IndexStrategyUpgradeable is
         );
     }
 
-    function setOracle(address _oracle) public onlyOwner {
-        oracle = IIndexOracle(_oracle);
+    function addComponent(address component) external onlyOwner {
+        for (uint256 i = 0; i < components.length; i++) {
+            if (components[i] == component) {
+                revert Errors.Index_ComponentAlreadyExists(component);
+            }
+        }
+
+        components.push(component);
     }
 
     function addSwapRoute(
@@ -296,6 +302,20 @@ abstract contract IndexStrategyUpgradeable is
         for (uint256 i = 0; i < tokens.length; i++) {
             if (!isTokenWhitelisted(tokens[i])) {
                 whitelistedTokens.push(tokens[i]);
+            }
+        }
+    }
+
+    function removeComponent(address component) external onlyOwner {
+        for (uint256 i = 0; i < components.length; i++) {
+            if (components[i] == component) {
+                if (weights[component] != 0) {
+                    revert Errors.Index_ComponentHasNonZeroWeight(component);
+                }
+
+                components[i] = components[components.length - 1];
+                components.pop();
+                break;
             }
         }
     }
@@ -332,6 +352,10 @@ abstract contract IndexStrategyUpgradeable is
         equityValuationLimit = _equityValuationLimit;
     }
 
+    function setOracle(address _oracle) public onlyOwner {
+        oracle = IIndexOracle(_oracle);
+    }
+
     function allComponents() external view override returns (address[] memory) {
         return components;
     }
@@ -362,7 +386,7 @@ abstract contract IndexStrategyUpgradeable is
     ) internal returns (uint256 amountWNATIVESpent) {
         for (uint256 i = 0; i < components.length; i++) {
             if (mintingData.amountComponents[i] == 0) {
-                revert Errors.Index_TooSmallAmountIndex();
+                continue;
             }
 
             amountWNATIVESpent += _swapTokenForExactToken(
@@ -382,12 +406,12 @@ abstract contract IndexStrategyUpgradeable is
         returns (uint256 amountWNATIVE)
     {
         for (uint256 i = 0; i < components.length; i++) {
+            if (weights[components[i]] == 0) {
+                continue;
+            }
+
             uint256 amountComponent = (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
-
-            if (amountComponent == 0) {
-                revert Errors.Index_TooSmallAmountIndex();
-            }
 
             (uint256 amountWNATIVEOut, address bestRouter) = _getAmountOutMax(
                 routers[components[i]],
@@ -419,6 +443,10 @@ abstract contract IndexStrategyUpgradeable is
         mintingData.amountComponents = new uint256[](components.length);
 
         for (uint256 i = 0; i < components.length; i++) {
+            if (weights[components[i]] == 0) {
+                continue;
+            }
+
             mintingData.amountComponents[i] =
                 (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
@@ -475,6 +503,10 @@ abstract contract IndexStrategyUpgradeable is
         uint256 amountIndex = type(uint256).max;
 
         for (uint256 i = 0; i < components.length; i++) {
+            if (mintingDataUnit.amountWNATIVEs[i] == 0) {
+                continue;
+            }
+
             uint256 amountWNATIVE = (amountWNATIVEMax *
                 mintingDataUnit.amountWNATIVEs[i]) /
                 mintingDataUnit.amountWNATIVETotal;
@@ -501,6 +533,10 @@ abstract contract IndexStrategyUpgradeable is
         returns (uint256 amountWNATIVE)
     {
         for (uint256 i = 0; i < components.length; i++) {
+            if (weights[components[i]] == 0) {
+                continue;
+            }
+
             uint256 amountComponent = (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
 

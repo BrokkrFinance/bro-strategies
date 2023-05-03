@@ -118,5 +118,15 @@ export function testStrategyAccessControl() {
 
       expect(await this.strategy.allWhitelistedTokens()).to.have.members(whitelistedTokens)
     })
+
+    it("should fail when the non-owner user adds component", async function () {
+      await expect(this.strategy.connect(this.user0).addComponent(this.user0.address)).to.be.reverted
+    })
+
+    it("should fail when the non-owner user removes component", async function () {
+      const components = await this.strategy.allComponents()
+
+      await expect(this.strategy.connect(this.user0).removeComponent(components[0])).to.be.reverted
+    })
   })
 }

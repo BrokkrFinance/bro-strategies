@@ -6,6 +6,7 @@ import { DepositTokens } from "../../scripts/constants/deposit-tokens"
 import { WhaleAddrs } from "../helper/addresses"
 import { IndexTestOptions } from "../helper/interfaces/options"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
+import { testStrategyComponent } from "./StrategyComponent.test"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
@@ -93,9 +94,7 @@ export function testStrategy(
     })
 
     testStrategyAccessControl()
-    testStrategyDeposit()
-    // testStrategyLimit() // Opt-out investment limit test because it fails when the limit is way higher than component's pool depth.
-    testStrategyWithdraw()
+    testStrategyComponent()
 
     for (const strategySpecificTest of strategySpecificTests) {
       strategySpecificTest()
