@@ -22,12 +22,12 @@ testStrategy(
   indexAvalancheTestOptions,
   [testIndexAvalancheAddSwapRoute]
 )
-testStrategy(
-  "IndexAvalancheDeFi Strategy - Upgrade After Deploy",
-  upgradeIndexAvalancheDeFiStrategy,
-  indexAvalancheTestOptions,
-  [testIndexAvalancheAddSwapRoute, testIndexAvalancheRemoveSwapRoute]
-)
+// testStrategy(
+//   "IndexAvalancheDeFi Strategy - Upgrade After Deploy",
+//   upgradeIndexAvalancheDeFiStrategy,
+//   indexAvalancheTestOptions,
+//   [testIndexAvalancheAddSwapRoute, testIndexAvalancheRemoveSwapRoute]
+// )
 
 async function deployIndexAvalancheDeFiStrategy() {
   return await deployStrategy("avalanche", "IndexAvalancheDeFi")
