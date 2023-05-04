@@ -2,7 +2,13 @@
   "properties": [
     {
       "proxy": { "$ref": "../../live/strategy/IndexAvalancheDeFi.json#/address" },
-      "newImplementation": "IndexAvalancheDeFi"
+      "newImplementation": "IndexAvalancheDeFi",
+      "libraries": [
+        {
+          "name": "SwapAdapter",
+          "dependencies": []
+        }
+      ]
     }
   ]
 }

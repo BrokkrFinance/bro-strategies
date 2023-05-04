@@ -113,7 +113,12 @@
       "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/index" },
       "equityValuationLimit": 2e13,
       "extraArgs": [],
-      "libraries": []
+      "libraries": [
+        {
+          "name": "SwapAdapter",
+          "dependencies": []
+        }
+      ]
     }
   ]
 }
