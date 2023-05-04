@@ -12,6 +12,8 @@ library Errors {
     error Index_ZeroAddress();
     error Index_WrongSwapAmount();
     error Index_WrongPair(address tokenIn, address tokenOut);
+    error Index_WrongTargetWeightsLength();
+    error Index_WrongTargetWeights();
 
     // SwapAdapter errors.
     error SwapAdapter_WrongDEX(uint8 dex);

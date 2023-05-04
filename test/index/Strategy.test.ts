@@ -8,6 +8,7 @@ import { IndexTestOptions } from "../helper/interfaces/options"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
 import { testStrategyComponent } from "./StrategyComponent.test"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
+import { testStrategyRebalance } from "./StrategyRebalance.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
 export function testStrategy(
@@ -95,6 +96,10 @@ export function testStrategy(
 
     testStrategyAccessControl()
     testStrategyComponent()
+    testStrategyDeposit()
+    // testStrategyLimit() // Opt-out investment limit test because it fails when the limit is way higher than component's pool depth.
+    testStrategyRebalance()
+    testStrategyWithdraw()
 
     for (const strategySpecificTest of strategySpecificTests) {
       strategySpecificTest()

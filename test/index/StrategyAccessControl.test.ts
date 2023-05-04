@@ -128,5 +128,16 @@ export function testStrategyAccessControl() {
 
       await expect(this.strategy.connect(this.user0).removeComponent(components[0])).to.be.reverted
     })
+
+    it("should fail when the non-owner user rebalances", async function () {
+      const components = await this.strategy.allComponents()
+      const targetWeights = []
+
+      for (const component of components) {
+        targetWeights.push(await this.strategy.weights(component))
+      }
+
+      await expect(this.strategy.connect(this.user0).rebalance(targetWeights)).to.be.reverted
+    })
   })
 }

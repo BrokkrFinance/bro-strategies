@@ -10,7 +10,7 @@ import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Avalanche,
-  forkAt: 29197000,
+  forkAt: 29567000,
 }
 
 testStrategy("IndexAvalancheDeFi Strategy - Deploy", deployIndexAvalancheDeFiStrategy, indexAvalancheTestOptions, [
