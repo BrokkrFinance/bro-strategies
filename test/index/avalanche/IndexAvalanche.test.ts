@@ -10,7 +10,7 @@ import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Avalanche,
-  forkAt: 29197000,
+  forkAt: 29567000,
 }
 
 testStrategy("IndexAvalancheDeFi Strategy - Deploy", deployIndexAvalancheDeFiStrategy, indexAvalancheTestOptions, [
@@ -22,12 +22,12 @@ testStrategy(
   indexAvalancheTestOptions,
   [testIndexAvalancheAddSwapRoute]
 )
-// testStrategy(
-//   "IndexAvalancheDeFi Strategy - Upgrade After Deploy",
-//   upgradeIndexAvalancheDeFiStrategy,
-//   indexAvalancheTestOptions,
-//   [testIndexAvalancheAddSwapRoute, testIndexAvalancheRemoveSwapRoute]
-// )
+testStrategy(
+  "IndexAvalancheDeFi Strategy - Upgrade After Deploy",
+  upgradeIndexAvalancheDeFiStrategy,
+  indexAvalancheTestOptions,
+  [] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
+)
 
 async function deployIndexAvalancheDeFiStrategy() {
   return await deployStrategy("avalanche", "IndexAvalancheDeFi")
@@ -124,7 +124,7 @@ function testIndexAvalancheAddSwapRoute() {
   })
 }
 
-function testIndexAvalancheRemoveSwapRoute() {
+function testIndexAvalancheReplaceSwapRoute() {
   describe("removeSwapRoute - IndexAvalancheDeFi Strategy Specific", async function () {
     it("should succeed after replacing pangolin swap route of BENQI-wAVAX", async function () {
       // Note: This only works when the strategy has a BENQI-wAVAX route on TraderJoe.

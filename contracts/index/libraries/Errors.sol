@@ -3,14 +3,17 @@ pragma solidity 0.8.10;
 
 library Errors {
     // IndexStrategyUpgradeable errors.
+    error Index_ComponentAlreadyExists(address component);
+    error Index_ComponentHasNonZeroWeight(address component);
     error Index_NotWhitelistedToken(address token);
     error Index_ExceedEquityValuationLimit();
-    error Index_TooSmallAmountIndex();
     error Index_AboveMaxAmount();
     error Index_BelowMinAmount();
     error Index_ZeroAddress();
     error Index_WrongSwapAmount();
     error Index_WrongPair(address tokenIn, address tokenOut);
+    error Index_WrongTargetWeightsLength();
+    error Index_WrongTargetWeights();
 
     // SwapAdapter errors.
     error SwapAdapter_WrongDEX(uint8 dex);

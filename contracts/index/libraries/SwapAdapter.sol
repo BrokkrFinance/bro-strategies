@@ -36,7 +36,7 @@ library SwapAdapter {
         uint256 amountIn,
         uint256 amountOutMin,
         address[] memory path
-    ) internal returns (uint256 amountOut) {
+    ) external returns (uint256 amountOut) {
         if (path[0] == path[path.length - 1]) {
             return amountIn;
         }
@@ -71,7 +71,7 @@ library SwapAdapter {
         uint256 amountOut,
         uint256 amountInMax,
         address[] memory path
-    ) internal returns (uint256 amountIn) {
+    ) external returns (uint256 amountIn) {
         if (path[0] == path[path.length - 1]) {
             return amountOut;
         }
@@ -106,7 +106,7 @@ library SwapAdapter {
         uint256 amountIn,
         address tokenIn,
         address tokenOut
-    ) internal view returns (uint256 amountOut) {
+    ) external view returns (uint256 amountOut) {
         if (tokenIn == tokenOut) {
             return amountIn;
         }
@@ -139,7 +139,7 @@ library SwapAdapter {
         uint256 amountOut,
         address tokenIn,
         address tokenOut
-    ) internal view returns (uint256 amountIn) {
+    ) external view returns (uint256 amountIn) {
         if (tokenIn == tokenOut) {
             return amountOut;
         }

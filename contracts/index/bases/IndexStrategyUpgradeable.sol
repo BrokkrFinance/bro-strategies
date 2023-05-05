@@ -275,8 +275,123 @@ abstract contract IndexStrategyUpgradeable is
         );
     }
 
-    function setOracle(address _oracle) public onlyOwner {
-        oracle = IIndexOracle(_oracle);
+    function rebalance(uint256[] calldata targetWeights) external onlyOwner {
+        if (components.length != targetWeights.length) {
+            revert Errors.Index_WrongTargetWeightsLength();
+        }
+
+        uint256 amountWNATIVETotal;
+        uint256[] memory requiredWNATIVEs = new uint256[](components.length);
+        uint256 requiredWNATIVETotal;
+
+        uint256 indexTotalSupply = indexToken.totalSupply();
+
+        for (uint256 i = 0; i < components.length; i++) {
+            if (weights[components[i]] > targetWeights[i]) {
+                // Convert component to wNATIVE.
+                uint256 amountComponent = ((weights[components[i]] -
+                    targetWeights[i]) * indexTotalSupply) / Constants.PRECISION;
+
+                (
+                    uint256 amountWNATIVEOut,
+                    address bestRouter
+                ) = _getAmountOutMax(
+                        routers[components[i]],
+                        amountComponent,
+                        components[i],
+                        wNATIVE
+                    );
+
+                uint256 balanceComponent = IERC20Upgradeable(components[i])
+                    .balanceOf(address(this));
+
+                if (amountComponent > balanceComponent) {
+                    amountComponent = balanceComponent;
+                }
+
+                uint256 amountWNATIVE = _swapExactTokenForToken(
+                    bestRouter,
+                    amountComponent,
+                    amountWNATIVEOut,
+                    components[i],
+                    wNATIVE
+                );
+
+                if (amountWNATIVE != amountWNATIVEOut) {
+                    revert Errors.Index_WrongSwapAmount();
+                }
+
+                amountWNATIVETotal += amountWNATIVE;
+            } else if (weights[components[i]] < targetWeights[i]) {
+                // Calculate how much wNATIVE is required to buy component.
+                uint256 amountComponent = ((targetWeights[i] -
+                    weights[components[i]]) * indexTotalSupply) /
+                    Constants.PRECISION;
+
+                (uint256 amountWNATIVE, ) = _getAmountInMin(
+                    routers[components[i]],
+                    amountComponent,
+                    wNATIVE,
+                    components[i]
+                );
+
+                requiredWNATIVEs[i] = amountWNATIVE;
+                requiredWNATIVETotal += amountWNATIVE;
+            }
+        }
+
+        if (amountWNATIVETotal == 0) {
+            revert Errors.Index_WrongTargetWeights();
+        }
+
+        // Convert wNATIVE to component.
+        for (uint256 i = 0; i < components.length; i++) {
+            if (requiredWNATIVEs[i] == 0) {
+                continue;
+            }
+
+            uint256 amountWNATIVE = (requiredWNATIVEs[i] * amountWNATIVETotal) /
+                requiredWNATIVETotal;
+
+            (uint256 amountComponentOut, address bestRouter) = _getAmountOutMax(
+                routers[components[i]],
+                amountWNATIVE,
+                wNATIVE,
+                components[i]
+            );
+
+            uint256 amountComponent = _swapExactTokenForToken(
+                bestRouter,
+                amountWNATIVE,
+                amountComponentOut,
+                wNATIVE,
+                components[i]
+            );
+
+            if (amountComponent != amountComponentOut) {
+                revert Errors.Index_WrongSwapAmount();
+            }
+        }
+
+        // Adjust component's weights.
+        for (uint256 i = 0; i < components.length; i++) {
+            uint256 componentBalance = IERC20Upgradeable(components[i])
+                .balanceOf(address(this));
+
+            weights[components[i]] =
+                (componentBalance * Constants.PRECISION) /
+                indexTotalSupply;
+        }
+    }
+
+    function addComponent(address component) external onlyOwner {
+        for (uint256 i = 0; i < components.length; i++) {
+            if (components[i] == component) {
+                revert Errors.Index_ComponentAlreadyExists(component);
+            }
+        }
+
+        components.push(component);
     }
 
     function addSwapRoute(
@@ -296,6 +411,20 @@ abstract contract IndexStrategyUpgradeable is
         for (uint256 i = 0; i < tokens.length; i++) {
             if (!isTokenWhitelisted(tokens[i])) {
                 whitelistedTokens.push(tokens[i]);
+            }
+        }
+    }
+
+    function removeComponent(address component) external onlyOwner {
+        for (uint256 i = 0; i < components.length; i++) {
+            if (components[i] == component) {
+                if (weights[component] != 0) {
+                    revert Errors.Index_ComponentHasNonZeroWeight(component);
+                }
+
+                components[i] = components[components.length - 1];
+                components.pop();
+                break;
             }
         }
     }
@@ -332,6 +461,10 @@ abstract contract IndexStrategyUpgradeable is
         equityValuationLimit = _equityValuationLimit;
     }
 
+    function setOracle(address _oracle) public onlyOwner {
+        oracle = IIndexOracle(_oracle);
+    }
+
     function allComponents() external view override returns (address[] memory) {
         return components;
     }
@@ -362,7 +495,7 @@ abstract contract IndexStrategyUpgradeable is
     ) internal returns (uint256 amountWNATIVESpent) {
         for (uint256 i = 0; i < components.length; i++) {
             if (mintingData.amountComponents[i] == 0) {
-                revert Errors.Index_TooSmallAmountIndex();
+                continue;
             }
 
             amountWNATIVESpent += _swapTokenForExactToken(
@@ -382,12 +515,12 @@ abstract contract IndexStrategyUpgradeable is
         returns (uint256 amountWNATIVE)
     {
         for (uint256 i = 0; i < components.length; i++) {
+            if (weights[components[i]] == 0) {
+                continue;
+            }
+
             uint256 amountComponent = (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
-
-            if (amountComponent == 0) {
-                revert Errors.Index_TooSmallAmountIndex();
-            }
 
             (uint256 amountWNATIVEOut, address bestRouter) = _getAmountOutMax(
                 routers[components[i]],
@@ -419,6 +552,10 @@ abstract contract IndexStrategyUpgradeable is
         mintingData.amountComponents = new uint256[](components.length);
 
         for (uint256 i = 0; i < components.length; i++) {
+            if (weights[components[i]] == 0) {
+                continue;
+            }
+
             mintingData.amountComponents[i] =
                 (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
@@ -475,6 +612,10 @@ abstract contract IndexStrategyUpgradeable is
         uint256 amountIndex = type(uint256).max;
 
         for (uint256 i = 0; i < components.length; i++) {
+            if (mintingDataUnit.amountWNATIVEs[i] == 0) {
+                continue;
+            }
+
             uint256 amountWNATIVE = (amountWNATIVEMax *
                 mintingDataUnit.amountWNATIVEs[i]) /
                 mintingDataUnit.amountWNATIVETotal;
@@ -501,6 +642,10 @@ abstract contract IndexStrategyUpgradeable is
         returns (uint256 amountWNATIVE)
     {
         for (uint256 i = 0; i < components.length; i++) {
+            if (weights[components[i]] == 0) {
+                continue;
+            }
+
             uint256 amountComponent = (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
 
