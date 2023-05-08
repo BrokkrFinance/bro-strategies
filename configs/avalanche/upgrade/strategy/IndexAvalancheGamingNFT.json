@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "proxy": { "$ref": "../../live/strategy/IndexAvalancheGamingNFT.json#/address" },
+      "newImplementation": "IndexAvalancheGamingNFT",
+      "libraries": [
+        {
+          "name": "SwapAdapter",
+          "dependencies": []
+        }
+      ]
+    }
+  ]
+}

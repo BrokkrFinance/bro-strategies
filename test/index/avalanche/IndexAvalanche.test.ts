@@ -28,6 +28,12 @@ testStrategy(
   indexAvalancheTestOptions,
   [] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
 )
+testStrategy(
+  "IndexAvalancheGamingNFT Strategy - Upgrade After Deploy",
+  upgradeIndexAvalancheGamingNFTStrategy,
+  indexAvalancheTestOptions,
+  [] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
+)
 
 async function deployIndexAvalancheDeFiStrategy() {
   return await deployStrategy("avalanche", "IndexAvalancheDeFi")
@@ -39,6 +45,10 @@ async function deployIndexAvalancheGamingNFTStrategy() {
 
 async function upgradeIndexAvalancheDeFiStrategy() {
   return await upgradeStrategy("avalanche", "IndexAvalancheDeFi")
+}
+
+async function upgradeIndexAvalancheGamingNFTStrategy() {
+  return await upgradeStrategy("avalanche", "IndexAvalancheGamingNFT")
 }
 
 function testIndexAvalancheAddSwapRoute() {
