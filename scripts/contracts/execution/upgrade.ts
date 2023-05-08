@@ -98,7 +98,9 @@ async function upgradeMainnet(investable: Investable): Promise<Contract> {
     let libraries: Libraries = {}
 
     if (upgradeConfig.libraries !== undefined) {
-      libraries = await deployLibraries(investable.network, upgradeConfig.libraries)
+      libraries = await deployLibraries(investable.network, {
+        libraries: upgradeConfig.libraries as unknown as Library[],
+      })
     } else {
       libraries = {}
     }
