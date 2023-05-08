@@ -15,6 +15,7 @@
     "imports-on-top": "error",
     "func-visibility": ["error", { "ignoreConstructors": true }],
     "private-vars-leading-underscore": "off",
-    "no-empty-blocks": "off"
+    "no-empty-blocks": "off",
+    "not-rely-on-time": "off"
   }
 }

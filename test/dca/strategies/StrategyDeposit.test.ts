@@ -3,6 +3,9 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 
+ethers
+expect
+
 export function testStrategyDeposit() {
   describe("Deposit", async function () {
     it("should allow to make deposits for a single user", async function () {

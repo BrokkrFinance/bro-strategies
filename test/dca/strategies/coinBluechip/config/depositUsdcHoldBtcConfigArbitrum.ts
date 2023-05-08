@@ -1,9 +1,6 @@
-import { ethers } from "hardhat"
 import * as Tokens from "../../../../../constants/arbitrum/addresses/Tokens.json"
 
-export async function depositUsdcHoldBtcConfigArbitrum() {
-  const signers = await ethers.getSigners()
-
+export function depositUsdcHoldBtcConfigArbitrum() {
   return {
     depositToken: {
       address: Tokens.usdc,
@@ -29,6 +26,6 @@ export async function depositUsdcHoldBtcConfigArbitrum() {
       depositExitTokenDigits: 6,
       bluechipExitTokenDigits: 18,
     },
-    signers: signers,
+    skipEmergencyExitTests: false,
   }
 }

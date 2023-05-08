@@ -4,25 +4,25 @@ import { ethers, network } from "hardhat"
 import { getTokenContract } from "../../../scripts/helper/helper"
 import { Chain } from "../helper/HelperInterfaces"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
+import { testStrategyEmergencyExit } from "./StrategyEmergencyExit.test"
 import { testStrategyLimit } from "./StrategyLimit.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
 testStrategyDeposit
 testStrategyLimit
 testStrategyWithdraw
+testStrategyEmergencyExit
 
-export async function testDcaStrategy(
+export function testDcaStrategy(
   description: string,
   deployStrategy: Function,
   strategySpecificTests: (() => any)[],
-  testConfigPromise: Promise<any>,
+  testConfig: any,
   chain: Chain
 ) {
   describe(description, function () {
     before(async function () {
-      const testConfig = await testConfigPromise
       this.testConfig = testConfig
-
       await network.provider.request({
         method: "hardhat_reset",
         params: [
@@ -42,7 +42,7 @@ export async function testDcaStrategy(
       this.depositTokenContract = await getTokenContract(this.testConfig.depositToken.address)
       this.bluechipTokenContract = await getTokenContract(this.testConfig.bluechipToken.address)
 
-      this.signers = testConfig.signers
+      this.signers = await ethers.getSigners()
       this.user0 = this.signers[1]
       this.user1 = this.signers[2]
       this.user2 = this.signers[3]
@@ -77,6 +77,7 @@ export async function testDcaStrategy(
     testStrategyDeposit()
     testStrategyWithdraw()
     testStrategyLimit()
+    if (!testConfig.skipEmergencyExitTests) testStrategyEmergencyExit()
 
     for (const strategySpecificTest of strategySpecificTests) {
       strategySpecificTest()

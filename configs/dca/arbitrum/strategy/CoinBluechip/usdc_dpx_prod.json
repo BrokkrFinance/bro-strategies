@@ -12,29 +12,29 @@
       "decimals": 6
     },
     "investmentPeriod": 604800,
-    "lastInvestmentTimestamp": 1678035599,
+    "lastInvestmentTimestamp": 1684083599,
     "minDepositAmount": 1000000,
     "positionsLimit": 52,
     "router": {
-      "dex": 1,
-      "router": "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30"
+      "dex": 0,
+      "router": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506"
     },
-    "depositToBluechipSwapBins": [15, 25],
+    "depositToBluechipSwapBins": [0, 0],
     "depositToBluechipSwapPath": [
       "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
       "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-      "0x3082cc23568ea640225c2467653db90e9250aaa0"
+      "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55"
     ],
-    "bluechipToDepositSwapBins": [25, 15],
+    "bluechipToDepositSwapBins": [0, 0],
     "bluechipToDepositSwapPath": [
-      "0x3082cc23568ea640225c2467653db90e9250aaa0",
+      "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55",
       "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
       "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8"
     ]
   },
   "strategyArgs": [
     {
-      "token": "0x3082cc23568ea640225c2467653db90e9250aaa0",
+      "token": "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55",
       "decimals": 18
     }
   ]
