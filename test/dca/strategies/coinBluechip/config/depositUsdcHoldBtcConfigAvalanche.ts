@@ -1,9 +1,6 @@
-import { ethers } from "hardhat"
 import { CoinAddrs } from "../../../../../scripts/helper/helper"
 
-export async function depositUsdcHoldBtcConfigAvalanche() {
-  const signers = await ethers.getSigners()
-
+export function depositUsdcHoldBtcConfigAvalanche() {
   return {
     depositToken: {
       address: CoinAddrs.usdc,
@@ -29,6 +26,6 @@ export async function depositUsdcHoldBtcConfigAvalanche() {
       depositExitTokenDigits: 6,
       bluechipExitTokenDigits: 18,
     },
-    signers: signers,
+    skipEmergencyExitTests: false,
   }
 }

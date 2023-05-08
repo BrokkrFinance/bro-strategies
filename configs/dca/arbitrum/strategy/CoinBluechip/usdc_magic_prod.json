@@ -12,7 +12,7 @@
       "decimals": 6
     },
     "investmentPeriod": 604800,
-    "lastInvestmentTimestamp": 1678035599,
+    "lastInvestmentTimestamp": 1684083599,
     "minDepositAmount": 1000000,
     "positionsLimit": 52,
     "router": {
