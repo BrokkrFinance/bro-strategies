@@ -3,7 +3,7 @@ import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import Pangolin from "../../../constants/avalanche/addresses/Pangolin.json"
 import Tokens from "../../../constants/avalanche/addresses/Tokens.json"
-import Avalanche from "../../../constants/networks/Avalanche.json"
+import { Avalanche } from "../../../constants/networks/Avalanche"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import { StrategyTestOptions } from "../../helper/interfaces/options"
@@ -11,7 +11,7 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
 const dnsVectorTestOptions: StrategyTestOptions = {
-  network: Avalanche,
+  network: Avalanche(),
   forkAt: 28060000,
   upgradeTo: "RoleableV2",
   runReapRewardExtra: false,

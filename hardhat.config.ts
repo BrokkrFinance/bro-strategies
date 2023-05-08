@@ -12,10 +12,7 @@ import "hardhat-contract-sizer"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
 import "solidity-coverage"
-import avalanche from "./constants/networks/Avalanche.json"
-import avalancheTest from "./constants/networks/AvalancheTest.json"
-import bsc from "./constants/networks/BSC.json"
-import bscTest from "./constants/networks/BSCTest.json"
+import { Avalanche } from "./constants/networks/Avalanche"
 import { Arbitrum } from "./test/dca/chains/Arbitrum"
 
 dotenv.config()
@@ -57,31 +54,14 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545/",
     },
     avalanche: {
-      url: avalanche.url,
-      chainId: avalanche.chainId,
+      url: Avalanche().url,
+      chainId: Avalanche().chainId,
       accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
-    },
-    avalanche_test: {
-      url: avalancheTest.url,
-      chainId: avalancheTest.chainId,
-      accounts: [`0x${process.env.TESTNET_PRIVATE_KEY}`],
-      gas: 5_000_000,
     },
     arbitrum: {
       url: `${arbitrumChainConfig.url}`,
       chainId: arbitrumChainConfig.chainId,
       accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
-    },
-    bsc: {
-      url: bsc.url,
-      chainId: bsc.chainId,
-      accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
-    },
-    bsc_test: {
-      url: bscTest.url,
-      chainId: bscTest.chainId,
-      accounts: [`0x${process.env.TESTNET_PRIVATE_KEY}`],
-      gasPrice: 20_000_000_000,
     },
     tenderly: {
       url: `${process.env.TENDERLY_FORK_URL}`,

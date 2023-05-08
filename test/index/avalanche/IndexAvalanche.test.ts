@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
-import Avalanche from "../../../constants/networks/Avalanche.json"
+import { Avalanche } from "../../../constants/networks/Avalanche"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import { IndexTestOptions } from "../../helper/interfaces/options"
@@ -9,7 +9,7 @@ import { testStrategy } from "../Strategy.test"
 import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
-  network: Avalanche,
+  network: Avalanche(),
   forkAt: 29567000,
 }
 
