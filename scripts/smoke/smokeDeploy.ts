@@ -29,28 +29,45 @@ getExecutionGasAmount
 increaseEvmTimeBySeconds
 deployPortfolio
 
-describe("DNS Vector deployment", function () {
+describe("Smoke test", function () {
   this.timeout(60 * 60 * 1000)
 
-  // it("Smoke test", async function () {
-  //   const strategy = await getUsdcStrategy()
-  // })
   it("Smoke test", async function () {
-    const portfolio = await getUsdcPortfolio()
+    const accounts = await ethers.getSigners()
+    const Alice = accounts[0].address
+
+    let impersonatedSigner = await expectSuccess(
+      ethers.getImpersonatedSigner("0x62383739d68dd0f844103db8dfb05a7eded5bbe6")
+    )
+    const usdcContract = await expectSuccess(
+      ethers.getContractAt(
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+        "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8"
+      )
+    )
+
+    console.log("funding Alice account with native currency")
+    let tx = await expectSuccess(
+      impersonatedSigner.sendTransaction({
+        to: Alice,
+        value: ethers.utils.parseEther("100"),
+      })
+    )
+    console.log("funding Alice account with usdc currency")
+    await expectSuccess(usdcContract.connect(impersonatedSigner).transfer(Alice, ethers.utils.parseUnits("2000", 6)))
+
+    const SwapProviderLibrary = await ethers.getContractFactory("SwapProviderLibrary")
+    const swapProviderLibrary = await retryUntilSuccess(SwapProviderLibrary.deploy())
+
+    const LPIndex = await ethers.getContractFactory("LPIndex")
+    const lpIndex = await retryUntilSuccess(LPIndex.deploy())
+
+    await usdcContract.approve(lpIndex.address, ethers.utils.parseUnits("100", 6))
+    await lpIndex.swap(swapProviderLibrary.address)
   })
 })
 
 async function getUsdcPortfolio() {
-  const singleOwnerAddress = "0xE8855828fEC29dc6860A4362BCb386CCf6C0c601"
-  const maintainerRoleAddress = "0x44041eE3A2ae30a1F2a79710542040d9C5BeEb2c"
-  const feeReceiver = "0xD81965d1D44c084b43fBFE1Cc5baC7414cd4FbbD"
-  const swapServiceAddress = "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
-  const aaveOracleAddress = "0x736d964c70fF405e14aAc3094CeFe585812e1877"
-
-  const ownerAddrs = [singleOwnerAddress]
-
-  const usdcContract = await expectSuccess(getUsdcContract())
-
   // STEP 1: deploying DNS strategy
   const DnsVectorStrategyAumLib = await ethers.getContractFactory("DnsVectorStrategyAumLib")
   const dnsVectorStrategyAumLib = await retryUntilSuccess(DnsVectorStrategyAumLib.deploy())
