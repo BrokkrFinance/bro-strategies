@@ -68,6 +68,7 @@ export function testStrategy(
       // Strategy owner.
       const ownerAddr = await this.strategy.owner()
       this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+      await setBalance(this.owner.address, ethers.utils.parseEther("10000"))
 
       // Strategy token.
       const indexTokenAddr = await this.strategy.indexToken()

@@ -1,0 +1,63 @@
+{
+  "properties": [
+    {
+      "type": "strategy",
+      "subtype": "index",
+      "name": "IndexArbitrumDeFi",
+      "owner": { "$ref": "../../../../constants/arbitrum/addresses/DAO.json#/multisig" },
+      "contractName": "IndexArbitrumDeFi",
+      "indexTokenName": "Index Arbitrum DeFi Token",
+      "indexTokenSymbol": "IXAD",
+      "wNATIVE": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/wEth" },
+      "components": [
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/arb" },
+          "weight": "454545454545455000000"
+        },
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/gmx" },
+          "weight": "7954183900731790000"
+        }
+      ],
+      "swapRoutes": [
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/usdc" },
+          "router": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/router_v2" },
+          "dex": 2,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/wETH_usdc_v2" },
+            "data": "0x000000000000000000000000000000000000000000000000000000000000000f"
+          }
+        },
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/arb" },
+          "router": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/router_v2" },
+          "dex": 2,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/wETH_arb_v2" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000014"
+          }
+        },
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/gmx" },
+          "router": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/router_v2" },
+          "dex": 2,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/wETH_gmx_v2" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000014"
+          }
+        }
+      ],
+      "whitelistedTokens": [{ "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/usdc" }],
+      "oracle": { "$ref": "../../../../constants/arbitrum/Oracles.json#/index" },
+      "equityValuationLimit": 2e13,
+      "extraArgs": [],
+      "libraries": [
+        {
+          "name": "SwapAdapter",
+          "dependencies": []
+        }
+      ]
+    }
+  ]
+}

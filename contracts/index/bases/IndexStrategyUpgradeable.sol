@@ -289,8 +289,18 @@ abstract contract IndexStrategyUpgradeable is
         for (uint256 i = 0; i < components.length; i++) {
             if (weights[components[i]] > targetWeights[i]) {
                 // Convert component to wNATIVE.
-                uint256 amountComponent = ((weights[components[i]] -
-                    targetWeights[i]) * indexTotalSupply) / Constants.PRECISION;
+                uint256 amountComponent;
+
+                if (targetWeights[i] == 0) {
+                    // To avoid rounding errors.
+                    amountComponent = IERC20Upgradeable(components[i])
+                        .balanceOf(address(this));
+                } else {
+                    amountComponent =
+                        ((weights[components[i]] - targetWeights[i]) *
+                            indexTotalSupply) /
+                        Constants.PRECISION;
+                }
 
                 (
                     uint256 amountWNATIVEOut,
