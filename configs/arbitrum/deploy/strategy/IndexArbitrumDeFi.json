@@ -7,16 +7,20 @@
       "owner": { "$ref": "../../../../constants/arbitrum/addresses/DAO.json#/multisig" },
       "contractName": "IndexArbitrumDeFi",
       "indexTokenName": "Index Arbitrum DeFi Token",
-      "indexTokenSymbol": "IXAD",
+      "indexTokenSymbol": "IRAD",
       "wNATIVE": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/wEth" },
       "components": [
         {
-          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/arb" },
-          "weight": "454545454545455000000"
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/pendle" },
+          "weight": "500000000000000000000"
         },
         {
-          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/gmx" },
-          "weight": "7954183900731790000"
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/jones" },
+          "weight": "500000000000000000000"
+        },
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/pls" },
+          "weight": "500000000000000000000"
         }
       ],
       "swapRoutes": [
@@ -30,21 +34,30 @@
           }
         },
         {
-          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/arb" },
-          "router": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/router_v2" },
-          "dex": 2,
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/pendle" },
+          "router": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/router" },
+          "dex": 3,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/wETH_arb_v2" },
-            "data": "0x0000000000000000000000000000000000000000000000000000000000000014"
+            "pair": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/wETH_pendle" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
           }
         },
         {
-          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/gmx" },
-          "router": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/router_v2" },
-          "dex": 2,
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/jones" },
+          "router": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/router" },
+          "dex": 3,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/wETH_gmx_v2" },
-            "data": "0x0000000000000000000000000000000000000000000000000000000000000014"
+            "pair": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/wETH_jones" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/pls" },
+          "router": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/router" },
+          "dex": 3,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/wETH_pls" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
           }
         }
       ],
