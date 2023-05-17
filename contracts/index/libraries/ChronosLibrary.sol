@@ -17,8 +17,8 @@ library ChronosLibrary {
     ) internal returns (uint256 amountOut) {
         IERC20Upgradeable(path[0]).approve(address(router), amountIn);
 
-        IChronosRouter.route[] memory routes = new IChronosRouter.route[](1);
-        routes[0] = IChronosRouter.route(path[0], path[path.length - 1], false);
+        IChronosRouter.Route[] memory routes = new IChronosRouter.Route[](1);
+        routes[0] = IChronosRouter.Route(path[0], path[path.length - 1], false);
 
         amountOut = router.swapExactTokensForTokens(
             amountIn,
@@ -42,8 +42,8 @@ library ChronosLibrary {
         // only when `amountInMax` equals to actual amount in. Under this assumption,
         // `swapExactTokensForTokens` is used instead of `swapTokensForExactTokens`
         // because Solidly forks doesn't support `swapTokensForExactTokens`.
-        IChronosRouter.route[] memory routes = new IChronosRouter.route[](1);
-        routes[0] = IChronosRouter.route(path[0], path[path.length - 1], false);
+        IChronosRouter.Route[] memory routes = new IChronosRouter.Route[](1);
+        routes[0] = IChronosRouter.Route(path[0], path[path.length - 1], false);
 
         uint256 amountOutReceived = router.swapExactTokensForTokens(
             amountInMax,

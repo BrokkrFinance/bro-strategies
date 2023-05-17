@@ -2,8 +2,6 @@
 pragma solidity ^0.8.0;
 
 interface ICamelotPair {
-    function FEE_DENOMINATOR() external view returns (uint256);
-
     function stableSwap() external view returns (bool);
 
     function token0() external view returns (address);

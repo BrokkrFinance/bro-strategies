@@ -111,12 +111,10 @@ library CamelotLibrary {
             ? token0FeePercent
             : token1FeePercent;
 
-        uint256 FEE_DENOMINATOR = pair.FEE_DENOMINATOR();
-
         amountIn =
-            (reserveIn * amountOut * FEE_DENOMINATOR) /
+            (reserveIn * amountOut * 100000) /
             (reserveOut - amountOut) /
-            (FEE_DENOMINATOR - feePercent) +
+            (100000 - feePercent) +
             1;
     }
 }
