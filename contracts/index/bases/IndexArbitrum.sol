@@ -63,4 +63,19 @@ contract IndexArbitrum is IndexStrategyUpgradeable {
 
         addSwapRoute(token, router, dex, pairData);
     }
+
+    function addSwapRoute(
+        address token,
+        address router,
+        SwapAdapter.DEX dex,
+        address pair,
+        address factory
+    ) external onlyOwner {
+        SwapAdapter.PairData memory pairData = SwapAdapter.PairData(
+            pair,
+            abi.encode(factory)
+        );
+
+        addSwapRoute(token, router, dex, pairData);
+    }
 }

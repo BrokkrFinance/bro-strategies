@@ -3,11 +3,15 @@ pragma solidity ^0.8.0;
 
 import { ICamelotPair } from "../dependencies/ICamelotPair.sol";
 import { ICamelotRouter } from "../dependencies/ICamelotRouter.sol";
+import { IChronosFactory } from "../dependencies/IChronosFactory.sol";
+import { IChronosPair } from "../dependencies/IChronosPair.sol";
+import { IChronosRouter } from "../dependencies/IChronosRouter.sol";
 import { ITraderJoeV2Pair } from "../dependencies/ITraderJoeV2Pair.sol";
 import { ITraderJoeV2Router } from "../dependencies/ITraderJoeV2Router.sol";
 import { IUniswapV2Pair } from "../dependencies/IUniswapV2Pair.sol";
 import { IUniswapV2Router } from "../dependencies/IUniswapV2Router.sol";
 import { CamelotLibrary } from "./CamelotLibrary.sol";
+import { ChronosLibrary } from "./ChronosLibrary.sol";
 import { TraderJoeV2Library } from "./TraderJoeV2Library.sol";
 import { UniswapV2Library } from "./UniswapV2Library.sol";
 
@@ -15,6 +19,7 @@ import { Errors } from "./Errors.sol";
 
 library SwapAdapter {
     using CamelotLibrary for ICamelotRouter;
+    using ChronosLibrary for IChronosRouter;
     using UniswapV2Library for IUniswapV2Router;
     using TraderJoeV2Library for ITraderJoeV2Router;
 
@@ -22,7 +27,8 @@ library SwapAdapter {
         None,
         UniswapV2,
         TraderJoeV2,
-        Camelot
+        Camelot,
+        Chronos
     }
 
     struct PairData {
@@ -77,6 +83,15 @@ library SwapAdapter {
                 );
         }
 
+        if (setup.dex == DEX.Chronos) {
+            return
+                IChronosRouter(setup.router).swapExactTokensForTokens(
+                    amountIn,
+                    amountOutMin,
+                    path
+                );
+        }
+
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
@@ -115,6 +130,15 @@ library SwapAdapter {
         if (setup.dex == DEX.Camelot) {
             return
                 ICamelotRouter(setup.router).swapTokensForExactTokens(
+                    amountOut,
+                    amountInMax,
+                    path
+                );
+        }
+
+        if (setup.dex == DEX.Chronos) {
+            return
+                IChronosRouter(setup.router).swapTokensForExactTokens(
                     amountOut,
                     amountInMax,
                     path
@@ -163,6 +187,15 @@ library SwapAdapter {
                 );
         }
 
+        if (setup.dex == DEX.Chronos) {
+            return
+                IChronosRouter(setup.router).getAmountOut(
+                    IChronosPair(setup.pairData.pair),
+                    amountIn,
+                    tokenIn
+                );
+        }
+
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
@@ -200,6 +233,18 @@ library SwapAdapter {
             return
                 ICamelotRouter(setup.router).getAmountIn(
                     ICamelotPair(setup.pairData.pair),
+                    amountOut,
+                    tokenOut
+                );
+        }
+
+        if (setup.dex == DEX.Chronos) {
+            address factory = abi.decode(setup.pairData.data, (address));
+
+            return
+                IChronosRouter(setup.router).getAmountIn(
+                    IChronosPair(setup.pairData.pair),
+                    IChronosFactory(factory),
                     amountOut,
                     tokenOut
                 );
