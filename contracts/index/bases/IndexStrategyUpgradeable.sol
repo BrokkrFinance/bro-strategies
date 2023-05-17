@@ -723,6 +723,10 @@ abstract contract IndexStrategyUpgradeable is
         address tokenIn,
         address tokenOut
     ) internal returns (uint256 amountOut) {
+        if (tokenIn == tokenOut) {
+            return amountIn;
+        }
+
         address[] memory path = new address[](2);
         path[0] = tokenIn;
         path[1] = tokenOut;
@@ -739,6 +743,10 @@ abstract contract IndexStrategyUpgradeable is
         address tokenIn,
         address tokenOut
     ) internal returns (uint256 amountIn) {
+        if (tokenIn == tokenOut) {
+            return amountOut;
+        }
+
         address[] memory path = new address[](2);
         path[0] = tokenIn;
         path[1] = tokenOut;

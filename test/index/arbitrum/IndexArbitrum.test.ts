@@ -15,9 +15,16 @@ const indexAvalancheTestOptions: IndexTestOptions = {
 testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexAvalancheTestOptions, [
   // testIndexArbitrumDeFiSetSwapRoute,
 ])
+testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumMarketCapStrategy, indexAvalancheTestOptions, [
+  // testIndexArbitrumDeFiSetSwapRoute,
+])
 
 async function deployIndexArbitrumDeFiStrategy() {
   return await deployStrategy("arbitrum", "IndexArbitrumDeFi")
+}
+
+async function deployIndexArbitrumMarketCapStrategy() {
+  return await deployStrategy("arbitrum", "IndexArbitrumMarketCap")
 }
 
 function testIndexArbitrumDeFiSetSwapRoute() {
