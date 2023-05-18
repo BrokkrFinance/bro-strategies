@@ -9,7 +9,7 @@ import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Arbitrum(),
-  forkAt: 90333604,
+  forkAt: 91875300,
 }
 
 testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexAvalancheTestOptions, [
