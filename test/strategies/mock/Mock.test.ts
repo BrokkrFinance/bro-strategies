@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import Tokens from "../../../constants/avalanche/addresses/Tokens.json"
-import Avalanche from "../../../constants/networks/Avalanche.json"
+import { Avalanche } from "../../../constants/networks/Avalanche"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { WhaleAddrs } from "../../helper/addresses"
 import { StrategyTestOptions } from "../../helper/interfaces/options"
@@ -17,7 +17,7 @@ testStrategy
 Tokens
 
 const mockTestOptions: StrategyTestOptions = {
-  network: Avalanche,
+  network: Avalanche(),
   forkAt: 29197000,
   upgradeTo: "OwnableV2",
   runReapRewardExtra: false,
@@ -35,7 +35,7 @@ async function deployMockStrategy() {
   await strategy.setFreeMoneyProvider(freeMoneyProvider.address)
 
   // transfering deposit token to FreeMoneyProvider and to the strategy
-  let impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.avalanche.usdc)
+  let impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.get("avalanche")!)
   let usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.usdc)
   await usdc.connect(impersonatedSigner).transfer(freeMoneyProvider.address, ethers.utils.parseUnits("30000", 6))
   await usdc.connect(impersonatedSigner).transfer(strategy.address, ethers.utils.parseUnits("30000", 6))

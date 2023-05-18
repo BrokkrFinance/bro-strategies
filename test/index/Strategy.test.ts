@@ -36,20 +36,7 @@ export function testStrategy(
 
       // Set chain specific parameters.
       const depositTokenAddr: string = DepositTokens.get(strategyTestOptions.network.name)!
-      let whaleAddr: string
-
-      switch (strategyTestOptions.network.chainId) {
-        case 56:
-          // BNB Smart Chain.
-          whaleAddr = WhaleAddrs.bsc.busd
-          break
-        case 43114:
-          // Avalanche C-Chain.
-          whaleAddr = WhaleAddrs.avalanche.usdc
-          break
-        default:
-          throw new Error("Selected chain for test is not one of supported mainnets.")
-      }
+      const whaleAddr: string = WhaleAddrs.get(strategyTestOptions.network.name)!
 
       // Get ERC20 tokens.
       this.depositToken = await ethers.getContractAt(
@@ -81,6 +68,7 @@ export function testStrategy(
       // Strategy owner.
       const ownerAddr = await this.strategy.owner()
       this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+      await setBalance(this.owner.address, ethers.utils.parseEther("10000"))
 
       // Strategy token.
       const indexTokenAddr = await this.strategy.indexToken()

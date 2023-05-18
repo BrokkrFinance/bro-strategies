@@ -3,7 +3,7 @@ import { BigNumber } from "ethers"
 import { ethers, upgrades } from "hardhat"
 import Tokens from "../../../constants/avalanche/addresses/Tokens.json"
 import TraderJoe from "../../../constants/avalanche/addresses/TraderJoe.json"
-import Avalanche from "../../../constants/networks/Avalanche.json"
+import { Avalanche } from "../../../constants/networks/Avalanche"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import TraderJoeLBPairABI from "../../helper/abi/TraderJoeLBPair.json"
@@ -12,7 +12,7 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
 const traderjoeTestOptions: StrategyTestOptions = {
-  network: Avalanche,
+  network: Avalanche(),
   forkAt: 29197000,
   upgradeTo: "OwnableV2",
   runReapReward: false,

@@ -41,20 +41,7 @@ export function testPortfolio(
 
       // Set chain specific parameters.
       const depositTokenAddr: string = DepositTokens.get(testOptions.network.name)!
-      let whaleAddr: string
-
-      switch (testOptions.network.chainId) {
-        case 56:
-          // BNB Smart Chain.
-          whaleAddr = WhaleAddrs.bsc.busd
-          break
-        case 43114:
-          // Avalanche C-Chain.
-          whaleAddr = WhaleAddrs.avalanche.usdc
-          break
-        default:
-          throw new Error("Selected chain for test is not one of supported mainnets.")
-      }
+      const whaleAddr: string = WhaleAddrs.get(testOptions.network.name)!
 
       // Get ERC20 tokens.
       this.depositToken = await ethers.getContractAt(

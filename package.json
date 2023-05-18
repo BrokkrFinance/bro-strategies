@@ -17,7 +17,7 @@
     "@openzeppelin/contracts": "^4.6.0",
     "@openzeppelin/contracts-upgradeable": "^4.6.0",
     "@openzeppelin/hardhat-defender": "^1.8.0",
-    "@openzeppelin/hardhat-upgrades": "^1.18.1",
+    "@openzeppelin/hardhat-upgrades": "^1.25.0",
     "@tenderly/hardhat-tenderly": "^1.1.0",
     "@traderjoe-xyz/core": "^2.4.6",
     "@typechain/ethers-v5": "^7.0.1",

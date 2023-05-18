@@ -10,6 +10,7 @@ library Errors {
     error Index_AboveMaxAmount();
     error Index_BelowMinAmount();
     error Index_ZeroAddress();
+    error Index_SolidlyStableSwapNotSupported();
     error Index_WrongSwapAmount();
     error Index_WrongPair(address tokenIn, address tokenOut);
     error Index_WrongTargetWeightsLength();

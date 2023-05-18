@@ -4,7 +4,7 @@ import { ethers, upgrades } from "hardhat"
 import Stargate from "../../../constants/avalanche/addresses/Stargate.json"
 import Tokens from "../../../constants/avalanche/addresses/Tokens.json"
 import TraderJoe from "../../../constants/avalanche/addresses/TraderJoe.json"
-import Avalanche from "../../../constants/networks/Avalanche.json"
+import { Avalanche } from "../../../constants/networks/Avalanche"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import StargateLPTokenABI from "../../helper/abi/StargateLPToken.json"
@@ -13,7 +13,7 @@ import { getErrorRange } from "../../helper/utils"
 import { testStrategy } from "../Strategy.test"
 
 const stargateTestOptions: StrategyTestOptions = {
-  network: Avalanche,
+  network: Avalanche(),
   forkAt: 29197000,
   upgradeTo: "OwnableV2",
   runReapUninvestedReward: false,
