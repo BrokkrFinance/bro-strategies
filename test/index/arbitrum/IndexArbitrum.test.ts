@@ -4,12 +4,12 @@ import { ethers } from "hardhat"
 import { Arbitrum } from "../../../constants/networks/Arbitrum"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { IndexTestOptions } from "../../helper/interfaces/options"
-import { testStrategy } from "../Strategy.test"
 import { burn, mint } from "../helper/InvestHelper"
+import { testStrategy } from "../Strategy.test"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Arbitrum(),
-  forkAt: 91875300,
+  forkAt: 92206952,
 }
 
 testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexAvalancheTestOptions, [
