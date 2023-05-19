@@ -232,7 +232,12 @@ abstract contract DCABaseUpgradeableCutted is
             ) {
                 // not started position with the same amount split exists
                 // just add invested amount here
-                depositor.positions[i].depositAmount += amount;
+
+                // (amount / amountSplit) * amountSplit exression will produce the same truncation loss as the one
+                // that happens during adding the funds to the investment queue
+                depositor.positions[i].depositAmount +=
+                    (amount / amountSplit) *
+                    amountSplit;
 
                 emit Deposit(sender, amount, amountSplit);
                 return;

@@ -10,6 +10,34 @@ getTokenContract
 
 export function testStrategyWithdraw() {
   describe("Withdrawal", async function () {
+    it("should not fail when funds truncation occur", async function () {
+      // this test verifies that a truncation related bug is fixed
+      // 1. userA invest 1 USDC twice
+      // 2. userB withdraws everything
+      // previous version of the code failed, as the investment queue values were truncated
+      // while the user positions were not truncated
+
+      // deposit 1 depositToken into 52 slots
+      await this.depositTokenContract
+        .connect(this.user3)
+        .approve(this.strategy.address, ethers.utils.parseUnits("1", 6))
+      await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1", 6), 52)
+
+      // deposit again 1 depositToken into 52 slots
+      await this.depositTokenContract
+        .connect(this.user3)
+        .approve(this.strategy.address, ethers.utils.parseUnits("1", 6))
+      await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1", 6), 52)
+
+      // check user depositor info
+      let depositorInfo = await this.strategy.depositorInfo(this.user3.address)
+      expect(depositorInfo.positions.length).to.equal(1)
+
+      // withdraw all deposited money without the contract ever investing
+      // previous version of the code failed during withdrawal
+      await this.strategy.connect(this.user3).withdrawAll(false)
+    })
+
     it("should allow to withdraw user deposits for a single user", async function () {
       let depositTokenBalanceBefore = await this.depositTokenContract.balanceOf(this.user3.address)
       let bluechipBalanceBefore = await this.bluechipTokenContract.balanceOf(this.user3.address)
