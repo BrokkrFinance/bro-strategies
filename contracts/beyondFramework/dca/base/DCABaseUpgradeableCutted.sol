@@ -247,7 +247,7 @@ abstract contract DCABaseUpgradeableCutted is
         // otherwise create new position
         depositor.positions.push(
             Position(
-                amount,
+                (amount / amountSplit) * amountSplit,
                 amountSplit,
                 lastInvestmentTimestamp,
                 dcaHistory.currentHistoricalIndex()
