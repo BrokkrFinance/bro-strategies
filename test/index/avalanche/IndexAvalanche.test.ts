@@ -5,12 +5,12 @@ import { Avalanche } from "../../../constants/networks/Avalanche"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import { IndexTestOptions } from "../../helper/interfaces/options"
-import { testStrategy } from "../Strategy.test"
 import { burn, mint } from "../helper/InvestHelper"
+import { testStrategy } from "../Strategy.test"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Avalanche(),
-  forkAt: 29567000,
+  forkAt: 30337122,
 }
 
 testStrategy("IndexAvalancheDeFi Strategy - Deploy", deployIndexAvalancheDeFiStrategy, indexAvalancheTestOptions, [
