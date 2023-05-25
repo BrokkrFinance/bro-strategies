@@ -54,7 +54,7 @@ contract OracleAvalanche is
             return uint256(chainlinkPrice);
         }
 
-        int256 ammPrice = _getAmmPrice(token, maximize);
+        int256 ammPrice = -1;
 
         int256 price;
 
@@ -97,10 +97,5 @@ contract OracleAvalanche is
         }
 
         (, price, , , ) = priceFeeds[token].latestRoundData();
-    }
-
-    function _getAmmPrice(address, bool) internal pure returns (int256) {
-        // TODO: Not implemented.
-        return -1;
     }
 }
