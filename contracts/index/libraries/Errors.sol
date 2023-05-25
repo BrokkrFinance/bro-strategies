@@ -22,4 +22,5 @@ library Errors {
 
     // IndexOracle errors.
     error Oracle_TokenNotSupported(address token);
+    error Oracle_ZeroAddress();
 }

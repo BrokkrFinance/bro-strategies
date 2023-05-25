@@ -84,6 +84,10 @@ contract OracleArbitrum is
     }
 
     function setPriceFeed(address token, address priceFeed) public onlyOwner {
+        if (token == address(0)) {
+            revert Errors.Oracle_ZeroAddress();
+        }
+
         priceFeeds[token] = IChainlinkAggregatorV3(priceFeed);
     }
 

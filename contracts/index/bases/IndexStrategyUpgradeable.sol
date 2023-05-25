@@ -675,6 +675,10 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     function _addRouter(address token, address router) internal {
+        if (token == address(0)) {
+            revert Errors.Index_ZeroAddress();
+        }
+
         for (uint256 i = 0; i < routers[token].length; i++) {
             if (routers[token][i] == router) {
                 return;
@@ -685,6 +689,10 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     function _setDEX(address router, SwapAdapter.DEX dex) internal {
+        if (router == address(0)) {
+            revert Errors.Index_ZeroAddress();
+        }
+
         if (dexs[router] != SwapAdapter.DEX.None) {
             return;
         }
@@ -698,6 +706,10 @@ abstract contract IndexStrategyUpgradeable is
         address token1,
         SwapAdapter.PairData memory _pairData
     ) internal {
+        if (token0 == address(0) || token1 == address(0)) {
+            revert Errors.Index_ZeroAddress();
+        }
+
         if (pairData[router][token0][token1].pair != address(0)) {
             return;
         }
