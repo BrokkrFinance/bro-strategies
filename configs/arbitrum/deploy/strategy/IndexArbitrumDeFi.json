@@ -6,8 +6,8 @@
       "name": "IndexArbitrumDeFi",
       "owner": { "$ref": "../../../../constants/arbitrum/addresses/DAO.json#/multisig" },
       "contractName": "IndexArbitrumDeFi",
-      "indexTokenName": "Index Arbitrum DeFi Token",
-      "indexTokenSymbol": "IRAD",
+      "indexTokenName": "Arbitrum DeFi Index token",
+      "indexTokenSymbol": "ARDIX",
       "wNATIVE": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/wEth" },
       "components": [
         {
