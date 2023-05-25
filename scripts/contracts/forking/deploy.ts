@@ -19,5 +19,6 @@ export async function deployStrategy(network: string, name: string): Promise<Con
 }
 
 async function deployInvestable(investable: Investable): Promise<Contract> {
-  return await deploy(investable, { forkEnabled: true })
+  // testRun should be a parameter to deployInvestable in the future
+  return await deploy(investable, { forkEnabled: true, testRun: true })
 }

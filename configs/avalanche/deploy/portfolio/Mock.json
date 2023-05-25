@@ -1,0 +1,74 @@
+{
+  "properties": [
+    {
+      "type": "strategy",
+      "subtype": "ownable",
+      "name": "MockCash",
+      "owner": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
+      "contractName": "Cash",
+      "investmentTokenName": "Cash Strategy Token",
+      "investmentTokenSymbol": "CASH",
+      "depositToken": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
+      "depositFee": 0,
+      "depositFeeParams": [],
+      "withdrawalFee": 500,
+      "withdrawalFeeParams": [],
+      "performanceFee": 0,
+      "performanceFeeParams": [],
+      "managementFee": 0,
+      "managementFeeParams": [],
+      "feeReceiver": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
+      "feeReceiverParams": [],
+      "totalInvestmentLimit": 1e20,
+      "investmentLimitPerAddress": 1e20,
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
+      "swapService": { "$ref": "../../../../constants/avalanche/SwapServices.json#/traderjoe" },
+      "roleToUsers": [],
+      "extraArgs": [],
+      "libraries": []
+    },
+    {
+      "type": "portfolio",
+      "subtype": "ownable",
+      "name": "Mock",
+      "owner": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
+      "contractName": "PercentageAllocation",
+      "investmentTokenName": "Mock Investment Token",
+      "investmentTokenSymbol": "MPT",
+      "depositToken": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
+      "depositFee": 0,
+      "depositFeeParams": [],
+      "withdrawalFee": 0,
+      "withdrawalFeeParams": [],
+      "performanceFee": 0,
+      "performanceFeeParams": [],
+      "managementFee": 0,
+      "managementFeeParams": [],
+      "feeReceiver": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
+      "feeReceiverParams": [],
+      "totalInvestmentLimit": 1e20,
+      "investmentLimitPerAddress": 1e20,
+      "extraArgs": [],
+      "investables": ["strategy/MockCash"],
+      "allocations": [[100000]],
+      "libraries": [
+        {
+          "name": "PortfolioBaseAumLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseFeeLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseInvestmentLib",
+          "dependencies": ["PortfolioBaseAumLib"]
+        },
+        {
+          "name": "PortfolioBaseManagementLib",
+          "dependencies": []
+        }
+      ]
+    }
+  ]
+}

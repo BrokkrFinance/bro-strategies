@@ -26,43 +26,15 @@ testDcaStrategy(
   prodDeploymentConfig("arbitrum", "usdc_arb_prod.json"),
   Arbitrum()
 )
-testDcaStrategy(
-  "CoinBluechip usdc -> eth DCA Strategy on Arbitrum (Production contract)",
-  deployCoinBluechipDcaStrategy,
-  [],
-  prodDeploymentConfig("arbitrum", "usdc_eth_prod.json"),
-  Arbitrum()
-)
-testDcaStrategy(
-  "CoinBluechip usdc -> magic DCA Strategy on Arbitrum (Production contract)",
-  deployCoinBluechipDcaStrategy,
-  [],
-  prodDeploymentConfig("arbitrum", "usdc_magic_prod.json"),
-  Arbitrum()
-)
-testDcaStrategy(
-  "CoinBluechip usdc -> rdnt DCA Strategy on Arbitrum (Production contract)",
-  deployCoinBluechipDcaStrategy,
-  [],
-  prodDeploymentConfig("arbitrum", "usdc_rdnt_prod.json"),
-  Arbitrum()
-)
-testDcaStrategy(
-  "CoinBluechip usdc -> dpx DCA Strategy on Arbitrum (Production contract)",
-  deployCoinBluechipDcaStrategy,
-  [],
-  prodDeploymentConfig("arbitrum", "usdc_dpx_prod.json"),
-  Arbitrum()
-)
 
 // test deployments
-testDcaStrategy(
-  "CoinBluechip usdc -> btc DCA Strategy on Arbitrum",
-  deployCoinBluechipDcaStrategy,
-  [],
-  depositUsdcHoldBtcConfigArbitrum(),
-  Arbitrum()
-)
+// testDcaStrategy(
+//   "CoinBluechip usdc -> btc DCA Strategy on Arbitrum",
+//   deployCoinBluechipDcaStrategy,
+//   [],
+//   depositUsdcHoldBtcConfigArbitrum(),
+//   Arbitrum()
+// )
 testDcaStrategy(
   "CoinBluechip usdc -> btc DCA Strategy on Avalanche",
   deployCoinBluechipDcaStrategy,

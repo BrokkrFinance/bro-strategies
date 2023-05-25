@@ -84,7 +84,25 @@
       "investmentLimitPerAddress": 1e20,
       "extraArgs": [],
       "investables": ["strategy/StargateUSDC", "strategy/CashWithStargateUSDC"],
-      "allocations": [[100000], [100000, 0]]
+      "allocations": [[100000], [100000, 0]],
+      "libraries": [
+        {
+          "name": "PortfolioBaseAumLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseFeeLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseInvestmentLib",
+          "dependencies": ["PortfolioBaseAumLib"]
+        },
+        {
+          "name": "PortfolioBaseManagementLib",
+          "dependencies": []
+        }
+      ]
     },
     {
       "type": "strategy",
@@ -170,7 +188,25 @@
       "investmentLimitPerAddress": 1e20,
       "extraArgs": [],
       "investables": ["strategy/StargateUSDT", "strategy/CashWithStargateUSDT"],
-      "allocations": [[100000], [100000, 0]]
+      "allocations": [[100000], [100000, 0]],
+      "libraries": [
+        {
+          "name": "PortfolioBaseAumLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseFeeLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseInvestmentLib",
+          "dependencies": ["PortfolioBaseAumLib"]
+        },
+        {
+          "name": "PortfolioBaseManagementLib",
+          "dependencies": []
+        }
+      ]
     },
     {
       "type": "strategy",
@@ -263,7 +299,25 @@
       "investmentLimitPerAddress": 1e20,
       "extraArgs": [],
       "investables": ["strategy/TraderJoe", "strategy/CashWithTraderJoe"],
-      "allocations": [[100000], [100000, 0]]
+      "allocations": [[100000], [100000, 0]],
+      "libraries": [
+        {
+          "name": "PortfolioBaseAumLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseFeeLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseInvestmentLib",
+          "dependencies": ["PortfolioBaseAumLib"]
+        },
+        {
+          "name": "PortfolioBaseManagementLib",
+          "dependencies": []
+        }
+      ]
     },
     {
       "type": "portfolio",
@@ -288,7 +342,25 @@
       "investmentLimitPerAddress": 1e20,
       "extraArgs": [],
       "investables": ["portfolio/WrapperStargateUSDC", "portfolio/WrapperStargateUSDT", "portfolio/WrapperTraderJoe"],
-      "allocations": [[100000], [50000, 50000], [30000, 30000, 40000]]
+      "allocations": [[100000], [50000, 50000], [30000, 30000, 40000]],
+      "libraries": [
+        {
+          "name": "PortfolioBaseAumLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseFeeLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseInvestmentLib",
+          "dependencies": ["PortfolioBaseAumLib"]
+        },
+        {
+          "name": "PortfolioBaseManagementLib",
+          "dependencies": []
+        }
+      ]
     }
   ]
 }

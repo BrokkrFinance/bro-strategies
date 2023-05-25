@@ -140,7 +140,6 @@ abstract contract DCABaseUpgradeableCutted is
         setBluechipInvestmentState(BluechipInvestmentState.Investing);
         setDepositFee(args.depositFee);
         setDCAInvestor(args.dcaInvestor);
-        // setDepositTokenInto(args.depositTokenInfo);
         depositTokenInfo = args.depositTokenInfo;
         depositTokenScale = 10**args.depositTokenInfo.decimals;
         setInvestmentPeriod(args.investmentPeriod);
@@ -702,8 +701,7 @@ abstract contract DCABaseUpgradeableCutted is
         private
     {
         require(
-            // solhint-disable-next-line not-rely-on-time
-            newLastInvestmentTimestamp >= block.timestamp,
+            newLastInvestmentTimestamp >= lastInvestmentTimestamp,
             "Invalid last invest ts"
         );
         lastInvestmentTimestamp = newLastInvestmentTimestamp;

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./FeeUpgradeable.sol";
+import { InvestmentLimitLib } from "./InvestmentLimitUpgradeable.sol";
 import "./InvestmentLimitUpgradeable.sol";
 import "../interfaces/IERC20UpgradeableExt.sol";
 import "../interfaces/IInvestmentToken.sol";
@@ -114,11 +115,16 @@ abstract contract StrategyBaseUpgradeable is
                 (equityValuationBeforeInvestment * investmentTokenBalance) /
                 investmentTokenSupply;
         }
-        checkTotalInvestmentLimit(
+        InvestmentLimitLib.checkTotalInvestmentLimit(
             depositTokenAmountIn,
-            equityValuationBeforeInvestment
+            equityValuationBeforeInvestment,
+            getTotalInvestmentLimit()
         );
-        checkInvestmentLimitPerAddress(depositTokenAmountIn, userEquity);
+        InvestmentLimitLib.checkInvestmentLimitPerAddress(
+            depositTokenAmountIn,
+            userEquity,
+            getInvestmentLimitPerAddress()
+        );
 
         uint256 depositTokenAmountBeforeInvestment = depositToken.balanceOf(
             address(this)

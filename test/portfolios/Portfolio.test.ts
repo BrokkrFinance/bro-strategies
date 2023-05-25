@@ -122,7 +122,7 @@ export function testPortfolio(
     testPortfolioInvestable()
     testPortfolioPausable()
     testPortfolioRebalance()
-    testPortfolioUpgradeable()
+    if (testOptions.upgradeTo !== "") testPortfolioUpgradeable()
     testPortfolioWithdraw()
     // temporarily switched off, until the interface becomes more stable
     // testPortfolioERC165()

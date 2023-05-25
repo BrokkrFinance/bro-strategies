@@ -10,14 +10,14 @@ struct InvestableDesc {
     IInvestable investable;
     uint24 allocationPercentage;
     string[] keys;
-    string[] values;
+    bytes[] values;
 }
 
 interface IPortfolio is IInvestable {
+    error RebalancePercentageNot100();
     error InvestableAlreadyAdded();
     error InvestableNotYetAdded();
     error InvestableHasNonZeroAllocation();
-    error RebalancePercentageNot100();
     error RebalanceIncorrectAllocationsLength();
 
     event InvestableAdd(
