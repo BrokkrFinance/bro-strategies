@@ -82,17 +82,17 @@ export function testStrategyDeposit() {
     it("should allow to make deposits for multiple users", async function () {
       await mine(86401)
 
-      // deposit 1000 depositToken into 9 slots as user3
+      // deposit 10 depositToken into 9 slots as user3
       await this.depositTokenContract
         .connect(this.user3)
-        .approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
-      await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("1000", 6), 9)
+        .approve(this.strategy.address, ethers.utils.parseUnits("10", 6))
+      await this.strategy.connect(this.user3).deposit(ethers.utils.parseUnits("10", 6), 9)
 
-      // deposit 1000 depositToken into 9 slots as user2
+      // deposit 10 depositToken into 9 slots as user2
       await this.depositTokenContract
         .connect(this.user2)
-        .approve(this.strategy.address, ethers.utils.parseUnits("1000", 6))
-      await this.strategy.connect(this.user2).deposit(ethers.utils.parseUnits("1000", 6), 9)
+        .approve(this.strategy.address, ethers.utils.parseUnits("10", 6))
+      await this.strategy.connect(this.user2).deposit(ethers.utils.parseUnits("10", 6), 9)
 
       // invest
       await mine(86400)

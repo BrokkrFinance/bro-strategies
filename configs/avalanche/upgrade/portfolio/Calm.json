@@ -2,7 +2,25 @@
   "properties": [
     {
       "proxy": { "$ref": "../../live/portfolio/Calm.json#/address" },
-      "newImplementation": "PercentageAllocation"
+      "newImplementation": "PercentageAllocation",
+      "libraries": [
+        {
+          "name": "PortfolioBaseAumLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseFeeLib",
+          "dependencies": []
+        },
+        {
+          "name": "PortfolioBaseInvestmentLib",
+          "dependencies": ["PortfolioBaseAumLib"]
+        },
+        {
+          "name": "PortfolioBaseManagementLib",
+          "dependencies": []
+        }
+      ]
     }
   ]
 }

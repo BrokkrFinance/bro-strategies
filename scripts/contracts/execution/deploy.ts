@@ -43,6 +43,10 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
         console.log(`Deploy: Deploy ${deployConfig.name} ${deployConfig.type}.`)
 
         if (deployConfig.type === "portfolio") {
+          // Deploy libraries.
+          const librarArgs = getLibraries(deployConfig)
+          const libraries = await deployLibraries(investable.network, librarArgs)
+
           // Deploy a portfolio contract.
           contract = await deployUUPSUpgradeablePortfolio(
             deployConfig.contractName,
@@ -51,7 +55,8 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
             getPortfolioArgs(deployConfig),
             getPortfolioExtraArgs(deployConfig),
             getPortfolioInvestables(investable.network, deployConfig),
-            getPortfolioAllocations(deployConfig)
+            getPortfolioAllocations(deployConfig),
+            libraries
           )
         } else if (deployConfig.type === "strategy") {
           // Deploy libraries.
@@ -328,7 +333,7 @@ async function investOneDollarToPortfolio(investable: Investable): Promise<void>
   console.log(`Deploy: Successfully withdrew $1 from ${portfolioLiveConfig.address}.`)
 }
 
-async function investOneDollarToIndex(investable: Investable): Promise<void> {
+async function investOneDollarToIndex(investable: Investable, options?: DeployOptions): Promise<void> {
   // Get an instance of HRE.
   const { ethers } = require("hardhat")
 
@@ -356,9 +361,10 @@ async function investOneDollarToIndex(investable: Investable): Promise<void> {
 
   console.log(`Deploy: Successfully deposited $2 to ${strategyLiveConfig.address}.`)
 
-  console.log("Deploy: Wait 1 min for block confirmation before withdrawing.")
-
-  await new Promise((timeout) => setTimeout(timeout, 60000))
+  if (options !== undefined && options.testRun !== undefined && !options.testRun) {
+    console.log("Deploy: Wait 1 min for block confirmation before withdrawing.")
+    await new Promise((timeout) => setTimeout(timeout, 60000))
+  }
 
   console.log("Deploy: Withdraw $1.")
 

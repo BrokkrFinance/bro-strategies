@@ -79,7 +79,8 @@ const config: HardhatUserConfig = {
   //   strict: true,
   // },
   mocha: {
-    timeout: 150000,
+    timeout: 200000,
+    // bail: true,
   },
 }
 

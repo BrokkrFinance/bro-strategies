@@ -3,14 +3,9 @@ import { Contract } from "ethers"
 import { ethers } from "hardhat"
 
 export async function removeInvestmentLimitsAndFees(investable: Contract, owner: SignerWithAddress): Promise<void> {
-  const isPortfolio = await investable.supportsInterface("0x2ac9cdaa")
   const isStrategy = await investable.supportsInterface("0x00000000")
 
-  if (isPortfolio === false && isStrategy === false) {
-    throw new Error("The given investable is neither portfolio nor strategy.")
-  }
-
-  if (isPortfolio === true) {
+  if (!isStrategy) {
     const investables = await investable.getInvestables()
 
     for (let i = 0; i < investables.length; i++) {

@@ -19,11 +19,12 @@ export async function deployUUPSUpgradeablePortfolio(
   portfolioArgs: PortfolioArgs,
   portfolioExtraArgs: PortfolioExtraArgs,
   investables: string[],
-  allocations: number[][]
+  allocations: number[][],
+  libraries: Libraries = {}
 ): Promise<Contract> {
   // Contact factories.
   const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
-  const Portfolio = await ethers.getContractFactory(portfolioName)
+  const Portfolio = await ethers.getContractFactory(portfolioName, { libraries })
 
   // Deploy portfolio token.
   const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, [

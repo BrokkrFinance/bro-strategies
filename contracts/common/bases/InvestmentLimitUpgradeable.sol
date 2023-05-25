@@ -23,7 +23,7 @@ abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
     }
 
     function getTotalInvestmentLimit()
-        external
+        public
         view
         virtual
         override
@@ -40,7 +40,7 @@ abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
     }
 
     function getInvestmentLimitPerAddress()
-        external
+        public
         view
         virtual
         override
@@ -55,20 +55,25 @@ abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
     {
         investmentLimitPerAddress = investmentLimitPerAddress_;
     }
+}
 
+library InvestmentLimitLib {
     function checkTotalInvestmentLimit(
         uint256 aboutToInvest,
-        uint256 totalInvestedSoFar
-    ) internal virtual {
+        uint256 totalInvestedSoFar,
+        uint256 totalInvestmentLimit
+    ) internal pure {
         if (aboutToInvest + totalInvestedSoFar > totalInvestmentLimit)
-            revert TotalInvestmentLimitExceeded();
+            revert InvestmentLimitUpgradeable.TotalInvestmentLimitExceeded();
     }
 
     function checkInvestmentLimitPerAddress(
         uint256 aboutToInvest,
-        uint256 investedSoFarPerAddress
-    ) internal virtual {
+        uint256 investedSoFarPerAddress,
+        uint256 investmentLimitPerAddress
+    ) internal pure {
         if (aboutToInvest + investedSoFarPerAddress > investmentLimitPerAddress)
-            revert InvestmentLimitPerAddressExceeded();
+            revert InvestmentLimitUpgradeable
+                .InvestmentLimitPerAddressExceeded();
     }
 }
