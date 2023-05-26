@@ -4,8 +4,8 @@ import { ethers } from "hardhat"
 import { Arbitrum } from "../../../constants/networks/Arbitrum"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { IndexTestOptions } from "../../helper/interfaces/options"
-import { burn, mint } from "../helper/InvestHelper"
 import { testStrategy } from "../Strategy.test"
+import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Arbitrum(),
@@ -15,9 +15,14 @@ const indexAvalancheTestOptions: IndexTestOptions = {
 testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexAvalancheTestOptions, [
   // testIndexArbitrumDeFiSetSwapRoute,
 ])
-testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumMarketCapStrategy, indexAvalancheTestOptions, [
-  // testIndexArbitrumDeFiSetSwapRoute,
-])
+testStrategy(
+  "IndexArbitrumMarketCap Strategy - Deploy",
+  deployIndexArbitrumMarketCapStrategy,
+  indexAvalancheTestOptions,
+  [
+    // testIndexArbitrumDeFiSetSwapRoute,
+  ]
+)
 
 async function deployIndexArbitrumDeFiStrategy() {
   return await deployStrategy("arbitrum", "IndexArbitrumDeFi")
