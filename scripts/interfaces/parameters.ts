@@ -48,6 +48,7 @@ export interface PortfolioArgs {
     feeReceiver: FeeReceiver
   }
   investmentLimit: InvestmentLimit
+  roleToUsers: RoleToUsers[]
 }
 
 export interface PortfolioExtraArgs {
