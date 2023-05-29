@@ -8,6 +8,8 @@ import { IndexTestOptions } from "../helper/interfaces/options"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
 import { testStrategyComponent } from "./StrategyComponent.test"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
+import { testStrategyOracle } from "./StrategyOracle.test"
+import { testStrategyPausable } from "./StrategyPausable.test"
 import { testStrategyRebalance } from "./StrategyRebalance.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
@@ -74,6 +76,13 @@ export function testStrategy(
       const indexTokenAddr = await this.strategy.indexToken()
       this.indexToken = await ethers.getContractAt("IndexToken", indexTokenAddr)
 
+      // Oracle.
+      const oracleAddr = await this.strategy.oracle()
+      this.oracle = await ethers.getContractAt("IIndexOracle", oracleAddr)
+
+      // wNATIVE.
+      this.wNATIVE = await this.strategy.wNATIVE()
+
       this.snapshot = await takeSnapshot()
     })
 
@@ -86,6 +95,8 @@ export function testStrategy(
     testStrategyComponent()
     testStrategyDeposit()
     // testStrategyLimit() // Opt-out investment limit test because it fails when the limit is way higher than component's pool depth.
+    testStrategyOracle()
+    testStrategyPausable()
     testStrategyRebalance()
     testStrategyWithdraw()
 

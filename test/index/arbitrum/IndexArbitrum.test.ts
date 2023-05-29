@@ -9,19 +9,18 @@ import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Arbitrum(),
-  forkAt: 92206952,
+  forkAt: 95685600,
 }
 
 testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexAvalancheTestOptions, [
-  // testIndexArbitrumDeFiSetSwapRoute,
+  testIndexArbitrumEquityValuation,
+  testIndexArbitrumSetSwapRoute,
 ])
 testStrategy(
   "IndexArbitrumMarketCap Strategy - Deploy",
   deployIndexArbitrumMarketCapStrategy,
   indexAvalancheTestOptions,
-  [
-    // testIndexArbitrumDeFiSetSwapRoute,
-  ]
+  [testIndexArbitrumEquityValuation, testIndexArbitrumSetSwapRoute]
 )
 
 async function deployIndexArbitrumDeFiStrategy() {
@@ -32,19 +31,17 @@ async function deployIndexArbitrumMarketCapStrategy() {
   return await deployStrategy("arbitrum", "IndexArbitrumMarketCap")
 }
 
-function testIndexArbitrumDeFiSetSwapRoute() {
-  describe("SetSwapRoute - IndexArbitrumDeFi Strategy Specific", async function () {
-    it("should succeed after adding pangolin swap route of USDC-wAVAX", async function () {
-      await expect(
-        this.strategy.connect(this.owner)["addSwapRoute(address,address,address,uint8,address)"](
-          "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", // wAVAX
-          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
-          "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // Pangolin Router
-          ethers.BigNumber.from("1"),
-          "0x0e0100Ab771E9288e0Aa97e11557E6654C3a9665" // Pangolin wAVAX-USDC pair
-        )
-      ).not.to.be.reverted
+function testIndexArbitrumEquityValuation() {
+  describe("EquityValuation - IndexArbitrum Strategy Specific", async function () {
+    it("should succeed to call equityValuation", async function () {
+      await expect(this.strategy.equityValuation(true, true)).not.to.be.reverted
+    })
+  })
+}
 
+function testIndexArbitrumSetSwapRoute() {
+  describe("SetSwapRoute - IndexArbitrumDeFi Strategy Specific", async function () {
+    afterEach(async function () {
       // User 0 deposits.
       await mint(
         this.strategy,
@@ -112,6 +109,41 @@ function testIndexArbitrumDeFiSetSwapRoute() {
         indexTokenBalance,
         BigNumber.from(1)
       )
+    })
+
+    it("should succeed to add swap route without any data", async function () {
+      await expect(
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
+          "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", // USDC
+          "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506", // Sushi Router
+          ethers.BigNumber.from("1"),
+          "0x905dfCD5649217c42684f23958568e533C711Aa3" // USDC-wETH pair
+        )
+      ).not.to.be.reverted
+    })
+
+    it("should succeed to add swap route with bin step", async function () {
+      await expect(
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address,uint256)"](
+          "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", // USDC
+          "0x7BFd7192E76D950832c77BB412aaE841049D8D9B", // TraderJoe V2 Router
+          ethers.BigNumber.from("2"),
+          "0x7eC3717f70894F6d9BA0be00774610394Ce006eE", // USDC-wETH pair
+          ethers.BigNumber.from("15") // Bin step
+        )
+      ).not.to.be.reverted
+    })
+
+    it("should succeed to add swap route with factory", async function () {
+      await expect(
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address,address)"](
+          "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", // USDC
+          "0xE708aA9E887980750C040a6A2Cb901c37Aa34f3b", // Chronos router
+          ethers.BigNumber.from("4"),
+          "0xA2F1C1B52E1b7223825552343297Dc68a29ABecC", // USDC-wETH pair
+          "0xCe9240869391928253Ed9cc9Bcb8cb98CB5B0722" // Factory
+        )
+      ).not.to.be.reverted
     })
   })
 }
