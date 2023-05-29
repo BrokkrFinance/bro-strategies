@@ -6,8 +6,6 @@ import { RoleableUpgradeable, GOVERNOR_ROLE, STRATEGIST_ROLE, MAINTAINER_ROLE, U
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
-import "hardhat/console.sol";
-
 abstract contract PortfolioRoleableBaseUpgradeable is
     RoleableUpgradeable,
     PortfolioBaseUpgradeable
