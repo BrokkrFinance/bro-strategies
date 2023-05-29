@@ -207,6 +207,7 @@ function getPortfolioArgs(deployConfig: DeployConfig): PortfolioArgs {
       total: BigInt(deployConfig.totalInvestmentLimit),
       perAddress: BigInt(deployConfig.investmentLimitPerAddress),
     },
+    roleToUsers: deployConfig.roleToUsers,
   }
 }
 

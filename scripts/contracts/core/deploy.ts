@@ -51,22 +51,19 @@ export async function deployUUPSUpgradeablePortfolio(
       ],
       portfolioArgs.investmentLimit.total,
       portfolioArgs.investmentLimit.perAddress,
+      portfolioArgs.roleToUsers,
     ],
     ...portfolioExtraArgs.extraArgs,
   ])
 
+  const impersonatedSigner = await ethers.getImpersonatedSigner(portfolioOwner)
   // Add investables.
   for (let i = 0; i < investables.length; i++) {
-    await portfolio.addInvestable(investables[i], allocations[i], [])
+    await portfolio.connect(impersonatedSigner).addInvestable(investables[i], allocations[i], [])
   }
 
   // Transfer ownership of portfolio token to portfolio.
   await investmentToken.transferOwnership(portfolio.address)
-
-  if (ethers.utils.isAddress(portfolioOwner)) {
-    // Transfer ownership of portfolio to portfolio owner.
-    await portfolio.transferOwnership(portfolioOwner)
-  }
 
   return portfolio
 }

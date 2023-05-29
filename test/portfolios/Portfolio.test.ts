@@ -2,6 +2,7 @@ import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpe
 import { execSync } from "child_process"
 import { Contract } from "ethers"
 import { ethers, network } from "hardhat"
+import AccessControlRoles from "../../constants/AccessControlRoles.json"
 import { DepositTokens } from "../../scripts/constants/deposit-tokens"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
 import { WhaleAddrs } from "../helper/addresses"
@@ -73,9 +74,27 @@ export function testPortfolio(
       // Portfolio upgradeability test to.
       this.upgradeTo = testOptions.upgradeTo
 
-      // Portfolio owner.
-      const ownerAddr = await this.portfolio.owner()
+      // Query current roles
+      const ownerAddr = await this.portfolio.getRoleMember(AccessControlRoles.admin, 0)
       this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+
+      const adminMemberAddr = await this.portfolio.getRoleMember(AccessControlRoles.admin, 0)
+      this.adminMember = await ethers.getImpersonatedSigner(adminMemberAddr)
+
+      const governorMemberAddr = await this.portfolio.getRoleMember(AccessControlRoles.governor, 0)
+      this.governorMember = await ethers.getImpersonatedSigner(governorMemberAddr)
+
+      const strategistMemberAddr = await this.portfolio.getRoleMember(AccessControlRoles.strategist, 0)
+      this.strategistMember = await ethers.getImpersonatedSigner(strategistMemberAddr)
+
+      const maintainerMemberAddr = await this.portfolio.getRoleMember(AccessControlRoles.maintainer, 0)
+      this.maintainerMember = await ethers.getImpersonatedSigner(maintainerMemberAddr)
+
+      const upgradeMemberAddr = await this.portfolio.getRoleMember(AccessControlRoles.upgrade, 0)
+      this.upgradeMember = await ethers.getImpersonatedSigner(upgradeMemberAddr)
+
+      const pauseMemberAddr = await this.portfolio.getRoleMember(AccessControlRoles.pause, 0)
+      this.pauseMember = await ethers.getImpersonatedSigner(pauseMemberAddr)
 
       // Portfolio token.
       const investmentTokenAddr = await this.portfolio.getInvestmentToken()
