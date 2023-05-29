@@ -2,8 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../FeeUpgradeable.sol";
-import { InvestmentLimitLib } from "../InvestmentLimitUpgradeable.sol";
-import "../InvestmentLimitUpgradeable.sol";
+import { InvestmentLimitLib, InvestmentLimitUpgradeable } from "../InvestmentLimitUpgradeable.sol";
 import "../../interfaces/IERC20UpgradeableExt.sol";
 import "../../interfaces/IInvestmentToken.sol";
 import "../../interfaces/IPriceOracle.sol";
@@ -17,8 +16,6 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-
-import "hardhat/console.sol";
 
 struct StrategyArgs {
     IInvestmentToken investmentToken;

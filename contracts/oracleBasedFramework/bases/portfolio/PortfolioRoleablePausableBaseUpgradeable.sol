@@ -8,8 +8,6 @@ import { PAUSE_ROLE } from "../RoleableUpgradeable.sol";
 
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
-import "hardhat/console.sol";
-
 abstract contract PortfolioRoleablePausableBaseUpgradeable is
     PausableUpgradeable,
     PortfolioRoleableBaseUpgradeable

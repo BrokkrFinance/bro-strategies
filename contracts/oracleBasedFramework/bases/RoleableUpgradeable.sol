@@ -32,6 +32,7 @@ bytes32 constant ADMIN_ROLE = 0x0;
 abstract contract RoleableUpgradeable is AccessControlEnumerableUpgradeable {
     error MissingAdminRole();
 
+    // solhint-disable-next-line
     function __RoleableBaseUpgradeable_init(RoleToUsers[] calldata roleToUsers)
         internal
         onlyInitializing
