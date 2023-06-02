@@ -26,7 +26,7 @@ contract IndexToken is
     }
 
     function initialize(string memory name_, string memory symbol_)
-        public
+        external
         initializer
     {
         __Context_init();

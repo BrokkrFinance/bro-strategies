@@ -19,6 +19,10 @@ import { Constants } from "../libraries/Constants.sol";
 import { Errors } from "../libraries/Errors.sol";
 import { SwapAdapter } from "../libraries/SwapAdapter.sol";
 
+/**
+ * @title IndexStrategyUpgradeable
+ * @dev An abstract contract that implements various interfaces and extends other contracts, providing functionality for managing index strategies.
+ */
 abstract contract IndexStrategyUpgradeable is
     ERC165Upgradeable,
     ReentrancyGuardUpgradeable,
@@ -57,6 +61,10 @@ abstract contract IndexStrategyUpgradeable is
 
     uint256[8] private __gap;
 
+    /**
+     * @dev Modifier to allow only whitelisted tokens to access a function.
+     * @param token The address of the token to check.
+     */
     modifier onlyWhitelistedToken(address token) {
         if (!isTokenWhitelisted(token)) {
             revert Errors.Index_NotWhitelistedToken(token);
@@ -65,6 +73,9 @@ abstract contract IndexStrategyUpgradeable is
         _;
     }
 
+    /**
+     * @dev Modifier to check if the equity valuation limit has not been reached.
+     */
     modifier whenNotReachedEquityValuationLimit() {
         _;
 
@@ -73,6 +84,10 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Initializes the IndexStrategyUpgradeable contract.
+     * @param initParams The parameters needed for initialization.
+     */
     // solhint-disable-next-line
     function __IndexStrategyUpgradeable_init(
         IndexStrategyInitParams calldata initParams
@@ -112,14 +127,25 @@ abstract contract IndexStrategyUpgradeable is
         setEquityValuationLimit(initParams.equityValuationLimit);
     }
 
+    /**
+     * @dev Pauses the contract, preventing certain functions from being called.
+     */
     function pause() external onlyOwner {
         super._pause();
     }
 
+    /**
+     * @dev Unpauses the contract, allowing the paused functions to be called.
+     */
     function unpause() external onlyOwner {
         super._unpause();
     }
 
+    /**
+     * @dev Checks if a particular interface is supported by the contract.
+     * @param interfaceId The interface identifier.
+     * @return A boolean value indicating whether the interface is supported.
+     */
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -132,6 +158,15 @@ abstract contract IndexStrategyUpgradeable is
             super.supportsInterface(interfaceId);
     }
 
+    /**
+     * @dev Mints index tokens in exchange for a specified token.
+     * @param token The address of the token to be swapped.
+     * @param amountTokenMax The maximum amount of the token to be swapped.
+     * @param amountIndexMin The minimum amount of index tokens to be minted.
+     * @param recipient The address that will receive the minted index tokens.
+     * @return amountIndex The amount of index tokens minted.
+     * @return amountToken The amount of tokens swapped.
+     */
     function mintIndexFromToken(
         address token,
         uint256 amountTokenMax,
@@ -197,6 +232,14 @@ abstract contract IndexStrategyUpgradeable is
         emit Mint(_msgSender(), recipient, token, amountToken, amountIndex);
     }
 
+    /**
+     * @dev Burns index tokens in exchange for a specified token.
+     * @param token The address of the token to be received.
+     * @param amountTokenMin The minimum amount of tokens to be received.
+     * @param amountIndex The amount of index tokens to be burned.
+     * @param recipient The address that will receive the tokens.
+     * @return amountToken The amount of tokens received.
+     */
     function burnExactIndexForToken(
         address token,
         uint256 amountTokenMin,
@@ -243,6 +286,13 @@ abstract contract IndexStrategyUpgradeable is
         emit Burn(_msgSender(), recipient, token, amountToken, amountIndex);
     }
 
+    /**
+     * @dev Retrieves the amount of index tokens that will be minted for a specified token.
+     * @param token The address of the token to be swapped.
+     * @param amountTokenMax The maximum amount of the token to be swapped.
+     * @return amountIndex The amount of index tokens that will be minted.
+     * @return amountToken The amount of tokens to be swapped.
+     */
     function getAmountIndexFromToken(address token, uint256 amountTokenMax)
         external
         view
@@ -259,6 +309,12 @@ abstract contract IndexStrategyUpgradeable is
         amountIndex = mintingData.amountIndex;
     }
 
+    /**
+     * @dev Retrieves the amount of tokens that will be received for a specified amount of index tokens.
+     * @param token The address of the token to be received.
+     * @param amountIndex The amount of index tokens to be burned.
+     * @return amountToken The amount of tokens that will be received.
+     */
     function getAmountTokenFromExactIndex(address token, uint256 amountIndex)
         external
         view
@@ -275,6 +331,10 @@ abstract contract IndexStrategyUpgradeable is
         );
     }
 
+    /**
+     * @dev Rebalances the index strategy by adjusting the weights of the components.
+     * @param targetWeights The target weights for each component.
+     */
     function rebalance(uint256[] calldata targetWeights) external onlyOwner {
         if (components.length != targetWeights.length) {
             revert Errors.Index_WrongTargetWeightsLength();
@@ -394,6 +454,10 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Adds a component to the index strategy.
+     * @param component The address of the component token.
+     */
     function addComponent(address component) external onlyOwner {
         for (uint256 i = 0; i < components.length; i++) {
             if (components[i] == component) {
@@ -404,6 +468,13 @@ abstract contract IndexStrategyUpgradeable is
         components.push(component);
     }
 
+    /**
+     * @dev Adds a swap route for swapping tokens.
+     * @param token The address of the token to be swapped.
+     * @param router The address of the router contract.
+     * @param dex The type of decentralized exchange (DEX) used by the router.
+     * @param _pairData The pair data for the router and tokens.
+     */
     function addSwapRoute(
         address token,
         address router,
@@ -417,6 +488,10 @@ abstract contract IndexStrategyUpgradeable is
         _setPairData(router, token, wNATIVE, _pairData);
     }
 
+    /**
+     * @dev Adds multiple tokens to the whitelist.
+     * @param tokens The addresses of the tokens to be added.
+     */
     function addWhitelistedTokens(address[] memory tokens) public onlyOwner {
         for (uint256 i = 0; i < tokens.length; i++) {
             if (!isTokenWhitelisted(tokens[i])) {
@@ -425,6 +500,10 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Removes a component from the index strategy.
+     * @param component The address of the component token to be removed.
+     */
     function removeComponent(address component) external onlyOwner {
         for (uint256 i = 0; i < components.length; i++) {
             if (components[i] == component) {
@@ -439,6 +518,11 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Removes a swap route for swapping tokens.
+     * @param token The address of the token to be swapped.
+     * @param router The address of the router contract to be removed.
+     */
     function removeSwapRoute(address token, address router) external onlyOwner {
         _removeRouter(token, router);
 
@@ -450,6 +534,10 @@ abstract contract IndexStrategyUpgradeable is
         );
     }
 
+    /**
+     * @dev Removes multiple tokens from the whitelist.
+     * @param tokens The addresses of the tokens to be removed.
+     */
     function removeWhitelistedTokens(address[] memory tokens) public onlyOwner {
         for (uint256 i = 0; i < tokens.length; i++) {
             for (uint256 j = 0; j < whitelistedTokens.length; j++) {
@@ -464,6 +552,10 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Sets the equity valuation limit for the index strategy.
+     * @param _equityValuationLimit The new equity valuation limit.
+     */
     function setEquityValuationLimit(uint256 _equityValuationLimit)
         public
         onlyOwner
@@ -471,24 +563,47 @@ abstract contract IndexStrategyUpgradeable is
         equityValuationLimit = _equityValuationLimit;
     }
 
+    /**
+     * @dev Sets the oracle contract for the index strategy.
+     * @param _oracle The address of the oracle contract.
+     */
     function setOracle(address _oracle) public onlyOwner {
         oracle = IIndexOracle(_oracle);
     }
 
+    /**
+     * @dev Retrieves the addresses of all components in the index strategy.
+     * @return An array of component addresses.
+     */
     function allComponents() external view override returns (address[] memory) {
         return components;
     }
 
+    /**
+     * @dev Retrieves the addresses of all whitelisted tokens.
+     * @return An array of whitelisted token addresses.
+     */
     function allWhitelistedTokens() external view returns (address[] memory) {
         return whitelistedTokens;
     }
 
+    /**
+     * @dev Calculates the equity valuation of the index strategy.
+     * @param maximize A boolean indicating whether to maximize the valuation.
+     * @param includeAmmPrice A boolean indicating whether to include the AMM price in the valuation.
+     * @return The equity valuation of the index strategy.
+     */
     function equityValuation(bool maximize, bool includeAmmPrice)
         public
         view
         virtual
         returns (uint256);
 
+    /**
+     * @dev Checks if a token is whitelisted.
+     * @param token The address of the token to check.
+     * @return bool Returns true if the token is whitelisted, false otherwise.
+     */
     function isTokenWhitelisted(address token) public view returns (bool) {
         for (uint256 i = 0; i < whitelistedTokens.length; i++) {
             if (whitelistedTokens[i] == token) {
@@ -499,6 +614,12 @@ abstract contract IndexStrategyUpgradeable is
         return false;
     }
 
+    /**
+     * @dev Mints the exact index amount of the index token by swapping components with wNATIVE.
+     * @param mintingData The minting data containing information about the components and routers.
+     * @param recipient The address to receive the minted index tokens.
+     * @return amountWNATIVESpent The amount of wNATIVE spent during the minting process.
+     */
     function _mintExactIndexFromWNATIVE(
         MintingData memory mintingData,
         address recipient
@@ -520,6 +641,11 @@ abstract contract IndexStrategyUpgradeable is
         indexToken.mint(recipient, mintingData.amountIndex);
     }
 
+    /**
+     * @dev Burns the exact index amount of the index token and swaps components for wNATIVE.
+     * @param amountIndex The amount of index tokens to burn.
+     * @return amountWNATIVE The amount of wNATIVE received from burning the index tokens.
+     */
     function _burnExactIndexForWNATIVE(uint256 amountIndex)
         internal
         returns (uint256 amountWNATIVE)
@@ -551,6 +677,11 @@ abstract contract IndexStrategyUpgradeable is
         indexToken.burnFrom(_msgSender(), amountIndex);
     }
 
+    /**
+     * @dev Calculates the minting data for the exact index amount.
+     * @param amountIndex The exact index amount to mint.
+     * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
+     */
     function _getMintingDataForExactIndex(uint256 amountIndex)
         internal
         view
@@ -584,6 +715,14 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Calculates the minting data from the given token and maximum token amount.
+     * @param token The token to mint from.
+     * @param amountTokenMax The maximum token amount to use for minting.
+     * @return amountToken The actual token amount used for minting.
+     * @return bestRouter The best router to use for minting.
+     * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
+     */
     function _getMintingDataFromToken(address token, uint256 amountTokenMax)
         internal
         view
@@ -610,6 +749,11 @@ abstract contract IndexStrategyUpgradeable is
         );
     }
 
+    /**
+     * @dev Calculates the minting data from the given wNATIVE amount.
+     * @param amountWNATIVEMax The maximum wNATIVE amount to use for minting.
+     * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
+     */
     function _getMintingDataFromWNATIVE(uint256 amountWNATIVEMax)
         internal
         view
@@ -646,6 +790,11 @@ abstract contract IndexStrategyUpgradeable is
         mintingData = _getMintingDataForExactIndex(amountIndex);
     }
 
+    /**
+     * @dev Calculates the amount of wNATIVE received from the exact index amount.
+     * @param amountIndex The exact index amount.
+     * @return amountWNATIVE The amount of wNATIVE received.
+     */
     function _getAmountWNATIVEFromExactIndex(uint256 amountIndex)
         internal
         view
@@ -670,11 +819,25 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Sets the weight of a token.
+     * @param token The token address.
+     * @param weight The weight of the token.
+     */
     function _setWeight(address token, uint256 weight) internal {
         weights[token] = weight;
     }
 
+    /**
+     * @dev Adds a router for a token.
+     * @param token The token address.
+     * @param router The router address.
+     */
     function _addRouter(address token, address router) internal {
+        if (token == address(0)) {
+            revert Errors.Index_ZeroAddress();
+        }
+
         for (uint256 i = 0; i < routers[token].length; i++) {
             if (routers[token][i] == router) {
                 return;
@@ -684,7 +847,16 @@ abstract contract IndexStrategyUpgradeable is
         routers[token].push(router);
     }
 
+    /**
+     * @dev Sets the DEX (Decentralized Exchange) for a router.
+     * @param router The router address.
+     * @param dex The DEX to set.
+     */
     function _setDEX(address router, SwapAdapter.DEX dex) internal {
+        if (router == address(0)) {
+            revert Errors.Index_ZeroAddress();
+        }
+
         if (dexs[router] != SwapAdapter.DEX.None) {
             return;
         }
@@ -692,12 +864,23 @@ abstract contract IndexStrategyUpgradeable is
         dexs[router] = dex;
     }
 
+    /**
+     * @dev Sets the pair data for a router, token0, and token1.
+     * @param router The router address.
+     * @param token0 The first token address.
+     * @param token1 The second token address.
+     * @param _pairData The pair data to set.
+     */
     function _setPairData(
         address router,
         address token0,
         address token1,
         SwapAdapter.PairData memory _pairData
     ) internal {
+        if (token0 == address(0) || token1 == address(0)) {
+            revert Errors.Index_ZeroAddress();
+        }
+
         if (pairData[router][token0][token1].pair != address(0)) {
             return;
         }
@@ -706,6 +889,11 @@ abstract contract IndexStrategyUpgradeable is
         pairData[router][token1][token0] = _pairData;
     }
 
+    /**
+     * @dev Removes a router for a token.
+     * @param token The token address.
+     * @param router The router address to remove.
+     */
     function _removeRouter(address token, address router) internal {
         for (uint256 i = 0; i < routers[token].length; i++) {
             if (routers[token][i] == router) {
@@ -716,6 +904,15 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Swaps exact token for token using a specific router.
+     * @param router The router address to use for swapping.
+     * @param amountIn The exact amount of input tokens.
+     * @param amountOutMin The minimum amount of output tokens to receive.
+     * @param tokenIn The input token address.
+     * @param tokenOut The output token address.
+     * @return amountOut The amount of output tokens received.
+     */
     function _swapExactTokenForToken(
         address router,
         uint256 amountIn,
@@ -736,6 +933,15 @@ abstract contract IndexStrategyUpgradeable is
             .swapExactTokensForTokens(amountIn, amountOutMin, path);
     }
 
+    /**
+     * @dev Swaps a specific amount of `tokenIn` for an exact amount of `tokenOut` using a specified router.
+     * @param router The address of the router contract to use for the swap.
+     * @param amountOut The exact amount of `tokenOut` tokens to receive.
+     * @param amountInMax The maximum amount of `tokenIn` tokens to be used for the swap.
+     * @param tokenIn The address of the token to be swapped.
+     * @param tokenOut The address of the token to receive.
+     * @return amountIn The actual amount of `tokenIn` tokens used for the swap.
+     */
     function _swapTokenForExactToken(
         address router,
         uint256 amountOut,
@@ -756,6 +962,16 @@ abstract contract IndexStrategyUpgradeable is
             .swapTokensForExactTokens(amountOut, amountInMax, path);
     }
 
+    /**
+     * @dev Calculates the maximum amount of `tokenOut` tokens that can be received for a given `amountIn` of `tokenIn` tokens,
+     *      and identifies the best router to use for the swap among a list of routers.
+     * @param _routers The list of router addresses to consider for the swap.
+     * @param amountIn The amount of `tokenIn` tokens.
+     * @param tokenIn The address of the token to be swapped.
+     * @param tokenOut The address of the token to receive.
+     * @return amountOutMax The maximum amount of `tokenOut` tokens that can be received for the given `amountIn`.
+     * @return bestRouter The address of the best router to use for the swap.
+     */
     function _getAmountOutMax(
         address[] memory _routers,
         uint256 amountIn,
@@ -790,6 +1006,16 @@ abstract contract IndexStrategyUpgradeable is
         }
     }
 
+    /**
+     * @dev Calculates the minimum amount of `tokenIn` tokens required to receive a given `amountOut` of `tokenOut` tokens,
+     *      and identifies the best router to use for the swap among a list of routers.
+     * @param _routers The list of router addresses to consider for the swap.
+     * @param amountOut The amount of `tokenOut` tokens to receive.
+     * @param tokenIn The address of the token to be swapped.
+     * @param tokenOut The address of the token to receive.
+     * @return amountInMin The minimum amount of `tokenIn` tokens required to receive the given `amountOut`.
+     * @return bestRouter The address of the best router to use for the swap.
+     */
     function _getAmountInMin(
         address[] memory _routers,
         uint256 amountOut,

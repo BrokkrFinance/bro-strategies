@@ -5,8 +5,8 @@ import { Avalanche } from "../../../constants/networks/Avalanche"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import { IndexTestOptions } from "../../helper/interfaces/options"
-import { burn, mint } from "../helper/InvestHelper"
 import { testStrategy } from "../Strategy.test"
+import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Avalanche(),
@@ -14,25 +14,26 @@ const indexAvalancheTestOptions: IndexTestOptions = {
 }
 
 testStrategy("IndexAvalancheDeFi Strategy - Deploy", deployIndexAvalancheDeFiStrategy, indexAvalancheTestOptions, [
-  testIndexAvalancheAddSwapRoute,
+  testIndexAvalancheEquityValuation,
+  testIndexAvalancheSetSwapRoute,
 ])
 testStrategy(
   "IndexAvalancheGamingNFT Strategy - Deploy",
   deployIndexAvalancheGamingNFTStrategy,
   indexAvalancheTestOptions,
-  [testIndexAvalancheAddSwapRoute]
+  [testIndexAvalancheEquityValuation, testIndexAvalancheSetSwapRoute]
 )
 testStrategy(
   "IndexAvalancheDeFi Strategy - Upgrade After Deploy",
   upgradeIndexAvalancheDeFiStrategy,
   indexAvalancheTestOptions,
-  [] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
+  [testIndexAvalancheEquityValuation] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
 )
 testStrategy(
   "IndexAvalancheGamingNFT Strategy - Upgrade After Deploy",
   upgradeIndexAvalancheGamingNFTStrategy,
   indexAvalancheTestOptions,
-  [] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
+  [testIndexAvalancheEquityValuation] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
 )
 
 async function deployIndexAvalancheDeFiStrategy() {
@@ -51,18 +52,17 @@ async function upgradeIndexAvalancheGamingNFTStrategy() {
   return await upgradeStrategy("avalanche", "IndexAvalancheGamingNFT")
 }
 
-function testIndexAvalancheAddSwapRoute() {
-  describe("addSwapRoute - IndexAvalancheDeFi Strategy Specific", async function () {
-    it("should succeed after adding pangolin swap route of USDC-wAVAX", async function () {
-      await expect(
-        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
-          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
-          "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // Pangolin Router
-          ethers.BigNumber.from("1"),
-          "0x0e0100Ab771E9288e0Aa97e11557E6654C3a9665" // Pangolin wAVAX-USDC pair
-        )
-      ).not.to.be.reverted
+function testIndexAvalancheEquityValuation() {
+  describe("EquityValuation - IndexAvalanche Strategy Specific", async function () {
+    it("should succeed to call equityValuation", async function () {
+      await expect(this.strategy.equityValuation(true, true)).not.to.be.reverted
+    })
+  })
+}
 
+function testIndexAvalancheSetSwapRoute() {
+  describe("SetSwapRoute - IndexAvalanche Strategy Specific", async function () {
+    afterEach(async function () {
       // User 0 deposits.
       await mint(
         this.strategy,
@@ -130,6 +130,29 @@ function testIndexAvalancheAddSwapRoute() {
         indexTokenBalance,
         BigNumber.from(1)
       )
+    })
+
+    it("should succeed to add swap route without any data", async function () {
+      await expect(
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
+          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
+          "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", // TraderJoe V1 Router
+          ethers.BigNumber.from("1"),
+          "0xf4003F4efBE8691B60249E6afbD307aBE7758adb" // wAVAX-USDC pair
+        )
+      ).not.to.be.reverted
+    })
+
+    it("should succeed to add swap route with bin step", async function () {
+      await expect(
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address,uint256)"](
+          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
+          "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3", // TraderJoe V2 Router
+          ethers.BigNumber.from("2"),
+          "0xB5352A39C11a81FE6748993D586EC448A01f08b5", // wAVAX-USDC pair
+          ethers.BigNumber.from("20")
+        )
+      ).not.to.be.reverted
     })
   })
 }
