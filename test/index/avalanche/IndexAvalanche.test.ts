@@ -10,7 +10,7 @@ import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Avalanche(),
-  forkAt: 30337122,
+  forkAt: 30994300,
   upgradeTo: "OwnableV2",
 }
 

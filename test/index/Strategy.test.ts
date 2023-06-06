@@ -79,7 +79,11 @@ export function testStrategy(
 
       // Oracle.
       const oracleAddr = await this.strategy.oracle()
-      this.oracle = await ethers.getContractAt("IIndexOracle", oracleAddr)
+      if (strategyTestOptions.network.name === "arbitrum") {
+        this.oracle = await ethers.getContractAt("OracleArbitrum", oracleAddr)
+      } else if (strategyTestOptions.network.name === "avalanche") {
+        this.oracle = await ethers.getContractAt("OracleAvalanche", oracleAddr)
+      }
 
       // wNATIVE.
       this.wNATIVE = await this.strategy.wNATIVE()
