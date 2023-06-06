@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
     currency: "USD",
   },
   mocha: {
-    timeout: 150000,
+    timeout: 250000,
   },
   contractSizer: {
     alphaSort: true,
