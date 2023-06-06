@@ -85,6 +85,7 @@
       "extraArgs": [],
       "investables": ["strategy/StargateUSDC", "strategy/CashWithStargateUSDC"],
       "allocations": [[100000], [100000, 0]],
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",
@@ -215,6 +216,7 @@
       "extraArgs": [],
       "investables": ["strategy/StargateUSDT", "strategy/CashWithStargateUSDT"],
       "allocations": [[100000], [100000, 0]],
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",
@@ -352,6 +354,7 @@
       "extraArgs": [],
       "investables": ["strategy/TraderJoe", "strategy/CashWithTraderJoe"],
       "allocations": [[100000], [100000, 0]],
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",
@@ -421,6 +424,7 @@
       "extraArgs": [],
       "investables": ["portfolio/WrapperStargateUSDC", "portfolio/WrapperStargateUSDT", "portfolio/WrapperTraderJoe"],
       "allocations": [[100000], [50000, 50000], [30000, 30000, 40000]],
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",

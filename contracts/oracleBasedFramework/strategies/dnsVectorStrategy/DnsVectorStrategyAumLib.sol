@@ -73,12 +73,12 @@ library DnsVectorStrategyAumLib {
 
         // assuming ammPairDepositToken == depositToken
         // get the ammPairDepositToken AUM in depositToken
-        uint256 lpPairDepositAumInDepositCurrency = (ammPairDepositTokenReserve *
-                lpTokenContractBalance) / lpTokenTotalSupply;
+        uint256 lpPairDepositAumInDepositToken = (ammPairDepositTokenReserve *
+            lpTokenContractBalance) / lpTokenTotalSupply;
 
         assetValuations[1] = Valuation(
             address(strategyStorage.pangolinPair),
-            lpBorrowTokenAumInDepositToken + lpPairDepositAumInDepositCurrency
+            lpBorrowTokenAumInDepositToken + lpPairDepositAumInDepositToken
         );
 
         return assetValuations;

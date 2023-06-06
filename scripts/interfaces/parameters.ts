@@ -49,6 +49,7 @@ export interface PortfolioArgs {
   }
   investmentLimit: InvestmentLimit
   roleToUsers: RoleToUsers[]
+  oracle: Oracle
 }
 
 export interface PortfolioExtraArgs {

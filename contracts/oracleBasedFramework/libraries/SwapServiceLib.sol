@@ -8,14 +8,15 @@ import "../../dependencies/swap/IUniswapV2LikeRouter.sol";
 import "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 
 error InvalidSwapServiceProvider();
 
 enum SwapServiceProvider {
-    AvalancheTraderJoe,
-    AvalancheTraderJoeV2,
-    AvalanchePangolin,
-    BscPancakeSwap
+    TraderJoe,
+    TraderJoeV2,
+    UniswapV2,
+    UniswapV3
 }
 
 struct SwapService {
@@ -26,6 +27,67 @@ struct SwapService {
 library SwapServiceLib {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    ///////////////////////////////////////////
+    // External library functions and wrappers
+    //
+    // Ext suffix: These entry points are for the externally deployed libraries, which in turn forward requests to the
+    //             internal implementation of the swap function. Before forwarding it to the internal implementation,
+    //             it also converts the raw byte array to typed values for example uint256[] in case of Uniswap V3.
+    //
+    // Wrapper suffix: allows smart contracts to call the externally SwapLibrary functions without the Library address
+    //                 hardcoded into the contract
+    ///////////////////////////////////////////
+
+    function swapExactTokensForTokensExtWrapper(
+        address swapLibAddress,
+        SwapService memory swapService,
+        uint256 amountIn,
+        uint256 minAmountOut,
+        address[] memory path,
+        bytes memory data
+    ) internal returns (uint256 amountOut) {
+        bytes memory returnData = Address.functionDelegateCall(
+            swapLibAddress,
+            abi.encodeWithSignature(
+                "swapExactTokensForTokensExt(SwapService,uint256,uint256,address[],bytes)",
+                swapService,
+                amountIn,
+                minAmountOut,
+                path,
+                data
+            )
+        );
+        amountOut = abi.decode(returnData, (uint256));
+    }
+
+    function swapExactTokensForTokensExt(
+        SwapService calldata swapService,
+        uint256 amountIn,
+        uint256 minAmountOut,
+        address[] calldata path,
+        bytes calldata
+    ) external returns (uint256 amountOut) {
+        if (
+            swapService.provider == SwapServiceProvider.TraderJoe ||
+            swapService.provider == SwapServiceProvider.UniswapV2
+        ) {
+            amountOut = swapExactTokensForTokens(
+                swapService,
+                amountIn,
+                minAmountOut,
+                path,
+                new uint256[](0)
+            );
+        } else {
+            // converting bytes to the appropriate array for TraderJoeV2 and UniswapV3
+            revert InvalidSwapServiceProvider();
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Internal library functions
+    ///////////////////////////////////////////
+
     function swapExactTokensForTokens(
         SwapService memory swapService,
         uint256 amountIn,
@@ -34,9 +96,8 @@ library SwapServiceLib {
         uint256[] memory binSteps
     ) internal returns (uint256 amountOut) {
         if (
-            swapService.provider == SwapServiceProvider.AvalancheTraderJoe ||
-            swapService.provider == SwapServiceProvider.AvalanchePangolin ||
-            swapService.provider == SwapServiceProvider.BscPancakeSwap
+            swapService.provider == SwapServiceProvider.TraderJoe ||
+            swapService.provider == SwapServiceProvider.UniswapV2
         ) {
             IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
                 swapService.router
@@ -46,7 +107,6 @@ library SwapServiceLib {
                 address(uniswapV2LikeRouter),
                 amountIn
             );
-
             amountOut = uniswapV2LikeRouter.swapExactTokensForTokens(
                 amountIn,
                 minAmountOut,
@@ -55,9 +115,7 @@ library SwapServiceLib {
                 // solhint-disable-next-line not-rely-on-time
                 block.timestamp
             )[path.length - 1];
-        } else if (
-            swapService.provider == SwapServiceProvider.AvalancheTraderJoeV2
-        ) {
+        } else if (swapService.provider == SwapServiceProvider.TraderJoeV2) {
             ITraderJoeLBRouter traderjoeLBRouter = ITraderJoeLBRouter(
                 swapService.router
             );
@@ -89,9 +147,8 @@ library SwapServiceLib {
         uint256[] memory binSteps
     ) internal returns (uint256 amountIn) {
         if (
-            swapService.provider == SwapServiceProvider.AvalancheTraderJoe ||
-            swapService.provider == SwapServiceProvider.AvalanchePangolin ||
-            swapService.provider == SwapServiceProvider.BscPancakeSwap
+            swapService.provider == SwapServiceProvider.TraderJoe ||
+            swapService.provider == SwapServiceProvider.UniswapV2
         ) {
             IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
                 swapService.router
@@ -117,9 +174,7 @@ library SwapServiceLib {
                 // solhint-disable-next-line not-rely-on-time
                 block.timestamp
             )[0];
-        } else if (
-            swapService.provider == SwapServiceProvider.AvalancheTraderJoeV2
-        ) {
+        } else if (swapService.provider == SwapServiceProvider.TraderJoeV2) {
             ITraderJoeLBRouter traderjoeLBRouter = ITraderJoeLBRouter(
                 swapService.router
             );
@@ -156,7 +211,7 @@ library SwapServiceLib {
         for (uint256 i = 0; i < pathOldLength; ++i) {
             pathNew[i] = path[i];
         }
-        if (swapService.provider == SwapServiceProvider.BscPancakeSwap) {
+        if (swapService.provider == SwapServiceProvider.UniswapV2) {
             pathNew[pathOldLength] = address(InvestableLib.BINANCE_WBNB);
             IUniswapV2LikeRouter router = IUniswapV2LikeRouter(
                 swapService.router
@@ -189,7 +244,7 @@ library SwapServiceLib {
             pathNew[i] = path[i - 1];
         }
 
-        if (swapService.provider == SwapServiceProvider.BscPancakeSwap) {
+        if (swapService.provider == SwapServiceProvider.UniswapV2) {
             pathNew[0] = address(InvestableLib.BINANCE_WBNB);
             IUniswapV2LikeRouter router = IUniswapV2LikeRouter(
                 swapService.router
@@ -219,7 +274,7 @@ library SwapServiceLib {
             pathNew[i] = path[i];
         }
 
-        if (swapService.provider == SwapServiceProvider.BscPancakeSwap) {
+        if (swapService.provider == SwapServiceProvider.UniswapV2) {
             pathNew[pathOldLength] = address(InvestableLib.BINANCE_WBNB);
             IUniswapV2LikeRouter router = IUniswapV2LikeRouter(
                 swapService.router
@@ -258,9 +313,8 @@ library SwapServiceLib {
         address[] memory path
     ) internal view returns (uint256[] memory amounts) {
         if (
-            swapService.provider == SwapServiceProvider.AvalancheTraderJoe ||
-            swapService.provider == SwapServiceProvider.AvalanchePangolin ||
-            swapService.provider == SwapServiceProvider.BscPancakeSwap
+            swapService.provider == SwapServiceProvider.TraderJoe ||
+            swapService.provider == SwapServiceProvider.UniswapV2
         ) {
             IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
                 swapService.router
@@ -278,9 +332,8 @@ library SwapServiceLib {
         address[] memory path
     ) internal view returns (uint256[] memory amounts) {
         if (
-            swapService.provider == SwapServiceProvider.AvalancheTraderJoe ||
-            swapService.provider == SwapServiceProvider.AvalanchePangolin ||
-            swapService.provider == SwapServiceProvider.BscPancakeSwap
+            swapService.provider == SwapServiceProvider.TraderJoe ||
+            swapService.provider == SwapServiceProvider.UniswapV2
         ) {
             IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
                 swapService.router

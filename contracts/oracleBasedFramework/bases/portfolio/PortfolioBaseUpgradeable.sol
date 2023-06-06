@@ -6,6 +6,7 @@ import "../InvestmentLimitUpgradeable.sol";
 import "../../interfaces/IERC20UpgradeableExt.sol";
 import "../../interfaces/IInvestmentToken.sol";
 import "../../interfaces/IPortfolio.sol";
+import { IPriceOracle } from "../../interfaces/IPriceOracle.sol";
 import "../../libraries/InvestableLib.sol";
 import { PortfolioBaseAumLib } from "./libraries/PortfolioBaseAumLib.sol";
 import { PortfolioBaseFeeLib } from "./libraries/PortfolioBaseFeeLib.sol";
@@ -27,6 +28,7 @@ struct PortfolioArgs {
     uint256 totalInvestmentLimit;
     uint256 investmentLimitPerAddress;
     RoleToUsers[] roleToUsersArray;
+    IPriceOracle priceOracle;
 }
 
 abstract contract PortfolioBaseUpgradeable is
@@ -46,7 +48,8 @@ abstract contract PortfolioBaseUpgradeable is
 
     IInvestmentToken internal investmentToken;
     IERC20UpgradeableExt internal depositToken;
-    uint256[20] private __gap;
+    IPriceOracle public priceOracle;
+    uint256[19] private __gap;
 
     // solhint-disable-next-line
     function __PortfolioBaseUpgradeable_init(
@@ -67,6 +70,7 @@ abstract contract PortfolioBaseUpgradeable is
         );
         investmentToken = portfolioArgs.investmentToken;
         depositToken = portfolioArgs.depositToken;
+        priceOracle = portfolioArgs.priceOracle;
     }
 
     function _addInvestable(
@@ -133,12 +137,13 @@ abstract contract PortfolioBaseUpgradeable is
             super.supportsInterface(interfaceId);
     }
 
-    function deposit(
+    function _deposit(
         uint256 depositTokenAmountIn,
         uint256 minimumDepositTokenAmountOut,
         address investmentTokenReceiver,
-        NameValuePair[] calldata params
-    ) public virtual override nonReentrant {
+        NameValuePair[] calldata params,
+        bool depositTokenAlreadyTransferred
+    ) internal virtual nonReentrant {
         address msgSender = _msgSender();
 
         // 1. emitting event for portfolios at the higher level first
@@ -155,19 +160,22 @@ abstract contract PortfolioBaseUpgradeable is
                 investmentToken,
                 msgSender,
                 getTotalInvestmentLimit(),
-                getInvestmentLimitPerAddress()
+                getInvestmentLimitPerAddress(),
+                depositTokenAlreadyTransferred,
+                priceOracle
             ),
             investableDescs,
             params
         );
     }
 
-    function withdraw(
+    function _withdraw(
         uint256 investmentTokenAmountIn,
         uint256 minimumDepositTokenAmountOut,
         address depositTokenReceiver,
-        NameValuePair[] calldata params
-    ) public virtual override nonReentrant {
+        NameValuePair[] calldata params,
+        bool shouldTransferDepositTokens
+    ) public virtual nonReentrant {
         address msgSender = _msgSender();
         emit Withdrawal(
             msgSender,
@@ -182,7 +190,8 @@ abstract contract PortfolioBaseUpgradeable is
                 depositTokenReceiver,
                 depositToken,
                 investmentToken,
-                msgSender
+                msgSender,
+                shouldTransferDepositTokens
             ),
             investableDescs,
             params

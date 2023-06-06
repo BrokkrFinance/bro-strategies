@@ -74,7 +74,7 @@
     "lint:check": "prettier --check '**.sol' && prettier --check '**.js' && prettier --check '**.ts' && prettier --check '**.json' && hardhat compile && npx solhint -q --config ./.solhint.json --ignore-path ./.solhintignore 'contracts/**/*.sol'",
     "prepare": "husky install",
     "postinstall": "husky install",
-    "lint-staged": "lint-staged;hardhat compile && npx solhint --config ./.solhint.json --ignore-path ./.solhintignore 'contracts/**/*.sol'"
+    "lint-staged": "lint-staged;hardhat compile && npx solhint -q --config ./.solhint.json --ignore-path ./.solhintignore 'contracts/**/*.sol'"
   },
   "lint-staged": {
     "*.sol": "prettier --write",

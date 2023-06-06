@@ -320,7 +320,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         strategyStorage.swapServiceForStgToken = swapService;
 
         setSwapService(
-            SwapServiceProvider.AvalancheTraderJoeV2,
+            SwapServiceProvider.TraderJoeV2,
             stargateArgs.traderjoeLBRouter
         );
 
