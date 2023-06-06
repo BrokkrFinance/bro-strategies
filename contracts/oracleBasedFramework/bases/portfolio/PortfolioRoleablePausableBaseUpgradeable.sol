@@ -36,11 +36,12 @@ abstract contract PortfolioRoleablePausableBaseUpgradeable is
         address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.deposit(
+        super._deposit(
             depositTokenAmountIn,
             minimumDepositTokenAmountOut,
             investmentTokenReceiver,
-            params
+            params,
+            false
         );
     }
 
@@ -50,11 +51,12 @@ abstract contract PortfolioRoleablePausableBaseUpgradeable is
         address depositTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.withdraw(
+        super._withdraw(
             investmentTokenAmountIn,
             minimumDepositTokenAmountOut,
             depositTokenReceiver,
-            params
+            params,
+            true
         );
     }
 }

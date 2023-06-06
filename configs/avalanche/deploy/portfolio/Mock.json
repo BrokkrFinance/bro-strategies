@@ -51,6 +51,7 @@
       "extraArgs": [],
       "investables": ["strategy/MockCash"],
       "allocations": [[100000]],
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",

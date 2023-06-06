@@ -66,6 +66,7 @@ async function upgradeForking(investable: Investable): Promise<Contract> {
       call,
       kind: "uups",
       unsafeAllow: ["external-library-linking"],
+      unsafeSkipStorageCheck: true,
     })
 
     await newImplementation.deployed()

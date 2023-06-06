@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "./Math.sol";
 import "../../dependencies/venus/IVBNB.sol";
 import "../../dependencies/venus/IVBep20.sol";
+import { IPriceOracle } from "../interfaces/IPriceOracle.sol";
+import { IERC20UpgradeableExt } from "../interfaces/IERC20UpgradeableExt.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 
@@ -56,19 +58,29 @@ library InvestableLib {
         else return price;
     }
 
+    function convertTokenPriceToUsdc(
+        IERC20UpgradeableExt tokenToConvert,
+        uint256 tokenAmount,
+        IPriceOracle priceOracle,
+        bool shouldMaximise,
+        bool includeAmmPrice
+    ) internal view returns (uint256) {
+        // assuming priceOracle's decimal count is equal to USDC's
+        return
+            (priceOracle.getPrice(
+                tokenToConvert,
+                shouldMaximise,
+                includeAmmPrice
+            ) * tokenAmount) / (10**tokenToConvert.decimals());
+    }
+
     function calculateMintAmount(
         uint256 equitySoFar,
         uint256 amountInvestedNow,
-        uint256 investmentTokenSupplySoFar,
-        uint8 depositTokenDecimalCount
-    ) internal pure returns (uint256) {
+        uint256 investmentTokenSupplySoFar
+    ) internal view returns (uint256) {
         if (investmentTokenSupplySoFar == 0) {
-            return
-                convertPricePrecision(
-                    amountInvestedNow,
-                    10**depositTokenDecimalCount,
-                    PRICE_PRECISION_FACTOR
-                );
+            return amountInvestedNow;
         } else
             return
                 (amountInvestedNow * investmentTokenSupplySoFar) / equitySoFar;

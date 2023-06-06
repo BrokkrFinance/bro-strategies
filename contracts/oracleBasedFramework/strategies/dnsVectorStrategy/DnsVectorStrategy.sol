@@ -111,38 +111,6 @@ contract DnsVectorStrategy is
         );
     }
 
-    function reinitialize(ReinitializeParams calldata reinitializeParams)
-        external
-        reinitializer(3)
-    {
-        // Initialize.
-        __initializePangolinParams(reinitializeParams.pangolinParams);
-
-        // Use Pangolin to swap tokens because we provide liquidity there.
-        setSwapService(
-            SwapServiceProvider.AvalanchePangolin,
-            address(reinitializeParams.pangolinParams.pangolinRouter)
-        );
-
-        uint256 depositTokenBalanceBefore = depositToken.balanceOf(
-            address(this)
-        );
-
-        DnsVectorStrategyInvestmentLib.migrate();
-
-        // Check if valuation after migration is greater than or equal to minValuation.
-        uint256 valuation = getEquityValuation(true, false);
-
-        if (valuation < reinitializeParams.minValuation) {
-            revert TooBigValuationLoss();
-        }
-
-        // handling dust amount caused by providing liquidity
-        uninvestedDepositTokenAmount +=
-            depositToken.balanceOf(address(this)) -
-            depositTokenBalanceBefore;
-    }
-
     function _deposit(uint256 amount, NameValuePair[] calldata params)
         internal
         virtual

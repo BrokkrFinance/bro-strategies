@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import { IInvestable } from "../../../interfaces/IInvestable.sol";
+import { IPriceOracle } from "../../../interfaces/IPriceOracle.sol";
 import { NameValuePair } from "../../../Common.sol";
 import { Math } from "../../../libraries/Math.sol";
 import { InvestableLib } from "../../../libraries/InvestableLib.sol";
@@ -22,6 +23,8 @@ struct DepositArgs {
     address msgSender;
     uint256 totalInvestmentLimit;
     uint256 investmentLimitPerAddress;
+    bool depositTokenAlreadyTransferred;
+    IPriceOracle priceOracle;
 }
 
 struct WithdrawArgs {
@@ -31,6 +34,7 @@ struct WithdrawArgs {
     IERC20UpgradeableExt depositToken;
     IInvestmentToken investmentToken;
     address msgSender;
+    bool shouldTransferDepositTokens;
 }
 
 library PortfolioBaseInvestmentLib {
@@ -73,12 +77,14 @@ library PortfolioBaseInvestmentLib {
             depositArgs.investmentLimitPerAddress
         );
 
-        // transfering deposit tokens from the user
-        depositArgs.depositToken.safeTransferFrom(
-            depositArgs.msgSender,
-            address(this),
-            depositArgs.depositTokenAmountIn
-        );
+        if (!depositArgs.depositTokenAlreadyTransferred) {
+            // transfering deposit tokens from the user
+            depositArgs.depositToken.safeTransferFrom(
+                depositArgs.msgSender,
+                address(this),
+                depositArgs.depositTokenAmountIn
+            );
+        }
 
         for (uint256 i = 0; i < investableDescs.length; i++) {
             uint256 embeddedAmount = (depositArgs.depositTokenAmountIn *
@@ -116,8 +122,7 @@ library PortfolioBaseInvestmentLib {
             InvestableLib.calculateMintAmount(
                 equityValuationBeforeInvestment,
                 actualInvested,
-                investmentTokenSupply,
-                depositArgs.depositToken.decimals()
+                investmentTokenSupply
             )
         );
     }
@@ -170,10 +175,13 @@ library PortfolioBaseInvestmentLib {
             withdrawArgs.msgSender,
             withdrawArgs.investmentTokenAmountIn
         );
-        //transferring deposit tokens to the depositTokenReceiver
-        withdrawArgs.depositToken.safeTransfer(
-            withdrawArgs.depositTokenReceiver,
-            withdrawnDepositTokenAmount
-        );
+
+        if (withdrawArgs.shouldTransferDepositTokens) {
+            //transferring deposit tokens to the depositTokenReceiver
+            withdrawArgs.depositToken.safeTransfer(
+                withdrawArgs.depositTokenReceiver,
+                withdrawnDepositTokenAmount
+            );
+        }
     }
 }

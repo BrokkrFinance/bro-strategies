@@ -80,7 +80,7 @@ contract TraderJoe is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         __initialize(
             traderJoeArgs,
             SwapService(
-                SwapServiceProvider.AvalancheTraderJoeV2,
+                SwapServiceProvider.TraderJoeV2,
                 address(traderJoeArgs.lbRouter)
             )
         );
