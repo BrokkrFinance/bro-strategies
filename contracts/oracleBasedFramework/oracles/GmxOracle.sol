@@ -9,24 +9,25 @@ import "../../dependencies/gmx/IVaultPriceFeed.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 
 contract GmxOracle is OwnableUpgradeable, UUPSUpgradeable, IPriceOracle {
     IVaultPriceFeed public vendorFeed;
-    IERC20 internal usdcToken;
+    IERC20Upgradeable internal baseToken;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address vendorFeed_, address usdcToken_)
+    function initialize(address vendorFeed_, IERC20Upgradeable baseToken_)
         external
         initializer
     {
         __Ownable_init();
         __UUPSUpgradeable_init();
         setVendorFeed(vendorFeed_);
-        usdcToken = IERC20(usdcToken_);
+        baseToken = baseToken_;
     }
 
     function _authorizeUpgrade(address) internal virtual override onlyOwner {}
@@ -40,15 +41,16 @@ contract GmxOracle is OwnableUpgradeable, UUPSUpgradeable, IPriceOracle {
         bool shouldMaximise,
         bool includeAmmPrice
     ) external view returns (uint256) {
+        if (token == baseToken) return 10**InvestableLib.PRICE_PRECISION_DIGITS;
+
         uint256 tokenPriceInUsd = vendorFeed.getPrice(
             address(token),
             shouldMaximise,
             includeAmmPrice,
             false
         );
-
         uint256 usdcPriceInUsd = vendorFeed.getPrice(
-            address(usdcToken),
+            address(baseToken),
             shouldMaximise,
             includeAmmPrice,
             false

@@ -208,6 +208,7 @@ function getPortfolioArgs(deployConfig: DeployConfig): PortfolioArgs {
       perAddress: BigInt(deployConfig.investmentLimitPerAddress),
     },
     roleToUsers: deployConfig.roleToUsers,
+    oracle: { name: deployConfig.oracle.name, address: deployConfig.oracle.address },
   }
 }
 

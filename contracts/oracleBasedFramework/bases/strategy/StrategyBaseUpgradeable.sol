@@ -96,6 +96,7 @@ abstract contract StrategyBaseUpgradeable is
         // check investment limits
         // the underlying defi protocols might take fees, but for limit check we can safely ignore it
         _beforeDepositEquityValuation(depositTokenAmountIn, params);
+
         uint256 equityValuationBeforeInvestment = getEquityValuation(
             true,
             false
@@ -146,8 +147,8 @@ abstract contract StrategyBaseUpgradeable is
         );
         uint256 totalEquityChange = equityValuationAfterInvestment -
             equityValuationBeforeInvestment;
-
         if (totalEquityChange == 0) revert ZeroAmountInvested();
+
         if (totalEquityChange < minimumDepositTokenAmountOut)
             revert TooSmallDepositTokenAmountOut();
 
@@ -160,8 +161,7 @@ abstract contract StrategyBaseUpgradeable is
             InvestableLib.calculateMintAmount(
                 equityValuationBeforeInvestment,
                 totalEquityChange,
-                investmentTokenSupply,
-                depositToken.decimals()
+                investmentTokenSupply
             )
         );
 

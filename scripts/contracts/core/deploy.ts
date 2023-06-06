@@ -24,12 +24,19 @@ export async function deployUUPSUpgradeablePortfolio(
 ): Promise<Contract> {
   // Contact factories.
   const InvestmentToken = await ethers.getContractFactory("InvestmentToken")
+  const PriceOracle = await ethers.getContractFactory(portfolioArgs.oracle.name)
   const Portfolio = await ethers.getContractFactory(portfolioName, { libraries })
 
   // Deploy portfolio token.
   const investmentToken = await deployUUPSUpgradeableContract(InvestmentToken, [
     portfolioTokenArgs.name,
     portfolioTokenArgs.symbol,
+  ])
+
+  // Deploy price oracle.
+  const priceOracle = await deployUUPSUpgradeableContract(PriceOracle, [
+    portfolioArgs.oracle.address,
+    portfolioArgs.depositToken,
   ])
 
   // Deploy portfolio.
@@ -52,6 +59,7 @@ export async function deployUUPSUpgradeablePortfolio(
       portfolioArgs.investmentLimit.total,
       portfolioArgs.investmentLimit.perAddress,
       portfolioArgs.roleToUsers,
+      priceOracle.address,
     ],
     ...portfolioExtraArgs.extraArgs,
   ])
