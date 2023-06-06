@@ -20,11 +20,7 @@ interface IPortfolio is IInvestable {
     error InvestableHasNonZeroAllocation();
     error RebalanceIncorrectAllocationsLength();
 
-    event InvestableAdd(
-        IInvestable investable,
-        uint24[] newAllocations,
-        NameValuePair[] params
-    );
+    event InvestableAdd(IInvestable investable, uint24[] newAllocations, NameValuePair[] params);
     event InvestableRemove(IInvestable investable, uint24[] newAllocations);
     event InvestableChange(IInvestable investable, NameValuePair[] params);
     event TargetInvestableAllocationsSet(uint24[] newAllocations);
@@ -36,23 +32,13 @@ interface IPortfolio is IInvestable {
         NameValuePair[] calldata params
     ) external;
 
-    function removeInvestable(
-        IInvestable investable,
-        uint24[] calldata newAllocations
-    ) external;
+    function removeInvestable(IInvestable investable, uint24[] calldata newAllocations) external;
 
-    function changeInvestable(
-        IInvestable investable,
-        NameValuePair[] calldata params
-    ) external;
+    function changeInvestable(IInvestable investable, NameValuePair[] calldata params) external;
 
-    function setTargetInvestableAllocations(uint24[] calldata newAllocations)
-        external;
+    function setTargetInvestableAllocations(uint24[] calldata newAllocations) external;
 
-    function getInvestables()
-        external
-        view
-        returns (InvestableDesc[] memory investableDescs);
+    function getInvestables() external view returns (InvestableDesc[] memory investableDescs);
 
     function rebalance(
         uint256 minimumDepositTokenAmountOut,

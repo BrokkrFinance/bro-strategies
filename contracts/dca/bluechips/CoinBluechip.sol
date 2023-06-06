@@ -17,10 +17,7 @@ contract CoinBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         _disableInitializers();
     }
 
-    function initialize(
-        DCAStrategyInitArgs calldata args,
-        TokenInfo calldata bluechipTokenInfo_
-    ) external initializer {
+    function initialize(DCAStrategyInitArgs calldata args, TokenInfo calldata bluechipTokenInfo_) external initializer {
         __UUPSUpgradeable_init();
         __DCABaseUpgradeable_init(args);
 
@@ -30,46 +27,21 @@ contract CoinBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     // ----- Base Contract Overrides -----
-    function _invest(uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256)
-    {
+    function _invest(uint256 amount) internal virtual override returns (uint256) {
         return amount;
     }
 
-    function _claimRewards()
-        internal
-        virtual
-        override
-        returns (uint256 claimedAmount)
-    {}
+    function _claimRewards() internal virtual override returns (uint256 claimedAmount) {}
 
-    function _withdrawInvestedBluechip(uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256)
-    {
+    function _withdrawInvestedBluechip(uint256 amount) internal virtual override returns (uint256) {
         return amount;
     }
 
-    function _transferBluechip(address to, uint256 amount)
-        internal
-        virtual
-        override
-    {
+    function _transferBluechip(address to, uint256 amount) internal virtual override {
         bluechipTokenInfo.token.safeTransfer(to, amount);
     }
 
-    function _totalBluechipInvested()
-        internal
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function _totalBluechipInvested() internal view virtual override returns (uint256) {
         if (
             bluechipInvestmentState == BluechipInvestmentState.Investing ||
             bluechipInvestmentState == BluechipInvestmentState.Withdrawn
@@ -78,23 +50,11 @@ contract CoinBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         } else return 0;
     }
 
-    function _bluechipAddress()
-        internal
-        view
-        virtual
-        override
-        returns (address)
-    {
+    function _bluechipAddress() internal view virtual override returns (address) {
         return address(bluechipTokenInfo.token);
     }
 
-    function _bluechipDecimals()
-        internal
-        view
-        virtual
-        override
-        returns (uint8)
-    {
+    function _bluechipDecimals() internal view virtual override returns (uint8) {
         return bluechipTokenInfo.decimals;
     }
 }

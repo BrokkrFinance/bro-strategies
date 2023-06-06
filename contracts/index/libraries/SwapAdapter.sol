@@ -53,43 +53,22 @@ library SwapAdapter {
         }
 
         if (setup.dex == DEX.UniswapV2) {
-            return
-                IUniswapV2Router(setup.router).swapExactTokensForTokens(
-                    amountIn,
-                    amountOutMin,
-                    path
-                );
+            return IUniswapV2Router(setup.router).swapExactTokensForTokens(amountIn, amountOutMin, path);
         }
 
         if (setup.dex == DEX.TraderJoeV2) {
             uint256[] memory binSteps = new uint256[](1);
             binSteps[0] = abi.decode(setup.pairData.data, (uint256));
 
-            return
-                ITraderJoeV2Router(setup.router).swapExactTokensForTokens(
-                    amountIn,
-                    amountOutMin,
-                    binSteps,
-                    path
-                );
+            return ITraderJoeV2Router(setup.router).swapExactTokensForTokens(amountIn, amountOutMin, binSteps, path);
         }
 
         if (setup.dex == DEX.Camelot) {
-            return
-                ICamelotRouter(setup.router).swapExactTokensForTokens(
-                    amountIn,
-                    amountOutMin,
-                    path
-                );
+            return ICamelotRouter(setup.router).swapExactTokensForTokens(amountIn, amountOutMin, path);
         }
 
         if (setup.dex == DEX.Chronos) {
-            return
-                IChronosRouter(setup.router).swapExactTokensForTokens(
-                    amountIn,
-                    amountOutMin,
-                    path
-                );
+            return IChronosRouter(setup.router).swapExactTokensForTokens(amountIn, amountOutMin, path);
         }
 
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
@@ -106,43 +85,22 @@ library SwapAdapter {
         }
 
         if (setup.dex == DEX.UniswapV2) {
-            return
-                IUniswapV2Router(setup.router).swapTokensForExactTokens(
-                    amountOut,
-                    amountInMax,
-                    path
-                );
+            return IUniswapV2Router(setup.router).swapTokensForExactTokens(amountOut, amountInMax, path);
         }
 
         if (setup.dex == DEX.TraderJoeV2) {
             uint256[] memory binSteps = new uint256[](1);
             binSteps[0] = abi.decode(setup.pairData.data, (uint256));
 
-            return
-                ITraderJoeV2Router(setup.router).swapTokensForExactTokens(
-                    amountOut,
-                    amountInMax,
-                    binSteps,
-                    path
-                );
+            return ITraderJoeV2Router(setup.router).swapTokensForExactTokens(amountOut, amountInMax, binSteps, path);
         }
 
         if (setup.dex == DEX.Camelot) {
-            return
-                ICamelotRouter(setup.router).swapTokensForExactTokens(
-                    amountOut,
-                    amountInMax,
-                    path
-                );
+            return ICamelotRouter(setup.router).swapTokensForExactTokens(amountOut, amountInMax, path);
         }
 
         if (setup.dex == DEX.Chronos) {
-            return
-                IChronosRouter(setup.router).swapTokensForExactTokens(
-                    amountOut,
-                    amountInMax,
-                    path
-                );
+            return IChronosRouter(setup.router).swapTokensForExactTokens(amountOut, amountInMax, path);
         }
 
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
@@ -179,21 +137,11 @@ library SwapAdapter {
         }
 
         if (setup.dex == DEX.Camelot) {
-            return
-                ICamelotRouter(setup.router).getAmountOut(
-                    ICamelotPair(setup.pairData.pair),
-                    amountIn,
-                    tokenIn
-                );
+            return ICamelotRouter(setup.router).getAmountOut(ICamelotPair(setup.pairData.pair), amountIn, tokenIn);
         }
 
         if (setup.dex == DEX.Chronos) {
-            return
-                IChronosRouter(setup.router).getAmountOut(
-                    IChronosPair(setup.pairData.pair),
-                    amountIn,
-                    tokenIn
-                );
+            return IChronosRouter(setup.router).getAmountOut(IChronosPair(setup.pairData.pair), amountIn, tokenIn);
         }
 
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
@@ -230,12 +178,7 @@ library SwapAdapter {
         }
 
         if (setup.dex == DEX.Camelot) {
-            return
-                ICamelotRouter(setup.router).getAmountIn(
-                    ICamelotPair(setup.pairData.pair),
-                    amountOut,
-                    tokenOut
-                );
+            return ICamelotRouter(setup.router).getAmountIn(ICamelotPair(setup.pairData.pair), amountOut, tokenOut);
         }
 
         if (setup.dex == DEX.Chronos) {

@@ -3,7 +3,7 @@ import { execSync } from "child_process"
 import { Contract } from "ethers"
 import { ethers, network } from "hardhat"
 import AccessControlRoles from "../../constants/AccessControlRoles.json"
-import { DepositTokens } from "../../scripts/constants/deposit-tokens"
+import { UsdcTokens } from "../../scripts/constants/deposit-tokens"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
 import { WhaleAddrs } from "../helper/addresses"
 import { StrategyTestOptions } from "../helper/interfaces/options"
@@ -54,7 +54,7 @@ export function testStrategy(
       })
 
       // Set chain specific parameters.
-      const depositTokenAddr: string = DepositTokens.get(testOptions.network.name)!
+      const depositTokenAddr: string = UsdcTokens.get(testOptions.network.name)!
       const whaleAddr: string = WhaleAddrs.get(testOptions.network.name)!
 
       // Get ERC20 tokens.

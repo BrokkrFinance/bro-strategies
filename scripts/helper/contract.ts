@@ -21,7 +21,7 @@ export async function removeInvestmentLimitsAndFees(investable: Contract, owner:
 async function setInvestmentLimits(
   investable: Contract,
   owner: SignerWithAddress,
-  limit: BigInt = BigInt(1e20)
+  limit: BigInt = BigInt(1e40)
 ): Promise<void> {
   await investable.connect(owner).setTotalInvestmentLimit(limit)
   await investable.connect(owner).setInvestmentLimitPerAddress(limit)

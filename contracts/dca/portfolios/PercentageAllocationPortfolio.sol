@@ -31,20 +31,14 @@ contract PercentageAllocationPortfolio is
         _disableInitializers();
     }
 
-    function initialize(DCAPortfolioInitArgs calldata portfolioArgs)
-        external
-        initializer
-    {
+    function initialize(DCAPortfolioInitArgs calldata portfolioArgs) external initializer {
         __UUPSUpgradeable_init();
         __PortfolioAccessBaseUpgradeable_init();
         __Pausable_init();
         __ReentrancyGuard_init();
 
         for (uint256 i = 0; i < portfolioArgs.investables.length; i++) {
-            if (
-                portfolioArgs.investables[i].depositToken() !=
-                portfolioArgs.depositToken
-            ) {
+            if (portfolioArgs.investables[i].depositToken() != portfolioArgs.depositToken) {
                 revert InvalidDepositToken();
             }
 
@@ -83,23 +77,13 @@ contract PercentageAllocationPortfolio is
 
         uint256 perInvestableDeposit = amount / activeInvestables;
         for (uint256 i = 0; i < investables.length; i++) {
-            depositToken.safeApprove(
-                address(investables[i].investable),
-                perInvestableDeposit
-            );
+            depositToken.safeApprove(address(investables[i].investable), perInvestableDeposit);
 
-            investables[i].investable.depositFor(
-                sender,
-                perInvestableDeposit,
-                investAmountSplit
-            );
+            investables[i].investable.depositFor(sender, perInvestableDeposit, investAmountSplit);
         }
     }
 
-    function _checkActiveInvestables()
-        private
-        returns (uint256 activeInvestables)
-    {
+    function _checkActiveInvestables() private returns (uint256 activeInvestables) {
         for (uint256 i = 0; i < investables.length; i++) {
             if (investables[i].emergencyExited) {
                 continue;
@@ -114,25 +98,17 @@ contract PercentageAllocationPortfolio is
         }
     }
 
-    function depositSelected(
-        uint256 amount,
-        uint256[] calldata selectedInvestables
-    ) external nonReentrant {
+    function depositSelected(uint256 amount, uint256[] calldata selectedInvestables) external nonReentrant {
         if (selectedInvestables.length > investables.length) {
             // solhint-disable-next-line
-            revert(
-                "Selected investables length is higher then actual investables"
-            );
+            revert("Selected investables length is higher then actual investables");
         }
 
         depositToken.safeTransferFrom(_msgSender(), address(this), amount);
 
         uint256 perInvestableDeposit = amount / selectedInvestables.length;
         for (uint256 i = 0; i < selectedInvestables.length; i++) {
-            depositToken.safeApprove(
-                address(investables[selectedInvestables[i]].investable),
-                perInvestableDeposit
-            );
+            depositToken.safeApprove(address(investables[selectedInvestables[i]].investable), perInvestableDeposit);
 
             investables[selectedInvestables[i]].investable.depositFor(
                 _msgSender(),
@@ -142,40 +118,22 @@ contract PercentageAllocationPortfolio is
         }
     }
 
-    function withdrawAll(bool convertBluechipIntoDepositAsset)
-        external
-        nonReentrant
-    {
+    function withdrawAll(bool convertBluechipIntoDepositAsset) external nonReentrant {
         _withdrawAll(_msgSender(), convertBluechipIntoDepositAsset);
     }
 
-    function withdrawAllFor(
-        address sender,
-        bool convertBluechipIntoDepositAsset
-    ) external onlyPortfolio nonReentrant {
+    function withdrawAllFor(address sender, bool convertBluechipIntoDepositAsset) external onlyPortfolio nonReentrant {
         _withdrawAll(sender, convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawAll(address sender, bool convertBluechipIntoDepositAsset)
-        private
-    {
+    function _withdrawAll(address sender, bool convertBluechipIntoDepositAsset) private {
         for (uint256 i = 0; i < investables.length; i++) {
-            investables[i].investable.withdrawAllFor(
-                sender,
-                convertBluechipIntoDepositAsset
-            );
+            investables[i].investable.withdrawAllFor(sender, convertBluechipIntoDepositAsset);
         }
     }
 
-    function withdrawAll(
-        uint256 positionIndex,
-        bool convertBluechipIntoDepositAsset
-    ) external nonReentrant {
-        _withdrawAll(
-            _msgSender(),
-            positionIndex,
-            convertBluechipIntoDepositAsset
-        );
+    function withdrawAll(uint256 positionIndex, bool convertBluechipIntoDepositAsset) external nonReentrant {
+        _withdrawAll(_msgSender(), positionIndex, convertBluechipIntoDepositAsset);
     }
 
     function withdrawAllFor(
@@ -192,49 +150,30 @@ contract PercentageAllocationPortfolio is
         bool convertBluechipIntoDepositAsset
     ) private {
         for (uint256 i = 0; i < investables.length; i++) {
-            investables[i].investable.withdrawAllFor(
-                sender,
-                positionIndex,
-                convertBluechipIntoDepositAsset
-            );
+            investables[i].investable.withdrawAllFor(sender, positionIndex, convertBluechipIntoDepositAsset);
         }
     }
 
-    function withdrawBluechip(bool convertBluechipIntoDepositAsset)
-        external
-        nonReentrant
-    {
+    function withdrawBluechip(bool convertBluechipIntoDepositAsset) external nonReentrant {
         _withdrawBluechip(_msgSender(), convertBluechipIntoDepositAsset);
     }
 
-    function withdrawBluechipFor(
-        address sender,
-        bool convertBluechipIntoDepositAsset
-    ) external onlyPortfolio nonReentrant {
+    function withdrawBluechipFor(address sender, bool convertBluechipIntoDepositAsset)
+        external
+        onlyPortfolio
+        nonReentrant
+    {
         _withdrawBluechip(sender, convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawBluechip(
-        address sender,
-        bool convertBluechipIntoDepositAsset
-    ) private {
+    function _withdrawBluechip(address sender, bool convertBluechipIntoDepositAsset) private {
         for (uint256 i = 0; i < investables.length; i++) {
-            investables[i].investable.withdrawBluechipFor(
-                sender,
-                convertBluechipIntoDepositAsset
-            );
+            investables[i].investable.withdrawBluechipFor(sender, convertBluechipIntoDepositAsset);
         }
     }
 
-    function withdrawBluechip(
-        uint256 positionIndex,
-        bool convertBluechipIntoDepositAsset
-    ) external nonReentrant {
-        _withdrawBluechip(
-            _msgSender(),
-            positionIndex,
-            convertBluechipIntoDepositAsset
-        );
+    function withdrawBluechip(uint256 positionIndex, bool convertBluechipIntoDepositAsset) external nonReentrant {
+        _withdrawBluechip(_msgSender(), positionIndex, convertBluechipIntoDepositAsset);
     }
 
     function withdrawBluechipFor(
@@ -242,11 +181,7 @@ contract PercentageAllocationPortfolio is
         uint256 positionIndex,
         bool convertBluechipIntoDepositAsset
     ) external onlyPortfolio nonReentrant {
-        _withdrawBluechip(
-            sender,
-            positionIndex,
-            convertBluechipIntoDepositAsset
-        );
+        _withdrawBluechip(sender, positionIndex, convertBluechipIntoDepositAsset);
     }
 
     function _withdrawBluechip(
@@ -255,19 +190,12 @@ contract PercentageAllocationPortfolio is
         bool convertBluechipIntoDepositAsset
     ) private {
         for (uint256 i = 0; i < investables.length; i++) {
-            investables[i].investable.withdrawBluechipFor(
-                sender,
-                positionIndex,
-                convertBluechipIntoDepositAsset
-            );
+            investables[i].investable.withdrawBluechipFor(sender, positionIndex, convertBluechipIntoDepositAsset);
         }
     }
 
     // ----- Base Class Setters -----
-    function addDCAInvestable(IDCAInvestable newDCAInvestable)
-        external
-        onlyOwner
-    {
+    function addDCAInvestable(IDCAInvestable newDCAInvestable) external onlyOwner {
         for (uint256 i = 0; i < investables.length; i++) {
             if (investables[i].investable == newDCAInvestable) {
                 revert DCAInvestableAlreadyAdded();
@@ -303,29 +231,18 @@ contract PercentageAllocationPortfolio is
         return emergencyExitedInvestables == investables.length;
     }
 
-    function equityValuation()
-        external
-        view
-        returns (DCAEquityValuation[] memory)
-    {
+    function equityValuation() external view returns (DCAEquityValuation[] memory) {
         uint256 totalValuationsLength;
-        DCAEquityValuation[][]
-            memory investableValuations = new DCAEquityValuation[][](
-                investables.length
-            );
+        DCAEquityValuation[][] memory investableValuations = new DCAEquityValuation[][](investables.length);
 
         for (uint256 i = 0; i < investables.length; i++) {
-            DCAEquityValuation[] memory investableValuation = investables[i]
-                .investable
-                .equityValuation();
+            DCAEquityValuation[] memory investableValuation = investables[i].investable.equityValuation();
 
             investableValuations[i] = investableValuation;
             totalValuationsLength += investableValuation.length;
         }
 
-        DCAEquityValuation[] memory valuation = new DCAEquityValuation[](
-            totalValuationsLength
-        );
+        DCAEquityValuation[] memory valuation = new DCAEquityValuation[](totalValuationsLength);
         uint256 current = 0;
         for (uint256 i = 0; i < investableValuations.length; i++) {
             for (uint256 j = 0; j < investableValuations[i].length; j++) {
@@ -337,15 +254,9 @@ contract PercentageAllocationPortfolio is
         return valuation;
     }
 
-    function minDepositAmount()
-        external
-        view
-        returns (uint256 totalMinDepositAmount)
-    {
+    function minDepositAmount() external view returns (uint256 totalMinDepositAmount) {
         for (uint256 i = 0; i < investables.length; i++) {
-            totalMinDepositAmount += investables[i]
-                .investable
-                .minDepositAmount();
+            totalMinDepositAmount += investables[i].investable.minDepositAmount();
         }
     }
 }

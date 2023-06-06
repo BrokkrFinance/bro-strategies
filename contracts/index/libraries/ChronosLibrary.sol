@@ -89,14 +89,8 @@ library ChronosLibrary {
 
         address token1 = pair.token1();
 
-        (uint256 reserveIn, uint256 reserveOut) = (tokenOut == token1)
-            ? (reserve0, reserve1)
-            : (reserve1, reserve0);
+        (uint256 reserveIn, uint256 reserveOut) = (tokenOut == token1) ? (reserve0, reserve1) : (reserve1, reserve0);
 
-        amountIn =
-            (reserveIn * amountOut * 10000) /
-            (reserveOut - amountOut) /
-            (10000 - fee) +
-            1;
+        amountIn = (reserveIn * amountOut * 10000) / (reserveOut - amountOut) / (10000 - fee) + 1;
     }
 }

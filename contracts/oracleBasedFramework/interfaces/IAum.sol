@@ -21,20 +21,14 @@ interface IAum {
         view
         returns (Valuation[] memory);
 
-    function getLiabilityValuations(
-        bool shouldMaximise,
-        bool shouldIncludeAmmPrice
-    ) external view returns (Valuation[] memory);
-
-    function getEquityValuation(bool shouldMaximise, bool shouldIncludeAmmPrice)
+    function getLiabilityValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
         external
         view
-        returns (uint256);
+        returns (Valuation[] memory);
+
+    function getEquityValuation(bool shouldMaximise, bool shouldIncludeAmmPrice) external view returns (uint256);
 
     function getInvestmentTokenSupply() external view returns (uint256);
 
-    function getInvestmentTokenBalanceOf(address user)
-        external
-        view
-        returns (uint256);
+    function getInvestmentTokenBalanceOf(address user) external view returns (uint256);
 }

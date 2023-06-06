@@ -31,8 +31,7 @@ struct TraderJoeStorage {
 library TraderJoeStorageLib {
     // keccak256("brokkr.storage.traderjoe.strategy");
     // solhint-disable-next-line const-name-snakecase
-    bytes32 private constant storagePosition =
-        0x2c18a668c6ed16d1abb08a50aa4bef7a42b8953231af749500b07f3b5a121f25;
+    bytes32 private constant storagePosition = 0x2c18a668c6ed16d1abb08a50aa4bef7a42b8953231af749500b07f3b5a121f25;
 
     function getStorage() internal pure returns (TraderJoeStorage storage ts) {
         // solhint-disable-next-line no-inline-assembly

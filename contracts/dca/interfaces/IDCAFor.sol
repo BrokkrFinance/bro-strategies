@@ -8,10 +8,7 @@ interface IDCAFor {
         uint8 amountSplit
     ) external;
 
-    function withdrawAllFor(
-        address sender,
-        bool convertBluechipIntoDepositAsset
-    ) external;
+    function withdrawAllFor(address sender, bool convertBluechipIntoDepositAsset) external;
 
     function withdrawAllFor(
         address sender,
@@ -19,10 +16,7 @@ interface IDCAFor {
         bool convertBluechipIntoDepositAsset
     ) external;
 
-    function withdrawBluechipFor(
-        address sender,
-        bool convertBluechipIntoDepositAsset
-    ) external;
+    function withdrawBluechipFor(address sender, bool convertBluechipIntoDepositAsset) external;
 
     function withdrawBluechipFor(
         address sender,

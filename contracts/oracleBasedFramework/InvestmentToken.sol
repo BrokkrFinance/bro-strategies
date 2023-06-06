@@ -25,10 +25,7 @@ contract InvestmentToken is
         _disableInitializers();
     }
 
-    function initialize(string memory name_, string memory symbol_)
-        public
-        initializer
-    {
+    function initialize(string memory name_, string memory symbol_) public initializer {
         __Context_init();
         __Ownable_init();
         __UUPSUpgradeable_init();
@@ -46,11 +43,7 @@ contract InvestmentToken is
         address /* newImplementation */
     ) internal virtual override onlyOwner {}
 
-    function burn(uint256 amount)
-        public
-        virtual
-        override(IInvestmentToken, ERC20BurnableUpgradeable)
-    {
+    function burn(uint256 amount) public virtual override(IInvestmentToken, ERC20BurnableUpgradeable) {
         _burn(_msgSender(), amount);
     }
 

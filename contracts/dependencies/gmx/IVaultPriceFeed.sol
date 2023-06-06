@@ -2,10 +2,7 @@
 pragma solidity ^0.8.10;
 
 interface IVaultPriceFeed {
-    function adjustmentBasisPoints(address _token)
-        external
-        view
-        returns (uint256);
+    function adjustmentBasisPoints(address _token) external view returns (uint256);
 
     function isAdjustmentAdditive(address _token) external view returns (bool);
 
@@ -21,18 +18,15 @@ interface IVaultPriceFeed {
 
     function setIsSecondaryPriceEnabled(bool _isEnabled) external;
 
-    function setSpreadBasisPoints(address _token, uint256 _spreadBasisPoints)
-        external;
+    function setSpreadBasisPoints(address _token, uint256 _spreadBasisPoints) external;
 
-    function setSpreadThresholdBasisPoints(uint256 _spreadThresholdBasisPoints)
-        external;
+    function setSpreadThresholdBasisPoints(uint256 _spreadThresholdBasisPoints) external;
 
     function setFavorPrimaryPrice(bool _favorPrimaryPrice) external;
 
     function setPriceSampleSpace(uint256 _priceSampleSpace) external;
 
-    function setMaxStrictPriceDeviation(uint256 _maxStrictPriceDeviation)
-        external;
+    function setMaxStrictPriceDeviation(uint256 _maxStrictPriceDeviation) external;
 
     function getPrice(
         address _token,
@@ -43,10 +37,7 @@ interface IVaultPriceFeed {
 
     function getAmmPrice(address _token) external view returns (uint256);
 
-    function getPrimaryPrice(address _token, bool _maximise)
-        external
-        view
-        returns (uint256);
+    function getPrimaryPrice(address _token, bool _maximise) external view returns (uint256);
 
     function setTokenConfig(
         address _token,

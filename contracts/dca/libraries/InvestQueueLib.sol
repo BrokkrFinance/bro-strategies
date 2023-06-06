@@ -9,10 +9,7 @@ library InvestQueueLib {
         uint8 current;
     }
 
-    function getCurrentInvestmentAmountAndMoveNext(InvestQueue storage queue)
-        internal
-        returns (uint256)
-    {
+    function getCurrentInvestmentAmountAndMoveNext(InvestQueue storage queue) internal returns (uint256) {
         uint256 amount = queue.investAmounts[queue.current];
         queue.investAmounts[queue.current] = 0;
         queue.current = _nextQueueIndex(queue.current);
@@ -26,10 +23,7 @@ library InvestQueueLib {
         uint8 amountSplit
     ) internal {
         // solhint-disable-next-line reason-string
-        require(
-            amountSplit < queue.investAmounts.length,
-            "InvestQueueLib: Invalid amount split"
-        );
+        require(amountSplit < queue.investAmounts.length, "InvestQueueLib: Invalid amount split");
 
         uint8 current = queue.current;
         uint256 perPeriodInvestment = amountToInvest / amountSplit;

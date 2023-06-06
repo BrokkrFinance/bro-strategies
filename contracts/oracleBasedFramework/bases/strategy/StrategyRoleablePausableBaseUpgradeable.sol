@@ -5,16 +5,14 @@ import "./StrategyRoleableBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
-abstract contract StrategyRoleablePausableBaseUpgradeable is
-    PausableUpgradeable,
-    StrategyRoleableBaseUpgradeable
-{
+abstract contract StrategyRoleablePausableBaseUpgradeable is PausableUpgradeable, StrategyRoleableBaseUpgradeable {
     uint256[4] private __gap;
 
     // solhint-disable-next-line
-    function __StrategyRoleablePausableBaseUpgradeable_init(
-        StrategyArgs calldata strategyArgs
-    ) internal onlyInitializing {
+    function __StrategyRoleablePausableBaseUpgradeable_init(StrategyArgs calldata strategyArgs)
+        internal
+        onlyInitializing
+    {
         __Pausable_init();
         __StrategyRoleableBaseUpgradeable_init(strategyArgs);
     }
@@ -33,12 +31,7 @@ abstract contract StrategyRoleablePausableBaseUpgradeable is
         address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.deposit(
-            depositTokenAmountIn,
-            minimumDepositTokenAmountOut,
-            investmentTokenReceiver,
-            params
-        );
+        super.deposit(depositTokenAmountIn, minimumDepositTokenAmountOut, investmentTokenReceiver, params);
     }
 
     function withdraw(
@@ -47,20 +40,10 @@ abstract contract StrategyRoleablePausableBaseUpgradeable is
         address depositTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.withdraw(
-            investmentTokenAmountIn,
-            minimumDepositTokenAmountOut,
-            depositTokenReceiver,
-            params
-        );
+        super.withdraw(investmentTokenAmountIn, minimumDepositTokenAmountOut, depositTokenReceiver, params);
     }
 
-    function withdrawReward(NameValuePair[] calldata withdrawParams)
-        public
-        virtual
-        override
-        whenNotPaused
-    {
+    function withdrawReward(NameValuePair[] calldata withdrawParams) public virtual override whenNotPaused {
         super.withdrawReward(withdrawParams);
     }
 }

@@ -23,10 +23,7 @@ interface IVectorPoolHelperJoe {
     /// @param token the address of the token to get the number of rewards for
     /// @return vtxAmount the amount of VTX ready for harvest
     /// @return tokenAmount the amount of token inputted
-    function earned(address token)
-        external
-        view
-        returns (uint256 vtxAmount, uint256 tokenAmount);
+    function earned(address token) external view returns (uint256 vtxAmount, uint256 tokenAmount);
 
     function deposit(uint256 amount) external;
 

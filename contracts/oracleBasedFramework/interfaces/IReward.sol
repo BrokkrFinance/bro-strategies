@@ -7,10 +7,7 @@ interface IReward {
     event RewardProcess(uint256 amount);
     event RewardWithdraw(address indexed withdrawer, uint256 amount);
 
-    function processReward(
-        NameValuePair[] calldata depositParams,
-        NameValuePair[] calldata reapRewardParams
-    ) external;
+    function processReward(NameValuePair[] calldata depositParams, NameValuePair[] calldata reapRewardParams) external;
 
     function withdrawReward(NameValuePair[] calldata withdrawParams) external;
 }

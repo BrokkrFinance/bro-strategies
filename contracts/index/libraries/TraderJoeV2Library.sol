@@ -54,11 +54,7 @@ library TraderJoeV2Library {
         address,
         address tokenOut
     ) internal view returns (uint256 amountOut) {
-        (amountOut, ) = router.getSwapOut(
-            address(pair),
-            amountIn,
-            tokenOut == address(pair.tokenY())
-        );
+        (amountOut, ) = router.getSwapOut(address(pair), amountIn, tokenOut == address(pair.tokenY()));
     }
 
     function getAmountIn(
@@ -68,10 +64,6 @@ library TraderJoeV2Library {
         address,
         address tokenOut
     ) internal view returns (uint256 amountIn) {
-        (amountIn, ) = router.getSwapIn(
-            address(pair),
-            amountOut,
-            tokenOut == address(pair.tokenY())
-        );
+        (amountIn, ) = router.getSwapIn(address(pair), amountOut, tokenOut == address(pair.tokenY()));
     }
 }

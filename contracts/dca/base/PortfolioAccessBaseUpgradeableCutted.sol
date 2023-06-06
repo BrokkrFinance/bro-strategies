@@ -5,10 +5,7 @@ import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/O
 
 abstract contract PortfolioAccessBaseUpgradeableCutted is OwnableUpgradeable {
     // solhint-disable-next-line
-    function __PortfolioAccessBaseUpgradeableCutted_init()
-        internal
-        onlyInitializing
-    {
+    function __PortfolioAccessBaseUpgradeableCutted_init() internal onlyInitializing {
         __Ownable_init();
     }
 

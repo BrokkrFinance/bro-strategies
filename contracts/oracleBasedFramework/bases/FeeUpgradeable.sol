@@ -33,126 +33,69 @@ abstract contract FeeUpgradeable is Initializable, IFee {
     uint256[39] private __gap;
 
     // solhint-disable-next-line func-name-mixedcase
-    function __FeeUpgradeable_init(
-        FeeArgs calldata feeArgs,
-        uint8 depositTokenDecimalCount
-    ) internal onlyInitializing {
+    function __FeeUpgradeable_init(FeeArgs calldata feeArgs, uint8 depositTokenDecimalCount) internal onlyInitializing {
         // assumption: depositTokenDecimalCount >= InvestableLib.PRICE_PRECISION_DIGITS
         _setTokenPriceHighWatermark(
-            (10 **
-                (depositTokenDecimalCount -
-                    InvestableLib.PRICE_PRECISION_DIGITS)) *
-                Math.MEDIUM_FIXED_DECIMAL_FACTOR
+            (10**(depositTokenDecimalCount - InvestableLib.PRICE_PRECISION_DIGITS)) * Math.MEDIUM_FIXED_DECIMAL_FACTOR
         );
         _setDepositFee(feeArgs.depositFee, feeArgs.depositFeeParams);
         _setWithdrawalFee(feeArgs.withdrawalFee, feeArgs.withdrawFeeParams);
-        _setPerformanceFee(
-            feeArgs.performanceFee,
-            feeArgs.performanceFeeParams
-        );
+        _setPerformanceFee(feeArgs.performanceFee, feeArgs.performanceFeeParams);
         _setManagementFee(feeArgs.managementFee, feeArgs.managementFeeParams);
         _setFeeReceiver(feeArgs.feeReceiver, feeArgs.feeReceiverParams);
     }
 
     modifier checkFee(uint24 fee) {
-        if (fee >= uint256(100) * Math.SHORT_FIXED_DECIMAL_FACTOR)
-            revert InvalidFeeError();
+        if (fee >= uint256(100) * Math.SHORT_FIXED_DECIMAL_FACTOR) revert InvalidFeeError();
 
         _;
     }
 
-    function getDepositFee(NameValuePair[] calldata)
-        public
-        view
-        virtual
-        returns (uint24)
-    {
+    function getDepositFee(NameValuePair[] calldata) public view virtual returns (uint24) {
         return depositFee;
     }
 
-    function _setDepositFee(uint24 fee, NameValuePair[] calldata params)
-        internal
-        virtual
-        checkFee(fee)
-    {
+    function _setDepositFee(uint24 fee, NameValuePair[] calldata params) internal virtual checkFee(fee) {
         depositFee = fee;
         emit DepositFeeChange(depositFee, params);
     }
 
-    function getWithdrawalFee(NameValuePair[] calldata)
-        public
-        view
-        virtual
-        returns (uint24)
-    {
+    function getWithdrawalFee(NameValuePair[] calldata) public view virtual returns (uint24) {
         return withdrawalFee;
     }
 
-    function _setWithdrawalFee(uint24 fee, NameValuePair[] calldata params)
-        internal
-        virtual
-        checkFee(fee)
-    {
+    function _setWithdrawalFee(uint24 fee, NameValuePair[] calldata params) internal virtual checkFee(fee) {
         withdrawalFee = fee;
         emit WithdrawalFeeChange(withdrawalFee, params);
     }
 
-    function getPerformanceFee(NameValuePair[] calldata)
-        public
-        view
-        virtual
-        returns (uint24)
-    {
+    function getPerformanceFee(NameValuePair[] calldata) public view virtual returns (uint24) {
         return performanceFee;
     }
 
-    function _setPerformanceFee(uint24 fee, NameValuePair[] calldata params)
-        internal
-        virtual
-        checkFee(fee)
-    {
+    function _setPerformanceFee(uint24 fee, NameValuePair[] calldata params) internal virtual checkFee(fee) {
         performanceFee = fee;
         emit PerformanceFeeChange(performanceFee, params);
     }
 
-    function _setTokenPriceHighWatermark(uint256 newTokenPriceHighWaterMark)
-        internal
-        virtual
-    {
+    function _setTokenPriceHighWatermark(uint256 newTokenPriceHighWaterMark) internal virtual {
         tokenPriceHighWatermark = newTokenPriceHighWaterMark;
     }
 
-    function getManagementFee(NameValuePair[] calldata)
-        public
-        view
-        virtual
-        returns (uint24)
-    {
+    function getManagementFee(NameValuePair[] calldata) public view virtual returns (uint24) {
         return managementFee;
     }
 
-    function _setManagementFee(uint24 fee, NameValuePair[] calldata params)
-        internal
-        virtual
-        checkFee(fee)
-    {
+    function _setManagementFee(uint24 fee, NameValuePair[] calldata params) internal virtual checkFee(fee) {
         managementFee = fee;
         emit ManagementFeeChange(managementFee, params);
     }
 
-    function getFeeReceiver(NameValuePair[] calldata)
-        external
-        view
-        virtual
-        returns (address)
-    {
+    function getFeeReceiver(NameValuePair[] calldata) external view virtual returns (address) {
         return feeReceiver;
     }
 
-    function _setFeeReceiver(
-        address feeReceiver_,
-        NameValuePair[] calldata params
-    ) internal virtual {
+    function _setFeeReceiver(address feeReceiver_, NameValuePair[] calldata params) internal virtual {
         if (feeReceiver_ == address(0)) revert ZeroFeeReceiver();
 
         feeReceiver = feeReceiver_;
@@ -171,10 +114,7 @@ abstract contract FeeUpgradeable is Initializable, IFee {
         claimedFee = claimedFee_;
     }
 
-    function setCurrentAccumulatedFee(uint256 currentAccumulatedFee_)
-        internal
-        virtual
-    {
+    function setCurrentAccumulatedFee(uint256 currentAccumulatedFee_) internal virtual {
         currentAccumulatedFee = currentAccumulatedFee_;
     }
 }

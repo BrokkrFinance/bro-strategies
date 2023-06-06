@@ -13,21 +13,9 @@ interface IDCAStrategy is IDCAInvestable {
     error NothingToWithdraw();
 
     event Deposit(address indexed sender, uint256 amount, uint256 amountSplit);
-    event Invest(
-        uint256 depositAmountSpent,
-        uint256 bluechipReceived,
-        uint256 investedAt,
-        uint256 historicalIndex
-    );
-    event Withdraw(
-        address indexed sender,
-        uint256 withdrawnDeposit,
-        uint256 withdrawnBluechip
-    );
-    event StatusChanged(
-        BluechipInvestmentState indexed prevStatus,
-        BluechipInvestmentState indexed newStatus
-    );
+    event Invest(uint256 depositAmountSpent, uint256 bluechipReceived, uint256 investedAt, uint256 historicalIndex);
+    event Withdraw(address indexed sender, uint256 withdrawnDeposit, uint256 withdrawnBluechip);
+    event StatusChanged(BluechipInvestmentState indexed prevStatus, BluechipInvestmentState indexed newStatus);
 
     struct DCAStrategyInitArgs {
         DepositFee depositFee;
@@ -73,19 +61,13 @@ interface IDCAStrategy is IDCAInvestable {
 
     function canInvest() external view returns (bool);
 
-    function depositorInfo(address depositor)
-        external
-        view
-        returns (DCADepositor memory);
+    function depositorInfo(address depositor) external view returns (DCADepositor memory);
 
     function getInvestAmountAt(uint8 index) external view returns (uint256);
 
     function currentInvestQueueIndex() external view returns (uint8);
 
-    function getHistoricalGaugeAt(uint256 index)
-        external
-        view
-        returns (uint256, uint256);
+    function getHistoricalGaugeAt(uint256 index) external view returns (uint256, uint256);
 
     function currentDCAHistoryIndex() external view returns (uint256);
 }

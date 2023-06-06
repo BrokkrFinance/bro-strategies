@@ -27,12 +27,7 @@ contract MockDCAStrategy is DCABaseUpgradeable {
         bluechipTokenDecimals = bluechipTokenDecimals_;
     }
 
-    function _invest(uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256)
-    {
+    function _invest(uint256 amount) internal virtual override returns (uint256) {
         return amount;
     }
 
@@ -41,30 +36,15 @@ contract MockDCAStrategy is DCABaseUpgradeable {
         return 1e8;
     }
 
-    function _withdrawInvestedBluechip(uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256)
-    {
+    function _withdrawInvestedBluechip(uint256 amount) internal virtual override returns (uint256) {
         return amount;
     }
 
-    function _transferBluechip(address to, uint256 amount)
-        internal
-        virtual
-        override
-    {
+    function _transferBluechip(address to, uint256 amount) internal virtual override {
         bluechipToken.safeTransfer(to, amount);
     }
 
-    function _totalBluechipInvested()
-        internal
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function _totalBluechipInvested() internal view virtual override returns (uint256) {
         if (
             bluechipInvestmentState == BluechipInvestmentState.Investing ||
             bluechipInvestmentState == BluechipInvestmentState.Withdrawn
@@ -77,23 +57,11 @@ contract MockDCAStrategy is DCABaseUpgradeable {
         return 0;
     }
 
-    function _bluechipAddress()
-        internal
-        view
-        virtual
-        override
-        returns (address)
-    {
+    function _bluechipAddress() internal view virtual override returns (address) {
         return address(bluechipToken);
     }
 
-    function _bluechipDecimals()
-        internal
-        view
-        virtual
-        override
-        returns (uint8)
-    {
+    function _bluechipDecimals() internal view virtual override returns (uint8) {
         return bluechipTokenDecimals;
     }
 }

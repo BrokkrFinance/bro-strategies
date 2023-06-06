@@ -10,19 +10,13 @@ library DnsVectorStrategyCommon {
     uint256 public constant AAVE_FIXED_DECIMAL_FACTOR = 10**4;
 
     function getPangolinLpBalance() internal view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
-        return
-            strategyStorage
-                .pangolinMiniChef
-                .userInfo(strategyStorage.pangolinPoolId, address(this))
-                .amount;
+        return strategyStorage.pangolinMiniChef.userInfo(strategyStorage.pangolinPoolId, address(this)).amount;
     }
 
     function getPangolinLpTotalSupply() internal view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         return strategyStorage.pangolinPair.totalSupply();
     }
@@ -32,12 +26,9 @@ library DnsVectorStrategyCommon {
         view
         returns (uint256 reserve0, uint256 reserve1)
     {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
-        (uint256 _reserve0, uint256 _reserve1, ) = strategyStorage
-            .pangolinPair
-            .getReserves();
+        (uint256 _reserve0, uint256 _reserve1, ) = strategyStorage.pangolinPair.getReserves();
 
         address _token0 = strategyStorage.pangolinPair.token0();
         address _token1 = strategyStorage.pangolinPair.token1();

@@ -42,8 +42,7 @@ struct DnsVectorStorage {
 library DnsVectorStorageLib {
     // keccak256("brokkr.storage.dns.vector.strategy");
     // solhint-disable-next-line const-name-snakecase
-    bytes32 private constant storagePosition =
-        0x4237030a40a92a0fc4b8b6a6ef53b6cec5c13de00b648c0968c3070e93d90ada;
+    bytes32 private constant storagePosition = 0x4237030a40a92a0fc4b8b6a6ef53b6cec5c13de00b648c0968c3070e93d90ada;
 
     function getStorage() internal pure returns (DnsVectorStorage storage ts) {
         // solhint-disable-next-line no-inline-assembly

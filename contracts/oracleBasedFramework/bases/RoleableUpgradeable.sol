@@ -33,10 +33,7 @@ abstract contract RoleableUpgradeable is AccessControlEnumerableUpgradeable {
     error MissingAdminRole();
 
     // solhint-disable-next-line
-    function __RoleableBaseUpgradeable_init(RoleToUsers[] calldata roleToUsers)
-        internal
-        onlyInitializing
-    {
+    function __RoleableBaseUpgradeable_init(RoleToUsers[] calldata roleToUsers) internal onlyInitializing {
         __AccessControlEnumerable_init();
 
         uint256 roleToUsersArrayLength = roleToUsers.length;

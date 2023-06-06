@@ -25,7 +25,5 @@ interface IComptroller {
             bool isVenus
         );
 
-    function enterMarkets(address[] calldata vTokens)
-        external
-        returns (uint256[] memory);
+    function enterMarkets(address[] calldata vTokens) external returns (uint256[] memory);
 }

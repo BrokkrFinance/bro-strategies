@@ -6,16 +6,11 @@ import { RoleableUpgradeable, GOVERNOR_ROLE, STRATEGIST_ROLE, MAINTAINER_ROLE, U
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
-abstract contract PortfolioRoleableBaseUpgradeable is
-    RoleableUpgradeable,
-    PortfolioBaseUpgradeable
-{
+abstract contract PortfolioRoleableBaseUpgradeable is RoleableUpgradeable, PortfolioBaseUpgradeable {
     uint256[8] private __gap;
 
     // solhint-disable-next-line
-    function __PortfolioRoleableBaseUpgradeable_init(
-        PortfolioArgs calldata portfolioArgs
-    ) internal onlyInitializing {
+    function __PortfolioRoleableBaseUpgradeable_init(PortfolioArgs calldata portfolioArgs) internal onlyInitializing {
         __RoleableBaseUpgradeable_init(portfolioArgs.roleToUsersArray);
         __PortfolioBaseUpgradeable_init(portfolioArgs);
     }
@@ -28,25 +23,23 @@ abstract contract PortfolioRoleableBaseUpgradeable is
         super._addInvestable(investable, newAllocations, params);
     }
 
-    function removeInvestable(
-        IInvestable investable,
-        uint24[] calldata newAllocations
-    ) public virtual onlyRole(GOVERNOR_ROLE) {
+    function removeInvestable(IInvestable investable, uint24[] calldata newAllocations)
+        public
+        virtual
+        onlyRole(GOVERNOR_ROLE)
+    {
         super._removeInvestable(investable, newAllocations);
     }
 
-    function changeInvestable(
-        IInvestable investable,
-        NameValuePair[] calldata params
-    ) public virtual onlyRole(GOVERNOR_ROLE) {
+    function changeInvestable(IInvestable investable, NameValuePair[] calldata params)
+        public
+        virtual
+        onlyRole(GOVERNOR_ROLE)
+    {
         super._changeInvestable(investable, params);
     }
 
-    function setTargetInvestableAllocations(uint24[] calldata newAllocations)
-        public
-        virtual
-        onlyRole(MAINTAINER_ROLE)
-    {
+    function setTargetInvestableAllocations(uint24[] calldata newAllocations) public virtual onlyRole(MAINTAINER_ROLE) {
         super._setTargetInvestableAllocations(newAllocations);
     }
 
@@ -55,89 +48,50 @@ abstract contract PortfolioRoleableBaseUpgradeable is
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams
     ) public virtual onlyRole(MAINTAINER_ROLE) {
-        super._rebalance(
-            minimumDepositTokenAmountOut,
-            depositParams,
-            withdrawParams
-        );
+        super._rebalance(minimumDepositTokenAmountOut, depositParams, withdrawParams);
     }
 
-    function setDepositFee(uint24 fee_, NameValuePair[] calldata params)
-        public
-        virtual
-        onlyRole(GOVERNOR_ROLE)
-    {
+    function setDepositFee(uint24 fee_, NameValuePair[] calldata params) public virtual onlyRole(GOVERNOR_ROLE) {
         super._setDepositFee(fee_, params);
     }
 
-    function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
-        public
-        virtual
-        onlyRole(GOVERNOR_ROLE)
-    {
+    function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params) public virtual onlyRole(GOVERNOR_ROLE) {
         super._setWithdrawalFee(fee_, params);
     }
 
-    function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
-        public
-        virtual
-        onlyRole(GOVERNOR_ROLE)
-    {
+    function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params) public virtual onlyRole(GOVERNOR_ROLE) {
         super._setPerformanceFee(fee_, params);
     }
 
-    function takePerformanceFee(NameValuePair[] calldata params)
-        external
-        virtual
-        onlyRole(MAINTAINER_ROLE)
-    {
+    function takePerformanceFee(NameValuePair[] calldata params) external virtual onlyRole(MAINTAINER_ROLE) {
         super._takePerformanceFee(params);
     }
 
-    function setManagementFee(uint24 fee_, NameValuePair[] calldata params)
-        public
-        virtual
-        onlyRole(GOVERNOR_ROLE)
-    {
+    function setManagementFee(uint24 fee_, NameValuePair[] calldata params) public virtual onlyRole(GOVERNOR_ROLE) {
         super._setManagementFee(fee_, params);
     }
 
-    function takeManagementFee(NameValuePair[] calldata params)
-        external
-        virtual
-        onlyRole(MAINTAINER_ROLE)
-    {
+    function takeManagementFee(NameValuePair[] calldata params) external virtual onlyRole(MAINTAINER_ROLE) {
         super._takeManagementFee(params);
     }
 
-    function setFeeReceiver(
-        address feeReceiver_,
-        NameValuePair[] calldata params
-    ) public virtual onlyRole(GOVERNOR_ROLE) {
-        super._setFeeReceiver(feeReceiver_, params);
-    }
-
-    function setInvestmentToken(IInvestmentToken investmentToken)
+    function setFeeReceiver(address feeReceiver_, NameValuePair[] calldata params)
         public
         virtual
         onlyRole(GOVERNOR_ROLE)
     {
+        super._setFeeReceiver(feeReceiver_, params);
+    }
+
+    function setInvestmentToken(IInvestmentToken investmentToken) public virtual onlyRole(GOVERNOR_ROLE) {
         super._setInvestmentToken(investmentToken);
     }
 
-    function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
-        public
-        virtual
-        onlyRole(STRATEGIST_ROLE)
-    {
+    function setTotalInvestmentLimit(uint256 totalInvestmentLimit) public virtual onlyRole(STRATEGIST_ROLE) {
         super._setTotalInvestmentLimit(totalInvestmentLimit);
     }
 
-    function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
-        public
-        virtual
-        onlyRole(STRATEGIST_ROLE)
-    {
+    function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress) public virtual onlyRole(STRATEGIST_ROLE) {
         super._setInvestmentLimitPerAddress(investmentLimitPerAddress);
     }
 
@@ -149,7 +103,6 @@ abstract contract PortfolioRoleableBaseUpgradeable is
         returns (bool)
     {
         return
-            interfaceId == type(PortfolioRoleableBaseUpgradeable).interfaceId ||
-            super.supportsInterface(interfaceId);
+            interfaceId == type(PortfolioRoleableBaseUpgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
 }

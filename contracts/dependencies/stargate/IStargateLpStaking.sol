@@ -20,10 +20,7 @@ interface IStargateLpStaking {
 
     function poolInfo(uint256 _poolId) external view returns (PoolInfo memory);
 
-    function userInfo(uint256 _poolId, address _user)
-        external
-        view
-        returns (UserInfo memory);
+    function userInfo(uint256 _poolId, address _user) external view returns (UserInfo memory);
 
     function deposit(uint256 _poolId, uint256 _amount) external;
 

@@ -9,12 +9,7 @@ import { IChainlinkAggregatorV3 } from "../dependencies/IChainlinkAggregatorV3.s
 import { IIndexOracle } from "../interfaces/IIndexOracle.sol";
 import { Errors } from "../libraries/Errors.sol";
 
-contract OracleArbitrum is
-    ContextUpgradeable,
-    OwnableUpgradeable,
-    UUPSUpgradeable,
-    IIndexOracle
-{
+contract OracleArbitrum is ContextUpgradeable, OwnableUpgradeable, UUPSUpgradeable, IIndexOracle {
     mapping(address => IChainlinkAggregatorV3) public priceFeeds;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -22,10 +17,7 @@ contract OracleArbitrum is
         _disableInitializers();
     }
 
-    function initialize(address wETH, address wETHPriceFeed)
-        external
-        initializer
-    {
+    function initialize(address wETH, address wETHPriceFeed) external initializer {
         __Context_init();
         __Ownable_init();
         __UUPSUpgradeable_init();
@@ -87,11 +79,7 @@ contract OracleArbitrum is
         priceFeeds[token] = IChainlinkAggregatorV3(priceFeed);
     }
 
-    function _getChainlinkPrice(address token)
-        internal
-        view
-        returns (int256 price)
-    {
+    function _getChainlinkPrice(address token) internal view returns (int256 price) {
         if (address(priceFeeds[token]) == address(0)) {
             return -1;
         }

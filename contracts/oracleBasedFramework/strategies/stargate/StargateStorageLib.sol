@@ -24,8 +24,7 @@ struct StargateStorage {
 library StargateStorageLib {
     // keccak256("brokkr.storage.stargate.strategy");
     // solhint-disable-next-line const-name-snakecase
-    bytes32 private constant storagePosition =
-        0x071adf0c31586d6b8e30500aaef8199ce8b6f5b9ab08c1bafcf48809f1191b74;
+    bytes32 private constant storagePosition = 0x071adf0c31586d6b8e30500aaef8199ce8b6f5b9ab08c1bafcf48809f1191b74;
 
     function getStorage() internal pure returns (StargateStorage storage ts) {
         // solhint-disable-next-line no-inline-assembly

@@ -35,48 +35,29 @@ library PortfolioBaseManagementLib {
         // calculating current equity for investables
         uint256 investableDescsLength = investableDescs.length;
         uint256[] memory currentInvestableEquities;
-        (
-            currentInvestableEquities,
-            rebalanceLocalVars.totalEquityBeforeRebalance
-        ) = getTotalEquity(investableDescs);
+        (currentInvestableEquities, rebalanceLocalVars.totalEquityBeforeRebalance) = getTotalEquity(investableDescs);
 
         if (rebalanceLocalVars.totalEquityBeforeRebalance == 0) {
             return;
         }
         // calculating target equities for investables
-        uint256[] memory targetInvestableEquities = new uint256[](
-            investableDescsLength
-        );
+        uint256[] memory targetInvestableEquities = new uint256[](investableDescsLength);
         for (uint256 i = 0; i < investableDescsLength; i++) {
             targetInvestableEquities[i] =
-                (rebalanceLocalVars.totalEquityBeforeRebalance *
-                    investableDescs[i].allocationPercentage) /
+                (rebalanceLocalVars.totalEquityBeforeRebalance * investableDescs[i].allocationPercentage) /
                 Math.SHORT_FIXED_DECIMAL_FACTOR /
                 100;
         }
         // withdrawing from investables that are above the target equity
-        rebalanceLocalVars.withdrawnAmount = rebalanceArgs
-            .depositToken
-            .balanceOf(address(this));
+        rebalanceLocalVars.withdrawnAmount = rebalanceArgs.depositToken.balanceOf(address(this));
         for (uint256 i = 0; i < investableDescsLength; i++) {
             IInvestable embeddedInvestable = investableDescs[i].investable;
             if (currentInvestableEquities[i] > targetInvestableEquities[i]) {
-                uint256 withdrawAmount = embeddedInvestable
-                    .getInvestmentTokenBalanceOf(address(this)) -
-                    (embeddedInvestable.getInvestmentTokenBalanceOf(
-                        address(this)
-                    ) * targetInvestableEquities[i]) /
+                uint256 withdrawAmount = embeddedInvestable.getInvestmentTokenBalanceOf(address(this)) -
+                    (embeddedInvestable.getInvestmentTokenBalanceOf(address(this)) * targetInvestableEquities[i]) /
                     currentInvestableEquities[i];
-                embeddedInvestable.getInvestmentToken().approve(
-                    address(embeddedInvestable),
-                    withdrawAmount
-                );
-                embeddedInvestable.withdraw(
-                    withdrawAmount,
-                    0,
-                    address(this),
-                    withdrawParams[i]
-                );
+                embeddedInvestable.getInvestmentToken().approve(address(embeddedInvestable), withdrawAmount);
+                embeddedInvestable.withdraw(withdrawAmount, 0, address(this), withdrawParams[i]);
             }
         }
         rebalanceLocalVars.withdrawnAmount =
@@ -94,39 +75,23 @@ library PortfolioBaseManagementLib {
                 );
 
                 if (depositAmount != 0) {
-                    rebalanceArgs.depositToken.approve(
-                        address(embeddedInvestable),
-                        depositAmount
-                    );
-                    embeddedInvestable.deposit(
-                        depositAmount,
-                        0,
-                        address(this),
-                        depositParams[i]
-                    );
+                    rebalanceArgs.depositToken.approve(address(embeddedInvestable), depositAmount);
+                    embeddedInvestable.deposit(depositAmount, 0, address(this), depositParams[i]);
                 } else break;
                 rebalanceLocalVars.remainingAmount -= depositAmount;
             }
         }
 
-        (
-            currentInvestableEquities,
-            rebalanceLocalVars.totalEquityAfterRebalance
-        ) = getTotalEquity(investableDescs);
+        (currentInvestableEquities, rebalanceLocalVars.totalEquityAfterRebalance) = getTotalEquity(investableDescs);
 
-        if (
-            rebalanceLocalVars.totalEquityAfterRebalance <
-            rebalanceArgs.minimumDepositTokenAmountOut
-        ) revert IInvestable.TooSmallDepositTokenAmountOut();
+        if (rebalanceLocalVars.totalEquityAfterRebalance < rebalanceArgs.minimumDepositTokenAmountOut)
+            revert IInvestable.TooSmallDepositTokenAmountOut();
     }
 
     function getTotalEquity(InvestableDesc[] storage investableDescs)
         internal
         view
-        returns (
-            uint256[] memory currentInvestableEquities,
-            uint256 totalEquity
-        )
+        returns (uint256[] memory currentInvestableEquities, uint256 totalEquity)
     {
         uint256 investableDescsLength = investableDescs.length;
         currentInvestableEquities = new uint256[](investableDescs.length);
@@ -135,27 +100,27 @@ library PortfolioBaseManagementLib {
             if (embeddedInvestable.getInvestmentTokenSupply() != 0) {
                 currentInvestableEquities[i] =
                     (embeddedInvestable.getEquityValuation(false, false) *
-                        embeddedInvestable.getInvestmentTokenBalanceOf(
-                            address(this)
-                        )) /
+                        embeddedInvestable.getInvestmentTokenBalanceOf(address(this))) /
                     embeddedInvestable.getInvestmentTokenSupply();
                 totalEquity += currentInvestableEquities[i];
             }
         }
     }
 
-    function findInvestableDescInd(
-        IInvestable investable,
-        InvestableDesc[] storage investableDescs
-    ) internal view returns (uint256) {
-        for (uint256 i = 0; i < investableDescs.length; ++i)
-            if (investableDescs[i].investable == investable) return i;
+    function findInvestableDescInd(IInvestable investable, InvestableDesc[] storage investableDescs)
+        internal
+        view
+        returns (uint256)
+    {
+        for (uint256 i = 0; i < investableDescs.length; ++i) if (investableDescs[i].investable == investable) return i;
         return type(uint256).max;
     }
 
-    function deconstructNameValuePairArray(
-        NameValuePair[] calldata nameValueParams
-    ) internal pure returns (string[] memory keys, bytes[] memory values) {
+    function deconstructNameValuePairArray(NameValuePair[] calldata nameValueParams)
+        internal
+        pure
+        returns (string[] memory keys, bytes[] memory values)
+    {
         uint256 paramsLength = nameValueParams.length;
         keys = new string[](paramsLength);
         values = new bytes[](paramsLength);
@@ -165,13 +130,12 @@ library PortfolioBaseManagementLib {
         }
     }
 
-    function containsInvestableDesc(
-        IInvestable investable,
-        InvestableDesc[] storage investableDescs
-    ) internal view returns (bool) {
-        return
-            findInvestableDescInd(investable, investableDescs) !=
-            type(uint256).max;
+    function containsInvestableDesc(IInvestable investable, InvestableDesc[] storage investableDescs)
+        internal
+        view
+        returns (bool)
+    {
+        return findInvestableDescInd(investable, investableDescs) != type(uint256).max;
     }
 
     function addInvestable(
@@ -180,23 +144,12 @@ library PortfolioBaseManagementLib {
         NameValuePair[] calldata params,
         InvestableDesc[] storage investableDescs
     ) external {
-        if (containsInvestableDesc(investable, investableDescs))
-            revert IPortfolio.InvestableAlreadyAdded();
+        if (containsInvestableDesc(investable, investableDescs)) revert IPortfolio.InvestableAlreadyAdded();
 
         // workaround for 'Copying of type struct memory[] memory to storage not yet supported'
-        (
-            string[] memory keys,
-            bytes[] memory values
-        ) = deconstructNameValuePairArray(params);
+        (string[] memory keys, bytes[] memory values) = deconstructNameValuePairArray(params);
 
-        investableDescs.push(
-            InvestableDesc(
-                investable,
-                newAllocations[newAllocations.length - 1],
-                keys,
-                values
-            )
-        );
+        investableDescs.push(InvestableDesc(investable, newAllocations[newAllocations.length - 1], keys, values));
 
         setTargetInvestableAllocations(newAllocations, investableDescs);
     }
@@ -206,20 +159,11 @@ library PortfolioBaseManagementLib {
         uint24[] calldata newAllocations,
         InvestableDesc[] storage investableDescs
     ) external {
-        uint256 investableDescInd = findInvestableDescInd(
-            investable,
-            investableDescs
-        );
-        if (investableDescInd == type(uint256).max)
-            revert IPortfolio.InvestableNotYetAdded();
-        InvestableDesc storage investableDesc = investableDescs[
-            investableDescInd
-        ];
-        if (investableDesc.allocationPercentage != 0)
-            revert IPortfolio.InvestableHasNonZeroAllocation();
-        investableDescs[investableDescInd] = investableDescs[
-            investableDescs.length - 1
-        ];
+        uint256 investableDescInd = findInvestableDescInd(investable, investableDescs);
+        if (investableDescInd == type(uint256).max) revert IPortfolio.InvestableNotYetAdded();
+        InvestableDesc storage investableDesc = investableDescs[investableDescInd];
+        if (investableDesc.allocationPercentage != 0) revert IPortfolio.InvestableHasNonZeroAllocation();
+        investableDescs[investableDescInd] = investableDescs[investableDescs.length - 1];
         investableDescs.pop();
         setTargetInvestableAllocations(newAllocations, investableDescs);
     }
@@ -229,35 +173,23 @@ library PortfolioBaseManagementLib {
         NameValuePair[] calldata params,
         InvestableDesc[] storage investableDescs
     ) external {
-        uint256 investableDescInd = findInvestableDescInd(
-            investable,
-            investableDescs
-        );
-        if (investableDescInd == type(uint256).max)
-            revert IPortfolio.InvestableNotYetAdded();
-        InvestableDesc storage investableDesc = investableDescs[
-            investableDescInd
-        ];
-        (
-            investableDesc.keys,
-            investableDesc.values
-        ) = deconstructNameValuePairArray(params);
+        uint256 investableDescInd = findInvestableDescInd(investable, investableDescs);
+        if (investableDescInd == type(uint256).max) revert IPortfolio.InvestableNotYetAdded();
+        InvestableDesc storage investableDesc = investableDescs[investableDescInd];
+        (investableDesc.keys, investableDesc.values) = deconstructNameValuePairArray(params);
     }
 
-    function setTargetInvestableAllocations(
-        uint24[] calldata newAllocations,
-        InvestableDesc[] storage investableDescs
-    ) public {
+    function setTargetInvestableAllocations(uint24[] calldata newAllocations, InvestableDesc[] storage investableDescs)
+        public
+    {
         uint256 totalPercentage;
         uint256 investableDescsLength = investableDescs.length;
         uint256 newAllocationsLength = newAllocations.length;
-        for (uint256 i = 0; i < newAllocationsLength; ++i)
-            totalPercentage += newAllocations[i];
+        for (uint256 i = 0; i < newAllocationsLength; ++i) totalPercentage += newAllocations[i];
 
         if (totalPercentage != uint256(100) * Math.SHORT_FIXED_DECIMAL_FACTOR)
             revert IPortfolio.RebalancePercentageNot100();
-        if (investableDescsLength != newAllocationsLength)
-            revert IPortfolio.RebalanceIncorrectAllocationsLength();
+        if (investableDescsLength != newAllocationsLength) revert IPortfolio.RebalanceIncorrectAllocationsLength();
 
         for (uint256 i = 0; i < investableDescsLength; i++) {
             investableDescs[i].allocationPercentage = newAllocations[i];

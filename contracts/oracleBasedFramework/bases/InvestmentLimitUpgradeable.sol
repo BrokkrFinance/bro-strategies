@@ -14,45 +14,27 @@ abstract contract InvestmentLimitUpgradeable is Initializable, IInvestable {
     uint256[8] private __gap;
 
     // solhint-disable-next-line func-name-mixedcase
-    function __InvestmentLimitUpgradeable_init(
-        uint256 totalInvestmentLimit_,
-        uint256 investmentLimitPerAddress_
-    ) internal onlyInitializing {
+    function __InvestmentLimitUpgradeable_init(uint256 totalInvestmentLimit_, uint256 investmentLimitPerAddress_)
+        internal
+        onlyInitializing
+    {
         _setTotalInvestmentLimit(totalInvestmentLimit_);
         _setInvestmentLimitPerAddress(investmentLimitPerAddress_);
     }
 
-    function getTotalInvestmentLimit()
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function getTotalInvestmentLimit() public view virtual override returns (uint256) {
         return totalInvestmentLimit;
     }
 
-    function _setTotalInvestmentLimit(uint256 totalInvestmentLimit_)
-        internal
-        virtual
-    {
+    function _setTotalInvestmentLimit(uint256 totalInvestmentLimit_) internal virtual {
         totalInvestmentLimit = totalInvestmentLimit_;
     }
 
-    function getInvestmentLimitPerAddress()
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function getInvestmentLimitPerAddress() public view virtual override returns (uint256) {
         return investmentLimitPerAddress;
     }
 
-    function _setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress_)
-        internal
-        virtual
-    {
+    function _setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress_) internal virtual {
         investmentLimitPerAddress = investmentLimitPerAddress_;
     }
 }
@@ -73,7 +55,6 @@ library InvestmentLimitLib {
         uint256 investmentLimitPerAddress
     ) internal pure {
         if (aboutToInvest + investedSoFarPerAddress > investmentLimitPerAddress)
-            revert InvestmentLimitUpgradeable
-                .InvestmentLimitPerAddressExceeded();
+            revert InvestmentLimitUpgradeable.InvestmentLimitPerAddressExceeded();
     }
 }

@@ -43,9 +43,7 @@ abstract contract PortfolioAccessBaseUpgradeable is OwnableUpgradeable {
     function removePortfolio(address portfolio) public virtual onlyOwner {
         for (uint256 i = 0; i < whitelistedPortfolios.length; i++) {
             if (whitelistedPortfolios[i] == portfolio) {
-                whitelistedPortfolios[i] = whitelistedPortfolios[
-                    whitelistedPortfolios.length - 1
-                ];
+                whitelistedPortfolios[i] = whitelistedPortfolios[whitelistedPortfolios.length - 1];
                 whitelistedPortfolios.pop();
 
                 emit PortfolioRemoved(portfolio);

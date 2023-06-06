@@ -8,16 +8,14 @@ import { PAUSE_ROLE } from "../RoleableUpgradeable.sol";
 
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
-abstract contract PortfolioRoleablePausableBaseUpgradeable is
-    PausableUpgradeable,
-    PortfolioRoleableBaseUpgradeable
-{
+abstract contract PortfolioRoleablePausableBaseUpgradeable is PausableUpgradeable, PortfolioRoleableBaseUpgradeable {
     uint256[4] private __gap;
 
     // solhint-disable-next-line
-    function __PortfolioRoleablePausableBaseUpgradeable_init(
-        PortfolioArgs calldata portfolioArgs
-    ) internal onlyInitializing {
+    function __PortfolioRoleablePausableBaseUpgradeable_init(PortfolioArgs calldata portfolioArgs)
+        internal
+        onlyInitializing
+    {
         __Pausable_init();
         __PortfolioRoleableBaseUpgradeable_init(portfolioArgs);
     }
@@ -36,12 +34,7 @@ abstract contract PortfolioRoleablePausableBaseUpgradeable is
         address investmentTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.deposit(
-            depositTokenAmountIn,
-            minimumDepositTokenAmountOut,
-            investmentTokenReceiver,
-            params
-        );
+        super._deposit(depositTokenAmountIn, minimumDepositTokenAmountOut, investmentTokenReceiver, params, false);
     }
 
     function withdraw(
@@ -50,11 +43,6 @@ abstract contract PortfolioRoleablePausableBaseUpgradeable is
         address depositTokenReceiver,
         NameValuePair[] calldata params
     ) public virtual override whenNotPaused {
-        super.withdraw(
-            investmentTokenAmountIn,
-            minimumDepositTokenAmountOut,
-            depositTokenReceiver,
-            params
-        );
+        super._withdraw(investmentTokenAmountIn, minimumDepositTokenAmountOut, depositTokenReceiver, params, true);
     }
 }

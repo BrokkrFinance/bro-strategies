@@ -27,10 +27,7 @@ interface IMasterPlatypusV4 {
         external
         returns (uint256 reward, uint256[] memory additionalRewards);
 
-    function getUserInfo(uint256 _pid, address _user)
-        external
-        view
-        returns (UserInfo memory);
+    function getUserInfo(uint256 _pid, address _user) external view returns (UserInfo memory);
 
     function pendingTokens(uint256 _pid, address _user)
         external

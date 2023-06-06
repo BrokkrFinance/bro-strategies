@@ -15,10 +15,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-contract DnsVectorStrategy is
-    UUPSUpgradeable,
-    StrategyRoleablePausableBaseUpgradeable
-{
+contract DnsVectorStrategy is UUPSUpgradeable, StrategyRoleablePausableBaseUpgradeable {
     using SafeERC20Upgradeable for IInvestmentToken;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -28,11 +25,9 @@ contract DnsVectorStrategy is
     error TooBigValuationLoss();
 
     // solhint-disable-next-line const-name-snakecase
-    string public constant trackingName =
-        "brokkr.dns_vector_strategy.dns_vector_strategy_v1.1.1";
+    string public constant trackingName = "brokkr.dns_vector_strategy.dns_vector_strategy_v1.1.1";
     // solhint-disable-next-line const-name-snakecase
-    string public constant humanReadableName =
-        "Dns vector delta neutral strategy";
+    string public constant humanReadableName = "Dns vector delta neutral strategy";
     // solhint-disable-next-line const-name-snakecase
     string public constant version = "1.1.1";
 
@@ -70,124 +65,55 @@ contract DnsVectorStrategy is
         uint256 minValuation;
     }
 
-    function initialize(
-        StrategyArgs calldata strategyArgs,
-        InitializeParams calldata initializeParams
-    ) external initializer {
+    function initialize(StrategyArgs calldata strategyArgs, InitializeParams calldata initializeParams)
+        external
+        initializer
+    {
         __UUPSUpgradeable_init();
         __StrategyRoleablePausableBaseUpgradeable_init(strategyArgs);
 
+        require(initializeParams.aaveParams.aaveSupplyToken == InvestableLib.AVALANCHE_USDC, "aaveSupplyToken != USDC");
         require(
-            initializeParams.aaveParams.aaveSupplyToken ==
-                InvestableLib.AVALANCHE_USDC,
-            "aaveSupplyToken != USDC"
-        );
-        require(
-            initializeParams.aaveParams.aaveBorrowToken ==
-                InvestableLib.AVALANCHE_WAVAX,
+            initializeParams.aaveParams.aaveBorrowToken == InvestableLib.AVALANCHE_WAVAX,
             "aaveBorrowToken!= WAVAX"
         );
-        require(
-            initializeParams.ammPairDepositToken ==
-                InvestableLib.AVALANCHE_USDC,
-            "ammPairDepositToken != USDC"
-        );
+        require(initializeParams.ammPairDepositToken == InvestableLib.AVALANCHE_USDC, "ammPairDepositToken != USDC");
 
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         __initializeAaveParams(initializeParams.aaveParams);
 
-        strategyStorage.ammPairDepositToken = initializeParams
-            .ammPairDepositToken;
+        strategyStorage.ammPairDepositToken = initializeParams.ammPairDepositToken;
 
         __initializePangolinParams(initializeParams.pangolinParams);
 
         strategyStorage.depositToken = strategyArgs.depositToken;
         strategyStorage.priceOracle = strategyArgs.priceOracle;
-        strategyStorage.swapService = SwapService(
-            strategyArgs.swapServiceProvider,
-            strategyArgs.swapServiceRouter
-        );
+        strategyStorage.swapService = SwapService(strategyArgs.swapServiceProvider, strategyArgs.swapServiceRouter);
     }
 
-    function reinitialize(ReinitializeParams calldata reinitializeParams)
-        external
-        reinitializer(3)
-    {
-        // Initialize.
-        __initializePangolinParams(reinitializeParams.pangolinParams);
-
-        // Use Pangolin to swap tokens because we provide liquidity there.
-        setSwapService(
-            SwapServiceProvider.AvalanchePangolin,
-            address(reinitializeParams.pangolinParams.pangolinRouter)
-        );
-
-        uint256 depositTokenBalanceBefore = depositToken.balanceOf(
-            address(this)
-        );
-
-        DnsVectorStrategyInvestmentLib.migrate();
-
-        // Check if valuation after migration is greater than or equal to minValuation.
-        uint256 valuation = getEquityValuation(true, false);
-
-        if (valuation < reinitializeParams.minValuation) {
-            revert TooBigValuationLoss();
-        }
-
-        // handling dust amount caused by providing liquidity
-        uninvestedDepositTokenAmount +=
-            depositToken.balanceOf(address(this)) -
-            depositTokenBalanceBefore;
-    }
-
-    function _deposit(uint256 amount, NameValuePair[] calldata params)
-        internal
-        virtual
-        override
-    {
+    function _deposit(uint256 amount, NameValuePair[] calldata params) internal virtual override {
         DnsVectorStrategyInvestmentLib.deposit(amount, params);
     }
 
-    function _withdraw(uint256 amount, NameValuePair[] calldata params)
-        internal
-        virtual
-        override
-    {
-        DnsVectorStrategyInvestmentLib.withdraw(
-            amount,
-            params,
-            getInvestmentTokenSupply()
-        );
+    function _withdraw(uint256 amount, NameValuePair[] calldata params) internal virtual override {
+        DnsVectorStrategyInvestmentLib.withdraw(amount, params, getInvestmentTokenSupply());
     }
 
-    function _reapReward(NameValuePair[] calldata params)
-        internal
-        virtual
-        override
-    {
+    function _reapReward(NameValuePair[] calldata params) internal virtual override {
         DnsVectorStrategyInvestmentLib.reapReward(params);
     }
 
-    modifier checkMinimumEquityAfterOperation(
-        uint256 minimumEquityAfterOperation
-    ) {
+    modifier checkMinimumEquityAfterOperation(uint256 minimumEquityAfterOperation) {
         _;
-        if (getEquityValuation(false, false) < minimumEquityAfterOperation)
-            revert TooLowMinimumEquityAfterOperation();
+        if (getEquityValuation(false, false) < minimumEquityAfterOperation) revert TooLowMinimumEquityAfterOperation();
     }
 
     function repayDebt(
         uint256 pangolinPairAmount,
         NameValuePair[] calldata params,
         uint256 minimumEquityAfterOperation
-    )
-        external
-        onlyRole(MAINTAINER_ROLE)
-        checkMinimumEquityAfterOperation(minimumEquityAfterOperation)
-    {
+    ) external onlyRole(MAINTAINER_ROLE) checkMinimumEquityAfterOperation(minimumEquityAfterOperation) {
         DnsVectorStrategyInvestmentLib.repayDebt(pangolinPairAmount, params);
     }
 
@@ -195,22 +121,12 @@ contract DnsVectorStrategy is
         uint256 aaveBorrowTokenAmount,
         NameValuePair[] calldata params,
         uint256 minimumEquityAfterOperation
-    )
-        external
-        onlyRole(MAINTAINER_ROLE)
-        checkMinimumEquityAfterOperation(minimumEquityAfterOperation)
-    {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+    ) external onlyRole(MAINTAINER_ROLE) checkMinimumEquityAfterOperation(minimumEquityAfterOperation) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
-        uint256 depositTokenBalanceBefore = depositToken.balanceOf(
-            address(this)
-        );
+        uint256 depositTokenBalanceBefore = depositToken.balanceOf(address(this));
 
-        DnsVectorStrategyInvestmentLib.increaseDebt(
-            aaveBorrowTokenAmount,
-            params
-        );
+        DnsVectorStrategyInvestmentLib.increaseDebt(aaveBorrowTokenAmount, params);
 
         // handling dust amount caused by providing liquidity
         uninvestedDepositTokenAmount +=
@@ -222,22 +138,12 @@ contract DnsVectorStrategy is
         uint256 aaveSupplyTokenAmount,
         NameValuePair[] calldata params,
         uint256 minimumEquityAfterOperation
-    )
-        external
-        onlyRole(MAINTAINER_ROLE)
-        checkMinimumEquityAfterOperation(minimumEquityAfterOperation)
-    {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+    ) external onlyRole(MAINTAINER_ROLE) checkMinimumEquityAfterOperation(minimumEquityAfterOperation) {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
-        uint256 depositTokenBalanceBefore = depositToken.balanceOf(
-            address(this)
-        );
+        uint256 depositTokenBalanceBefore = depositToken.balanceOf(address(this));
 
-        DnsVectorStrategyInvestmentLib.decreaseSupply(
-            aaveSupplyTokenAmount,
-            params
-        );
+        DnsVectorStrategyInvestmentLib.decreaseSupply(aaveSupplyTokenAmount, params);
 
         // handling dust amount caused by providing liquidity
         uninvestedDepositTokenAmount +=
@@ -245,46 +151,32 @@ contract DnsVectorStrategy is
             depositTokenBalanceBefore;
     }
 
-    function _getAssetBalances()
-        internal
-        view
-        virtual
-        override
-        returns (Balance[] memory)
-    {
+    function _getAssetBalances() internal view virtual override returns (Balance[] memory) {
         return DnsVectorStrategyAumLib.getAssetBalances();
     }
 
-    function _getLiabilityBalances()
+    function _getLiabilityBalances() internal view virtual override returns (Balance[] memory) {
+        return DnsVectorStrategyAumLib.getLiabilityBalances();
+    }
+
+    function _getAssetValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
         internal
         view
         virtual
         override
-        returns (Balance[] memory)
+        returns (Valuation[] memory)
     {
-        return DnsVectorStrategyAumLib.getLiabilityBalances();
+        return DnsVectorStrategyAumLib.getAssetValuations(shouldMaximise, shouldIncludeAmmPrice);
     }
 
-    function _getAssetValuations(
-        bool shouldMaximise,
-        bool shouldIncludeAmmPrice
-    ) internal view virtual override returns (Valuation[] memory) {
-        return
-            DnsVectorStrategyAumLib.getAssetValuations(
-                shouldMaximise,
-                shouldIncludeAmmPrice
-            );
-    }
-
-    function _getLiabilityValuations(
-        bool shouldMaximise,
-        bool shouldIncludeAmmPrice
-    ) internal view virtual override returns (Valuation[] memory) {
-        return
-            DnsVectorStrategyAumLib.getLiabilityValuations(
-                shouldMaximise,
-                shouldIncludeAmmPrice
-            );
+    function _getLiabilityValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
+        internal
+        view
+        virtual
+        override
+        returns (Valuation[] memory)
+    {
+        return DnsVectorStrategyAumLib.getLiabilityValuations(shouldMaximise, shouldIncludeAmmPrice);
     }
 
     function getAaveDebt() external view returns (uint256) {
@@ -299,54 +191,37 @@ contract DnsVectorStrategy is
         return DnsVectorStrategyAumLib.getPoolDebt();
     }
 
-    function getInverseCollateralRatio(
-        bool shouldMaximise,
-        bool shouldIncludeAmmPrice
-    ) external view returns (uint256) {
-        return
-            DnsVectorStrategyAumLib.getInverseCollateralRatio(
-                shouldMaximise,
-                shouldIncludeAmmPrice
-            );
+    function getInverseCollateralRatio(bool shouldMaximise, bool shouldIncludeAmmPrice)
+        external
+        view
+        returns (uint256)
+    {
+        return DnsVectorStrategyAumLib.getInverseCollateralRatio(shouldMaximise, shouldIncludeAmmPrice);
     }
 
     // precision of 0.001, 800 means 0.8 -> 80%
     function getSafetyFactor() external view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
         return strategyStorage.safetyFactor;
     }
 
     // precision of 0.001, 800 means 0.8 -> 80%
     function getCombinedSafetyFactor() external view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         (, , uint256 maxLoanToValueFactor, , , , , , , ) = strategyStorage
             .aaveProtocolDataProvider
-            .getReserveConfigurationData(
-                address(strategyStorage.aaveSupplyToken)
-            );
+            .getReserveConfigurationData(address(strategyStorage.aaveSupplyToken));
         return
-            (strategyStorage.safetyFactor * maxLoanToValueFactor) /
-            DnsVectorStrategyCommon.AAVE_FIXED_DECIMAL_FACTOR;
+            (strategyStorage.safetyFactor * maxLoanToValueFactor) / DnsVectorStrategyCommon.AAVE_FIXED_DECIMAL_FACTOR;
     }
 
-    function _authorizeUpgrade(address)
-        internal
-        override
-        onlyRole(UPGRADE_ROLE)
-    {}
+    function _authorizeUpgrade(address) internal override onlyRole(UPGRADE_ROLE) {}
 
-    function setSafetyFactor(uint256 safetyFactor)
-        external
-        onlyRole(STRATEGIST_ROLE)
-    {
-        if (safetyFactor > 950 || safetyFactor == 0)
-            revert SafetyFactorRangeError();
+    function setSafetyFactor(uint256 safetyFactor) external onlyRole(STRATEGIST_ROLE) {
+        if (safetyFactor > 950 || safetyFactor == 0) revert SafetyFactorRangeError();
 
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         strategyStorage.safetyFactor = safetyFactor;
     }
@@ -359,22 +234,15 @@ contract DnsVectorStrategy is
     {
         super.setSwapService(provider, router);
 
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         strategyStorage.swapService = SwapService(provider, router);
     }
 
-    function setPriceOracle(IPriceOracle priceOracle)
-        public
-        virtual
-        override
-        onlyRole(GOVERNOR_ROLE)
-    {
+    function setPriceOracle(IPriceOracle priceOracle) public virtual override onlyRole(GOVERNOR_ROLE) {
         super.setPriceOracle(priceOracle);
 
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         strategyStorage.priceOracle = priceOracle;
     }
@@ -382,17 +250,12 @@ contract DnsVectorStrategy is
     // This function is added to help developers/integrators to obtain all data
     // stored in the strategy using a blockchain explorer.
     // This function should not be relied upon except during development.
-    function getDnsVectorStorage()
-        public
-        pure
-        returns (DnsVectorStorage memory)
-    {
+    function getDnsVectorStorage() public pure returns (DnsVectorStorage memory) {
         return DnsVectorStorageLib.getStorage();
     }
 
     function __initializeAaveParams(AaveParams calldata aaveParams) private {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         strategyStorage.safetyFactor = aaveParams.safetyFactor;
         strategyStorage.aaveSupplyToken = aaveParams.aaveSupplyToken;
@@ -400,15 +263,11 @@ contract DnsVectorStrategy is
         strategyStorage.aaveBorrowToken = aaveParams.aaveBorrowToken;
         strategyStorage.vAaveBorrowToken = aaveParams.vAaveBorrowToken;
         strategyStorage.aavePool = aaveParams.aavePool;
-        strategyStorage.aaveProtocolDataProvider = aaveParams
-            .aaveProtocolDataProvider;
+        strategyStorage.aaveProtocolDataProvider = aaveParams.aaveProtocolDataProvider;
     }
 
-    function __initializePangolinParams(PangolinParams calldata pangolinParams)
-        private
-    {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+    function __initializePangolinParams(PangolinParams calldata pangolinParams) private {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         strategyStorage.pngToken = pangolinParams.pngToken;
         strategyStorage.pangolinRouter = pangolinParams.pangolinRouter;
@@ -416,9 +275,7 @@ contract DnsVectorStrategy is
         strategyStorage.pangolinPair = pangolinParams.pangolinPair;
         strategyStorage.pangolinPoolId = pangolinParams.pangolinPoolId;
 
-        address pangolinLpToken = strategyStorage.pangolinMiniChef.lpToken(
-            strategyStorage.pangolinPoolId
-        );
+        address pangolinLpToken = strategyStorage.pangolinMiniChef.lpToken(strategyStorage.pangolinPoolId);
 
         if (pangolinLpToken != address(strategyStorage.pangolinPair)) {
             revert InvalidPangolinParams();

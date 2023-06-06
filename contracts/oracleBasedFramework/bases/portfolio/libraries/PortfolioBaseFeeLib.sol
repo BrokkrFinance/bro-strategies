@@ -23,17 +23,13 @@ library PortfolioBaseFeeLib {
         uint256 totalEquity;
         uint256 investableDescsLength = investableDescs.length;
         // calculating current equity for investables
-        uint256[] memory currentInvestableEquities = new uint256[](
-            investableDescs.length
-        );
+        uint256[] memory currentInvestableEquities = new uint256[](investableDescs.length);
         for (uint256 i = 0; i < investableDescsLength; i++) {
             IInvestable embeddedInvestable = investableDescs[i].investable;
             if (embeddedInvestable.getInvestmentTokenSupply() != 0) {
                 currentInvestableEquities[i] =
                     (embeddedInvestable.getEquityValuation(false, false) *
-                        embeddedInvestable.getInvestmentTokenBalanceOf(
-                            address(this)
-                        )) /
+                        embeddedInvestable.getInvestmentTokenBalanceOf(address(this))) /
                     embeddedInvestable.getInvestmentTokenSupply();
                 totalEquity += currentInvestableEquities[i];
             }
@@ -41,12 +37,7 @@ library PortfolioBaseFeeLib {
 
         // no prior investment into any of the strategies by the portfolio
         if (totalEquity == 0) {
-            return
-                calculateEmbeddedFeeTargetAllocation(
-                    feeType,
-                    params,
-                    investableDescs
-                );
+            return calculateEmbeddedFeeTargetAllocation(feeType, params, investableDescs);
         }
         // there is at least one strategy with investment by the portfolio
         else {
@@ -58,12 +49,8 @@ library PortfolioBaseFeeLib {
                             ? embeddedInvestable.getTotalWithdrawalFee(params)
                             : (
                                 (feeType == FeeType.Management)
-                                    ? embeddedInvestable.getTotalManagementFee(
-                                        params
-                                    )
-                                    : embeddedInvestable.getTotalPerformanceFee(
-                                        params
-                                    )
+                                    ? embeddedInvestable.getTotalManagementFee(params)
+                                    : embeddedInvestable.getTotalPerformanceFee(params)
                             )
                     ) * currentInvestableEquities[i]) /
                     totalEquity;
@@ -87,15 +74,11 @@ library PortfolioBaseFeeLib {
                         ? embeddedInvestable.getTotalDepositFee(params)
                         : (
                             (feeType == FeeType.Withdrawal)
-                                ? embeddedInvestable.getTotalWithdrawalFee(
-                                    params
-                                )
+                                ? embeddedInvestable.getTotalWithdrawalFee(params)
                                 : (
                                     (feeType == FeeType.Performance)
-                                        ? embeddedInvestable
-                                            .getTotalPerformanceFee(params)
-                                        : embeddedInvestable
-                                            .getTotalManagementFee(params)
+                                        ? embeddedInvestable.getTotalPerformanceFee(params)
+                                        : embeddedInvestable.getTotalManagementFee(params)
                                 )
                         )
                 ) *

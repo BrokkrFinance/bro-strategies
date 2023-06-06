@@ -7,8 +7,7 @@ import "../../interfaces/IAum.sol";
 
 library DnsVectorStrategyAumLib {
     function getAssetBalances() public view returns (Balance[] memory) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
         Balance[] memory assetBalances = new Balance[](2);
         assetBalances[0] = Balance(
             address(strategyStorage.aAaveSupplyToken),
@@ -23,8 +22,7 @@ library DnsVectorStrategyAumLib {
     }
 
     function getLiabilityBalances() public view returns (Balance[] memory) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
         Balance[] memory liabilityBalances = new Balance[](1);
         liabilityBalances[0] = Balance(
             address(strategyStorage.vAaveBorrowToken),
@@ -38,8 +36,7 @@ library DnsVectorStrategyAumLib {
         view
         returns (Valuation[] memory)
     {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
         Valuation[] memory assetValuations = new Valuation[](2);
         // assuming aaveSupplyToken == depositToken
         assetValuations[0] = Valuation(
@@ -47,18 +44,14 @@ library DnsVectorStrategyAumLib {
             strategyStorage.aAaveSupplyToken.balanceOf(address(this))
         );
 
-        (
-            uint256 ammPairDepositTokenReserve,
-            uint256 aaveBorrowTokenReserve
-        ) = DnsVectorStrategyCommon.getPangolinLpReserve(
+        (uint256 ammPairDepositTokenReserve, uint256 aaveBorrowTokenReserve) = DnsVectorStrategyCommon
+            .getPangolinLpReserve(
                 address(strategyStorage.ammPairDepositToken),
                 address(strategyStorage.aaveBorrowToken)
             );
 
-        uint256 lpTokenTotalSupply = DnsVectorStrategyCommon
-            .getPangolinLpTotalSupply();
-        uint256 lpTokenContractBalance = DnsVectorStrategyCommon
-            .getPangolinLpBalance();
+        uint256 lpTokenTotalSupply = DnsVectorStrategyCommon.getPangolinLpTotalSupply();
+        uint256 lpTokenContractBalance = DnsVectorStrategyCommon.getPangolinLpBalance();
 
         // get the aaveBorrowToken AUM in depositToken
         uint256 lpBorrowTokenAumInDepositToken = (aaveBorrowTokenReserve *
@@ -73,23 +66,23 @@ library DnsVectorStrategyAumLib {
 
         // assuming ammPairDepositToken == depositToken
         // get the ammPairDepositToken AUM in depositToken
-        uint256 lpPairDepositAumInDepositCurrency = (ammPairDepositTokenReserve *
-                lpTokenContractBalance) / lpTokenTotalSupply;
+        uint256 lpPairDepositAumInDepositToken = (ammPairDepositTokenReserve * lpTokenContractBalance) /
+            lpTokenTotalSupply;
 
         assetValuations[1] = Valuation(
             address(strategyStorage.pangolinPair),
-            lpBorrowTokenAumInDepositToken + lpPairDepositAumInDepositCurrency
+            lpBorrowTokenAumInDepositToken + lpPairDepositAumInDepositToken
         );
 
         return assetValuations;
     }
 
-    function getLiabilityValuations(
-        bool shouldMaximise,
-        bool shouldIncludeAmmPrice
-    ) external view returns (Valuation[] memory) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+    function getLiabilityValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
+        external
+        view
+        returns (Valuation[] memory)
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
         Valuation[] memory liabilityValuations = new Valuation[](1);
         liabilityValuations[0] = Valuation(
@@ -107,43 +100,35 @@ library DnsVectorStrategyAumLib {
     }
 
     function getAaveDebt() external view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
         return strategyStorage.vAaveBorrowToken.balanceOf(address(this));
     }
 
     function getAaveSupply() external view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
         return strategyStorage.aAaveSupplyToken.balanceOf(address(this));
     }
 
     function getPoolDebt() external view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
 
-        (uint256 aaveBorrowTokenReserve, ) = DnsVectorStrategyCommon
-            .getPangolinLpReserve(
-                address(strategyStorage.aaveBorrowToken),
-                address(strategyStorage.ammPairDepositToken)
-            );
+        (uint256 aaveBorrowTokenReserve, ) = DnsVectorStrategyCommon.getPangolinLpReserve(
+            address(strategyStorage.aaveBorrowToken),
+            address(strategyStorage.ammPairDepositToken)
+        );
 
-        uint256 lpTokenTotalSupply = DnsVectorStrategyCommon
-            .getPangolinLpTotalSupply();
-        uint256 lpTokenContractBalance = DnsVectorStrategyCommon
-            .getPangolinLpBalance();
+        uint256 lpTokenTotalSupply = DnsVectorStrategyCommon.getPangolinLpTotalSupply();
+        uint256 lpTokenContractBalance = DnsVectorStrategyCommon.getPangolinLpBalance();
 
-        return
-            (aaveBorrowTokenReserve * lpTokenContractBalance) /
-            lpTokenTotalSupply;
+        return (aaveBorrowTokenReserve * lpTokenContractBalance) / lpTokenTotalSupply;
     }
 
-    function getInverseCollateralRatio(
-        bool shouldMaximise,
-        bool shouldIncludeAmmPrice
-    ) external view returns (uint256) {
-        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib
-            .getStorage();
+    function getInverseCollateralRatio(bool shouldMaximise, bool shouldIncludeAmmPrice)
+        external
+        view
+        returns (uint256)
+    {
+        DnsVectorStorage storage strategyStorage = DnsVectorStorageLib.getStorage();
         Balance[] memory assetBalances = getAssetBalances();
         Balance[] memory liabilityBalances = getLiabilityBalances();
 
@@ -155,8 +140,6 @@ library DnsVectorStrategyAumLib {
                 strategyStorage.aaveBorrowToken,
                 shouldMaximise,
                 shouldIncludeAmmPrice
-            ) * liabilityBalances[0].balance) *
-                Math.SHORT_FIXED_DECIMAL_FACTOR) / 10**18) /
-            (assetBalances[0].balance);
+            ) * liabilityBalances[0].balance) * Math.SHORT_FIXED_DECIMAL_FACTOR) / 10**18) / (assetBalances[0].balance);
     }
 }

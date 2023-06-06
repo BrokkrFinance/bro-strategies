@@ -65,10 +65,7 @@ interface IIndexStrategy {
 
     function allWhitelistedTokens() external view returns (address[] memory);
 
-    function equityValuation(bool maximize, bool includeAmmPrice)
-        external
-        view
-        returns (uint256);
+    function equityValuation(bool maximize, bool includeAmmPrice) external view returns (uint256);
 
     function indexToken() external view returns (IIndexToken);
 }

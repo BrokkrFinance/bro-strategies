@@ -5,16 +5,11 @@ import "./PortfolioBaseUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-abstract contract PortfolioOwnableBaseUpgradeable is
-    OwnableUpgradeable,
-    PortfolioBaseUpgradeable
-{
+abstract contract PortfolioOwnableBaseUpgradeable is OwnableUpgradeable, PortfolioBaseUpgradeable {
     uint256[8] private __gap;
 
     // solhint-disable-next-line
-    function __PortfolioOwnableBaseUpgradeable_init(
-        PortfolioArgs calldata portfolioArgs
-    ) internal onlyInitializing {
+    function __PortfolioOwnableBaseUpgradeable_init(PortfolioArgs calldata portfolioArgs) internal onlyInitializing {
         __Ownable_init();
         __PortfolioBaseUpgradeable_init(portfolioArgs);
     }
@@ -27,25 +22,15 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         super._addInvestable(investable, newAllocations, params);
     }
 
-    function removeInvestable(
-        IInvestable investable,
-        uint24[] calldata newAllocations
-    ) public virtual onlyOwner {
+    function removeInvestable(IInvestable investable, uint24[] calldata newAllocations) public virtual onlyOwner {
         super._removeInvestable(investable, newAllocations);
     }
 
-    function changeInvestable(
-        IInvestable investable,
-        NameValuePair[] calldata params
-    ) public virtual onlyOwner {
+    function changeInvestable(IInvestable investable, NameValuePair[] calldata params) public virtual onlyOwner {
         super._changeInvestable(investable, params);
     }
 
-    function setTargetInvestableAllocations(uint24[] calldata newAllocations)
-        public
-        virtual
-        onlyOwner
-    {
+    function setTargetInvestableAllocations(uint24[] calldata newAllocations) public virtual onlyOwner {
         super._setTargetInvestableAllocations(newAllocations);
     }
 
@@ -54,89 +39,46 @@ abstract contract PortfolioOwnableBaseUpgradeable is
         NameValuePair[][] calldata depositParams,
         NameValuePair[][] calldata withdrawParams
     ) public virtual onlyOwner {
-        super._rebalance(
-            minimumDepositTokenAmountOut,
-            depositParams,
-            withdrawParams
-        );
+        super._rebalance(minimumDepositTokenAmountOut, depositParams, withdrawParams);
     }
 
-    function setDepositFee(uint24 fee_, NameValuePair[] calldata params)
-        public
-        virtual
-        onlyOwner
-    {
+    function setDepositFee(uint24 fee_, NameValuePair[] calldata params) public virtual onlyOwner {
         super._setDepositFee(fee_, params);
     }
 
-    function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params)
-        public
-        virtual
-        onlyOwner
-    {
+    function setWithdrawalFee(uint24 fee_, NameValuePair[] calldata params) public virtual onlyOwner {
         super._setWithdrawalFee(fee_, params);
     }
 
-    function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params)
-        public
-        virtual
-        onlyOwner
-    {
+    function setPerformanceFee(uint24 fee_, NameValuePair[] calldata params) public virtual onlyOwner {
         super._setPerformanceFee(fee_, params);
     }
 
-    function takePerformanceFee(NameValuePair[] calldata params)
-        external
-        virtual
-        onlyOwner
-    {
+    function takePerformanceFee(NameValuePair[] calldata params) external virtual onlyOwner {
         super._takePerformanceFee(params);
     }
 
-    function setManagementFee(uint24 fee_, NameValuePair[] calldata params)
-        public
-        virtual
-        onlyOwner
-    {
+    function setManagementFee(uint24 fee_, NameValuePair[] calldata params) public virtual onlyOwner {
         super._setManagementFee(fee_, params);
     }
 
-    function takeManagementFee(NameValuePair[] calldata params)
-        external
-        virtual
-        onlyOwner
-    {
+    function takeManagementFee(NameValuePair[] calldata params) external virtual onlyOwner {
         super._takeManagementFee(params);
     }
 
-    function setFeeReceiver(
-        address feeReceiver_,
-        NameValuePair[] calldata params
-    ) public virtual onlyOwner {
+    function setFeeReceiver(address feeReceiver_, NameValuePair[] calldata params) public virtual onlyOwner {
         super._setFeeReceiver(feeReceiver_, params);
     }
 
-    function setInvestmentToken(IInvestmentToken investmentToken)
-        public
-        virtual
-        onlyOwner
-    {
+    function setInvestmentToken(IInvestmentToken investmentToken) public virtual onlyOwner {
         super._setInvestmentToken(investmentToken);
     }
 
-    function setTotalInvestmentLimit(uint256 totalInvestmentLimit)
-        public
-        virtual
-        onlyOwner
-    {
+    function setTotalInvestmentLimit(uint256 totalInvestmentLimit) public virtual onlyOwner {
         super._setTotalInvestmentLimit(totalInvestmentLimit);
     }
 
-    function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
-        public
-        virtual
-        onlyOwner
-    {
+    function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress) public virtual onlyOwner {
         super._setInvestmentLimitPerAddress(investmentLimitPerAddress);
     }
 }

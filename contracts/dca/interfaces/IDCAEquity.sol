@@ -8,8 +8,5 @@ interface IDCAEquity {
         address bluechipToken;
     }
 
-    function equityValuation()
-        external
-        view
-        returns (DCAEquityValuation[] memory);
+    function equityValuation() external view returns (DCAEquityValuation[] memory);
 }

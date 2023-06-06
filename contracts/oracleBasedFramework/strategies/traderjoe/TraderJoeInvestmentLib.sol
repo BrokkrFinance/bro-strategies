@@ -13,15 +13,11 @@ library TraderJoeInvestmentLib {
 
     error InvalidActiveBinAllocation();
 
-    function deposit(uint256 depositTokenAmount, uint256 pairDepositTokenAmount)
-        public
-    {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
+    function deposit(uint256 depositTokenAmount, uint256 pairDepositTokenAmount) public {
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib.getStorage();
 
-        uint256 pairDepositTokenBefore = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this)) - pairDepositTokenAmount;
+        uint256 pairDepositTokenBefore = strategyStorage.pairDepositToken.balanceOf(address(this)) -
+            pairDepositTokenAmount;
 
         uint256 amountXIn;
         uint256 amountYIn;
@@ -44,73 +40,52 @@ library TraderJoeInvestmentLib {
         ) = __prepareParams(amountXIn, amountYIn);
 
         // Deposit.
-        ITraderJoeLBRouter.LiquidityParameters memory liquidityParameters = ITraderJoeLBRouter
-            .LiquidityParameters(
-                address(strategyStorage.tokenX),
-                address(strategyStorage.tokenY),
-                strategyStorage.binStep,
-                amountX,
-                amountY,
-                0, // Base contracts take care of min amount.
-                0, // Base contracts take care of min amount.
-                activeId,
-                0,
-                deltaIds,
-                distributionX,
-                distributionY,
-                address(this),
-                // solhint-disable-next-line not-rely-on-time
-                block.timestamp
-            );
+        ITraderJoeLBRouter.LiquidityParameters memory liquidityParameters = ITraderJoeLBRouter.LiquidityParameters(
+            address(strategyStorage.tokenX),
+            address(strategyStorage.tokenY),
+            strategyStorage.binStep,
+            amountX,
+            amountY,
+            0, // Base contracts take care of min amount.
+            0, // Base contracts take care of min amount.
+            activeId,
+            0,
+            deltaIds,
+            distributionX,
+            distributionY,
+            address(this),
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp
+        );
 
-        strategyStorage.tokenX.approve(
-            address(strategyStorage.lbRouter),
-            amountX
-        );
-        strategyStorage.tokenY.approve(
-            address(strategyStorage.lbRouter),
-            amountY
-        );
+        strategyStorage.tokenX.approve(address(strategyStorage.lbRouter), amountX);
+        strategyStorage.tokenY.approve(address(strategyStorage.lbRouter), amountY);
 
         strategyStorage.lbRouter.addLiquidity(liquidityParameters);
 
-        uint256 pairDepositTokenAfter = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this));
+        uint256 pairDepositTokenAfter = strategyStorage.pairDepositToken.balanceOf(address(this));
 
-        uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
-            pairDepositTokenBefore;
+        uint256 pairDepositTokenIncrement = pairDepositTokenAfter - pairDepositTokenBefore;
 
         // Swap back remaining pairDepositToken to strategyStorage.depositToken if possible.
-        swapTokens(
-            pairDepositTokenIncrement,
-            strategyStorage.pairDepositToken,
-            strategyStorage.depositToken
-        );
+        swapTokens(pairDepositTokenIncrement, strategyStorage.pairDepositToken, strategyStorage.depositToken);
     }
 
     function withdraw(uint256 amount, uint256 investmentTokenSupply) public {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib.getStorage();
 
         // Calculate LP token balance to withdraw per bin.
         uint256 binsAmount = strategyStorage.binIds.length;
         uint256[] memory amounts = new uint256[](binsAmount);
 
         for (uint256 i; i < binsAmount; ++i) {
-            uint256 lpTokenBalance = strategyStorage.lbPair.balanceOf(
-                address(this),
-                strategyStorage.binIds[i]
-            );
+            uint256 lpTokenBalance = strategyStorage.lbPair.balanceOf(address(this), strategyStorage.binIds[i]);
 
             amounts[i] = (lpTokenBalance * amount) / investmentTokenSupply;
         }
 
         // Withdraw.
-        strategyStorage.lbPair.setApprovalForAll(
-            address(strategyStorage.lbRouter),
-            true
-        );
+        strategyStorage.lbPair.setApprovalForAll(address(strategyStorage.lbRouter), true);
 
         strategyStorage.lbRouter.removeLiquidity(
             address(strategyStorage.tokenX),
@@ -127,30 +102,17 @@ library TraderJoeInvestmentLib {
     }
 
     function reapReward() external {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib.getStorage();
 
-        uint256 pairdepositTokenBefore = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this));
+        uint256 pairdepositTokenBefore = strategyStorage.pairDepositToken.balanceOf(address(this));
 
-        strategyStorage.lbPair.collectFees(
-            address(this),
-            strategyStorage.binIds
-        );
+        strategyStorage.lbPair.collectFees(address(this), strategyStorage.binIds);
 
-        uint256 pairDepositTokenAfter = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this));
+        uint256 pairDepositTokenAfter = strategyStorage.pairDepositToken.balanceOf(address(this));
 
-        uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
-            pairdepositTokenBefore;
+        uint256 pairDepositTokenIncrement = pairDepositTokenAfter - pairdepositTokenBefore;
 
-        swapTokens(
-            pairDepositTokenIncrement,
-            strategyStorage.pairDepositToken,
-            strategyStorage.depositToken
-        );
+        swapTokens(pairDepositTokenIncrement, strategyStorage.pairDepositToken, strategyStorage.depositToken);
     }
 
     function adjustBins(
@@ -158,25 +120,16 @@ library TraderJoeInvestmentLib {
         uint256[] calldata binAllocations,
         uint256 investmentTokenSupply
     ) external {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib.getStorage();
 
         // Withdraw from all bins.
-        uint256 depositTokenBefore = strategyStorage.depositToken.balanceOf(
-            address(this)
-        );
-        uint256 pairDepositTokenBefore = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this));
+        uint256 depositTokenBefore = strategyStorage.depositToken.balanceOf(address(this));
+        uint256 pairDepositTokenBefore = strategyStorage.pairDepositToken.balanceOf(address(this));
 
         withdraw(investmentTokenSupply, investmentTokenSupply);
 
-        uint256 depositTokenAfter = strategyStorage.depositToken.balanceOf(
-            address(this)
-        );
-        uint256 pairDepositTokenAfter = strategyStorage
-            .pairDepositToken
-            .balanceOf(address(this));
+        uint256 depositTokenAfter = strategyStorage.depositToken.balanceOf(address(this));
+        uint256 pairDepositTokenAfter = strategyStorage.pairDepositToken.balanceOf(address(this));
 
         // Set bin IDs and allocations to the given ones.
         strategyStorage.binIds = binIds;
@@ -184,8 +137,7 @@ library TraderJoeInvestmentLib {
 
         // Deposit into the new bins with the new allocations.
         uint256 depositTokenIncrement = depositTokenAfter - depositTokenBefore;
-        uint256 pairDepositTokenIncrement = pairDepositTokenAfter -
-            pairDepositTokenBefore;
+        uint256 pairDepositTokenIncrement = pairDepositTokenAfter - pairDepositTokenBefore;
 
         deposit(depositTokenIncrement, pairDepositTokenIncrement);
     }
@@ -195,8 +147,7 @@ library TraderJoeInvestmentLib {
         IERC20Upgradeable tokenIn,
         IERC20Upgradeable tokenOut
     ) public returns (uint256 amountOut) {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib.getStorage();
 
         (amountOut, ) = strategyStorage.lbRouter.getSwapOut(
             address(strategyStorage.lbPair),
@@ -215,13 +166,7 @@ library TraderJoeInvestmentLib {
         uint256[] memory binSteps = new uint256[](1);
         binSteps[0] = strategyStorage.binStep;
 
-        amountOut = SwapServiceLib.swapExactTokensForTokens(
-            strategyStorage.swapService,
-            amountIn,
-            0,
-            path,
-            binSteps
-        );
+        amountOut = SwapServiceLib.swapExactTokensForTokens(strategyStorage.swapService, amountIn, 0, path, binSteps);
     }
 
     function __prepareParams(uint256 amountXIn, uint256 amountYIn)
@@ -235,8 +180,7 @@ library TraderJoeInvestmentLib {
             uint256[] memory distributionY
         )
     {
-        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib
-            .getStorage();
+        TraderJoeStorage storage strategyStorage = TraderJoeStorageLib.getStorage();
 
         uint256 binsAmount = strategyStorage.binIds.length;
 
@@ -259,8 +203,7 @@ library TraderJoeInvestmentLib {
             deltaIds[i] = int256(strategyStorage.binIds[i]) - int256(activeId);
 
             // Bin allocation has precision of 1e3.
-            uint256 amount = (totalAmount * strategyStorage.binAllocations[i]) /
-                1e3;
+            uint256 amount = (totalAmount * strategyStorage.binAllocations[i]) / 1e3;
 
             if (strategyStorage.binIds[i] < activeId) {
                 distributionY[i] = amount;
@@ -324,21 +267,9 @@ library TraderJoeInvestmentLib {
 
         // Swap only as much as is needed.
         if (amountXIn > amountX) {
-            amountY =
-                amountYIn +
-                swapTokens(
-                    amountXIn - amountX,
-                    strategyStorage.tokenX,
-                    strategyStorage.tokenY
-                );
+            amountY = amountYIn + swapTokens(amountXIn - amountX, strategyStorage.tokenX, strategyStorage.tokenY);
         } else if (amountYIn > amountY) {
-            amountX =
-                amountXIn +
-                swapTokens(
-                    amountYIn - amountY,
-                    strategyStorage.tokenY,
-                    strategyStorage.tokenX
-                );
+            amountX = amountXIn + swapTokens(amountYIn - amountY, strategyStorage.tokenY, strategyStorage.tokenX);
         }
     }
 }

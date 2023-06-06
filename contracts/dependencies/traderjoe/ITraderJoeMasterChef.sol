@@ -18,15 +18,9 @@ interface ITraderJoeMasterChef {
 
     function poolLength() external view returns (uint256);
 
-    function poolInfo(uint256 pid)
-        external
-        view
-        returns (ITraderJoeMasterChef.PoolInfo memory);
+    function poolInfo(uint256 pid) external view returns (ITraderJoeMasterChef.PoolInfo memory);
 
-    function userInfo(uint256 _poolId, address _user)
-        external
-        view
-        returns (UserInfo memory);
+    function userInfo(uint256 _poolId, address _user) external view returns (UserInfo memory);
 
     function deposit(uint256 _pid, uint256 _amount) external;
 

@@ -51,11 +51,7 @@ library UniswapV2Library {
         address tokenIn,
         address tokenOut
     ) internal view returns (uint256 amountOut) {
-        (uint256 reserveIn, uint256 reserveOut) = _getReserveInAndOut(
-            pair,
-            tokenIn,
-            tokenOut
-        );
+        (uint256 reserveIn, uint256 reserveOut) = _getReserveInAndOut(pair, tokenIn, tokenOut);
 
         amountOut = router.getAmountOut(amountIn, reserveIn, reserveOut);
     }
@@ -67,11 +63,7 @@ library UniswapV2Library {
         address tokenIn,
         address tokenOut
     ) internal view returns (uint256 amountIn) {
-        (uint256 reserveIn, uint256 reserveOut) = _getReserveInAndOut(
-            pair,
-            tokenIn,
-            tokenOut
-        );
+        (uint256 reserveIn, uint256 reserveOut) = _getReserveInAndOut(pair, tokenIn, tokenOut);
 
         amountIn = router.getAmountIn(amountOut, reserveIn, reserveOut);
     }

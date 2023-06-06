@@ -7,13 +7,9 @@ import "../InvestmentToken.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract MockStrategy is
-    UUPSUpgradeable,
-    StrategyOwnablePausableBaseUpgradeable
-{
+contract MockStrategy is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     // solhint-disable-next-line const-name-snakecase
-    string public constant trackingName =
-        "brokkr.mock_strategy.<insert git label here>";
+    string public constant trackingName = "brokkr.mock_strategy.<insert git label here>";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Mock strategy";
     // solhint-disable-next-line const-name-snakecase
@@ -30,20 +26,13 @@ contract MockStrategy is
         _disableInitializers();
     }
 
-    function initialize(StrategyArgs calldata strategyArgs)
-        external
-        initializer
-    {
+    function initialize(StrategyArgs calldata strategyArgs) external initializer {
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function _deposit(uint256 amount, NameValuePair[] calldata)
-        internal
-        virtual
-        override
-    {
+    function _deposit(uint256 amount, NameValuePair[] calldata) internal virtual override {
         balance += amount;
 
         // incoming deposit token needs to be sent away, otherwise it would be
@@ -51,11 +40,7 @@ contract MockStrategy is
         depositToken.transfer(address(freeMoneyProvider), amount);
     }
 
-    function takePerformanceFee(NameValuePair[] calldata params)
-        public
-        virtual
-        override
-    {
+    function takePerformanceFee(NameValuePair[] calldata params) public virtual override {
         uint256 accumulatedFeeBefore = currentAccumulatedFee;
 
         // initiate withdrawal
@@ -68,11 +53,7 @@ contract MockStrategy is
         balance -= performanceFee;
     }
 
-    function takeManagementFee(NameValuePair[] calldata params)
-        public
-        virtual
-        override
-    {
+    function takeManagementFee(NameValuePair[] calldata params) public virtual override {
         uint256 accumulatedFeeBefore = currentAccumulatedFee;
 
         // initiate withdrawal
@@ -92,22 +73,13 @@ contract MockStrategy is
         NameValuePair[] calldata params
     ) public virtual override {
         // calculating the amount of deposit tokens the receiver should get, without the withdrawal fee
-        uint256 withdrawAmountInDepositToken = (balance *
-            investmentTokenAmountIn) / getInvestmentTokenSupply();
+        uint256 withdrawAmountInDepositToken = (balance * investmentTokenAmountIn) / getInvestmentTokenSupply();
 
         // making sure the contract holds enough deposit token
-        freeMoneyProvider.giveMeMoney(
-            withdrawAmountInDepositToken,
-            depositToken
-        );
+        freeMoneyProvider.giveMeMoney(withdrawAmountInDepositToken, depositToken);
 
         // initiate withdrawal
-        super.withdraw(
-            investmentTokenAmountIn,
-            minimumDepositTokenAmountOut,
-            depositTokenReceiver,
-            params
-        );
+        super.withdraw(investmentTokenAmountIn, minimumDepositTokenAmountOut, depositTokenReceiver, params);
 
         // adjusting the balance of the strategy
         balance = balance - withdrawAmountInDepositToken;
@@ -138,21 +110,9 @@ contract MockStrategy is
         freeMoneyProvider.giveMeMoney(10**6, depositToken);
     }
 
-    function _getAssetBalances()
-        internal
-        view
-        virtual
-        override
-        returns (Balance[] memory assetBalances)
-    {}
+    function _getAssetBalances() internal view virtual override returns (Balance[] memory assetBalances) {}
 
-    function _getLiabilityBalances()
-        internal
-        view
-        virtual
-        override
-        returns (Balance[] memory liabilityBalances)
-    {}
+    function _getLiabilityBalances() internal view virtual override returns (Balance[] memory liabilityBalances) {}
 
     function _getAssetValuations(bool, bool)
         internal
@@ -170,27 +130,16 @@ contract MockStrategy is
         returns (Valuation[] memory liabilityValuations)
     {}
 
-    function getEquityValuation(bool, bool)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function getEquityValuation(bool, bool) public view virtual override returns (uint256) {
         return balance;
     }
 
-    function setFreeMoneyProvider(FreeMoneyProvider freeMoneyProvider_)
-        external
-    {
+    function setFreeMoneyProvider(FreeMoneyProvider freeMoneyProvider_) external {
         freeMoneyProvider = freeMoneyProvider_;
     }
 
     function changeBalanceByPercentage(uint256 balanceMultiplier) external {
-        balance =
-            (balance * balanceMultiplier) /
-            Math.SHORT_FIXED_DECIMAL_FACTOR /
-            100;
+        balance = (balance * balanceMultiplier) / Math.SHORT_FIXED_DECIMAL_FACTOR / 100;
     }
 
     function increaseBalanceByAmount(uint256 balanceIncrease) external {

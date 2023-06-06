@@ -6,23 +6,15 @@ interface ITraderJoeLBPair {
 
     function tokenY() external returns (address);
 
-    function balanceOf(address account, uint256 id)
-        external
-        view
-        returns (uint256);
+    function balanceOf(address account, uint256 id) external view returns (uint256);
 
     function setApprovalForAll(address sender, bool approved) external;
 
     function totalSupply(uint256 id) external view returns (uint256);
 
-    function collectFees(address account, uint256[] calldata ids)
-        external
-        returns (uint256 amountX, uint256 amountY);
+    function collectFees(address account, uint256[] calldata ids) external returns (uint256 amountX, uint256 amountY);
 
-    function getBin(uint24 id)
-        external
-        view
-        returns (uint256 reserveX, uint256 reserveY);
+    function getBin(uint24 id) external view returns (uint256 reserveX, uint256 reserveY);
 
     function getReservesAndId()
         external

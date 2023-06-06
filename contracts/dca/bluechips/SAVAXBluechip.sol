@@ -56,17 +56,9 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     // ----- Base Contract Overrides -----
-    function _invest(uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256 receivedAltLp)
-    {
+    function _invest(uint256 amount) internal virtual override returns (uint256 receivedAltLp) {
         // 1. Approve bluechip to alt pool
-        bluechipTokenInfo.token.safeIncreaseAllowance(
-            address(platypusInfo.altPoolAvax),
-            amount
-        );
+        bluechipTokenInfo.token.safeIncreaseAllowance(address(platypusInfo.altPoolAvax), amount);
 
         // 2. Deposit bluechip into alt pool. Receive minted alt pool lp token
         receivedAltLp = platypusInfo.altPoolAvax.deposit(
@@ -78,29 +70,18 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         );
 
         // 3. Approve alt lp token to master platypus
-        platypusInfo.altSAvaxLpToken.safeIncreaseAllowance(
-            address(platypusInfo.masterPlatypusV4),
-            receivedAltLp
-        );
+        platypusInfo.altSAvaxLpToken.safeIncreaseAllowance(address(platypusInfo.masterPlatypusV4), receivedAltLp);
 
         // 4. Deposit alt lp into master platypus
-        platypusInfo.masterPlatypusV4.deposit(
-            platypusInfo.poolId,
-            receivedAltLp
-        );
+        platypusInfo.masterPlatypusV4.deposit(platypusInfo.poolId, receivedAltLp);
     }
 
     function _claimRewards() internal virtual override returns (uint256) {
         // fetch earned rewards
-        (
-            uint256 pendingPtp,
-            ,
-            ,
-            uint256[] memory pendingBonusTokens
-        ) = platypusInfo.masterPlatypusV4.pendingTokens(
-                platypusInfo.poolId,
-                address(this)
-            );
+        (uint256 pendingPtp, , , uint256[] memory pendingBonusTokens) = platypusInfo.masterPlatypusV4.pendingTokens(
+            platypusInfo.poolId,
+            address(this)
+        );
 
         // check if we can claim something
         if (pendingPtp == 0 && pendingBonusTokens[0] == 0) {
@@ -114,29 +95,19 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         platypusInfo.masterPlatypusV4.multiClaim(pids);
 
         // 2. Receive qi + ptp token rewards
-        uint256 receivedPtp = platypusInfo.platypusToken.balanceOf(
-            address(this)
-        );
+        uint256 receivedPtp = platypusInfo.platypusToken.balanceOf(address(this));
         uint256 receivedQi = platypusInfo.qiToken.balanceOf(address(this));
 
         // 3. Swap received rewawrds into bluechip
         return _swapRewards(receivedPtp, receivedQi);
     }
 
-    function _withdrawInvestedBluechip(uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256 receivedBluechip)
-    {
+    function _withdrawInvestedBluechip(uint256 amount) internal virtual override returns (uint256 receivedBluechip) {
         // 1. Unstake alp lp from master platypus
         platypusInfo.masterPlatypusV4.withdraw(platypusInfo.poolId, amount);
 
         // 2. Approve alt lp to alt pool avax
-        platypusInfo.altSAvaxLpToken.safeIncreaseAllowance(
-            address(platypusInfo.altPoolAvax),
-            amount
-        );
+        platypusInfo.altSAvaxLpToken.safeIncreaseAllowance(address(platypusInfo.altPoolAvax), amount);
 
         // 3. Withdraw bluechip from alt pool avax
         receivedBluechip = platypusInfo.altPoolAvax.withdraw(
@@ -149,28 +120,14 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         );
     }
 
-    function _transferBluechip(address to, uint256 amount)
-        internal
-        virtual
-        override
-    {
+    function _transferBluechip(address to, uint256 amount) internal virtual override {
         bluechipTokenInfo.token.safeTransfer(to, amount);
     }
 
-    function _totalBluechipInvested()
-        internal
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function _totalBluechipInvested() internal view virtual override returns (uint256) {
         if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
             // in case of investing all bluechip funds are invested into master platypus
-            return
-                platypusInfo
-                    .masterPlatypusV4
-                    .getUserInfo(platypusInfo.poolId, address(this))
-                    .amount;
+            return platypusInfo.masterPlatypusV4.getUserInfo(platypusInfo.poolId, address(this)).amount;
         }
 
         if (bluechipInvestmentState == BluechipInvestmentState.Withdrawn) {
@@ -183,35 +140,17 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         return 0;
     }
 
-    function _bluechipAddress()
-        internal
-        view
-        virtual
-        override
-        returns (address)
-    {
+    function _bluechipAddress() internal view virtual override returns (address) {
         return address(bluechipTokenInfo.token);
     }
 
-    function _bluechipDecimals()
-        internal
-        view
-        virtual
-        override
-        returns (uint8)
-    {
+    function _bluechipDecimals() internal view virtual override returns (uint8) {
         return bluechipTokenInfo.decimals;
     }
 
     // ----- Private Helper Functions -----
-    function _swapRewards(uint256 ptpReward, uint256 qiReward)
-        private
-        returns (uint256 receivedBleuchip)
-    {
-        uint256 ptpToBluechip = router.getAmountOut(
-            ptpReward,
-            ptpIntoBluechipSwapPath
-        );
+    function _swapRewards(uint256 ptpReward, uint256 qiReward) private returns (uint256 receivedBleuchip) {
+        uint256 ptpToBluechip = router.getAmountOut(ptpReward, ptpIntoBluechipSwapPath);
         if (ptpToBluechip > 0) {
             receivedBleuchip += router.swapTokensForTokens(
                 ptpReward,
@@ -220,10 +159,7 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
             );
         }
 
-        uint256 qiToBluechip = router.getAmountOut(
-            qiReward,
-            qiIntoBluechipSwapPath
-        );
+        uint256 qiToBluechip = router.getAmountOut(qiReward, qiIntoBluechipSwapPath);
         if (qiToBluechip > 0) {
             receivedBleuchip += router.swapTokensForTokens(
                 qiReward,
@@ -234,10 +170,10 @@ contract SAVAXBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
     }
 
     // ----- Setter Functions -----
-    function setRewardsSwapPath(
-        address[] memory newPtpIntoAvaxSwapPath,
-        address[] memory newQiIntoBluechipSwapPath
-    ) external onlyOwner {
+    function setRewardsSwapPath(address[] memory newPtpIntoAvaxSwapPath, address[] memory newQiIntoBluechipSwapPath)
+        external
+        onlyOwner
+    {
         ptpIntoBluechipSwapPath = newPtpIntoAvaxSwapPath;
         qiIntoBluechipSwapPath = newQiIntoBluechipSwapPath;
     }

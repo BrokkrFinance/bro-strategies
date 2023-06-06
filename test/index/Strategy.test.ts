@@ -2,7 +2,7 @@ import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpe
 import { execSync } from "child_process"
 import { Contract } from "ethers"
 import { ethers, network } from "hardhat"
-import { DepositTokens } from "../../scripts/constants/deposit-tokens"
+import { UsdcTokens } from "../../scripts/constants/deposit-tokens"
 import { WhaleAddrs } from "../helper/addresses"
 import { IndexTestOptions } from "../helper/interfaces/options"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
@@ -35,7 +35,7 @@ export function testStrategy(
       })
 
       // Set chain specific parameters.
-      const depositTokenAddr: string = DepositTokens.get(strategyTestOptions.network.name)!
+      const depositTokenAddr: string = UsdcTokens.get(strategyTestOptions.network.name)!
       const whaleAddr: string = WhaleAddrs.get(strategyTestOptions.network.name)!
 
       // Get ERC20 tokens.

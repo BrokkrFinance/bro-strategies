@@ -42,17 +42,9 @@ contract WETHBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     // ----- Base Contract Overrides -----
-    function _invest(uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256 receivedAToken)
-    {
+    function _invest(uint256 amount) internal virtual override returns (uint256 receivedAToken) {
         // 1. Approve bluechip to aave pool
-        bluechipTokenInfo.token.safeIncreaseAllowance(
-            address(aaveInfo.aavePool),
-            amount
-        );
+        bluechipTokenInfo.token.safeIncreaseAllowance(address(aaveInfo.aavePool), amount);
 
         // 2. Supply bluechip
         aaveInfo.aavePool.supply(
@@ -76,35 +68,16 @@ contract WETHBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         return 0;
     }
 
-    function _withdrawInvestedBluechip(uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256 receivedBluechip)
-    {
+    function _withdrawInvestedBluechip(uint256 amount) internal virtual override returns (uint256 receivedBluechip) {
         aTokenCompoundingBalance -= amount;
-        receivedBluechip = aaveInfo.aavePool.withdraw(
-            address(bluechipTokenInfo.token),
-            amount,
-            address(this)
-        );
+        receivedBluechip = aaveInfo.aavePool.withdraw(address(bluechipTokenInfo.token), amount, address(this));
     }
 
-    function _transferBluechip(address to, uint256 amount)
-        internal
-        virtual
-        override
-    {
+    function _transferBluechip(address to, uint256 amount) internal virtual override {
         bluechipTokenInfo.token.safeTransfer(to, amount);
     }
 
-    function _totalBluechipInvested()
-        internal
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function _totalBluechipInvested() internal view virtual override returns (uint256) {
         if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
             // When investing we exchange bluechip to aToken.
             // Since aToken is not 'staked' somewhere we just have it on contract balance
@@ -121,23 +94,11 @@ contract WETHBluechip is UUPSUpgradeable, DCABaseUpgradeableCutted {
         return 0;
     }
 
-    function _bluechipAddress()
-        internal
-        view
-        virtual
-        override
-        returns (address)
-    {
+    function _bluechipAddress() internal view virtual override returns (address) {
         return address(bluechipTokenInfo.token);
     }
 
-    function _bluechipDecimals()
-        internal
-        view
-        virtual
-        override
-        returns (uint8)
-    {
+    function _bluechipDecimals() internal view virtual override returns (uint8) {
         return bluechipTokenInfo.decimals;
     }
 }

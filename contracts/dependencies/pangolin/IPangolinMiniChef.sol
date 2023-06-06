@@ -7,10 +7,7 @@ interface IPangolinMiniChef {
         int256 rewardDebt;
     }
 
-    function userInfo(uint256 pid, address user)
-        external
-        view
-        returns (UserInfo memory);
+    function userInfo(uint256 pid, address user) external view returns (UserInfo memory);
 
     function lpToken(uint256 pid) external view returns (address);
 

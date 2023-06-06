@@ -8,31 +8,18 @@ import { Errors } from "../libraries/Errors.sol";
 import { SwapAdapter } from "../libraries/SwapAdapter.sol";
 
 contract IndexAvalanche is IndexStrategyUpgradeable {
-    function equityValuation(bool maximize, bool includeAmmPrice)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function equityValuation(bool maximize, bool includeAmmPrice) public view override returns (uint256) {
         uint256 totalSupply = indexToken.totalSupply();
 
         if (totalSupply == 0) {
             return 0;
         }
 
-        uint256 amountWNATIVEUnit = _getAmountWNATIVEFromExactIndex(
-            Constants.PRECISION
-        );
+        uint256 amountWNATIVEUnit = _getAmountWNATIVEFromExactIndex(Constants.PRECISION);
 
-        uint256 priceWNATIVE = oracle.getPrice(
-            wNATIVE,
-            maximize,
-            includeAmmPrice
-        );
+        uint256 priceWNATIVE = oracle.getPrice(wNATIVE, maximize, includeAmmPrice);
 
-        return
-            (amountWNATIVEUnit * priceWNATIVE * totalSupply) /
-            (Constants.DECIMALS * Constants.PRECISION);
+        return (amountWNATIVEUnit * priceWNATIVE * totalSupply) / (Constants.DECIMALS * Constants.PRECISION);
     }
 
     function addSwapRoute(
@@ -41,10 +28,7 @@ contract IndexAvalanche is IndexStrategyUpgradeable {
         SwapAdapter.DEX dex,
         address pair
     ) external onlyOwner {
-        SwapAdapter.PairData memory pairData = SwapAdapter.PairData(
-            pair,
-            abi.encode(0)
-        );
+        SwapAdapter.PairData memory pairData = SwapAdapter.PairData(pair, abi.encode(0));
 
         addSwapRoute(token, router, dex, pairData);
     }
@@ -56,10 +40,7 @@ contract IndexAvalanche is IndexStrategyUpgradeable {
         address pair,
         uint256 binStep
     ) external onlyOwner {
-        SwapAdapter.PairData memory pairData = SwapAdapter.PairData(
-            pair,
-            abi.encode(binStep)
-        );
+        SwapAdapter.PairData memory pairData = SwapAdapter.PairData(pair, abi.encode(binStep));
 
         addSwapRoute(token, router, dex, pairData);
     }

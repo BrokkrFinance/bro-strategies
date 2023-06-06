@@ -29,23 +29,14 @@ library SwapLib {
         address[] memory path,
         uint256[] memory binSteps
     ) internal returns (uint256 amountOut) {
-        IERC20Upgradeable(path[0]).safeIncreaseAllowance(
-            router.router,
-            amountIn
-        );
+        IERC20Upgradeable(path[0]).safeIncreaseAllowance(router.router, amountIn);
 
         if (router.dex == Dex.UniswapV2) {
-            IUniswapV2LikeRouter routerUniswapV2Like = IUniswapV2LikeRouter(
-                router.router
-            );
+            IUniswapV2LikeRouter routerUniswapV2Like = IUniswapV2LikeRouter(router.router);
 
-            amountOut = routerUniswapV2Like.swapExactTokensForTokens(
-                amountIn,
-                0,
-                path,
-                address(this),
-                block.timestamp
-            )[path.length - 1];
+            amountOut = routerUniswapV2Like.swapExactTokensForTokens(amountIn, 0, path, address(this), block.timestamp)[
+                    path.length - 1
+                ];
         } else if (router.dex == Dex.UniswapV3) {
             ISwapRouter routerUniswapV3 = ISwapRouter(router.router);
 
@@ -59,9 +50,7 @@ library SwapLib {
                 })
             );
         } else if (router.dex == Dex.TraderJoeV2) {
-            ITraderJoeLBRouter traderjoeLBRouter = ITraderJoeLBRouter(
-                router.router
-            );
+            ITraderJoeLBRouter traderjoeLBRouter = ITraderJoeLBRouter(router.router);
 
             amountOut = traderjoeLBRouter.swapExactTokensForTokens(
                 amountIn,
@@ -95,11 +84,7 @@ library SwapLib {
         address[] memory path
     ) internal view returns (uint256) {
         if (router.dex == Dex.UniswapV2) {
-            return
-                IUniswapV2LikeRouter(router.router).getAmountsOut(
-                    amountIn,
-                    path
-                )[path.length - 1];
+            return IUniswapV2LikeRouter(router.router).getAmountsOut(amountIn, path)[path.length - 1];
         } else {
             // solhint-disable-next-line reason-string
             revert("SwapLib: Invalid swap service provider");

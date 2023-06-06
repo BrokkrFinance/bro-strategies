@@ -14,16 +14,8 @@ interface IInvestable is IAum, IFee {
     error ZeroDepositTokenReceiver();
     error TooSmallDepositTokenAmountOut();
 
-    event Deposit(
-        address indexed initiator,
-        address indexed investmentTokenReceiver,
-        uint256 amount
-    );
-    event Withdrawal(
-        address indexed initiator,
-        address indexed depositTokenReceiver,
-        uint256 amount
-    );
+    event Deposit(address indexed initiator, address indexed investmentTokenReceiver, uint256 amount);
+    event Withdrawal(address indexed initiator, address indexed depositTokenReceiver, uint256 amount);
 
     function deposit(
         uint256 depositTokenAmountIn,
@@ -51,8 +43,7 @@ interface IInvestable is IAum, IFee {
 
     function getInvestmentLimitPerAddress() external view returns (uint256);
 
-    function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress)
-        external;
+    function setInvestmentLimitPerAddress(uint256 investmentLimitPerAddress) external;
 
     function trackingName() external pure returns (string memory);
 

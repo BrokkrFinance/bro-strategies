@@ -8,7 +8,7 @@
       "contractName": "Cash",
       "investmentTokenName": "Cash Strategy Token",
       "investmentTokenSymbol": "CASH",
-      "depositToken": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
+      "depositToken": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
       "depositFee": 0,
       "depositFeeParams": [],
       "withdrawalFee": 500,
@@ -19,8 +19,8 @@
       "managementFeeParams": [],
       "feeReceiver": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
       "feeReceiverParams": [],
-      "totalInvestmentLimit": 1e20,
-      "investmentLimitPerAddress": 1e20,
+      "totalInvestmentLimit": 1e40,
+      "investmentLimitPerAddress": 1e40,
       "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" },
       "swapService": { "$ref": "../../../../constants/avalanche/SwapServices.json#/traderjoe" },
       "roleToUsers": [],
@@ -32,10 +32,10 @@
       "subtype": "ownable",
       "name": "Mock",
       "owner": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
-      "contractName": "PercentageAllocation",
+      "contractName": "PercentageAllocationAnyToken",
       "investmentTokenName": "Mock Investment Token",
       "investmentTokenSymbol": "MPT",
-      "depositToken": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
+      "depositToken": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/wAvax" },
       "depositFee": 0,
       "depositFeeParams": [],
       "withdrawalFee": 0,
@@ -46,9 +46,9 @@
       "managementFeeParams": [],
       "feeReceiver": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
       "feeReceiverParams": [],
-      "totalInvestmentLimit": 1e20,
-      "investmentLimitPerAddress": 1e20,
-      "extraArgs": [],
+      "totalInvestmentLimit": 1e40,
+      "investmentLimitPerAddress": 1e40,
+      "extraArgs": ["0x50b7545627a5162f82a992c33b87adc75187b218"],
       "investables": ["strategy/MockCash"],
       "allocations": [[100000]],
       "libraries": [
@@ -94,7 +94,8 @@
           "role": { "$ref": "../../../../constants/AccessControlRoles.json#/pause" },
           "users": [{ "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" }]
         }
-      ]
+      ],
+      "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/aave" }
     }
   ]
 }

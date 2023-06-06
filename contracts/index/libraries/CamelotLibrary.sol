@@ -16,8 +16,7 @@ library CamelotLibrary {
     ) internal returns (uint256 amountOut) {
         IERC20Upgradeable(path[0]).approve(address(router), amountIn);
 
-        uint256 tokenOutBalanceBefore = IERC20Upgradeable(path[path.length - 1])
-            .balanceOf(address(this));
+        uint256 tokenOutBalanceBefore = IERC20Upgradeable(path[path.length - 1]).balanceOf(address(this));
 
         router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             amountIn,
@@ -29,8 +28,7 @@ library CamelotLibrary {
             block.timestamp
         );
 
-        uint256 tokenOutBalanceAfter = IERC20Upgradeable(path[path.length - 1])
-            .balanceOf(address(this));
+        uint256 tokenOutBalanceAfter = IERC20Upgradeable(path[path.length - 1]).balanceOf(address(this));
 
         amountOut = tokenOutBalanceAfter - tokenOutBalanceBefore;
     }
@@ -43,8 +41,7 @@ library CamelotLibrary {
     ) internal returns (uint256 amountIn) {
         IERC20Upgradeable(path[0]).approve(address(router), amountInMax);
 
-        uint256 tokenOutBalanceBefore = IERC20Upgradeable(path[path.length - 1])
-            .balanceOf(address(this));
+        uint256 tokenOutBalanceBefore = IERC20Upgradeable(path[path.length - 1]).balanceOf(address(this));
 
         // Note: In current algorithm, `swapTokensForExactTokens` is called
         // only when `amountInMax` equals to actual amount in. Under this assumption,
@@ -60,11 +57,9 @@ library CamelotLibrary {
             block.timestamp
         );
 
-        uint256 tokenOutBalanceAfter = IERC20Upgradeable(path[path.length - 1])
-            .balanceOf(address(this));
+        uint256 tokenOutBalanceAfter = IERC20Upgradeable(path[path.length - 1]).balanceOf(address(this));
 
-        uint256 amountOutReceived = tokenOutBalanceAfter -
-            tokenOutBalanceBefore;
+        uint256 amountOutReceived = tokenOutBalanceAfter - tokenOutBalanceBefore;
 
         if (amountOutReceived < amountOut) {
             revert Errors.Index_WrongSwapAmount();
@@ -94,27 +89,14 @@ library CamelotLibrary {
             revert Errors.Index_SolidlyStableSwapNotSupported();
         }
 
-        (
-            uint112 reserve0,
-            uint112 reserve1,
-            uint16 token0FeePercent,
-            uint16 token1FeePercent
-        ) = pair.getReserves();
+        (uint112 reserve0, uint112 reserve1, uint16 token0FeePercent, uint16 token1FeePercent) = pair.getReserves();
 
         address token1 = pair.token1();
 
-        (uint112 reserveIn, uint112 reserveOut) = (tokenOut == token1)
-            ? (reserve0, reserve1)
-            : (reserve1, reserve0);
+        (uint112 reserveIn, uint112 reserveOut) = (tokenOut == token1) ? (reserve0, reserve1) : (reserve1, reserve0);
 
-        uint16 feePercent = (tokenOut == token1)
-            ? token0FeePercent
-            : token1FeePercent;
+        uint16 feePercent = (tokenOut == token1) ? token0FeePercent : token1FeePercent;
 
-        amountIn =
-            (reserveIn * amountOut * 100000) /
-            (reserveOut - amountOut) /
-            (100000 - feePercent) +
-            1;
+        amountIn = (reserveIn * amountOut * 100000) / (reserveOut - amountOut) / (100000 - feePercent) + 1;
     }
 }

@@ -25,10 +25,7 @@ contract IndexToken is
         _disableInitializers();
     }
 
-    function initialize(string memory name_, string memory symbol_)
-        public
-        initializer
-    {
+    function initialize(string memory name_, string memory symbol_) public initializer {
         __Context_init();
         __Ownable_init();
         __ERC20_init("", "");
@@ -41,31 +38,15 @@ contract IndexToken is
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function name()
-        public
-        view
-        override(IIndexToken, ERC20Upgradeable)
-        returns (string memory)
-    {
+    function name() public view override(IIndexToken, ERC20Upgradeable) returns (string memory) {
         return _name;
     }
 
-    function symbol()
-        public
-        view
-        override(IIndexToken, ERC20Upgradeable)
-        returns (string memory)
-    {
+    function symbol() public view override(IIndexToken, ERC20Upgradeable) returns (string memory) {
         return _symbol;
     }
 
-    function decimals()
-        public
-        pure
-        virtual
-        override(IIndexToken, ERC20Upgradeable)
-        returns (uint8)
-    {
+    function decimals() public pure virtual override(IIndexToken, ERC20Upgradeable) returns (uint8) {
         return 18;
     }
 
@@ -73,19 +54,11 @@ contract IndexToken is
         _mint(account_, amount_);
     }
 
-    function burn(uint256 amount)
-        public
-        virtual
-        override(IIndexToken, ERC20BurnableUpgradeable)
-    {
+    function burn(uint256 amount) public virtual override(IIndexToken, ERC20BurnableUpgradeable) {
         ERC20BurnableUpgradeable.burn(amount);
     }
 
-    function burnFrom(address account, uint256 amount)
-        public
-        virtual
-        override(IIndexToken, ERC20BurnableUpgradeable)
-    {
+    function burnFrom(address account, uint256 amount) public virtual override(IIndexToken, ERC20BurnableUpgradeable) {
         ERC20BurnableUpgradeable.burnFrom(account, amount);
     }
 

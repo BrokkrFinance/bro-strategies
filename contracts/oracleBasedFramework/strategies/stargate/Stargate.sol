@@ -19,8 +19,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     error NotEnoughDeltaCredit();
 
     // solhint-disable-next-line const-name-snakecase
-    string public constant trackingName =
-        "brokkr.stargate_strategy.stargate_strategy_v1.1.2";
+    string public constant trackingName = "brokkr.stargate_strategy.stargate_strategy_v1.1.2";
     // solhint-disable-next-line const-name-snakecase
     string public constant humanReadableName = "Stargate Strategy";
     // solhint-disable-next-line const-name-snakecase
@@ -48,8 +47,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         __UUPSUpgradeable_init();
         __StrategyOwnablePausableBaseUpgradeable_init(strategyArgs);
 
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
         strategyStorage.router = router;
         strategyStorage.pool = pool;
@@ -79,168 +77,87 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         __switchSwapService(stargateArgs);
     }
 
-    function reinitialize(StargateArgs calldata stargateArgs)
-        external
-        reinitializer(2)
-    {
+    function reinitialize(StargateArgs calldata stargateArgs) external reinitializer(2) {
         __switchSwapService(stargateArgs);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function _deposit(uint256 amount, NameValuePair[] calldata)
-        internal
-        virtual
-        override
-    {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+    function _deposit(uint256 amount, NameValuePair[] calldata) internal virtual override {
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
         if (depositToken != strategyStorage.poolDepositToken) {
-            amount = __swapTokens(
-                amount,
-                depositToken,
-                strategyStorage.poolDepositToken
-            );
+            amount = __swapTokens(amount, depositToken, strategyStorage.poolDepositToken);
         }
 
-        uint256 lpBalanceBefore = strategyStorage.lpToken.balanceOf(
-            address(this)
-        );
-        strategyStorage.poolDepositToken.approve(
-            address(strategyStorage.router),
-            amount
-        );
-        strategyStorage.router.addLiquidity(
-            strategyStorage.poolId,
-            amount,
-            address(this)
-        );
-        uint256 lpBalanceAfter = strategyStorage.lpToken.balanceOf(
-            address(this)
-        );
+        uint256 lpBalanceBefore = strategyStorage.lpToken.balanceOf(address(this));
+        strategyStorage.poolDepositToken.approve(address(strategyStorage.router), amount);
+        strategyStorage.router.addLiquidity(strategyStorage.poolId, amount, address(this));
+        uint256 lpBalanceAfter = strategyStorage.lpToken.balanceOf(address(this));
 
         uint256 lpBalanceIncrement = lpBalanceAfter - lpBalanceBefore;
 
-        strategyStorage.lpToken.approve(
-            address(strategyStorage.lpStaking),
-            lpBalanceIncrement
-        );
-        strategyStorage.lpStaking.deposit(
-            strategyStorage.farmId,
-            lpBalanceIncrement
-        );
+        strategyStorage.lpToken.approve(address(strategyStorage.lpStaking), lpBalanceIncrement);
+        strategyStorage.lpStaking.deposit(strategyStorage.farmId, lpBalanceIncrement);
     }
 
-    function _withdraw(uint256 amount, NameValuePair[] calldata)
-        internal
-        virtual
-        override
-    {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+    function _withdraw(uint256 amount, NameValuePair[] calldata) internal virtual override {
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
-        uint256 lpBalanceToWithdraw = (getStargateLpBalance() * amount) /
-            getInvestmentTokenSupply();
+        uint256 lpBalanceToWithdraw = (getStargateLpBalance() * amount) / getInvestmentTokenSupply();
 
         if (lpBalanceToWithdraw > strategyStorage.pool.deltaCredit()) {
             revert NotEnoughDeltaCredit();
         }
 
-        uint256 poolDepositTokenBalanceBefore = strategyStorage
-            .poolDepositToken
-            .balanceOf(address(this));
-        strategyStorage.lpStaking.withdraw(
-            strategyStorage.farmId,
-            lpBalanceToWithdraw
-        );
-        strategyStorage.router.instantRedeemLocal(
-            uint16(strategyStorage.poolId),
-            lpBalanceToWithdraw,
-            address(this)
-        );
-        uint256 poolDepositTokenBalanceAfter = strategyStorage
-            .poolDepositToken
-            .balanceOf(address(this));
+        uint256 poolDepositTokenBalanceBefore = strategyStorage.poolDepositToken.balanceOf(address(this));
+        strategyStorage.lpStaking.withdraw(strategyStorage.farmId, lpBalanceToWithdraw);
+        strategyStorage.router.instantRedeemLocal(uint16(strategyStorage.poolId), lpBalanceToWithdraw, address(this));
+        uint256 poolDepositTokenBalanceAfter = strategyStorage.poolDepositToken.balanceOf(address(this));
 
         if (depositToken != strategyStorage.poolDepositToken) {
-            uint256 poolDepositTokenBalanceIncrement = poolDepositTokenBalanceAfter -
-                    poolDepositTokenBalanceBefore;
+            uint256 poolDepositTokenBalanceIncrement = poolDepositTokenBalanceAfter - poolDepositTokenBalanceBefore;
 
-            __swapTokens(
-                poolDepositTokenBalanceIncrement,
-                strategyStorage.poolDepositToken,
-                depositToken
-            );
+            __swapTokens(poolDepositTokenBalanceIncrement, strategyStorage.poolDepositToken, depositToken);
         }
     }
 
     function _reapReward(NameValuePair[] calldata) internal virtual override {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
         strategyStorage.lpStaking.deposit(strategyStorage.farmId, 0);
 
-        __swapTokens(
-            strategyStorage.stgToken.balanceOf(address(this)),
-            strategyStorage.stgToken,
-            depositToken
-        );
+        __swapTokens(strategyStorage.stgToken.balanceOf(address(this)), strategyStorage.stgToken, depositToken);
     }
 
-    function _getAssetBalances()
-        internal
-        view
-        virtual
-        override
-        returns (Balance[] memory assetBalances)
-    {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+    function _getAssetBalances() internal view virtual override returns (Balance[] memory assetBalances) {
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
         assetBalances = new Balance[](1);
-        assetBalances[0] = Balance(
-            address(strategyStorage.lpToken),
-            getStargateLpBalance()
-        );
+        assetBalances[0] = Balance(address(strategyStorage.lpToken), getStargateLpBalance());
     }
 
-    function _getLiabilityBalances()
-        internal
-        view
-        virtual
-        override
-        returns (Balance[] memory liabilityBalances)
-    {}
+    function _getLiabilityBalances() internal view virtual override returns (Balance[] memory liabilityBalances) {}
 
-    function _getAssetValuations(
-        bool shouldMaximise,
-        bool shouldIncludeAmmPrice
-    )
+    function _getAssetValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
         internal
         view
         virtual
         override
         returns (Valuation[] memory assetValuations)
     {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
         assetValuations = new Valuation[](1);
         assetValuations[0] = Valuation(
             address(strategyStorage.lpToken),
-            (getStargateLpBalance() * strategyStorage.pool.totalLiquidity()) /
-                strategyStorage.pool.totalSupply()
+            (getStargateLpBalance() * strategyStorage.pool.totalLiquidity()) / strategyStorage.pool.totalSupply()
         );
 
         if (depositToken != strategyStorage.poolDepositToken) {
             assetValuations[0].valuation =
                 (assetValuations[0].valuation *
-                    priceOracle.getPrice(
-                        strategyStorage.poolDepositToken,
-                        shouldMaximise,
-                        shouldIncludeAmmPrice
-                    )) /
+                    priceOracle.getPrice(strategyStorage.poolDepositToken, shouldMaximise, shouldIncludeAmmPrice)) /
                 InvestableLib.PRICE_PRECISION_FACTOR;
         }
     }
@@ -254,14 +171,9 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
     {}
 
     function getStargateLpBalance() public view returns (uint256) {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
-        return
-            strategyStorage
-                .lpStaking
-                .userInfo(strategyStorage.farmId, address(this))
-                .amount;
+        return strategyStorage.lpStaking.userInfo(strategyStorage.farmId, address(this)).amount;
     }
 
     function setBinStep(
@@ -269,8 +181,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         IERC20Upgradeable tokenY,
         uint256 binStep
     ) public onlyOwner {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
         strategyStorage.binSteps[tokenX][tokenY] = binStep;
         strategyStorage.binSteps[tokenY][tokenX] = binStep;
@@ -281,8 +192,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         IERC20Upgradeable tokenIn,
         IERC20Upgradeable tokenOut
     ) private returns (uint256 amountOut) {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
         address[] memory path = new address[](2);
         path[0] = address(tokenIn);
@@ -303,31 +213,17 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
             _swapService = swapService;
         }
 
-        amountOut = SwapServiceLib.swapExactTokensForTokens(
-            _swapService,
-            amountIn,
-            0,
-            path,
-            binStep
-        );
+        amountOut = SwapServiceLib.swapExactTokensForTokens(_swapService, amountIn, 0, path, binStep);
     }
 
     function __switchSwapService(StargateArgs calldata stargateArgs) private {
-        StargateStorage storage strategyStorage = StargateStorageLib
-            .getStorage();
+        StargateStorage storage strategyStorage = StargateStorageLib.getStorage();
 
         // $STG token is not supported by TraderJoe V2 yet.
         strategyStorage.swapServiceForStgToken = swapService;
 
-        setSwapService(
-            SwapServiceProvider.AvalancheTraderJoeV2,
-            stargateArgs.traderjoeLBRouter
-        );
+        setSwapService(SwapServiceProvider.TraderJoeV2, stargateArgs.traderjoeLBRouter);
 
-        setBinStep(
-            depositToken,
-            strategyStorage.poolDepositToken,
-            stargateArgs.binStep
-        );
+        setBinStep(depositToken, strategyStorage.poolDepositToken, stargateArgs.binStep);
     }
 }

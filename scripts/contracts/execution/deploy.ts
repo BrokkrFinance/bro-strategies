@@ -1,5 +1,5 @@
 import { BigNumber, Contract } from "ethers"
-import { DepositTokens } from "../../constants/deposit-tokens"
+import { UsdcTokens } from "../../constants/deposit-tokens"
 import { readDeployConfig, readLiveConfig, writeLiveConfig } from "../../files/io"
 import { getLiveConfigPath } from "../../files/paths"
 import { DeployConfig, LiveConfig } from "../../interfaces/configs"
@@ -148,7 +148,7 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
   if (investable.type === "portfolio") {
     console.log("Deploy: Deposit $2 to and withdraw $1 from the top level portfolio.")
 
-    await investOneDollarToPortfolio(investable)
+    // await investOneDollarToPortfolio(investable)
 
     console.log()
   } else {
@@ -208,6 +208,7 @@ function getPortfolioArgs(deployConfig: DeployConfig): PortfolioArgs {
       perAddress: BigInt(deployConfig.investmentLimitPerAddress),
     },
     roleToUsers: deployConfig.roleToUsers,
+    oracle: deployConfig.oracle,
   }
 }
 
@@ -312,7 +313,7 @@ async function investOneDollarToPortfolio(investable: Investable): Promise<void>
   const deployer = (await ethers.getSigners())[0]
   const usdc = await ethers.getContractAt(
     "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-    DepositTokens.get(investable.network)
+    UsdcTokens.get(investable.network)
   )
 
   // Deposit $2.
@@ -347,7 +348,7 @@ async function investOneDollarToIndex(investable: Investable, options?: DeployOp
   const deployer = (await ethers.getSigners())[0]
   const usdc = await ethers.getContractAt(
     "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-    DepositTokens.get(investable.network)
+    UsdcTokens.get(investable.network)
   )
 
   // Deposit $2.

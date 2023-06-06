@@ -25,21 +25,9 @@ abstract contract DCABaseUpgradeableCutted is
     error NothingToWithdraw();
 
     event Deposit(address indexed sender, uint256 amount, uint256 amountSplit);
-    event Invest(
-        uint256 depositAmountSpent,
-        uint256 bluechipReceived,
-        uint256 investedAt,
-        uint256 historicalIndex
-    );
-    event Withdraw(
-        address indexed sender,
-        uint256 withdrawnDeposit,
-        uint256 withdrawnBluechip
-    );
-    event StatusChanged(
-        BluechipInvestmentState indexed prevStatus,
-        BluechipInvestmentState indexed newStatus
-    );
+    event Invest(uint256 depositAmountSpent, uint256 bluechipReceived, uint256 investedAt, uint256 historicalIndex);
+    event Withdraw(address indexed sender, uint256 withdrawnDeposit, uint256 withdrawnBluechip);
+    event StatusChanged(BluechipInvestmentState indexed prevStatus, BluechipInvestmentState indexed newStatus);
 
     struct DCAEquityValuation {
         uint256 totalDepositToken;
@@ -129,10 +117,7 @@ abstract contract DCABaseUpgradeableCutted is
     uint256[8] private __gap;
 
     // solhint-disable-next-line
-    function __DCABaseUpgradeable_init(DCAStrategyInitArgs calldata args)
-        internal
-        onlyInitializing
-    {
+    function __DCABaseUpgradeable_init(DCAStrategyInitArgs calldata args) internal onlyInitializing {
         __PortfolioAccessBaseUpgradeableCutted_init();
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -156,10 +141,7 @@ abstract contract DCABaseUpgradeableCutted is
     }
 
     modifier nonEmergencyExited() {
-        require(
-            bluechipInvestmentState != BluechipInvestmentState.EmergencyExited,
-            "Strategy is emergency exited"
-        );
+        require(bluechipInvestmentState != BluechipInvestmentState.EmergencyExited, "Strategy is emergency exited");
 
         _;
     }
@@ -167,13 +149,7 @@ abstract contract DCABaseUpgradeableCutted is
     receive() external payable {}
 
     // ----- Base Class Methods -----
-    function deposit(uint256 amount, uint8 amountSplit)
-        public
-        virtual
-        nonReentrant
-        whenNotPaused
-        nonEmergencyExited
-    {
+    function deposit(uint256 amount, uint8 amountSplit) public virtual nonReentrant whenNotPaused nonEmergencyExited {
         _deposit(_msgSender(), amount, amountSplit);
     }
 
@@ -188,11 +164,7 @@ abstract contract DCABaseUpgradeableCutted is
         }
 
         // transfer deposit token from portfolio
-        depositTokenInfo.token.safeTransferFrom(
-            _msgSender(),
-            address(this),
-            amount
-        );
+        depositTokenInfo.token.safeTransferFrom(_msgSender(), address(this), amount);
 
         // compute actual deposit and transfer fee to receiver
         if (depositFee.fee > 0) {
@@ -200,10 +172,7 @@ abstract contract DCABaseUpgradeableCutted is
 
             uint256 feeAmount = amount - actualDeposit;
             if (feeAmount != 0) {
-                depositTokenInfo.token.safeTransfer(
-                    depositFee.feeReceiver,
-                    feeAmount
-                );
+                depositTokenInfo.token.safeTransfer(depositFee.feeReceiver, feeAmount);
             }
 
             amount = actualDeposit;
@@ -222,21 +191,16 @@ abstract contract DCABaseUpgradeableCutted is
         // if not started position with the same split exists - increase deposit amount
         for (uint256 i = 0; i < depositor.positions.length; i++) {
             // calculate amount of passed investment epochs
-            uint256 passedInvestPeriods = (lastInvestmentTimestamp -
-                depositor.positions[i].investedAt) / investmentPeriod;
+            uint256 passedInvestPeriods = (lastInvestmentTimestamp - depositor.positions[i].investedAt) /
+                investmentPeriod;
 
-            if (
-                passedInvestPeriods == 0 &&
-                depositor.positions[i].amountSplit == amountSplit
-            ) {
+            if (passedInvestPeriods == 0 && depositor.positions[i].amountSplit == amountSplit) {
                 // not started position with the same amount split exists
                 // just add invested amount here
 
                 // (amount / amountSplit) * amountSplit exression will produce the same truncation loss as the one
                 // that happens during adding the funds to the investment queue
-                depositor.positions[i].depositAmount +=
-                    (amount / amountSplit) *
-                    amountSplit;
+                depositor.positions[i].depositAmount += (amount / amountSplit) * amountSplit;
 
                 emit Deposit(sender, amount, amountSplit);
                 return;
@@ -256,13 +220,7 @@ abstract contract DCABaseUpgradeableCutted is
         emit Deposit(sender, amount, amountSplit);
     }
 
-    function invest()
-        public
-        virtual
-        nonReentrant
-        whenNotPaused
-        nonEmergencyExited
-    {
+    function invest() public virtual nonReentrant whenNotPaused nonEmergencyExited {
         require(_msgSender() == dcaInvestor, "Unauthorized");
 
         // declare total amount for event data
@@ -277,8 +235,7 @@ abstract contract DCABaseUpgradeableCutted is
 
         // iterate over passed invest periods
         for (uint256 i = 0; i < passedInvestPeriods; i++) {
-            uint256 depositedAmount = globalInvestQueue
-                .getCurrentInvestmentAmountAndMoveNext();
+            uint256 depositedAmount = globalInvestQueue.getCurrentInvestmentAmountAndMoveNext();
 
             // nobody invested in the queue, just skip this period
             if (depositedAmount == 0) {
@@ -313,10 +270,7 @@ abstract contract DCABaseUpgradeableCutted is
             // if something was claimed invest rewards and increase current gauge
             if (claimedBluechipRewards > 0) {
                 claimedBluechipRewards = _invest(claimedBluechipRewards);
-                dcaHistory.increaseHistoricalGaugeAt(
-                    claimedBluechipRewards,
-                    dcaHistory.currentHistoricalIndex() - 1
-                );
+                dcaHistory.increaseHistoricalGaugeAt(claimedBluechipRewards, dcaHistory.currentHistoricalIndex() - 1);
 
                 // increase total amount for event
                 totalBluechipReceived += claimedBluechipRewards;
@@ -334,12 +288,7 @@ abstract contract DCABaseUpgradeableCutted is
         );
     }
 
-    function withdrawAll(bool convertBluechipIntoDepositAsset)
-        public
-        virtual
-        nonReentrant
-        whenNotPaused
-    {
+    function withdrawAll(bool convertBluechipIntoDepositAsset) public virtual nonReentrant whenNotPaused {
         if (isEmergencyExited()) {
             _emergencyWithdrawUserDeposit(_msgSender());
             return;
@@ -347,9 +296,7 @@ abstract contract DCABaseUpgradeableCutted is
         _withdrawAll(_msgSender(), convertBluechipIntoDepositAsset);
     }
 
-    function _withdrawAll(address sender, bool convertBluechipIntoDepositAsset)
-        private
-    {
+    function _withdrawAll(address sender, bool convertBluechipIntoDepositAsset) private {
         // define total not invested yet amount by user
         // and total bought bluechip asset amount
         uint256 notInvestedYet;
@@ -357,10 +304,9 @@ abstract contract DCABaseUpgradeableCutted is
 
         DCADepositor storage depositor = depositors[sender];
         for (uint256 i = 0; i < depositor.positions.length; i++) {
-            (
-                uint256 positionBluechipInvestment,
-                uint256 positionNotInvestedYet
-            ) = _computePositionWithdrawAll(depositor.positions[i]);
+            (uint256 positionBluechipInvestment, uint256 positionNotInvestedYet) = _computePositionWithdrawAll(
+                depositor.positions[i]
+            );
 
             // increase users total amount
             investedIntoBluechip += positionBluechipInvestment;
@@ -374,9 +320,7 @@ abstract contract DCABaseUpgradeableCutted is
         // if convertion requested swap bluechip -> deposit asset
         if (investedIntoBluechip != 0) {
             if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
-                investedIntoBluechip = _withdrawInvestedBluechip(
-                    investedIntoBluechip
-                );
+                investedIntoBluechip = _withdrawInvestedBluechip(investedIntoBluechip);
             }
 
             if (convertBluechipIntoDepositAsset) {
@@ -405,8 +349,7 @@ abstract contract DCABaseUpgradeableCutted is
         returns (uint256 investedIntoBluechip, uint256 notInvestedYet)
     {
         // calculate amount of passed investment epochs
-        uint256 passedInvestPeriods = (lastInvestmentTimestamp -
-            position.investedAt) / investmentPeriod;
+        uint256 passedInvestPeriods = (lastInvestmentTimestamp - position.investedAt) / investmentPeriod;
 
         // in case everything was already invested
         // just set amount of epochs to be equal to amount split
@@ -415,31 +358,23 @@ abstract contract DCABaseUpgradeableCutted is
         }
 
         // compute per period investment - depositAmount / split
-        uint256 perPeriodInvestment = position.depositAmount /
-            position.amountSplit;
+        uint256 perPeriodInvestment = position.depositAmount / position.amountSplit;
 
-        uint8 futureInvestmentsToRemove = position.amountSplit -
-            uint8(passedInvestPeriods);
+        uint8 futureInvestmentsToRemove = position.amountSplit - uint8(passedInvestPeriods);
 
         // remove not invested yet amount from invest queue
         if (futureInvestmentsToRemove > 0) {
-            globalInvestQueue.removeUserInvestment(
-                perPeriodInvestment,
-                futureInvestmentsToRemove
-            );
+            globalInvestQueue.removeUserInvestment(perPeriodInvestment, futureInvestmentsToRemove);
         }
 
         // if investment period already started then we should calculate
         // both not invested deposit asset and owned bluechip asset
         if (passedInvestPeriods > 0) {
-            (
-                uint256 bluechipInvestment,
-                uint256 depositAssetInvestment
-            ) = _removeUserInvestmentFromHistory(
-                    position,
-                    passedInvestPeriods,
-                    perPeriodInvestment
-                );
+            (uint256 bluechipInvestment, uint256 depositAssetInvestment) = _removeUserInvestmentFromHistory(
+                position,
+                passedInvestPeriods,
+                perPeriodInvestment
+            );
 
             investedIntoBluechip += bluechipInvestment;
             notInvestedYet += position.depositAmount - depositAssetInvestment;
@@ -451,10 +386,7 @@ abstract contract DCABaseUpgradeableCutted is
     }
 
     function withdrawBluechipFromPool() external onlyOwner {
-        require(
-            bluechipInvestmentState == BluechipInvestmentState.Investing,
-            "Invalid investment state"
-        );
+        require(bluechipInvestmentState == BluechipInvestmentState.Investing, "Invalid investment state");
 
         uint256 bluechipBalance = _totalBluechipInvested();
         uint256 actualReceived = _withdrawInvestedBluechip(bluechipBalance);
@@ -462,17 +394,11 @@ abstract contract DCABaseUpgradeableCutted is
 
         setBluechipInvestmentState(BluechipInvestmentState.Withdrawn);
 
-        emit StatusChanged(
-            BluechipInvestmentState.Investing,
-            BluechipInvestmentState.Withdrawn
-        );
+        emit StatusChanged(BluechipInvestmentState.Investing, BluechipInvestmentState.Withdrawn);
     }
 
     function reInvestBluechipIntoPool() external onlyOwner {
-        require(
-            bluechipInvestmentState == BluechipInvestmentState.Withdrawn,
-            "Invalid investment state"
-        );
+        require(bluechipInvestmentState == BluechipInvestmentState.Withdrawn, "Invalid investment state");
 
         uint256 bluechipBalance = _totalBluechipInvested();
         uint256 actualReceived = _invest(bluechipBalance);
@@ -480,16 +406,10 @@ abstract contract DCABaseUpgradeableCutted is
 
         setBluechipInvestmentState(BluechipInvestmentState.Investing);
 
-        emit StatusChanged(
-            BluechipInvestmentState.Withdrawn,
-            BluechipInvestmentState.Investing
-        );
+        emit StatusChanged(BluechipInvestmentState.Withdrawn, BluechipInvestmentState.Investing);
     }
 
-    function _spreadDiffAfterReinvestment(
-        uint256 bluechipBalance,
-        uint256 actualReceived
-    ) private {
+    function _spreadDiffAfterReinvestment(uint256 bluechipBalance, uint256 actualReceived) private {
         if (actualReceived > bluechipBalance) {
             // in case we received more increase current gauge
             dcaHistory.increaseHistoricalGaugeAt(
@@ -502,13 +422,8 @@ abstract contract DCABaseUpgradeableCutted is
             // _deductLossFromGauges(bluechipBalance - actualReceived);
 
             uint256 diff = bluechipBalance - actualReceived;
-            for (
-                uint256 i = dcaHistory.currentHistoricalIndex() - 1;
-                i >= 0;
-                i--
-            ) {
-                (, uint256 gaugeBluechipBalancee) = dcaHistory
-                    .historicalGaugeByIndex(i);
+            for (uint256 i = dcaHistory.currentHistoricalIndex() - 1; i >= 0; i--) {
+                (, uint256 gaugeBluechipBalancee) = dcaHistory.historicalGaugeByIndex(i);
 
                 // if gauge balance is higher then diff simply remove diff from it
                 if (gaugeBluechipBalancee >= diff) {
@@ -517,11 +432,7 @@ abstract contract DCABaseUpgradeableCutted is
                 } else {
                     // otherwise deduct as much as possible and go to the next one
                     diff -= gaugeBluechipBalancee;
-                    dcaHistory.decreaseHistoricalGaugeByIndex(
-                        i,
-                        0,
-                        gaugeBluechipBalancee
-                    );
+                    dcaHistory.decreaseHistoricalGaugeByIndex(i, 0, gaugeBluechipBalancee);
                 }
             }
         }
@@ -538,9 +449,7 @@ abstract contract DCABaseUpgradeableCutted is
         // if status Investing we should first withdraw bluechip from pool
         uint256 currentBluechipBalance;
         if (bluechipInvestmentState == BluechipInvestmentState.Investing) {
-            currentBluechipBalance = _withdrawInvestedBluechip(
-                _totalBluechipInvested()
-            );
+            currentBluechipBalance = _withdrawInvestedBluechip(_totalBluechipInvested());
         }
 
         // set status to withdrawn to refetch actual bluechip balance
@@ -554,15 +463,12 @@ abstract contract DCABaseUpgradeableCutted is
         // if deposit token != emergency exit token then swap it
         if (depositTokenInfo.token != emergencyExitDepositToken.token) {
             // swap deposit into emergency exit token
-            uint256 currentDepositTokenBalance = depositTokenInfo
-                .token
-                .balanceOf(address(this));
-            uint256 receivedEmergencyExitDepositAsset = router
-                .swapTokensForTokens(
-                    currentDepositTokenBalance,
-                    depositSwapPath,
-                    depositSwapBins
-                );
+            uint256 currentDepositTokenBalance = depositTokenInfo.token.balanceOf(address(this));
+            uint256 receivedEmergencyExitDepositAsset = router.swapTokensForTokens(
+                currentDepositTokenBalance,
+                depositSwapPath,
+                depositSwapBins
+            );
 
             // store token price for future conversions
             emergencySellDepositPrice =
@@ -577,12 +483,11 @@ abstract contract DCABaseUpgradeableCutted is
         // if bluechip token != emergency exit token then swap it
         if (_bluechipAddress() != address(emergencyExitBluechipToken.token)) {
             // swap bluechip into emergency exit token
-            uint256 receivedEmergencyExitBluechipAsset = router
-                .swapTokensForTokens(
-                    currentBluechipBalance,
-                    bluechipSwapPath,
-                    bluechipSwapBins
-                );
+            uint256 receivedEmergencyExitBluechipAsset = router.swapTokensForTokens(
+                currentBluechipBalance,
+                bluechipSwapPath,
+                bluechipSwapBins
+            );
 
             // store token price for future conversions
             emergencySellBluechipPrice =
@@ -597,10 +502,7 @@ abstract contract DCABaseUpgradeableCutted is
         // set proper strategy state
         setBluechipInvestmentState(BluechipInvestmentState.EmergencyExited);
 
-        emit StatusChanged(
-            BluechipInvestmentState.Investing,
-            BluechipInvestmentState.EmergencyExited
-        );
+        emit StatusChanged(BluechipInvestmentState.Investing, BluechipInvestmentState.EmergencyExited);
     }
 
     function _emergencyWithdrawUserDeposit(address sender) private {
@@ -609,10 +511,9 @@ abstract contract DCABaseUpgradeableCutted is
 
         DCADepositor storage depositor = depositors[sender];
         for (uint256 i = 0; i < depositor.positions.length; i++) {
-            (
-                uint256 positionBluechipInvestment,
-                uint256 positionNotInvestedYet
-            ) = _computePositionWithdrawAll(depositor.positions[i]);
+            (uint256 positionBluechipInvestment, uint256 positionNotInvestedYet) = _computePositionWithdrawAll(
+                depositor.positions[i]
+            );
 
             investedIntoBluechip += positionBluechipInvestment;
             notInvestedYet += positionNotInvestedYet;
@@ -625,8 +526,7 @@ abstract contract DCABaseUpgradeableCutted is
         // if deposit token != emergency exit token compute share
         if (depositTokenInfo.token != emergencyExitDepositToken.token) {
             uint256 payout = _scaleAmount(
-                (notInvestedYet * emergencySellDepositPrice) /
-                    depositTokenScale,
+                (notInvestedYet * emergencySellDepositPrice) / depositTokenScale,
                 depositTokenInfo.decimals,
                 emergencyExitDepositToken.decimals
             );
@@ -644,8 +544,7 @@ abstract contract DCABaseUpgradeableCutted is
         // if bluechip != emergency exit token compute share
         if (_bluechipAddress() != address(emergencyExitBluechipToken.token)) {
             uint256 payout = _scaleAmount(
-                (investedIntoBluechip * emergencySellBluechipPrice) /
-                    _bluechipTokenScale(),
+                (investedIntoBluechip * emergencySellBluechipPrice) / _bluechipTokenScale(),
                 _bluechipDecimals(),
                 emergencyExitBluechipToken.decimals
             );
@@ -662,18 +561,12 @@ abstract contract DCABaseUpgradeableCutted is
     }
 
     // ----- Base Class Setters -----
-    function setBluechipInvestmentState(BluechipInvestmentState newState)
-        private
-        onlyOwner
-    {
+    function setBluechipInvestmentState(BluechipInvestmentState newState) private onlyOwner {
         bluechipInvestmentState = newState;
     }
 
     function setDepositFee(DepositFee memory newDepositFee) public onlyOwner {
-        require(
-            newDepositFee.feeReceiver != address(0),
-            "Invalid fee receiver"
-        );
+        require(newDepositFee.feeReceiver != address(0), "Invalid fee receiver");
         require(newDepositFee.fee <= 10000, "Invalid fee percentage");
         depositFee = newDepositFee;
     }
@@ -697,13 +590,8 @@ abstract contract DCABaseUpgradeableCutted is
         investmentPeriod = newInvestmentPeriod;
     }
 
-    function setLastInvestmentTimestamp(uint256 newLastInvestmentTimestamp)
-        private
-    {
-        require(
-            newLastInvestmentTimestamp >= lastInvestmentTimestamp,
-            "Invalid last invest ts"
-        );
+    function setLastInvestmentTimestamp(uint256 newLastInvestmentTimestamp) private {
+        require(newLastInvestmentTimestamp >= lastInvestmentTimestamp, "Invalid last invest ts");
         lastInvestmentTimestamp = newLastInvestmentTimestamp;
     }
 
@@ -729,20 +617,12 @@ abstract contract DCABaseUpgradeableCutted is
         uint256[] memory bluechipToDepositBins
     ) public onlyOwner {
         require(
-            depositToBluechipPath[0] ==
-                bluechipToDepositPath[bluechipToDepositPath.length - 1] &&
-                depositToBluechipPath[depositToBluechipPath.length - 1] ==
-                bluechipToDepositPath[0],
+            depositToBluechipPath[0] == bluechipToDepositPath[bluechipToDepositPath.length - 1] &&
+                depositToBluechipPath[depositToBluechipPath.length - 1] == bluechipToDepositPath[0],
             "Invalid swap path"
         );
-        require(
-            depositToBluechipBins.length + 1 == depositToBluechipPath.length,
-            "depToBlue length incorrect"
-        );
-        require(
-            bluechipToDepositBins.length + 1 == bluechipToDepositPath.length,
-            "BlueToDep length incorrect"
-        );
+        require(depositToBluechipBins.length + 1 == depositToBluechipPath.length, "depToBlue length incorrect");
+        require(bluechipToDepositBins.length + 1 == bluechipToDepositPath.length, "BlueToDep length incorrect");
 
         depositToBluechipSwapPath = depositToBluechipPath;
         bluechipToDepositSwapPath = bluechipToDepositPath;
@@ -764,39 +644,21 @@ abstract contract DCABaseUpgradeableCutted is
         return _getPassedInvestPeriods() > 0 && !isEmergencyExited();
     }
 
-    function depositorInfo(address depositor)
-        public
-        view
-        virtual
-        returns (DCADepositor memory)
-    {
+    function depositorInfo(address depositor) public view virtual returns (DCADepositor memory) {
         return depositors[depositor];
     }
 
-    function equityValuation()
-        public
-        view
-        virtual
-        returns (DCAEquityValuation[] memory)
-    {
+    function equityValuation() public view virtual returns (DCAEquityValuation[] memory) {
         DCAEquityValuation[] memory valuation = new DCAEquityValuation[](1);
         if (isEmergencyExited()) {
-            valuation[0].totalDepositToken = emergencyExitDepositToken
-                .token
-                .balanceOf(address(this));
-            valuation[0].totalBluechipToken = emergencyExitBluechipToken
-                .token
-                .balanceOf(address(this));
-            valuation[0].bluechipToken = address(
-                emergencyExitBluechipToken.token
-            );
+            valuation[0].totalDepositToken = emergencyExitDepositToken.token.balanceOf(address(this));
+            valuation[0].totalBluechipToken = emergencyExitBluechipToken.token.balanceOf(address(this));
+            valuation[0].bluechipToken = address(emergencyExitBluechipToken.token);
 
             return valuation;
         }
 
-        valuation[0].totalDepositToken = depositTokenInfo.token.balanceOf(
-            address(this)
-        );
+        valuation[0].totalDepositToken = depositTokenInfo.token.balanceOf(address(this));
         valuation[0].totalBluechipToken = _totalBluechipInvested();
         valuation[0].bluechipToken = _bluechipAddress();
 
@@ -811,11 +673,7 @@ abstract contract DCABaseUpgradeableCutted is
         return globalInvestQueue.current;
     }
 
-    function getHistoricalGaugeAt(uint256 index)
-        external
-        view
-        returns (uint256, uint256)
-    {
+    function getHistoricalGaugeAt(uint256 index) external view returns (uint256, uint256) {
         return dcaHistory.historicalGaugeByIndex(index);
     }
 
@@ -824,8 +682,7 @@ abstract contract DCABaseUpgradeableCutted is
     }
 
     function isEmergencyExited() public view virtual returns (bool) {
-        return
-            bluechipInvestmentState == BluechipInvestmentState.EmergencyExited;
+        return bluechipInvestmentState == BluechipInvestmentState.EmergencyExited;
     }
 
     function depositToken() public view returns (IERC20Upgradeable) {
@@ -842,10 +699,7 @@ abstract contract DCABaseUpgradeableCutted is
         Position memory position,
         uint256 passedInvestPeriods,
         uint256 perPeriodInvestment
-    )
-        private
-        returns (uint256 bluechipInvestment, uint256 depositAssetInvestment)
-    {
+    ) private returns (uint256 bluechipInvestment, uint256 depositAssetInvestment) {
         // iterate over historical gauges since initial deposit
         for (
             uint256 j = position.investedAtHistoricalIndex;
@@ -853,24 +707,16 @@ abstract contract DCABaseUpgradeableCutted is
             j++
         ) {
             // total spent and received at selected investment day
-            (
-                uint256 totalAmountSpent,
-                uint256 totalAmountExchanged
-            ) = dcaHistory.historicalGaugeByIndex(j);
+            (uint256 totalAmountSpent, uint256 totalAmountExchanged) = dcaHistory.historicalGaugeByIndex(j);
 
             // calculate amount that user ownes in current gauge
-            uint256 depositorOwnedBluechip = (totalAmountExchanged *
-                perPeriodInvestment) / totalAmountSpent;
+            uint256 depositorOwnedBluechip = (totalAmountExchanged * perPeriodInvestment) / totalAmountSpent;
 
             bluechipInvestment += depositorOwnedBluechip;
             depositAssetInvestment += perPeriodInvestment;
 
             // decrease gauge info
-            dcaHistory.decreaseHistoricalGaugeByIndex(
-                j,
-                perPeriodInvestment,
-                depositorOwnedBluechip
-            );
+            dcaHistory.decreaseHistoricalGaugeByIndex(j, perPeriodInvestment, depositorOwnedBluechip);
         }
 
         return (bluechipInvestment, depositAssetInvestment);
@@ -898,10 +744,7 @@ abstract contract DCABaseUpgradeableCutted is
 
     function _claimRewards() internal virtual returns (uint256);
 
-    function _withdrawInvestedBluechip(uint256 amount)
-        internal
-        virtual
-        returns (uint256);
+    function _withdrawInvestedBluechip(uint256 amount) internal virtual returns (uint256);
 
     function _transferBluechip(address to, uint256 amount) internal virtual;
 

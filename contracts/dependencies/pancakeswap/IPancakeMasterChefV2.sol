@@ -14,10 +14,7 @@ interface IPancakeMasterChefV2 {
 
     function poolLength() external view returns (uint256 pools);
 
-    function userInfo(uint256 poolId, address user)
-        external
-        view
-        returns (UserInfo memory);
+    function userInfo(uint256 poolId, address user) external view returns (UserInfo memory);
 
     function deposit(uint256 pid, uint256 amount) external;
 

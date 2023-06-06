@@ -6,6 +6,7 @@ import "../InvestmentLimitUpgradeable.sol";
 import "../../interfaces/IERC20UpgradeableExt.sol";
 import "../../interfaces/IInvestmentToken.sol";
 import "../../interfaces/IPortfolio.sol";
+import { IPriceOracle } from "../../interfaces/IPriceOracle.sol";
 import "../../libraries/InvestableLib.sol";
 import { PortfolioBaseAumLib } from "./libraries/PortfolioBaseAumLib.sol";
 import { PortfolioBaseFeeLib } from "./libraries/PortfolioBaseFeeLib.sol";
@@ -27,6 +28,7 @@ struct PortfolioArgs {
     uint256 totalInvestmentLimit;
     uint256 investmentLimitPerAddress;
     RoleToUsers[] roleToUsersArray;
+    IPriceOracle priceOracle;
 }
 
 abstract contract PortfolioBaseUpgradeable is
@@ -46,27 +48,21 @@ abstract contract PortfolioBaseUpgradeable is
 
     IInvestmentToken internal investmentToken;
     IERC20UpgradeableExt internal depositToken;
-    uint256[20] private __gap;
+    IPriceOracle public priceOracle;
+    uint256[19] private __gap;
 
     // solhint-disable-next-line
-    function __PortfolioBaseUpgradeable_init(
-        PortfolioArgs calldata portfolioArgs
-    ) internal onlyInitializing {
+    function __PortfolioBaseUpgradeable_init(PortfolioArgs calldata portfolioArgs) internal onlyInitializing {
         __Context_init();
         __ReentrancyGuard_init();
         __ERC165_init();
 
-        __FeeUpgradeable_init(
-            portfolioArgs.feeArgs,
-            portfolioArgs.depositToken.decimals()
-        );
+        __FeeUpgradeable_init(portfolioArgs.feeArgs, portfolioArgs.depositToken.decimals());
 
-        __InvestmentLimitUpgradeable_init(
-            portfolioArgs.totalInvestmentLimit,
-            portfolioArgs.investmentLimitPerAddress
-        );
+        __InvestmentLimitUpgradeable_init(portfolioArgs.totalInvestmentLimit, portfolioArgs.investmentLimitPerAddress);
         investmentToken = portfolioArgs.investmentToken;
         depositToken = portfolioArgs.depositToken;
+        priceOracle = portfolioArgs.priceOracle;
     }
 
     function _addInvestable(
@@ -74,57 +70,26 @@ abstract contract PortfolioBaseUpgradeable is
         uint24[] calldata newAllocations,
         NameValuePair[] calldata params
     ) internal virtual {
-        PortfolioBaseManagementLib.addInvestable(
-            investable,
-            newAllocations,
-            params,
-            investableDescs
-        );
+        PortfolioBaseManagementLib.addInvestable(investable, newAllocations, params, investableDescs);
         emit InvestableAdd(investable, newAllocations, params);
     }
 
-    function _removeInvestable(
-        IInvestable investable,
-        uint24[] calldata newAllocations
-    ) internal virtual {
-        PortfolioBaseManagementLib.removeInvestable(
-            investable,
-            newAllocations,
-            investableDescs
-        );
+    function _removeInvestable(IInvestable investable, uint24[] calldata newAllocations) internal virtual {
+        PortfolioBaseManagementLib.removeInvestable(investable, newAllocations, investableDescs);
         emit InvestableRemove(investable, newAllocations);
     }
 
-    function _changeInvestable(
-        IInvestable investable,
-        NameValuePair[] calldata params
-    ) internal virtual {
-        PortfolioBaseManagementLib.changeInvestable(
-            investable,
-            params,
-            investableDescs
-        );
+    function _changeInvestable(IInvestable investable, NameValuePair[] calldata params) internal virtual {
+        PortfolioBaseManagementLib.changeInvestable(investable, params, investableDescs);
         emit InvestableChange(investable, params);
     }
 
-    function _setTargetInvestableAllocations(uint24[] calldata newAllocations)
-        internal
-        virtual
-    {
-        PortfolioBaseManagementLib.setTargetInvestableAllocations(
-            newAllocations,
-            investableDescs
-        );
+    function _setTargetInvestableAllocations(uint24[] calldata newAllocations) internal virtual {
+        PortfolioBaseManagementLib.setTargetInvestableAllocations(newAllocations, investableDescs);
         emit TargetInvestableAllocationsSet(newAllocations);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IAum).interfaceId ||
             interfaceId == type(IFee).interfaceId ||
@@ -133,12 +98,13 @@ abstract contract PortfolioBaseUpgradeable is
             super.supportsInterface(interfaceId);
     }
 
-    function deposit(
+    function _deposit(
         uint256 depositTokenAmountIn,
         uint256 minimumDepositTokenAmountOut,
         address investmentTokenReceiver,
-        NameValuePair[] calldata params
-    ) public virtual override nonReentrant {
+        NameValuePair[] calldata params,
+        bool depositTokenAlreadyTransferred
+    ) internal virtual nonReentrant {
         address msgSender = _msgSender();
 
         // 1. emitting event for portfolios at the higher level first
@@ -155,25 +121,24 @@ abstract contract PortfolioBaseUpgradeable is
                 investmentToken,
                 msgSender,
                 getTotalInvestmentLimit(),
-                getInvestmentLimitPerAddress()
+                getInvestmentLimitPerAddress(),
+                depositTokenAlreadyTransferred,
+                priceOracle
             ),
             investableDescs,
             params
         );
     }
 
-    function withdraw(
+    function _withdraw(
         uint256 investmentTokenAmountIn,
         uint256 minimumDepositTokenAmountOut,
         address depositTokenReceiver,
-        NameValuePair[] calldata params
-    ) public virtual override nonReentrant {
+        NameValuePair[] calldata params,
+        bool shouldTransferDepositTokens
+    ) public virtual nonReentrant {
         address msgSender = _msgSender();
-        emit Withdrawal(
-            msgSender,
-            depositTokenReceiver,
-            investmentTokenAmountIn
-        );
+        emit Withdrawal(msgSender, depositTokenReceiver, investmentTokenAmountIn);
 
         PortfolioBaseInvestmentLib.withdraw(
             WithdrawArgs(
@@ -182,22 +147,17 @@ abstract contract PortfolioBaseUpgradeable is
                 depositTokenReceiver,
                 depositToken,
                 investmentToken,
-                msgSender
+                msgSender,
+                shouldTransferDepositTokens
             ),
             investableDescs,
             params
         );
     }
 
-    function _takePerformanceFee(NameValuePair[] calldata params)
-        internal
-        virtual
-    {}
+    function _takePerformanceFee(NameValuePair[] calldata params) internal virtual {}
 
-    function _takeManagementFee(NameValuePair[] calldata params)
-        internal
-        virtual
-    {}
+    function _takeManagementFee(NameValuePair[] calldata params) internal virtual {}
 
     // workaround for 'stack too deep' error
     struct RebalanceLocalVars {
@@ -213,11 +173,7 @@ abstract contract PortfolioBaseUpgradeable is
         NameValuePair[][] calldata withdrawParams
     ) internal virtual nonReentrant {
         PortfolioBaseManagementLib._rebalance(
-            RebalanceArgs(
-                minimumDepositTokenAmountOut,
-                depositToken,
-                investmentToken
-            ),
+            RebalanceArgs(minimumDepositTokenAmountOut, depositToken, investmentToken),
             investableDescs,
             depositParams,
             withdrawParams
@@ -225,23 +181,11 @@ abstract contract PortfolioBaseUpgradeable is
         emit Rebalance();
     }
 
-    function getAssetBalances()
-        external
-        view
-        virtual
-        override
-        returns (Balance[] memory)
-    {
+    function getAssetBalances() external view virtual override returns (Balance[] memory) {
         return PortfolioBaseAumLib.getAssetBalances(investableDescs);
     }
 
-    function getLiabilityBalances()
-        external
-        view
-        virtual
-        override
-        returns (Balance[] memory liabilityBalances)
-    {}
+    function getLiabilityBalances() external view virtual override returns (Balance[] memory liabilityBalances) {}
 
     function getAssetValuations(bool shouldMaximise, bool shouldIncludeAmmPrice)
         public
@@ -250,24 +194,13 @@ abstract contract PortfolioBaseUpgradeable is
         override
         returns (Valuation[] memory)
     {
-        return
-            PortfolioBaseAumLib.getAssetValuations(
-                shouldMaximise,
-                shouldIncludeAmmPrice,
-                investableDescs
-            );
+        return PortfolioBaseAumLib.getAssetValuations(shouldMaximise, shouldIncludeAmmPrice, investableDescs);
     }
 
     function getLiabilityValuations(
         bool, /*shouldMaximise*/
         bool /*shouldIncludeAmmPrice*/
-    )
-        public
-        view
-        virtual
-        override
-        returns (Valuation[] memory liabilityValuations)
-    {}
+    ) public view virtual override returns (Valuation[] memory liabilityValuations) {}
 
     function getEquityValuation(bool shouldMaximise, bool shouldIncludeAmmPrice)
         public
@@ -276,21 +209,10 @@ abstract contract PortfolioBaseUpgradeable is
         override
         returns (uint256)
     {
-        return
-            PortfolioBaseAumLib.getEquityValuation(
-                shouldMaximise,
-                shouldIncludeAmmPrice,
-                investableDescs
-            );
+        return PortfolioBaseAumLib.getEquityValuation(shouldMaximise, shouldIncludeAmmPrice, investableDescs);
     }
 
-    function getTotalDepositFee(NameValuePair[] calldata params)
-        external
-        view
-        virtual
-        override
-        returns (uint24)
-    {
+    function getTotalDepositFee(NameValuePair[] calldata params) external view virtual override returns (uint24) {
         return
             PortfolioBaseFeeLib.calculateEmbeddedFeeTargetAllocation(
                 PortfolioBaseFeeLib.FeeType.Deposit,
@@ -299,13 +221,7 @@ abstract contract PortfolioBaseUpgradeable is
             ) + getDepositFee(params);
     }
 
-    function getTotalWithdrawalFee(NameValuePair[] calldata params)
-        external
-        view
-        virtual
-        override
-        returns (uint24)
-    {
+    function getTotalWithdrawalFee(NameValuePair[] calldata params) external view virtual override returns (uint24) {
         return
             PortfolioBaseFeeLib.calculateEmbeddedFeeActualAllocation(
                 PortfolioBaseFeeLib.FeeType.Withdrawal,
@@ -314,13 +230,7 @@ abstract contract PortfolioBaseUpgradeable is
             ) + getWithdrawalFee(params);
     }
 
-    function getTotalPerformanceFee(NameValuePair[] calldata params)
-        external
-        view
-        virtual
-        override
-        returns (uint24)
-    {
+    function getTotalPerformanceFee(NameValuePair[] calldata params) external view virtual override returns (uint24) {
         return
             PortfolioBaseFeeLib.calculateEmbeddedFeeActualAllocation(
                 PortfolioBaseFeeLib.FeeType.Performance,
@@ -329,13 +239,7 @@ abstract contract PortfolioBaseUpgradeable is
             ) + getPerformanceFee(params);
     }
 
-    function getTotalManagementFee(NameValuePair[] calldata params)
-        external
-        view
-        virtual
-        override
-        returns (uint24)
-    {
+    function getTotalManagementFee(NameValuePair[] calldata params) external view virtual override returns (uint24) {
         return
             PortfolioBaseFeeLib.calculateEmbeddedFeeActualAllocation(
                 PortfolioBaseFeeLib.FeeType.Management,
@@ -344,59 +248,27 @@ abstract contract PortfolioBaseUpgradeable is
             ) + getManagementFee(params);
     }
 
-    function getDepositToken()
-        external
-        view
-        virtual
-        override
-        returns (IERC20Upgradeable)
-    {
+    function getDepositToken() external view virtual override returns (IERC20Upgradeable) {
         return depositToken;
     }
 
-    function _setInvestmentToken(IInvestmentToken investmentToken_)
-        internal
-        virtual
-    {
+    function _setInvestmentToken(IInvestmentToken investmentToken_) internal virtual {
         investmentToken = investmentToken_;
     }
 
-    function getInvestmentToken()
-        external
-        view
-        virtual
-        override
-        returns (IInvestmentToken)
-    {
+    function getInvestmentToken() external view virtual override returns (IInvestmentToken) {
         return investmentToken;
     }
 
-    function getInvestmentTokenSupply()
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function getInvestmentTokenSupply() public view virtual override returns (uint256) {
         return investmentToken.totalSupply();
     }
 
-    function getInvestmentTokenBalanceOf(address account)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function getInvestmentTokenBalanceOf(address account) public view virtual override returns (uint256) {
         return investmentToken.balanceOf(account);
     }
 
-    function claimFee(NameValuePair[] calldata params)
-        public
-        virtual
-        override
-        nonReentrant
-    {}
+    function claimFee(NameValuePair[] calldata params) public virtual override nonReentrant {}
 
     function getInvestables() external view returns (InvestableDesc[] memory) {
         return investableDescs;

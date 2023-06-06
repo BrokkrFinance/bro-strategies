@@ -8,17 +8,11 @@ interface IDCA {
 
     function withdrawAll(bool convertBluechipIntoDepositAsset) external;
 
-    function withdrawAll(
-        uint256 positionIndex,
-        bool convertBluechipIntoDepositAsset
-    ) external;
+    function withdrawAll(uint256 positionIndex, bool convertBluechipIntoDepositAsset) external;
 
     function withdrawBluechip(bool convertBluechipIntoDepositAsset) external;
 
-    function withdrawBluechip(
-        uint256 positionIndex,
-        bool convertBluechipIntoDepositAsset
-    ) external;
+    function withdrawBluechip(uint256 positionIndex, bool convertBluechipIntoDepositAsset) external;
 
     function depositToken() external view returns (IERC20Upgradeable);
 }

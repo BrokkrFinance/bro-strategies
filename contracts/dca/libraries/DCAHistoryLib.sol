@@ -39,11 +39,7 @@ library DCAHistoryLib {
         history.gauges[index].amountExchanged -= amountExchanged;
     }
 
-    function currentHistoricalIndex(DCAHistory storage history)
-        internal
-        view
-        returns (uint256)
-    {
+    function currentHistoricalIndex(DCAHistory storage history) internal view returns (uint256) {
         return history.current;
     }
 
@@ -53,9 +49,6 @@ library DCAHistoryLib {
         returns (uint256, uint256)
     {
         require(index <= history.current, "DCAHistoryLib: Out of bounds");
-        return (
-            history.gauges[index].amountSpent,
-            history.gauges[index].amountExchanged
-        );
+        return (history.gauges[index].amountSpent, history.gauges[index].amountExchanged);
     }
 }

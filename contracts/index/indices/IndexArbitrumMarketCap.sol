@@ -15,10 +15,7 @@ contract IndexArbitrumMarketCap is UUPSUpgradeable, IndexArbitrum {
         _disableInitializers();
     }
 
-    function initialize(IndexStrategyInitParams calldata initParams)
-        external
-        initializer
-    {
+    function initialize(IndexStrategyInitParams calldata initParams) external initializer {
         __UUPSUpgradeable_init();
         __IndexStrategyUpgradeable_init(initParams);
     }

@@ -35,10 +35,7 @@ interface ITraderJoeLBRouter {
         uint256 deadline
     ) external returns (uint256 amountX, uint256 amountY);
 
-    function getPriceFromId(address lbPair, uint24 id)
-        external
-        view
-        returns (uint256);
+    function getPriceFromId(address lbPair, uint24 id) external view returns (uint256);
 
     function swapExactTokensForTokens(
         uint256 amountIn,
