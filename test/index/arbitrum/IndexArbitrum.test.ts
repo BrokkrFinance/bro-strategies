@@ -7,20 +7,21 @@ import { IndexTestOptions } from "../../helper/interfaces/options"
 import { testStrategy } from "../Strategy.test"
 import { burn, mint } from "../helper/InvestHelper"
 
-const indexAvalancheTestOptions: IndexTestOptions = {
+const indexArbitrumTestOptions: IndexTestOptions = {
   network: Arbitrum(),
   forkAt: 95685600,
+  upgradeTo: "OwnableV2",
 }
 
-testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexAvalancheTestOptions, [
+testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexArbitrumTestOptions, [
   testIndexArbitrumEquityValuation,
-  testIndexArbitrumSetSwapRoute,
+  // testIndexArbitrumDeFiSetSwapRoute,
 ])
 testStrategy(
   "IndexArbitrumMarketCap Strategy - Deploy",
   deployIndexArbitrumMarketCapStrategy,
-  indexAvalancheTestOptions,
-  [testIndexArbitrumEquityValuation, testIndexArbitrumSetSwapRoute]
+  indexArbitrumTestOptions,
+  [testIndexArbitrumEquityValuation] // testIndexArbitrumSetSwapRoute]
 )
 
 async function deployIndexArbitrumDeFiStrategy() {

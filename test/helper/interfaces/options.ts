@@ -18,4 +18,5 @@ export interface StrategyTestOptions {
 export interface IndexTestOptions {
   network: Network
   forkAt: number
+  upgradeTo: string
 }

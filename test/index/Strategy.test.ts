@@ -11,6 +11,7 @@ import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyOracle } from "./StrategyOracle.test"
 import { testStrategyPausable } from "./StrategyPausable.test"
 import { testStrategyRebalance } from "./StrategyRebalance.test"
+import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
 export function testStrategy(
@@ -83,6 +84,9 @@ export function testStrategy(
       // wNATIVE.
       this.wNATIVE = await this.strategy.wNATIVE()
 
+      // Upgradeability test to.
+      this.upgradeTo = strategyTestOptions.upgradeTo
+
       this.snapshot = await takeSnapshot()
     })
 
@@ -98,6 +102,7 @@ export function testStrategy(
     testStrategyOracle()
     testStrategyPausable()
     testStrategyRebalance()
+    testStrategyUpgradeable()
     testStrategyWithdraw()
 
     for (const strategySpecificTest of strategySpecificTests) {

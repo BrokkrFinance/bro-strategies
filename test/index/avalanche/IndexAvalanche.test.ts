@@ -11,6 +11,7 @@ import { burn, mint } from "../helper/InvestHelper"
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Avalanche(),
   forkAt: 30337122,
+  upgradeTo: "OwnableV2",
 }
 
 testStrategy("IndexAvalancheDeFi Strategy - Deploy", deployIndexAvalancheDeFiStrategy, indexAvalancheTestOptions, [
