@@ -58,7 +58,7 @@ function testStargateUSDCAum() {
 
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -68,7 +68,7 @@ function testStargateUSDCAum() {
       const lpTokenContract = await ethers.getContractAt(StargateLPTokenABI, Stargate.usdcLPToken)
       const totalSupply = await lpTokenContract.totalSupply()
       const totalLiquidity = await lpTokenContract.totalLiquidity()
-      const lpBalance = ethers.utils.parseUnits("100", 6).mul(totalSupply).div(totalLiquidity)
+      const lpBalance = ethers.utils.parseUnits("10", this.depositTokenDecimals).mul(totalSupply).div(totalLiquidity)
 
       const assetBalancesAfter = await this.strategy.getAssetBalances()
       expect(assetBalancesAfter[0].asset.toLowerCase()).to.equal(Stargate.usdcLPToken.toLowerCase())
@@ -82,15 +82,15 @@ function testStargateUSDCAum() {
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
       expect(assetValuationsAfter[0].asset.toLowerCase()).to.equal(Stargate.usdcLPToken.toLowerCase())
       expect(assetValuationsAfter[0].valuation).to.approximately(
-        ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation),
-        getErrorRange(ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation))
+        ethers.utils.parseUnits("10", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation),
+        getErrorRange(ethers.utils.parseUnits("10", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
+        ethers.utils.parseUnits("10", this.depositTokenDecimals).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("10", this.depositTokenDecimals).add(this.equityValuation))
       )
     })
 
@@ -101,7 +101,7 @@ function testStargateUSDCAum() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("50", 6),
+          amount: ethers.utils.parseUnits("5", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -122,7 +122,7 @@ function testStargateUSDCAum() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("50", 6),
+          amount: ethers.utils.parseUnits("5", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -142,7 +142,7 @@ function testStargateUSDCAum() {
       const lpTokenContract = await ethers.getContractAt(StargateLPTokenABI, Stargate.usdcLPToken)
       const totalSupply = await lpTokenContract.totalSupply()
       const totalLiquidity = await lpTokenContract.totalLiquidity()
-      const lpBalance = ethers.utils.parseUnits("50", 6).mul(totalSupply).div(totalLiquidity)
+      const lpBalance = ethers.utils.parseUnits("5", this.depositTokenDecimals).mul(totalSupply).div(totalLiquidity)
 
       const assetBalancesAfter = await this.strategy.getAssetBalances()
       expect(assetBalancesAfter[0].asset.toLowerCase()).to.equal(Stargate.usdcLPToken.toLowerCase())
@@ -156,15 +156,15 @@ function testStargateUSDCAum() {
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
       expect(assetValuationsAfter[0].asset.toLowerCase()).to.equal(Stargate.usdcLPToken.toLowerCase())
       expect(assetValuationsAfter[0].valuation).to.approximately(
-        ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation),
-        getErrorRange(ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation))
+        ethers.utils.parseUnits("5", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation),
+        getErrorRange(ethers.utils.parseUnits("5", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("50", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
+        ethers.utils.parseUnits("5", this.depositTokenDecimals).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("5", this.depositTokenDecimals).add(this.equityValuation))
       )
     })
   })
@@ -223,7 +223,7 @@ function testStargateUSDTAum() {
 
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -233,7 +233,7 @@ function testStargateUSDTAum() {
       const lpTokenContract = await ethers.getContractAt(StargateLPTokenABI, Stargate.usdtLPToken)
       const totalSupply = await lpTokenContract.totalSupply()
       const totalLiquidity = await lpTokenContract.totalLiquidity()
-      const lpBalance = ethers.utils.parseUnits("100", 6).mul(totalSupply).div(totalLiquidity)
+      const lpBalance = ethers.utils.parseUnits("10", this.depositTokenDecimals).mul(totalSupply).div(totalLiquidity)
 
       const assetBalances = await this.strategy.getAssetBalances()
       expect(assetBalances[0].asset.toLowerCase()).to.equal(Stargate.usdtLPToken.toLowerCase())
@@ -247,15 +247,15 @@ function testStargateUSDTAum() {
       const assetValuations = await this.strategy.getAssetValuations(true, false)
       expect(assetValuations[0].asset.toLowerCase()).to.equal(Stargate.usdtLPToken.toLowerCase())
       expect(assetValuations[0].valuation).to.approximately(
-        ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation),
-        getErrorRange(ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation))
+        ethers.utils.parseUnits("10", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation),
+        getErrorRange(ethers.utils.parseUnits("10", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
+        ethers.utils.parseUnits("10", this.depositTokenDecimals).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("10", this.depositTokenDecimals).add(this.equityValuation))
       )
     })
 
@@ -266,7 +266,7 @@ function testStargateUSDTAum() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("50", 6),
+          amount: ethers.utils.parseUnits("5", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -287,7 +287,7 @@ function testStargateUSDTAum() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("50", 6),
+          amount: ethers.utils.parseUnits("5", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -307,7 +307,7 @@ function testStargateUSDTAum() {
       const lpTokenContract = await ethers.getContractAt(StargateLPTokenABI, Stargate.usdtLPToken)
       const totalSupply = await lpTokenContract.totalSupply()
       const totalLiquidity = await lpTokenContract.totalLiquidity()
-      const lpBalance = ethers.utils.parseUnits("50", 6).mul(totalSupply).div(totalLiquidity)
+      const lpBalance = ethers.utils.parseUnits("5", this.depositTokenDecimals).mul(totalSupply).div(totalLiquidity)
 
       const assetBalancesAfter = await this.strategy.getAssetBalances()
       expect(assetBalancesAfter[0].asset.toLowerCase()).to.equal(Stargate.usdtLPToken.toLowerCase())
@@ -321,15 +321,15 @@ function testStargateUSDTAum() {
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
       expect(assetValuationsAfter[0].asset.toLowerCase()).to.equal(Stargate.usdtLPToken.toLowerCase())
       expect(assetValuationsAfter[0].valuation).to.approximately(
-        ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation),
-        getErrorRange(ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation))
+        ethers.utils.parseUnits("5", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation),
+        getErrorRange(ethers.utils.parseUnits("5", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("50", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
+        ethers.utils.parseUnits("5", this.depositTokenDecimals).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("5", this.depositTokenDecimals).add(this.equityValuation))
       )
     })
   })

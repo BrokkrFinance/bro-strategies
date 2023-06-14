@@ -118,7 +118,7 @@ function testRebalanceSafetyLimits() {
       const lpTokenAmountBefore = (await this.strategy.getAssetBalances())[1].balance
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -132,7 +132,11 @@ function testRebalanceSafetyLimits() {
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .repayDebt(repayDebtAmount, [], this.equityValuation.add(ethers.utils.parseUnits("100", 6)))
+          .repayDebt(
+            repayDebtAmount,
+            [],
+            this.equityValuation.add(ethers.utils.parseUnits("10", this.depositTokenDecimals))
+          )
       ).to.be.reverted
     })
 
@@ -140,7 +144,7 @@ function testRebalanceSafetyLimits() {
       const lpTokenAmountBefore = (await this.strategy.getAssetBalances())[1].balance
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -154,7 +158,11 @@ function testRebalanceSafetyLimits() {
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .repayDebt(repayDebtAmount, [], this.equityValuation.add(ethers.utils.parseUnits("99", 6)))
+          .repayDebt(
+            repayDebtAmount,
+            [],
+            this.equityValuation.add(ethers.utils.parseUnits("9.9", this.depositTokenDecimals))
+          )
       ).to.not.be.reverted
     })
 
@@ -162,7 +170,7 @@ function testRebalanceSafetyLimits() {
       const aaveDebtBefore = await this.strategy.getAaveDebt()
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -176,7 +184,11 @@ function testRebalanceSafetyLimits() {
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .increaseDebt(increaseDebtAmount, [], this.equityValuation.add(ethers.utils.parseUnits("100", 6)))
+          .increaseDebt(
+            increaseDebtAmount,
+            [],
+            this.equityValuation.add(ethers.utils.parseUnits("10", this.depositTokenDecimals))
+          )
       ).to.be.reverted
     })
 
@@ -184,7 +196,7 @@ function testRebalanceSafetyLimits() {
       const aaveDebtBefore = await this.strategy.getAaveDebt()
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -198,14 +210,18 @@ function testRebalanceSafetyLimits() {
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .increaseDebt(increaseDebtAmount, [], this.equityValuation.add(ethers.utils.parseUnits("99", 6)))
+          .increaseDebt(
+            increaseDebtAmount,
+            [],
+            this.equityValuation.add(ethers.utils.parseUnits("9.9", this.depositTokenDecimals))
+          )
       ).to.not.be.reverted
     })
 
     it("decrease supply call should fail, if the limit is set too high", async function () {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -216,14 +232,18 @@ function testRebalanceSafetyLimits() {
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .decreaseSupply(decreaseSupplyAmount, [], this.equityValuation.add(ethers.utils.parseUnits("100", 6)))
+          .decreaseSupply(
+            decreaseSupplyAmount,
+            [],
+            this.equityValuation.add(ethers.utils.parseUnits("10", this.depositTokenDecimals))
+          )
       ).to.be.reverted
     })
 
     it("decrease supply call should succeed, if the limit is set too a reasonable level", async function () {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -231,11 +251,15 @@ function testRebalanceSafetyLimits() {
         .success()
       const initialState: StateSnapshot = await getStateSnapshot(this.strategy)
 
-      const decreaseSupplyAmount = ethers.utils.parseUnits("3", 6)
+      const decreaseSupplyAmount = ethers.utils.parseUnits("3", this.depositTokenDecimals)
       await expect(
         this.strategy
           .connect(this.maintainerMember)
-          .decreaseSupply(decreaseSupplyAmount, [], this.equityValuation.add(ethers.utils.parseUnits("99", 6)))
+          .decreaseSupply(
+            decreaseSupplyAmount,
+            [],
+            this.equityValuation.add(ethers.utils.parseUnits("9.9", this.depositTokenDecimals))
+          )
       ).to.not.be.reverted
     })
   })
@@ -247,7 +271,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // single deposit by user0
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -289,7 +313,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // single deposit by user0
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -325,7 +349,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // single deposit by user0
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -361,7 +385,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // single deposit by user0
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -375,7 +399,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // single deposit by user1
       await this.investHelper
         .deposit(this.strategy, this.user1, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -389,7 +413,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // partial withdrawal by user0
       await this.investHelper
         .deposit(this.investable, this.user0, {
-          amount: ethers.utils.parseUnits("70", 6),
+          amount: ethers.utils.parseUnits("7", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -403,7 +427,7 @@ function testCollaterizationAndDeltaNeutrality() {
       // partial withdrawal by user1
       await this.investHelper
         .deposit(this.investable, this.user1, {
-          amount: ethers.utils.parseUnits("70", 6),
+          amount: ethers.utils.parseUnits("7", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -422,7 +446,7 @@ function testAum() {
     it("should succeed after a single deposit", async function () {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],

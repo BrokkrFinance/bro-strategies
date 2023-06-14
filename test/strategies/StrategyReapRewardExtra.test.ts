@@ -11,7 +11,7 @@ export function testStrategyReapRewardExtra() {
     it("should succeed to earn larger reward when reap after 1 year", async function () {
       await this.investHelper
         .deposit(this.investable, this.user0, {
-          amount: ethers.utils.parseUnits("1000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -40,7 +40,7 @@ export function testStrategyReapRewardExtra() {
 
       await this.investHelper
         .deposit(this.investable, this.user0, {
-          amount: ethers.utils.parseUnits("1000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],

@@ -40,9 +40,10 @@ export function testStrategy(
       // Get ERC20 tokens.
       const depositTokenAddr: string = DepositTokens.get(strategyTestOptions.network.name)!
       this.depositToken = await ethers.getContractAt(
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
         depositTokenAddr
       )
+      this.depositTokenDecimals = await this.depositToken.decimals()
 
       // Users.
       this.signers = await ethers.getSigners()

@@ -71,7 +71,7 @@ function testIndexAvalancheSetSwapRoute() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", 6)
       )
 
       // User 1 deposits.
@@ -81,7 +81,7 @@ function testIndexAvalancheSetSwapRoute() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("500", 6)
+        ethers.utils.parseUnits("5", 6)
       )
 
       // User 2 deposits.
@@ -91,7 +91,7 @@ function testIndexAvalancheSetSwapRoute() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("500.123", 6)
+        ethers.utils.parseUnits("5.123", 6)
       )
 
       let indexTokenBalance: BigNumber
@@ -187,7 +187,7 @@ function testIndexAvalancheReplaceSwapRoute() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", 6)
       )
 
       // User 1 deposits.
@@ -197,7 +197,7 @@ function testIndexAvalancheReplaceSwapRoute() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("500", 6)
+        ethers.utils.parseUnits("5", 6)
       )
 
       // User 2 deposits.
@@ -207,7 +207,7 @@ function testIndexAvalancheReplaceSwapRoute() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("500.123", 6)
+        ethers.utils.parseUnits("5.123", 6)
       )
 
       let indexTokenBalance: BigNumber

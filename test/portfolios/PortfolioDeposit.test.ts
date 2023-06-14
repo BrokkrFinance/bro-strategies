@@ -15,7 +15,7 @@ export function testPortfolioDeposit() {
       // The second user deposits directly.
       await this.investHelper
         .deposit(investable, this.user1, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -25,7 +25,7 @@ export function testPortfolioDeposit() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -40,7 +40,7 @@ export function testPortfolioDeposit() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -50,7 +50,7 @@ export function testPortfolioDeposit() {
       // The second user deposits directly.
       await this.investHelper
         .deposit(investable, this.user1, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -65,7 +65,7 @@ export function testPortfolioDeposit() {
       // The third user deposits directly.
       await this.investHelper
         .deposit(investable, this.user2, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user2.address,
           params: [],
@@ -75,7 +75,7 @@ export function testPortfolioDeposit() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -85,7 +85,7 @@ export function testPortfolioDeposit() {
       // The second user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user1, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -100,7 +100,7 @@ export function testPortfolioDeposit() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -110,7 +110,7 @@ export function testPortfolioDeposit() {
       // The second user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user1, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -120,7 +120,7 @@ export function testPortfolioDeposit() {
       // The third user deposits directly.
       await this.investHelper
         .deposit(investable, this.user2, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user2.address,
           params: [],
@@ -134,7 +134,7 @@ export function testPortfolioDeposit() {
 
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -151,7 +151,10 @@ export function testPortfolioDeposit() {
         const allocationPercentage = await investableDesc.allocationPercentage
 
         const investable = await ethers.getContractAt("IInvestable", investableAddr)
-        const investableDepositAmount = ethers.utils.parseUnits("3000", 6).mul(allocationPercentage).div(1e5)
+        const investableDepositAmount = ethers.utils
+          .parseUnits("10", this.depositTokenDecimals)
+          .mul(allocationPercentage)
+          .div(1e5)
 
         expect(assetBalancesAfter[i].asset).to.equal(await investable.getInvestmentToken())
         expect(assetBalancesAfter[i].balance).to.approximately(
@@ -174,7 +177,7 @@ export function testPortfolioDeposit() {
 
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("5000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -193,7 +196,7 @@ export function testPortfolioDeposit() {
 
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("5000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -219,7 +222,10 @@ export function testPortfolioDeposit() {
         const allocationPercentage = await investableDesc.allocationPercentage
 
         const investable = await ethers.getContractAt("IInvestable", investableAddr)
-        const investableDepositAmount = ethers.utils.parseUnits("5000", 6).mul(allocationPercentage).div(1e5)
+        const investableDepositAmount = ethers.utils
+          .parseUnits("10", this.depositTokenDecimals)
+          .mul(allocationPercentage)
+          .div(1e5)
 
         expect(assetBalancesAfter[i].asset).to.equal(await investable.getInvestmentToken())
         expect(assetBalancesAfter[i].balance).to.approximately(

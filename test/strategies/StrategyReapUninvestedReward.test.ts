@@ -9,7 +9,7 @@ export function testStrategyReapUninvestedReward() {
     it("should succeed when any user processes reward", async function () {
       await this.investHelper
         .deposit(this.investable, this.user0, {
-          amount: ethers.utils.parseUnits("10000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],

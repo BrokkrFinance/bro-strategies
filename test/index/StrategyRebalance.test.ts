@@ -13,7 +13,7 @@ export function testStrategyRebalance() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       const components = await this.strategy.allComponents()
@@ -25,7 +25,7 @@ export function testStrategyRebalance() {
 
       // Set target weights.
       for (let i = 0; i < targetWeights.length; i++) {
-        if (i % 2 == 0) {
+        if (i % 2 === 0) {
           targetWeights[i] = targetWeights[i].mul(105).div(100)
         } else {
           targetWeights[i] = targetWeights[i].mul(95).div(100)
@@ -53,7 +53,7 @@ export function testStrategyRebalance() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("10000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 1 withdraws.
@@ -77,7 +77,7 @@ export function testStrategyRebalance() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       const components = await this.strategy.allComponents()
@@ -106,7 +106,7 @@ export function testStrategyRebalance() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       let indexTokenBalance: BigNumber
@@ -135,7 +135,7 @@ export function testStrategyRebalance() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 1 withdraws.

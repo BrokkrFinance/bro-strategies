@@ -18,7 +18,7 @@ export function testStrategyPausable() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6),
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
         true
       )
     })
@@ -30,7 +30,7 @@ export function testStrategyPausable() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       expect(await this.strategy.connect(this.owner).pause()).not.to.be.reverted

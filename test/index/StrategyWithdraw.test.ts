@@ -13,7 +13,7 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 0 withdraws.
@@ -37,7 +37,7 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 0 withdraws.
@@ -61,7 +61,7 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 0 withdraws.
@@ -85,7 +85,7 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 0 withdraws.
@@ -109,7 +109,7 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 1 deposits.
@@ -119,7 +119,7 @@ export function testStrategyWithdraw() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("500", 6)
+        ethers.utils.parseUnits("5", this.depositTokenDecimals)
       )
 
       // User 2 deposits.
@@ -129,7 +129,7 @@ export function testStrategyWithdraw() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("500.123", 6)
+        ethers.utils.parseUnits("5.123", this.depositTokenDecimals)
       )
 
       let indexTokenBalance: BigNumber
@@ -179,7 +179,7 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 1 deposits.
@@ -189,7 +189,7 @@ export function testStrategyWithdraw() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("500", 6)
+        ethers.utils.parseUnits("5", this.depositTokenDecimals)
       )
 
       // User 2 deposits.
@@ -199,7 +199,7 @@ export function testStrategyWithdraw() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("500.123", 6)
+        ethers.utils.parseUnits("5.123", this.depositTokenDecimals)
       )
 
       let indexTokenBalance: BigNumber
@@ -249,7 +249,7 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 0 withdraws.

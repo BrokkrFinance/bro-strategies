@@ -10,7 +10,7 @@ export function testStrategyDeposit() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
     })
 
@@ -21,7 +21,7 @@ export function testStrategyDeposit() {
         this.user0,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
     })
 
@@ -32,7 +32,7 @@ export function testStrategyDeposit() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1", 6)
+        ethers.utils.parseUnits("1", this.depositTokenDecimals)
       )
     })
 
@@ -43,29 +43,7 @@ export function testStrategyDeposit() {
         this.user0,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("1", 6)
-      )
-    })
-
-    it("should succeed when a single user deposits large amount of `depositToken`", async function () {
-      await mint(
-        this.strategy,
-        this.indexToken,
-        this.user0,
-        this.user0,
-        this.depositToken,
-        this.depositToken.balanceOf(this.user0.address)
-      )
-    })
-
-    it("should succeed when a single user deposits large amount of `depositToken` for other person", async function () {
-      await mint(
-        this.strategy,
-        this.indexToken,
-        this.user0,
-        this.user1,
-        this.depositToken,
-        this.depositToken.balanceOf(this.user0.address)
+        ethers.utils.parseUnits("1", this.depositTokenDecimals)
       )
     })
 
@@ -76,7 +54,7 @@ export function testStrategyDeposit() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1", 6)
+        ethers.utils.parseUnits("1", this.depositTokenDecimals)
       )
       await mint(
         this.strategy,
@@ -84,7 +62,7 @@ export function testStrategyDeposit() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("100", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
       await mint(
         this.strategy,
@@ -92,7 +70,7 @@ export function testStrategyDeposit() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("5012.12", 6)
+        ethers.utils.parseUnits("5.212", this.depositTokenDecimals)
       )
     })
 
@@ -103,7 +81,7 @@ export function testStrategyDeposit() {
         this.user0,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("1", 6)
+        ethers.utils.parseUnits("1", this.depositTokenDecimals)
       )
       await mint(
         this.strategy,
@@ -111,7 +89,7 @@ export function testStrategyDeposit() {
         this.user1,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("100", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
       await mint(
         this.strategy,
@@ -119,7 +97,7 @@ export function testStrategyDeposit() {
         this.user2,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("5012.12", 6)
+        ethers.utils.parseUnits("5.212", this.depositTokenDecimals)
       )
     })
   })

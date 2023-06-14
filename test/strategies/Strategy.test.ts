@@ -90,7 +90,7 @@ export function testStrategy(
         "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
         await this.portfolio.getDepositToken()
       )
-      this.depositTokenDecimal = await this.depositToken.decimals()
+      this.depositTokenDecimals = await this.depositToken.decimals()
 
       // Portfolio upgradeability test to.
       this.upgradeTo = testOptions.upgradeTo
