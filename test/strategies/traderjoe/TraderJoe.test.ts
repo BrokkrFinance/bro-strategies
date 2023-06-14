@@ -43,7 +43,7 @@ function testTraderJoeAdjustBins() {
     this.beforeEach(async function () {
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("3", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -77,7 +77,7 @@ function testTraderJoeAdjustBins() {
 
       await this.investHelper
         .deposit(this.strategy, this.user1, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("3", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user1.address,
           params: [],
@@ -206,7 +206,7 @@ function testTraderJoeAum() {
 
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -233,8 +233,8 @@ function testTraderJoeAum() {
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
+        ethers.utils.parseUnits("10", this.depositTokenDecimals).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("10", this.depositTokenDecimals).add(this.equityValuation))
       )
     })
 
@@ -245,7 +245,7 @@ function testTraderJoeAum() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("50", 6),
+          amount: ethers.utils.parseUnits("5", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -266,7 +266,7 @@ function testTraderJoeAum() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("50", 6),
+          amount: ethers.utils.parseUnits("5", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -303,8 +303,8 @@ function testTraderJoeAum() {
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("50", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
+        ethers.utils.parseUnits("5", this.depositTokenDecimals).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("5", this.depositTokenDecimals).add(this.equityValuation))
       )
     })
   })
@@ -376,8 +376,58 @@ function testTraderJoeInitialize() {
               TraderJoe.lbRouter,
               1,
               [
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
-                28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                this.depositTokenDecimals,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39,
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49,
+                50,
+                51,
               ],
               [1000],
               0,
@@ -430,8 +480,58 @@ function testTraderJoeInitialize() {
               1,
               [8388608],
               [
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
-                28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                this.depositTokenDecimals,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39,
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49,
+                50,
+                51,
               ],
               0,
             ],

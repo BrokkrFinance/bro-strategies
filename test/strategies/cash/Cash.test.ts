@@ -57,7 +57,7 @@ function testCashAum() {
 
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("100", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -67,8 +67,8 @@ function testCashAum() {
       const assetBalancesAfter = await this.strategy.getAssetBalances()
       expect(assetBalancesAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetBalancesAfter[0].balance).to.approximately(
-        ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance),
-        getErrorRange(ethers.utils.parseUnits("100", 6).add(assetBalancesBefore[0].balance))
+        ethers.utils.parseUnits("10", this.depositTokenDecimals).add(assetBalancesBefore[0].balance),
+        getErrorRange(ethers.utils.parseUnits("10", this.depositTokenDecimals).add(assetBalancesBefore[0].balance))
       )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
@@ -76,15 +76,15 @@ function testCashAum() {
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
       expect(assetValuationsAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetValuationsAfter[0].valuation).to.be.approximately(
-        ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation),
-        getErrorRange(ethers.utils.parseUnits("100", 6).add(assetValuationsBefore[0].valuation))
+        ethers.utils.parseUnits("10", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation),
+        getErrorRange(ethers.utils.parseUnits("10", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.be.approximately(
-        ethers.utils.parseUnits("100", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("100", 6).add(this.equityValuation))
+        ethers.utils.parseUnits("10", this.depositTokenDecimals).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("10", this.depositTokenDecimals).add(this.equityValuation))
       )
     })
 
@@ -95,7 +95,7 @@ function testCashAum() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("50", 6),
+          amount: ethers.utils.parseUnits("5", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -116,7 +116,7 @@ function testCashAum() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.strategy, this.user0, {
-          amount: ethers.utils.parseUnits("50", 6),
+          amount: ethers.utils.parseUnits("5", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -136,8 +136,8 @@ function testCashAum() {
       const assetBalancesAfter = await this.strategy.getAssetBalances()
       expect(assetBalancesAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetBalancesAfter[0].balance).to.approximately(
-        ethers.utils.parseUnits("50", 6).add(assetBalancesBefore[0].balance),
-        getErrorRange(ethers.utils.parseUnits("50", 6).add(assetBalancesBefore[0].balance))
+        ethers.utils.parseUnits("5", this.depositTokenDecimals).add(assetBalancesBefore[0].balance),
+        getErrorRange(ethers.utils.parseUnits("5", this.depositTokenDecimals).add(assetBalancesBefore[0].balance))
       )
 
       expect(await this.strategy.getLiabilityBalances()).to.be.an("array").that.is.empty
@@ -145,15 +145,15 @@ function testCashAum() {
       const assetValuationsAfter = await this.strategy.getAssetValuations(true, false)
       expect(assetValuationsAfter[0].asset).to.equal(this.depositToken.address)
       expect(assetValuationsAfter[0].valuation).to.approximately(
-        ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation),
-        getErrorRange(ethers.utils.parseUnits("50", 6).add(assetValuationsBefore[0].valuation))
+        ethers.utils.parseUnits("5", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation),
+        getErrorRange(ethers.utils.parseUnits("5", this.depositTokenDecimals).add(assetValuationsBefore[0].valuation))
       )
 
       expect(await this.strategy.getLiabilityValuations(true, false)).to.be.an("array").that.is.empty
 
       expect(await this.strategy.getEquityValuation(true, false)).to.approximately(
-        ethers.utils.parseUnits("50", 6).add(this.equityValuation),
-        getErrorRange(ethers.utils.parseUnits("50", 6).add(this.equityValuation))
+        ethers.utils.parseUnits("5", this.depositTokenDecimals).add(this.equityValuation),
+        getErrorRange(ethers.utils.parseUnits("5", this.depositTokenDecimals).add(this.equityValuation))
       )
     })
   })

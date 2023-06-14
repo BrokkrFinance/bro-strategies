@@ -23,7 +23,7 @@ export function testPortfolioRebalance() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("10000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -60,7 +60,7 @@ export function testPortfolioRebalance() {
         const investable = await ethers.getContractAt("IInvestable", investableAddr)
 
         const expectedValuation = ethers.utils
-          .parseUnits("10000", 6)
+          .parseUnits("10", this.depositTokenDecimals)
           .add(this.equityValuation)
           .mul(allocations[i])
           .div(100000)
@@ -93,7 +93,7 @@ export function testPortfolioRebalance() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("10000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -130,7 +130,7 @@ export function testPortfolioRebalance() {
         const investable = await ethers.getContractAt("IInvestable", investableAddr)
 
         const expectedValuation = ethers.utils
-          .parseUnits("10000", 6)
+          .parseUnits("10", this.depositTokenDecimals)
           .add(this.equityValuation)
           .mul(allocations[i])
           .div(100000)
@@ -162,7 +162,7 @@ export function testPortfolioRebalance() {
       // The third user deposits directly.
       await this.investHelper
         .deposit(investable, this.user2, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("3", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user2.address,
           params: [],
@@ -180,7 +180,7 @@ export function testPortfolioRebalance() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("10000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -217,11 +217,12 @@ export function testPortfolioRebalance() {
         const investable = await ethers.getContractAt("IInvestable", investableAddr)
 
         const expectedValuation = ethers.utils
-          .parseUnits("10000", 6)
+          .parseUnits("10", this.depositTokenDecimals)
           .add(this.equityValuation)
           .mul(allocations[i])
           .div(100000)
-        const directlyDepositedAmount = i == 0 ? ethers.utils.parseUnits("3000", 6) : BigNumber.from(0)
+        const directlyDepositedAmount =
+          i === 0 ? ethers.utils.parseUnits("3", this.depositTokenDecimals) : BigNumber.from(0)
         expect(await investable.getInvestmentTokenSupply()).to.be.approximately(
           expectedValuation.add(directlyDepositedAmount),
           getErrorRange(expectedValuation.add(directlyDepositedAmount))
@@ -250,7 +251,7 @@ export function testPortfolioRebalance() {
       // The third user deposits directly.
       await this.investHelper
         .deposit(investable, this.user2, {
-          amount: ethers.utils.parseUnits("3000", 6),
+          amount: ethers.utils.parseUnits("3", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user2.address,
           params: [],
@@ -268,7 +269,7 @@ export function testPortfolioRebalance() {
       // The first user deposits.
       await this.investHelper
         .deposit(this.portfolio, this.user0, {
-          amount: ethers.utils.parseUnits("10000", 6),
+          amount: ethers.utils.parseUnits("10", this.depositTokenDecimals),
           minimumDepositTokenAmountOut: BigNumber.from(0),
           investmentTokenReceiver: this.user0.address,
           params: [],
@@ -316,11 +317,12 @@ export function testPortfolioRebalance() {
         const investable = await ethers.getContractAt("IInvestable", investableAddr)
 
         const expectedValuation = ethers.utils
-          .parseUnits("10000", 6)
+          .parseUnits("10", this.depositTokenDecimals)
           .add(this.equityValuation)
           .mul(allocations[i])
           .div(100000)
-        const directlyDepositedAmount = i == 0 ? ethers.utils.parseUnits("1500", 6) : BigNumber.from(0)
+        const directlyDepositedAmount =
+          i === 0 ? ethers.utils.parseUnits("1.5", this.depositTokenDecimals) : BigNumber.from(0)
         expect(await investable.getInvestmentTokenSupply()).to.be.approximately(
           expectedValuation.add(directlyDepositedAmount),
           getErrorRange(expectedValuation.add(directlyDepositedAmount))

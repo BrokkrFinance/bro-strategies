@@ -34,7 +34,7 @@ export function testStrategyLimit() {
           break
         }
 
-        if (multiplier == maxTrial - 1) {
+        if (multiplier === maxTrial - 1) {
           throw new Error("Failed to find deposit amount that exceeds equity valuation limit.")
         }
       }

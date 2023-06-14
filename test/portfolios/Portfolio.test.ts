@@ -63,7 +63,6 @@ export function testPortfolio(
           await setBalance(whale.address, ethers.utils.parseEther("10000"))
 
           // Airdrop all possible deposit tokens.
-          console.log(await depositToken.balanceOf(this.signers[i].address))
           await depositToken
             .connect(whale)
             .transfer(this.signers[i].address, ethers.utils.parseUnits("100", await depositToken.decimals()))
@@ -78,7 +77,7 @@ export function testPortfolio(
         "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
         await this.portfolio.getDepositToken()
       )
-      this.depositTokenDecimal = await this.depositToken.decimals()
+      this.depositTokenDecimals = await this.depositToken.decimals()
 
       // Portfolio upgradeability test to.
       this.upgradeTo = testOptions.upgradeTo

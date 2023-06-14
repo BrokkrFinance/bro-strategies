@@ -22,7 +22,7 @@ export function testStrategyComponent() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 0 withdraws.
@@ -46,7 +46,7 @@ export function testStrategyComponent() {
       for (component of components) {
         const weight = await this.strategy.weights(component)
 
-        if (weight > 0) {
+        if (weight === 0) {
           break
         }
       }
