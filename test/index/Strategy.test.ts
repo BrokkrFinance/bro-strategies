@@ -37,11 +37,8 @@ export function testStrategy(
         ],
       })
 
-      // Set chain specific parameters.
-      const depositTokenAddr: string = DepositTokens.get(strategyTestOptions.network.name)!
-      const whaleAddr: string = WhaleAddrs.get(strategyTestOptions.network.name)!
-
       // Get ERC20 tokens.
+      const depositTokenAddr: string = DepositTokens.get(strategyTestOptions.network.name)!
       this.depositToken = await ethers.getContractAt(
         "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
         depositTokenAddr
@@ -55,14 +52,26 @@ export function testStrategy(
       this.userCount = 3
 
       // Airdrop signers.
-      this.whale = await ethers.getImpersonatedSigner(whaleAddr)
-      await setBalance(this.whale.address, ethers.utils.parseEther("10000"))
+      const whaleAddrs: [string, string][] = WhaleAddrs.get(strategyTestOptions.network.name)!
+
       for (let i = 0; i <= this.userCount; i++) {
+        // Airdrop native token.
         await setBalance(this.signers[i].address, ethers.utils.parseEther("10000"))
-        await this.depositToken
-          .connect(this.whale)
-          .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
-        // TODO: Add USDC setter helper.
+
+        for (const whaleAddr of whaleAddrs) {
+          const depositToken = await ethers.getContractAt(
+            "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+            whaleAddr[0]
+          )
+          const whale = await ethers.getImpersonatedSigner(whaleAddr[1])
+
+          await setBalance(whale.address, ethers.utils.parseEther("10000"))
+
+          // Airdrop all possible deposit tokens.
+          await depositToken
+            .connect(whale)
+            .transfer(this.signers[i].address, ethers.utils.parseUnits("100", await depositToken.decimals()))
+        }
       }
 
       // Deploy strategy.

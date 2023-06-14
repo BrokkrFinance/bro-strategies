@@ -3,7 +3,6 @@ import { execSync } from "child_process"
 import { Contract } from "ethers"
 import { ethers, network } from "hardhat"
 import AccessControlRoles from "../../constants/AccessControlRoles.json"
-import { DepositTokens } from "../../scripts/constants/deposit-tokens"
 import { removeInvestmentLimitsAndFees } from "../../scripts/helper/contract"
 import { WhaleAddrs } from "../helper/addresses"
 import { StrategyTestOptions } from "../helper/interfaces/options"
@@ -53,16 +52,6 @@ export function testStrategy(
         ],
       })
 
-      // Set chain specific parameters.
-      const depositTokenAddr: string = DepositTokens.get(testOptions.network.name)!
-      const whaleAddr: string = WhaleAddrs.get(testOptions.network.name)!
-
-      // Get ERC20 tokens.
-      this.depositToken = await ethers.getContractAt(
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-        depositTokenAddr
-      )
-
       // Users.
       this.signers = await ethers.getSigners()
       this.user0 = this.signers[1]
@@ -71,18 +60,37 @@ export function testStrategy(
       this.userCount = 3
 
       // Airdrop signers.
-      this.impersonatedSigner = await ethers.getImpersonatedSigner(whaleAddr)
-      await setBalance(this.impersonatedSigner.address, ethers.utils.parseEther("10000"))
+      const whaleAddrs: [string, string][] = WhaleAddrs.get(testOptions.network.name)!
+
       for (let i = 0; i <= this.userCount; i++) {
+        // Airdrop native token.
         await setBalance(this.signers[i].address, ethers.utils.parseEther("10000"))
-        await this.depositToken
-          .connect(this.impersonatedSigner)
-          .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", 6))
-        // TODO: Add USDC setter helper.
+
+        for (const whaleAddr of whaleAddrs) {
+          const depositToken = await ethers.getContractAt(
+            "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+            whaleAddr[0]
+          )
+          const whale = await ethers.getImpersonatedSigner(whaleAddr[1])
+
+          await setBalance(whale.address, ethers.utils.parseEther("10000"))
+
+          // Airdrop all possible deposit tokens.
+          await depositToken
+            .connect(whale)
+            .transfer(this.signers[i].address, ethers.utils.parseUnits("100", await depositToken.decimals()))
+        }
       }
 
       // Deploy strategy.
       this.strategy = await deployStrategy()
+
+      // Deposit token.
+      this.depositToken = await ethers.getContractAt(
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+        await this.portfolio.getDepositToken()
+      )
+      this.depositTokenDecimal = await this.depositToken.decimals()
 
       // Portfolio upgradeability test to.
       this.upgradeTo = testOptions.upgradeTo
