@@ -1,5 +1,5 @@
 import { BigNumber, Contract } from "ethers"
-import { DepositTokens } from "../../constants/deposit-tokens"
+import { DepositTokenAmounts, DepositTokens } from "../../constants/deposit-tokens"
 import { readDeployConfig, readLiveConfig, writeLiveConfig } from "../../files/io"
 import { getLiveConfigPath } from "../../files/paths"
 import { DeployConfig, LiveConfig } from "../../interfaces/configs"
@@ -139,6 +139,7 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
     if (deployConfig.type === "strategy" && deployConfig.subtype === "index") {
       console.log("Deploy: Deposit $2 to and withdraw $1 from the index strategy.")
 
+      // TODO: Pass depositToken
       await investOneDollarToIndex(investable, options)
 
       console.log()
@@ -148,7 +149,7 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
   if (investable.type === "portfolio") {
     console.log("Deploy: Deposit $2 to and withdraw $1 from the top level portfolio.")
 
-    await investOneDollarToPortfolio(investable)
+    await investOneDollarToPortfolio(investable, deployConfigs[deployConfigs.length - 1].depositToken)
 
     console.log()
   } else {
@@ -300,7 +301,7 @@ function getIndexExtraArgs(deployConfig: any): IndexExtraArgs {
   }
 }
 
-async function investOneDollarToPortfolio(investable: Investable): Promise<void> {
+async function investOneDollarToPortfolio(investable: Investable, depositTokenAddr: string): Promise<void> {
   // Get an instance of HRE.
   const { ethers } = require("hardhat")
 
@@ -311,16 +312,18 @@ async function investOneDollarToPortfolio(investable: Investable): Promise<void>
 
   // Get deployer account and USDC.
   const deployer = (await ethers.getSigners())[0]
-  const usdc = await ethers.getContractAt(
-    "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-    DepositTokens.get(investable.network)
+  const depositToken = await ethers.getContractAt(
+    "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+    depositTokenAddr
   )
+  const depositTokenDecimals = await depositToken.decimals()
 
   // Deposit $2.
   const portfolioTokenBalanceBefore = await portfolioToken.balanceOf(deployer.address)
 
-  await usdc.connect(deployer).approve(portfolio.address, ethers.utils.parseUnits("2", 6))
-  await portfolio.connect(deployer).deposit(ethers.utils.parseUnits("2", 6), 0, deployer.address, [])
+  const depositAmount = ethers.utils.parseUnits(DepositTokenAmounts.get(depositTokenAddr), depositTokenDecimals)
+  await depositToken.connect(deployer).approve(portfolio.address, depositAmount)
+  await portfolio.connect(deployer).deposit(depositAmount, 0, deployer.address, [])
 
   const portfolioTokenBalanceAfter = await portfolioToken.balanceOf(deployer.address)
 
