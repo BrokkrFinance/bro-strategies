@@ -9,7 +9,7 @@ import { burn, mint } from "../helper/InvestHelper"
 
 const indexArbitrumTestOptions: IndexTestOptions = {
   network: Arbitrum(),
-  forkAt: 101001400,
+  forkAt: 101345000,
   upgradeTo: "OwnableV2",
 }
 
