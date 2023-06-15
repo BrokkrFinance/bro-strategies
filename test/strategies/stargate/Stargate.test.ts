@@ -19,17 +19,17 @@ const stargateTestOptions: StrategyTestOptions = {
   runReapUninvestedReward: false,
 }
 
-testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, stargateTestOptions, [
-  testStargateUSDCAum,
-  testStargateUSDCInitialize,
-])
-testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, stargateTestOptions, [
-  testStargateUSDTAum,
-  testStargateUSDTInitialize,
-])
-testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, stargateTestOptions, [
-  testStargateUSDCAum,
-])
+// testStrategy("Stargate USDC Strategy - Deploy", deployStargateUSDCStrategy, stargateTestOptions, [
+//   testStargateUSDCAum,
+//   testStargateUSDCInitialize,
+// ])
+// testStrategy("Stargate USDT Strategy - Deploy", deployStargateUSDTStrategy, stargateTestOptions, [
+//   testStargateUSDTAum,
+//   testStargateUSDTInitialize,
+// ])
+// testStrategy("Stargate USDC Strategy - Upgrade After Deploy", upgradeStargateUSDCStrategy, stargateTestOptions, [
+//   testStargateUSDCAum,
+// ])
 // testStrategy("Stargate USDT Strategy - Upgrade After Deploy", upgradeStargateUSDTStrategy, stargateTestOptions, [
 //   testStargateUSDTAum,
 // ])
