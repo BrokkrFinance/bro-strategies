@@ -1,16 +1,16 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
-import { Contract } from "ethers"
+import { BigNumber, Contract } from "ethers"
 import { ethers } from "hardhat"
 
 export async function removeInvestmentLimitsAndFees(investable: Contract, owner: SignerWithAddress): Promise<void> {
-  const isStrategy = await investable.supportsInterface("0x00000000")
+  const humanReadableName = await investable.humanReadableName()
 
-  if (!isStrategy) {
+  if (humanReadableName.endsWith("portfolio")) {
     const investables = await investable.getInvestables()
 
     for (let i = 0; i < investables.length; i++) {
-      const investable = await ethers.getContractAt("IInvestable", await investables[i].investable)
-      removeInvestmentLimitsAndFees(investable, owner)
+      const _investable = await ethers.getContractAt("IInvestable", await investables[i].investable)
+      await removeInvestmentLimitsAndFees(_investable, owner)
     }
   }
 
@@ -21,7 +21,7 @@ export async function removeInvestmentLimitsAndFees(investable: Contract, owner:
 async function setInvestmentLimits(
   investable: Contract,
   owner: SignerWithAddress,
-  limit: BigInt = BigInt(1e20)
+  limit: BigNumber = BigNumber.from("115792089237316195423570985008687907853269984665640564039457584007913129639935") // 2^256 - 1
 ): Promise<void> {
   await investable.connect(owner).setTotalInvestmentLimit(limit)
   await investable.connect(owner).setInvestmentLimitPerAddress(limit)
