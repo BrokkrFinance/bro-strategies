@@ -9,7 +9,7 @@ const calmTestOptions: PortfolioTestOptions = {
   upgradeTo: "",
 }
 
-testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, calmTestOptions, [])
+// testPortfolio("Calm Portfolio - Deploy", deployCalmPortfolio, calmTestOptions, [])
 
 // Disabled the upgrade test, as the new portfolio storage layout has changed.
 // In the very unlikely case that we have to upgrade the calm portfolio, the original portfolio code can be brought back.

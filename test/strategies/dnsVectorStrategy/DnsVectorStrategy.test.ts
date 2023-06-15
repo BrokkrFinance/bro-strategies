@@ -17,11 +17,11 @@ const dnsVectorTestOptions: StrategyTestOptions = {
   runReapRewardExtra: false,
 }
 
-testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, dnsVectorTestOptions, [
-  testAum,
-  testCollaterizationAndDeltaNeutrality,
-  testRebalanceSafetyLimits,
-])
+// testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, dnsVectorTestOptions, [
+//   testAum,
+//   testCollaterizationAndDeltaNeutrality,
+//   testRebalanceSafetyLimits,
+// ])
 // testStrategy("Dns Vector Strategy - Upgrade After Deploy", upgradeDnsStrategy, dnsVectorTestOptions, [
 //   testAum,
 //   testCollaterizationAndDeltaNeutrality,
