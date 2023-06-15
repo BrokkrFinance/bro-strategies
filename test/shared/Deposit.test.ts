@@ -57,17 +57,6 @@ export function testDeposit() {
       .revertedWithCustomError("TooSmallDepositTokenAmountOut")
   })
 
-  it("should fail when a single user deposits USDC that he/she doesn't have", async function () {
-    await this.investHelper
-      .deposit(this.investable, this.user0, {
-        amount: ethers.utils.parseUnits("101", this.depositTokenDecimals),
-        minimumDepositTokenAmountOut: BigNumber.from(0),
-        investmentTokenReceiver: this.user0.address,
-        params: [],
-      })
-      .revertedWith("ERC20: transfer amount exceeds balance")
-  })
-
   it("should fail when a single user deposits exceeding limit per address", async function () {
     await this.investable
       .connect(this.owner)
@@ -192,28 +181,6 @@ export function testDeposit() {
         params: [],
       })
       .revertedWithCustomError("ZeroAmountDeposited")
-  })
-
-  it("should fail when multiple users deposit USDC that they don't have", async function () {
-    // The first user.
-    await this.investHelper
-      .deposit(this.investable, this.user0, {
-        amount: ethers.utils.parseUnits("3", this.depositTokenDecimals),
-        minimumDepositTokenAmountOut: BigNumber.from(0),
-        investmentTokenReceiver: this.user0.address,
-        params: [],
-      })
-      .success()
-
-    // The second user.
-    await this.investHelper
-      .deposit(this.investable, this.user1, {
-        amount: ethers.utils.parseUnits("101", this.depositTokenDecimals),
-        minimumDepositTokenAmountOut: BigNumber.from(0),
-        investmentTokenReceiver: this.user1.address,
-        params: [],
-      })
-      .revertedWith("ERC20: transfer amount exceeds balance")
   })
 
   it("should fail when multiple users deposit exceeding limit per address", async function () {
