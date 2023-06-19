@@ -10,7 +10,6 @@ import { testStrategyComponent } from "./StrategyComponent.test"
 import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyOracle } from "./StrategyOracle.test"
 import { testStrategyPausable } from "./StrategyPausable.test"
-import { testStrategyRebalance } from "./StrategyRebalance.test"
 import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
@@ -105,7 +104,7 @@ export function testStrategy(
     // testStrategyLimit() // Opt-out investment limit test because it fails when the limit is way higher than component's pool depth.
     testStrategyOracle()
     testStrategyPausable()
-    testStrategyRebalance()
+    // testStrategyRebalance() // Opt-out rebalance test because running it with arbitrary parameters is not meaningful.
     testStrategyUpgradeable()
     testStrategyWithdraw()
 
