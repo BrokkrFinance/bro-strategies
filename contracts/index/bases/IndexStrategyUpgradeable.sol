@@ -10,6 +10,7 @@ import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Co
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { MathUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
+import { INATIVE } from "../dependencies/INATIVE.sol";
 import { IIndexInit } from "../interfaces/IIndexInit.sol";
 import { IIndexLimits } from "../interfaces/IIndexLimits.sol";
 import { IIndexOracle } from "../interfaces/IIndexOracle.sol";
@@ -59,7 +60,9 @@ abstract contract IndexStrategyUpgradeable is
     IIndexOracle public oracle;
     uint256 public equityValuationLimit;
 
-    uint256[8] private __gap;
+    address public constant NATIVE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    uint256[7] private __gap;
 
     /**
      * @dev Modifier to allow only whitelisted tokens to access a function.
@@ -159,6 +162,15 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     /**
+     * @dev It ensures that Ether is only received from wNATIVE and not from any other addresses.
+     */
+    receive() external payable {
+        if (msg.sender != wNATIVE) {
+            revert Errors.Index_ReceivedNativeTokenDirectly();
+        }
+    }
+
+    /**
      * @dev Mints index tokens in exchange for a specified token.
      * @param token The address of the token to be swapped.
      * @param amountTokenMax The maximum amount of the token to be swapped.
@@ -233,6 +245,54 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     /**
+     * @dev Mints index tokens by swapping the native asset (such as Ether).
+     * @param amountIndexMin The minimum amount of index tokens expected to be minted.
+     * @param recipient The address that will receive the minted index tokens.
+     * @return amountIndex The actual amount of index tokens minted.
+     * @return amountNATIVE The actual amount of the native asset swapped.
+     */
+    function mintIndexFromNATIVE(uint256 amountIndexMin, address recipient)
+        external
+        payable
+        nonReentrant
+        whenNotPaused
+        whenNotReachedEquityValuationLimit
+        returns (uint256 amountIndex, uint256 amountNATIVE)
+    {
+        MintingData memory mintingData = _getMintingDataFromWNATIVE(msg.value);
+
+        if (mintingData.amountWNATIVETotal > msg.value) {
+            revert Errors.Index_AboveMaxAmount();
+        }
+
+        if (mintingData.amountIndex < amountIndexMin) {
+            revert Errors.Index_BelowMinAmount();
+        }
+
+        amountIndex = mintingData.amountIndex;
+        amountNATIVE = mintingData.amountWNATIVETotal;
+
+        INATIVE(wNATIVE).deposit{ value: mintingData.amountWNATIVETotal }();
+
+        uint256 amountWNATIVESpent = _mintExactIndexFromWNATIVE(
+            mintingData,
+            recipient
+        );
+
+        if (amountWNATIVESpent != mintingData.amountWNATIVETotal) {
+            revert Errors.Index_WrongSwapAmount();
+        }
+
+        uint256 amountNATIVERefund = msg.value - amountNATIVE;
+
+        if (amountNATIVERefund > 0) {
+            payable(_msgSender()).transfer(amountNATIVERefund);
+        }
+
+        emit Mint(_msgSender(), recipient, NATIVE, amountNATIVE, amountIndex);
+    }
+
+    /**
      * @dev Burns index tokens in exchange for a specified token.
      * @param token The address of the token to be received.
      * @param amountTokenMin The minimum amount of tokens to be received.
@@ -287,6 +347,35 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     /**
+     * @dev Burns index tokens in exchange for the native asset (such as Ether).
+     * @param amountNATIVEMin The minimum amount of the native asset expected to be received.
+     * @param amountIndex The amount of index tokens to be burned.
+     * @param recipient The address that will receive the native asset.
+     * @return amountNATIVE The actual amount of the native asset received.
+     */
+    function burnExactIndexForNATIVE(
+        uint256 amountNATIVEMin,
+        uint256 amountIndex,
+        address recipient
+    ) external nonReentrant whenNotPaused returns (uint256 amountNATIVE) {
+        if (recipient == address(0)) {
+            revert Errors.Index_ZeroAddress();
+        }
+
+        amountNATIVE = _burnExactIndexForWNATIVE(amountIndex);
+
+        if (amountNATIVE < amountNATIVEMin) {
+            revert Errors.Index_BelowMinAmount();
+        }
+
+        INATIVE(wNATIVE).withdraw(amountNATIVE);
+
+        payable(recipient).transfer(amountNATIVE);
+
+        emit Burn(_msgSender(), recipient, NATIVE, amountNATIVE, amountIndex);
+    }
+
+    /**
      * @dev Retrieves the amount of index tokens that will be minted for a specified token.
      * @param token The address of the token to be swapped.
      * @param amountTokenMax The maximum amount of the token to be swapped.
@@ -310,6 +399,25 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     /**
+     * @dev Retrieves the amount of index tokens that will be minted in exchange for the native asset (such as Ether).
+     * @param amountNATIVEMax The maximum amount of the native asset that can be swapped.
+     * @return amountIndex The estimated amount of index tokens that will be minted.
+     * @return amountNATIVE The actual amount of the native asset that will be swapped.
+     */
+    function getAmountIndexFromNATIVE(uint256 amountNATIVEMax)
+        external
+        view
+        returns (uint256 amountIndex, uint256 amountNATIVE)
+    {
+        MintingData memory mintingData = _getMintingDataFromWNATIVE(
+            amountNATIVEMax
+        );
+
+        amountIndex = mintingData.amountIndex;
+        amountNATIVE = mintingData.amountWNATIVETotal;
+    }
+
+    /**
      * @dev Retrieves the amount of tokens that will be received for a specified amount of index tokens.
      * @param token The address of the token to be received.
      * @param amountIndex The amount of index tokens to be burned.
@@ -329,6 +437,19 @@ abstract contract IndexStrategyUpgradeable is
             wNATIVE,
             token
         );
+    }
+
+    /**
+     * @dev Retrieves the estimated amount of the native asset (such as Ether) that can be received by burning a specified amount of index tokens.
+     * @param amountIndex The amount of index tokens to be burned.
+     * @return amountNATIVE The estimated amount of the native asset that will be received.
+     */
+    function getAmountNATIVEFromExactIndex(uint256 amountIndex)
+        external
+        view
+        returns (uint256 amountNATIVE)
+    {
+        amountNATIVE = _getAmountWNATIVEFromExactIndex(amountIndex);
     }
 
     /**
