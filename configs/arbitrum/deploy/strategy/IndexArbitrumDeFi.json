@@ -78,7 +78,11 @@
           }
         }
       ],
-      "whitelistedTokens": [{ "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/usdc" }],
+      "whitelistedTokens": [
+        { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/usdc" },
+        { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/eth" },
+        { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/arb" }
+      ],
       "oracle": { "$ref": "../../../../constants/arbitrum/Oracles.json#/index" },
       "equityValuationLimit": 2e13,
       "extraArgs": [],
