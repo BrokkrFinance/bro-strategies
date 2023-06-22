@@ -79,7 +79,7 @@ export function testStrategy(
           // Airdrop all possible deposit tokens.
           await depositToken
             .connect(whale)
-            .transfer(this.signers[i].address, ethers.utils.parseUnits("100", await depositToken.decimals()))
+            .transfer(this.signers[i].address, ethers.utils.parseUnits("10000", await depositToken.decimals()))
         }
       }
 
