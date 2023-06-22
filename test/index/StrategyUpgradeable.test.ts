@@ -19,12 +19,12 @@ export function testStrategyUpgradeable() {
 
     it("should succeed when the owner user upgrades", async function () {
       const indexStrategyInitParams = {
-        wNATIVE: this.depositToken.address,
+        wNATIVE: this.wNATIVE,
         indexToken: this.indexToken.address,
         components: [],
         swapRoutes: [],
         whitelistedTokens: [],
-        oracle: this.depositToken.address,
+        oracle: this.depositTokenAddress,
         equityValuationLimit: "0",
       }
 

@@ -1,5 +1,5 @@
 import { BigNumber, Contract } from "ethers"
-import { DepositTokenAmounts, DepositTokens } from "../../constants/deposit-tokens"
+import { DepositTokenAmounts, DepositTokens, NativeToken } from "../../constants/deposit-tokens"
 import { readDeployConfig, readLiveConfig, writeLiveConfig } from "../../files/io"
 import { getLiveConfigPath } from "../../files/paths"
 import { DeployConfig, LiveConfig } from "../../interfaces/configs"
@@ -139,8 +139,7 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
     if (deployConfig.type === "strategy" && deployConfig.subtype === "index") {
       console.log("Deploy: Deposit $2 to and withdraw $1 from the index strategy.")
 
-      // TODO: Pass depositToken
-      await investOneDollarToIndex(investable, options)
+      await investOneDollarToIndex(investable, deployConfig.whitelistedTokens[0], options)
 
       console.log()
     }
@@ -149,7 +148,7 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
   if (investable.type === "portfolio") {
     console.log("Deploy: Deposit $2 to and withdraw $1 from the top level portfolio.")
 
-    await investOneDollarToPortfolio(investable, deployConfigs[deployConfigs.length - 1].depositToken)
+    await investOneDollarToPortfolio(investable)
 
     console.log()
   } else {
@@ -338,7 +337,11 @@ async function investOneDollarToPortfolio(investable: Investable, depositTokenAd
   console.log(`Deploy: Successfully withdrew $1 from ${portfolioLiveConfig.address}.`)
 }
 
-async function investOneDollarToIndex(investable: Investable, options?: DeployOptions): Promise<void> {
+async function investOneDollarToIndex(
+  investable: Investable,
+  depositTokenAddr: string,
+  options?: DeployOptions
+): Promise<void> {
   // Get an instance of HRE.
   const { ethers } = require("hardhat")
 
@@ -347,7 +350,7 @@ async function investOneDollarToIndex(investable: Investable, options?: DeployOp
   const strategy = await ethers.getContractAt(strategyLiveConfig.name, strategyLiveConfig.address)
   const indexToken = await ethers.getContractAt("IndexToken", await strategy.indexToken())
 
-  // Get deployer account and USDC.
+  // Get deployer account.
   const deployer = (await ethers.getSigners())[0]
   const usdc = await ethers.getContractAt(
     "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
@@ -355,14 +358,35 @@ async function investOneDollarToIndex(investable: Investable, options?: DeployOp
   )
 
   // Deposit $2.
-  const depositAmount = ethers.utils.parseUnits("2", 6)
-  const [amountIndex] = await strategy.connect(deployer).getAmountIndexFromToken(usdc.address, depositAmount)
-  const amountIndexWithSlippage = amountIndex.mul(995).div(1000)
+  console.log("Deploy: Deposit $2.")
 
-  await usdc.connect(deployer).approve(strategy.address, depositAmount)
-  await strategy
-    .connect(deployer)
-    .mintIndexFromToken(usdc.address, depositAmount, amountIndexWithSlippage, deployer.address)
+  if (depositTokenAddr === NativeToken) {
+    const depositAmount = ethers.utils.parseEther("2", 18)
+    const [amountIndex] = await strategy.connect(deployer).getAmountIndexFromNATIVE(depositAmount)
+    const amountIndexWithSlippage = amountIndex.mul(995).div(1000)
+
+    await strategy
+      .connect(deployer)
+      .mintIndexFromNATIVE(amountIndexWithSlippage, deployer.address, { value: depositAmount })
+  } else {
+    const depositToken = await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+      depositTokenAddr
+    )
+    const depositTokenDecimals = await depositToken.decimals()
+
+    const depositAmount = ethers.utils.parseUnits(
+      DepositTokenAmounts.get(investable.network)!.get(depositTokenAddr)!,
+      depositTokenDecimals
+    )
+    const [amountIndex] = await strategy.connect(deployer).getAmountIndexFromToken(depositTokenAddr, depositAmount)
+    const amountIndexWithSlippage = amountIndex.mul(995).div(1000)
+
+    await depositToken.connect(deployer).approve(strategy.address, depositAmount)
+    await strategy
+      .connect(deployer)
+      .mintIndexFromToken(depositTokenAddr, depositAmount, amountIndexWithSlippage, deployer.address)
+  }
 
   console.log(`Deploy: Successfully deposited $2 to ${strategyLiveConfig.address}.`)
 
@@ -371,20 +395,28 @@ async function investOneDollarToIndex(investable: Investable, options?: DeployOp
     await new Promise((timeout) => setTimeout(timeout, 60000))
   }
 
+  // Withdraw $1.
   console.log("Deploy: Withdraw $1.")
 
-  // Withdraw $1.
   const indexTokenBalance = await indexToken.balanceOf(deployer.address)
 
   const withdrawAmount = indexTokenBalance.div(2)
 
-  const amountToken = await strategy.connect(deployer).getAmountTokenFromExactIndex(usdc.address, withdrawAmount)
-  const amountTokenMin = amountToken.mul(BigNumber.from(1e2).sub(1)).div(1e2)
+  if (depositTokenAddr === NativeToken) {
+    const amountNative = await strategy.connect(deployer).getAmountNATIVEFromExactIndex(withdrawAmount)
+    const amountNativeMin = amountNative.mul(BigNumber.from(1e2).sub(1)).div(1e2)
 
-  await indexToken.connect(deployer).approve(strategy.address, withdrawAmount)
-  await strategy
-    .connect(deployer)
-    .burnExactIndexForToken(usdc.address, amountTokenMin, withdrawAmount, deployer.address)
+    await indexToken.connect(deployer).approve(strategy.address, withdrawAmount)
+    await strategy.connect(deployer).burnExactIndexForNATIVE(amountNativeMin, withdrawAmount, deployer.address)
+  } else {
+    const amountToken = await strategy.connect(deployer).getAmountTokenFromExactIndex(depositTokenAddr, withdrawAmount)
+    const amountTokenMin = amountToken.mul(BigNumber.from(1e2).sub(1)).div(1e2)
+
+    await indexToken.connect(deployer).approve(strategy.address, withdrawAmount)
+    await strategy
+      .connect(deployer)
+      .burnExactIndexForToken(depositTokenAddr, amountTokenMin, withdrawAmount, deployer.address)
+  }
 
   console.log(`Deploy: Successfully withdrew $1 from ${strategyLiveConfig.address}.`)
 }

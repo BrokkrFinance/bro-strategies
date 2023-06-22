@@ -76,11 +76,20 @@
             "pair": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/wETH_pls" },
             "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
           }
+        },
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/arb" },
+          "router": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/router" },
+          "dex": 3,
+          "pairData": {
+            "pair": { "$ref": "../../../../constants/arbitrum/addresses/Camelot.json#/wETH_arb" },
+            "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          }
         }
       ],
       "whitelistedTokens": [
-        { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/usdc" },
         { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/eth" },
+        { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/usdc" },
         { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/arb" }
       ],
       "oracle": { "$ref": "../../../../constants/arbitrum/Oracles.json#/index" },

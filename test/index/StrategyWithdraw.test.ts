@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
+import { NativeToken } from "../../scripts/constants/deposit-tokens"
 import { burn, mint } from "./helper/InvestHelper"
 
 export function testStrategyWithdraw() {
@@ -255,16 +256,33 @@ export function testStrategyWithdraw() {
       // User 0 withdraws.
       const indexTokenBalance = await this.indexToken.balanceOf(this.user0.address)
 
-      const amountToken = await this.strategy
-        .connect(this.user0)
-        .getAmountTokenFromExactIndex(this.depositToken.address, indexTokenBalance)
+      if (this.depositTokenAddress === NativeToken) {
+        const amountNative = await this.strategy.connect(this.user0).getAmountNATIVEFromExactIndex(indexTokenBalance)
 
-      await this.indexToken.connect(this.user0).approve(this.strategy.address, indexTokenBalance)
-      await expect(
-        this.strategy
+        await this.indexToken.connect(this.user0).approve(this.strategy.address, indexTokenBalance)
+        await expect(
+          this.strategy
+            .connect(this.user0)
+            .burnExactIndexForNATIVE(amountNative.add(1), indexTokenBalance, this.user0.address)
+        ).to.be.reverted
+      } else {
+        const amountToken = await this.strategy
           .connect(this.user0)
-          .burnExactIndexForToken(this.depositToken.address, amountToken.add(1), indexTokenBalance, this.user0.address)
-      ).to.be.reverted
+          .getAmountTokenFromExactIndex(this.depositTokenAddress, indexTokenBalance)
+
+        await this.indexToken.connect(this.user0).approve(this.strategy.address, indexTokenBalance)
+
+        await expect(
+          this.strategy
+            .connect(this.user0)
+            .burnExactIndexForToken(
+              this.depositToken.address,
+              amountToken.add(1),
+              indexTokenBalance,
+              this.user0.address
+            )
+        ).to.be.reverted
+      }
     })
   })
 }
