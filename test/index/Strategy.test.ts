@@ -1,8 +1,8 @@
 import { setBalance, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers"
 import { execSync } from "child_process"
-import { Contract } from "ethers"
+import { BigNumber, Contract } from "ethers"
 import { ethers, network } from "hardhat"
-import { DepositTokens } from "../../scripts/constants/deposit-tokens"
+import { NativeToken } from "../../scripts/constants/deposit-tokens"
 import { WhaleAddrs } from "../helper/addresses"
 import { IndexTestOptions } from "../helper/interfaces/options"
 import { testStrategyAccessControl } from "./StrategyAccessControl.test"
@@ -37,14 +37,6 @@ export function testStrategy(
         ],
       })
 
-      // Get ERC20 tokens.
-      const depositTokenAddr: string = DepositTokens.get(strategyTestOptions.network.name)!
-      this.depositToken = await ethers.getContractAt(
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
-        depositTokenAddr
-      )
-      this.depositTokenDecimals = await this.depositToken.decimals()
-
       // Users.
       this.signers = await ethers.getSigners()
       this.user0 = this.signers[1]
@@ -78,6 +70,19 @@ export function testStrategy(
       // Deploy strategy.
       this.strategy = await deployStrategy()
 
+      // Deposit token.
+      this.depositTokenAddress = await this.strategy.whitelistedTokens(0)
+      if (this.depositTokenAddress === NativeToken) {
+        this.depositToken = undefined
+        this.depositTokenDecimals = 18
+      } else {
+        this.depositToken = await ethers.getContractAt(
+          "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+          this.depositTokenAddress
+        )
+        this.depositTokenDecimals = await this.depositToken.decimals()
+      }
+
       // Strategy owner.
       const ownerAddr = await this.strategy.owner()
       this.owner = await ethers.getImpersonatedSigner(ownerAddr)
@@ -103,6 +108,11 @@ export function testStrategy(
 
       // Upgradeability test to.
       this.upgradeTo = strategyTestOptions.upgradeTo
+
+      // Remove investment limit.
+      await this.strategy.connect(this.owner).setEquityValuationLimit(
+        BigNumber.from("115792089237316195423570985008687907853269984665640564039457584007913129639935") // 2^256 - 1
+      )
 
       this.snapshot = await takeSnapshot()
     })

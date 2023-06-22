@@ -1,31 +1,50 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { expect } from "chai"
 import { BigNumber, Contract } from "ethers"
+import { ethers } from "hardhat"
 
 export async function mint(
   indexStrategy: Contract,
   indexToken: Contract,
   spender: SignerWithAddress,
   recipient: SignerWithAddress,
-  token: Contract,
+  token: Contract | undefined,
   tokenAmount: BigNumber,
   reverted: boolean = false
 ) {
-  const [amountIndex] = await indexStrategy.connect(spender).getAmountIndexFromToken(token.address, tokenAmount)
-
   const indexTokenBalanceBefore = await indexToken.balanceOf(recipient.address)
 
-  await token.connect(spender).approve(indexStrategy.address, tokenAmount)
+  let amountIndex: BigNumber
 
-  if (reverted) {
-    await expect(
-      indexStrategy.connect(spender).mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
-    ).to.be.reverted
+  if (token === undefined) {
+    ;[amountIndex] = await indexStrategy.connect(spender).getAmountIndexFromNATIVE(tokenAmount)
+
+    if (reverted) {
+      await expect(
+        indexStrategy.connect(spender).mintIndexFromNATIVE(amountIndex, recipient.address, { value: tokenAmount })
+      ).to.be.reverted
+    } else {
+      await expect(
+        indexStrategy.connect(spender).mintIndexFromNATIVE(amountIndex, recipient.address, { value: tokenAmount })
+      ).to.emit(indexStrategy, "Mint")
+    }
   } else {
-    await expect(
-      indexStrategy.connect(spender).mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
-    ).to.emit(indexStrategy, "Mint")
+    ;[amountIndex] = await indexStrategy.connect(spender).getAmountIndexFromToken(token.address, tokenAmount)
 
+    await token.connect(spender).approve(indexStrategy.address, tokenAmount)
+
+    if (reverted) {
+      await expect(
+        indexStrategy.connect(spender).mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
+      ).to.be.reverted
+    } else {
+      await expect(
+        indexStrategy.connect(spender).mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
+      ).to.emit(indexStrategy, "Mint")
+    }
+  }
+
+  if (reverted !== true) {
     const indexTokenBalanceAfter = await indexToken.balanceOf(recipient.address)
 
     const indexTokenBalance = indexTokenBalanceAfter - indexTokenBalanceBefore
@@ -39,35 +58,60 @@ export async function burn(
   indexToken: Contract,
   spender: SignerWithAddress,
   recipient: SignerWithAddress,
-  token: Contract,
+  token: Contract | undefined,
   indexAmount: BigNumber,
   slippageTolerance: BigNumber,
   reverted: boolean = false
 ) {
-  const amountToken = await indexStrategy.connect(spender).getAmountTokenFromExactIndex(token.address, indexAmount)
-  const amountTokenMin = amountToken.mul(BigNumber.from(1e2).sub(slippageTolerance)).div(1e2)
+  if (token === undefined) {
+    const nativeBalanceBefore = await ethers.provider.getBalance(recipient.address)
 
-  const tokenBalanceBefore = await token.balanceOf(recipient.address)
+    const amountNative = await indexStrategy.connect(spender).getAmountNATIVEFromExactIndex(indexAmount)
+    const amountNativeMin = amountNative.mul(BigNumber.from(1e2).sub(slippageTolerance)).div(1e2)
 
-  await indexToken.connect(spender).approve(indexStrategy.address, indexAmount)
+    await indexToken.connect(spender).approve(indexStrategy.address, indexAmount)
 
-  if (reverted) {
-    await expect(
-      indexStrategy
-        .connect(spender)
-        .burnExactIndexForToken(token.address, amountTokenMin, indexAmount, recipient.address)
-    ).to.be.reverted
+    if (reverted) {
+      await expect(
+        indexStrategy.connect(spender).burnExactIndexForNATIVE(amountNativeMin, indexAmount, recipient.address)
+      ).to.be.reverted
+    } else {
+      await expect(
+        indexStrategy.connect(spender).burnExactIndexForNATIVE(amountNativeMin, indexAmount, recipient.address)
+      ).to.emit(indexStrategy, "Burn")
+
+      const nativeBalanceAfter = await ethers.provider.getBalance(recipient.address)
+
+      const nativeBalance = nativeBalanceAfter.sub(nativeBalanceBefore)
+
+      expect(nativeBalance.gte(amountNativeMin)).to.be.true
+    }
   } else {
-    await expect(
-      indexStrategy
-        .connect(spender)
-        .burnExactIndexForToken(token.address, amountTokenMin, indexAmount, recipient.address)
-    ).to.emit(indexStrategy, "Burn")
+    const tokenBalanceBefore = await token.balanceOf(recipient.address)
 
-    const tokenBalanceAfter = await token.balanceOf(recipient.address)
+    const amountToken = await indexStrategy.connect(spender).getAmountTokenFromExactIndex(token.address, indexAmount)
+    const amountTokenMin = amountToken.mul(BigNumber.from(1e2).sub(slippageTolerance)).div(1e2)
 
-    const tokenBalance = tokenBalanceAfter - tokenBalanceBefore
+    await indexToken.connect(spender).approve(indexStrategy.address, indexAmount)
 
-    expect(tokenBalance >= amountTokenMin).to.be.true
+    if (reverted) {
+      await expect(
+        indexStrategy
+          .connect(spender)
+          .burnExactIndexForToken(token.address, amountTokenMin, indexAmount, recipient.address)
+      ).to.be.reverted
+    } else {
+      await expect(
+        indexStrategy
+          .connect(spender)
+          .burnExactIndexForToken(token.address, amountTokenMin, indexAmount, recipient.address)
+      ).to.emit(indexStrategy, "Burn")
+
+      const tokenBalanceAfter = await token.balanceOf(recipient.address)
+
+      const tokenBalance = tokenBalanceAfter - tokenBalanceBefore
+
+      expect(tokenBalance >= amountTokenMin).to.be.true
+    }
   }
 }
