@@ -11,6 +11,7 @@ import { testStrategyDeposit } from "./StrategyDeposit.test"
 import { testStrategyOracle } from "./StrategyOracle.test"
 import { testStrategyPausable } from "./StrategyPausable.test"
 import { testStrategyRebalance } from "./StrategyRebalance.test"
+import { testStrategyToken } from "./StrategyToken.test"
 import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
 
@@ -78,11 +79,14 @@ export function testStrategy(
       this.indexToken = await ethers.getContractAt("IndexToken", indexTokenAddr)
 
       // Oracle.
-      const oracleAddr = await this.strategy.oracle()
       if (strategyTestOptions.network.name === "arbitrum") {
-        this.oracle = await ethers.getContractAt("OracleArbitrum", oracleAddr)
+        this.oracleName = "OracleArbitrum"
+        this.oracleWETH = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+        this.oracleWETHPriceFeed = "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612"
       } else if (strategyTestOptions.network.name === "avalanche") {
-        this.oracle = await ethers.getContractAt("OracleAvalanche", oracleAddr)
+        this.oracleName = "OracleAvalanche"
+        this.oracleWETH = "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7"
+        this.oracleWETHPriceFeed = "0x0A77230d17318075983913bC2145DB16C7366156"
       }
 
       // wNATIVE.
@@ -106,6 +110,7 @@ export function testStrategy(
     testStrategyOracle()
     testStrategyPausable()
     testStrategyRebalance()
+    testStrategyToken()
     testStrategyUpgradeable()
     testStrategyWithdraw()
 
