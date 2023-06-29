@@ -566,6 +566,11 @@ abstract contract IndexStrategyUpgradeable is
 
         // Adjust component's weights.
         for (uint256 i = 0; i < components.length; i++) {
+            if (targetWeights[i] == 0) {
+                weights[components[i]] = 0;
+                continue;
+            }
+
             uint256 componentBalance = IERC20Upgradeable(components[i])
                 .balanceOf(address(this));
 
