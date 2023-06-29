@@ -1,3 +1,4 @@
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers"
 import { AdminClient, ProposalResponseWithUrl } from "defender-admin-client/lib/api"
 import { PartialContract } from "defender-admin-client/lib/models/proposal"
 import { Contract, Signer } from "ethers"
@@ -37,6 +38,9 @@ async function upgradeForking(investable: Investable): Promise<Contract> {
   } else if (liveConfig.multisig !== undefined) {
     signer = await ethers.getImpersonatedSigner(liveConfig.multisig)
   }
+
+  // Airdrop signer.
+  await setBalance(await signer!.getAddress(), ethers.utils.parseEther("10000"))
 
   // Upgrade the given investable and its all relevant investables.
   for (let upgradeConfig of upgradeConfigs) {
