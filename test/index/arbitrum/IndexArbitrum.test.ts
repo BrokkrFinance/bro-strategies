@@ -25,11 +25,11 @@ testStrategy(
 )
 
 async function deployIndexArbitrumDeFiStrategy() {
-  return await deployStrategy("arbitrum", "IndexArbitrumDeFi")
+  return await deployStrategy("arbitrum-one", "IndexArbitrumDeFi")
 }
 
 async function deployIndexArbitrumMarketCapStrategy() {
-  return await deployStrategy("arbitrum", "IndexArbitrumMarketCap")
+  return await deployStrategy("arbitrum-one", "IndexArbitrumMarketCap")
 }
 
 function testIndexArbitrumEquityValuation() {
