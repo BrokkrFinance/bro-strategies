@@ -19,4 +19,5 @@ export interface IndexTestOptions {
   network: Network
   forkAt: number
   upgradeTo: string
+  runRebalance?: boolean
 }
