@@ -29,6 +29,10 @@
         {
           "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/rdnt" },
           "weight": "500000000000000000000"
+        },
+        {
+          "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/wEth" },
+          "weight": "0"
         }
       ],
       "swapRoutes": [
