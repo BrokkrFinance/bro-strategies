@@ -88,7 +88,7 @@
         }
       ],
       "whitelistedTokens": [
-        { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/eth" },
+        { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/wEth" },
         { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/usdc" },
         { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/arb" }
       ],
