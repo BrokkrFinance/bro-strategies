@@ -3,25 +3,44 @@ import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { Arbitrum } from "../../../constants/networks/Arbitrum"
 import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
+import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import { IndexTestOptions } from "../../helper/interfaces/options"
 import { testStrategy } from "../Strategy.test"
 import { burn, mint } from "../helper/InvestHelper"
 
-const indexArbitrumTestOptions: IndexTestOptions = {
+const indexArbitrumDeployTestOptions: IndexTestOptions = {
   network: Arbitrum(),
-  forkAt: 101345000,
+  forkAt: 106030000,
   upgradeTo: "OwnableV2",
 }
+const indexArbitrumUpgradeAfterDeployTestOptions: IndexTestOptions = {
+  network: Arbitrum(),
+  forkAt: 106030000,
+  upgradeTo: "OwnableV2",
+  runRebalance: false,
+}
 
-testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexArbitrumTestOptions, [
+testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexArbitrumDeployTestOptions, [
   testIndexArbitrumEquityValuation,
   // testIndexArbitrumDeFiSetSwapRoute,
 ])
 testStrategy(
   "IndexArbitrumMarketCap Strategy - Deploy",
   deployIndexArbitrumMarketCapStrategy,
-  indexArbitrumTestOptions,
+  indexArbitrumDeployTestOptions,
   [testIndexArbitrumEquityValuation] // testIndexArbitrumSetSwapRoute]
+)
+testStrategy(
+  "IndexArbitrumDeFi Strategy - Upgrade After Deploy",
+  upgradeIndexArbitrumDeFiStrategy,
+  indexArbitrumUpgradeAfterDeployTestOptions,
+  [testIndexArbitrumEquityValuation]
+)
+testStrategy(
+  "IndexArbitrumMarketCap Strategy - Upgrade After Deploy",
+  upgradeIndexArbitrumMarketCapStrategy,
+  indexArbitrumUpgradeAfterDeployTestOptions,
+  [testIndexArbitrumEquityValuation]
 )
 
 async function deployIndexArbitrumDeFiStrategy() {
@@ -30,6 +49,14 @@ async function deployIndexArbitrumDeFiStrategy() {
 
 async function deployIndexArbitrumMarketCapStrategy() {
   return await deployStrategy("arbitrum-one", "IndexArbitrumMarketCap")
+}
+
+async function upgradeIndexArbitrumDeFiStrategy() {
+  return await upgradeStrategy("arbitrum-one", "IndexArbitrumDeFi")
+}
+
+async function upgradeIndexArbitrumMarketCapStrategy() {
+  return await upgradeStrategy("arbitrum-one", "IndexArbitrumMarketCap")
 }
 
 function testIndexArbitrumEquityValuation() {
