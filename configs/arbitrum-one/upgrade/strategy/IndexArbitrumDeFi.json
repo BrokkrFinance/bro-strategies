@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "proxy": { "$ref": "../../live/strategy/IndexArbitrumDeFi.json#/address" },
+      "newImplementation": "IndexArbitrumDeFi",
+      "libraries": [
+        {
+          "name": "SwapAdapter",
+          "dependencies": []
+        }
+      ]
+    }
+  ]
+}
