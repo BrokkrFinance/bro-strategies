@@ -47,9 +47,9 @@ export async function mint(
   if (reverted !== true) {
     const indexTokenBalanceAfter = await indexToken.balanceOf(recipient.address)
 
-    const indexTokenBalance = indexTokenBalanceAfter - indexTokenBalanceBefore
+    const indexTokenBalance = indexTokenBalanceAfter.sub(indexTokenBalanceBefore)
 
-    expect(indexTokenBalance == amountIndex).to.be.true
+    expect(indexTokenBalance.eq(amountIndex)).to.be.true
   }
 }
 
@@ -109,9 +109,9 @@ export async function burn(
 
       const tokenBalanceAfter = await token.balanceOf(recipient.address)
 
-      const tokenBalance = tokenBalanceAfter - tokenBalanceBefore
+      const tokenBalance = tokenBalanceAfter.sub(tokenBalanceBefore)
 
-      expect(tokenBalance >= amountTokenMin).to.be.true
+      expect(tokenBalance.gte(amountTokenMin)).to.be.true
     }
   }
 }
