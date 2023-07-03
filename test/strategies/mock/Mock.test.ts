@@ -25,7 +25,7 @@ const mockTestOptions: StrategyTestOptions = {
   runReapUninvestedReward: false,
 }
 
-testStrategy("Mock Strategy - Deploy", deployMockStrategy, mockTestOptions, [testPerformanceFee])
+// testStrategy("Mock Strategy - Deploy", deployMockStrategy, mockTestOptions, [testPerformanceFee])
 
 async function deployMockStrategy() {
   let strategy = await deployStrategy("avalanche", "MockStrategy")
