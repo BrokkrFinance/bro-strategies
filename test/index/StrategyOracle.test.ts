@@ -24,8 +24,8 @@ export function testStrategyOracle() {
     })
 
     it("should success when the owner sets price feed", async function () {
-      await expect(this.oracle.connect(this.owner).setPriceFeed(this.depositToken.address, this.depositToken.address))
-        .not.to.be.reverted
+      await expect(this.oracle.connect(this.owner).setPriceFeed(this.depositTokenAddress, this.depositTokenAddress)).not
+        .to.be.reverted
     })
 
     it("should fail when the price feed is zero address", async function () {

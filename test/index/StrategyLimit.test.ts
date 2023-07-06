@@ -23,9 +23,9 @@ export function testStrategyLimit() {
 
         const [_amountIndex] = await this.strategy
           .connect(this.whale)
-          .getAmountIndexFromToken(this.depositToken.address, _depositAmount)
+          .getAmountIndexFromToken(this.depositTokenAddress, _depositAmount)
 
-        const amountToken = await this.strategy.getAmountTokenFromExactIndex(this.depositToken.address, _amountIndex)
+        const amountToken = await this.strategy.getAmountTokenFromExactIndex(this.depositTokenAddress, _amountIndex)
 
         // TODO: This only holds when the price of depositToken equals to 1 USD.
         if (amountToken.div(1e6) >= equityValuationLimit) {
@@ -43,7 +43,7 @@ export function testStrategyLimit() {
       await expect(
         this.strategy
           .connect(this.whale)
-          .mintIndexFromToken(this.depositToken.address, depositAmount!, amountIndex!, this.whale.address)
+          .mintIndexFromToken(this.depositTokenAddress, depositAmount!, amountIndex!, this.whale.address)
       ).to.be.reverted
     })
   })

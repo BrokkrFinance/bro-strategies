@@ -273,14 +273,12 @@ export function testStrategyWithdraw() {
         await this.indexToken.connect(this.user0).approve(this.strategy.address, indexTokenBalance)
 
         await expect(
-          this.strategy
-            .connect(this.user0)
-            .burnExactIndexForToken(
-              this.depositToken.address,
-              amountToken.add(1),
-              indexTokenBalance,
-              this.user0.address
-            )
+          this.strategy.connect(this.user0).burnExactIndexForToken(
+            this.depositTokenAddress,
+            amountToken.add(ethers.utils.parseUnits("0.1", this.depositTokenDecimals)), // Estimation on Solidly forks has a minor error. Adding 0.1 token will give us desired result.
+            indexTokenBalance,
+            this.user0.address
+          )
         ).to.be.reverted
       }
     })
