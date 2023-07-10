@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
 import { IIndexToken } from "../interfaces/IIndexToken.sol";
 
@@ -25,10 +25,10 @@ contract IndexToken is
         _disableInitializers();
     }
 
-    function initialize(string memory name_, string memory symbol_)
-        external
-        initializer
-    {
+    function initialize(
+        string memory name_,
+        string memory symbol_
+    ) external initializer {
         __Context_init();
         __Ownable_init();
         __ERC20_init("", "");
@@ -73,19 +73,16 @@ contract IndexToken is
         _mint(account_, amount_);
     }
 
-    function burn(uint256 amount)
-        public
-        virtual
-        override(IIndexToken, ERC20BurnableUpgradeable)
-    {
+    function burn(
+        uint256 amount
+    ) public virtual override(IIndexToken, ERC20BurnableUpgradeable) {
         ERC20BurnableUpgradeable.burn(amount);
     }
 
-    function burnFrom(address account, uint256 amount)
-        public
-        virtual
-        override(IIndexToken, ERC20BurnableUpgradeable)
-    {
+    function burnFrom(
+        address account,
+        uint256 amount
+    ) public virtual override(IIndexToken, ERC20BurnableUpgradeable) {
         ERC20BurnableUpgradeable.burnFrom(account, amount);
     }
 

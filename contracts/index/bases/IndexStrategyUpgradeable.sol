@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
@@ -146,13 +146,9 @@ abstract contract IndexStrategyUpgradeable is
      * @param interfaceId The interface identifier.
      * @return A boolean value indicating whether the interface is supported.
      */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override returns (bool) {
         return
             interfaceId == type(IIndexStrategy).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -293,7 +289,10 @@ abstract contract IndexStrategyUpgradeable is
      * @return amountIndex The amount of index tokens that will be minted.
      * @return amountToken The amount of tokens to be swapped.
      */
-    function getAmountIndexFromToken(address token, uint256 amountTokenMax)
+    function getAmountIndexFromToken(
+        address token,
+        uint256 amountTokenMax
+    )
         external
         view
         onlyWhitelistedToken(token)
@@ -315,12 +314,10 @@ abstract contract IndexStrategyUpgradeable is
      * @param amountIndex The amount of index tokens to be burned.
      * @return amountToken The amount of tokens that will be received.
      */
-    function getAmountTokenFromExactIndex(address token, uint256 amountIndex)
-        external
-        view
-        onlyWhitelistedToken(token)
-        returns (uint256 amountToken)
-    {
+    function getAmountTokenFromExactIndex(
+        address token,
+        uint256 amountIndex
+    ) external view onlyWhitelistedToken(token) returns (uint256 amountToken) {
         uint256 amountWNATIVE = _getAmountWNATIVEFromExactIndex(amountIndex);
 
         (amountToken, ) = _getAmountOutMax(
@@ -556,10 +553,9 @@ abstract contract IndexStrategyUpgradeable is
      * @dev Sets the equity valuation limit for the index strategy.
      * @param _equityValuationLimit The new equity valuation limit.
      */
-    function setEquityValuationLimit(uint256 _equityValuationLimit)
-        public
-        onlyOwner
-    {
+    function setEquityValuationLimit(
+        uint256 _equityValuationLimit
+    ) public onlyOwner {
         equityValuationLimit = _equityValuationLimit;
     }
 
@@ -593,11 +589,10 @@ abstract contract IndexStrategyUpgradeable is
      * @param includeAmmPrice A boolean indicating whether to include the AMM price in the valuation.
      * @return The equity valuation of the index strategy.
      */
-    function equityValuation(bool maximize, bool includeAmmPrice)
-        public
-        view
-        virtual
-        returns (uint256);
+    function equityValuation(
+        bool maximize,
+        bool includeAmmPrice
+    ) public view virtual returns (uint256);
 
     /**
      * @dev Checks if a token is whitelisted.
@@ -646,10 +641,9 @@ abstract contract IndexStrategyUpgradeable is
      * @param amountIndex The amount of index tokens to burn.
      * @return amountWNATIVE The amount of wNATIVE received from burning the index tokens.
      */
-    function _burnExactIndexForWNATIVE(uint256 amountIndex)
-        internal
-        returns (uint256 amountWNATIVE)
-    {
+    function _burnExactIndexForWNATIVE(
+        uint256 amountIndex
+    ) internal returns (uint256 amountWNATIVE) {
         for (uint256 i = 0; i < components.length; i++) {
             if (weights[components[i]] == 0) {
                 continue;
@@ -682,11 +676,9 @@ abstract contract IndexStrategyUpgradeable is
      * @param amountIndex The exact index amount to mint.
      * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
      */
-    function _getMintingDataForExactIndex(uint256 amountIndex)
-        internal
-        view
-        returns (MintingData memory mintingData)
-    {
+    function _getMintingDataForExactIndex(
+        uint256 amountIndex
+    ) internal view returns (MintingData memory mintingData) {
         mintingData.amountIndex = amountIndex;
         mintingData.amountWNATIVEs = new uint256[](components.length);
         mintingData.bestRouters = new address[](components.length);
@@ -723,7 +715,10 @@ abstract contract IndexStrategyUpgradeable is
      * @return bestRouter The best router to use for minting.
      * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
      */
-    function _getMintingDataFromToken(address token, uint256 amountTokenMax)
+    function _getMintingDataFromToken(
+        address token,
+        uint256 amountTokenMax
+    )
         internal
         view
         returns (
@@ -754,11 +749,9 @@ abstract contract IndexStrategyUpgradeable is
      * @param amountWNATIVEMax The maximum wNATIVE amount to use for minting.
      * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
      */
-    function _getMintingDataFromWNATIVE(uint256 amountWNATIVEMax)
-        internal
-        view
-        returns (MintingData memory mintingData)
-    {
+    function _getMintingDataFromWNATIVE(
+        uint256 amountWNATIVEMax
+    ) internal view returns (MintingData memory mintingData) {
         MintingData memory mintingDataUnit = _getMintingDataForExactIndex(
             Constants.PRECISION
         );
@@ -795,11 +788,9 @@ abstract contract IndexStrategyUpgradeable is
      * @param amountIndex The exact index amount.
      * @return amountWNATIVE The amount of wNATIVE received.
      */
-    function _getAmountWNATIVEFromExactIndex(uint256 amountIndex)
-        internal
-        view
-        returns (uint256 amountWNATIVE)
-    {
+    function _getAmountWNATIVEFromExactIndex(
+        uint256 amountIndex
+    ) internal view returns (uint256 amountWNATIVE) {
         for (uint256 i = 0; i < components.length; i++) {
             if (weights[components[i]] == 0) {
                 continue;

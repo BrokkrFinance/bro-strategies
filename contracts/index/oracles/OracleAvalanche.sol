@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -22,10 +22,10 @@ contract OracleAvalanche is
         _disableInitializers();
     }
 
-    function initialize(address wETH, address wETHPriceFeed)
-        external
-        initializer
-    {
+    function initialize(
+        address wETH,
+        address wETHPriceFeed
+    ) external initializer {
         __Context_init();
         __Ownable_init();
         __UUPSUpgradeable_init();
@@ -91,11 +91,9 @@ contract OracleAvalanche is
         priceFeeds[token] = IChainlinkAggregatorV3(priceFeed);
     }
 
-    function _getChainlinkPrice(address token)
-        internal
-        view
-        returns (int256 price)
-    {
+    function _getChainlinkPrice(
+        address token
+    ) internal view returns (int256 price) {
         if (address(priceFeeds[token]) == address(0)) {
             return -1;
         }

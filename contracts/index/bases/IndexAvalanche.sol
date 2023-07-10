@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
 import { IndexStrategyUpgradeable } from "../bases/IndexStrategyUpgradeable.sol";
 import { IChainlinkAggregatorV3 } from "../dependencies/IChainlinkAggregatorV3.sol";
@@ -17,12 +17,10 @@ contract IndexAvalanche is IndexStrategyUpgradeable {
      * @param includeAmmPrice Boolean value to include AMM price.
      * @return The equity valuation as a uint256.
      */
-    function equityValuation(bool maximize, bool includeAmmPrice)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function equityValuation(
+        bool maximize,
+        bool includeAmmPrice
+    ) public view override returns (uint256) {
         uint256 totalSupply = indexToken.totalSupply();
 
         if (totalSupply == 0) {

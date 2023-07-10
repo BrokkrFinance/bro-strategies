@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -15,10 +15,9 @@ contract IndexAvalancheDeFi is UUPSUpgradeable, IndexAvalanche {
         _disableInitializers();
     }
 
-    function initialize(IndexStrategyInitParams calldata initParams)
-        external
-        initializer
-    {
+    function initialize(
+        IndexStrategyInitParams calldata initParams
+    ) external initializer {
         __UUPSUpgradeable_init();
         __IndexStrategyUpgradeable_init(initParams);
     }
