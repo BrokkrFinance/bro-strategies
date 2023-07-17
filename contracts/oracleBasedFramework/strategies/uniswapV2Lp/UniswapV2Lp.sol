@@ -243,8 +243,8 @@ abstract contract UniswapV2Lp is
         override
         returns (Valuation[] memory assetValuations)
     {
-        UniswapV2LpStorage storage strategyStorage = UniswapV2LpStorageLib
-            .getStorage();
+        // UniswapV2LpStorage storage strategyStorage = UniswapV2LpStorageLib
+        //     .getStorage();
 
         assetValuations = new Valuation[](1);
         assetValuations[0] = Valuation(address(depositToken), 0);
