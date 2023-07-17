@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./Math.sol";
 
 import "./InvestableLib.sol";
-import "../../dependencies/swap/IUniswapV2LikeRouter.sol";
+import "../../dependencies/uniswapV2/IUniswapV2Router.sol";
 import "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -84,6 +84,43 @@ library SwapServiceLib {
         }
     }
 
+    function getAmountsOutExtWrapper(
+        address swapLibAddress,
+        SwapService memory swapService,
+        uint256 amountIn,
+        address[] memory path,
+        bytes memory data
+    ) internal view returns (uint256[] memory amountsOut) {
+        bytes memory returnData = Address.functionStaticCall(
+            swapLibAddress,
+            abi.encodeWithSignature(
+                "getAmountsOutExt(SwapService,uint256,address[],bytes)",
+                swapService,
+                amountIn,
+                path,
+                data
+            )
+        );
+        amountsOut = abi.decode(returnData, (uint256[]));
+    }
+
+    function getAmountsOutExt(
+        SwapService memory swapService,
+        uint256 amountIn,
+        address[] memory path,
+        bytes memory
+    ) internal view returns (uint256[] memory amountsOut) {
+        if (
+            swapService.provider == SwapServiceProvider.TraderJoe ||
+            swapService.provider == SwapServiceProvider.UniswapV2
+        ) {
+            amountsOut = getAmountsOut(swapService, amountIn, path);
+        } else {
+            // converting bytes to the appropriate array for TraderJoeV2 and UniswapV3
+            revert InvalidSwapServiceProvider();
+        }
+    }
+
     ///////////////////////////////////////////
     // Internal library functions
     ///////////////////////////////////////////
@@ -99,7 +136,7 @@ library SwapServiceLib {
             swapService.provider == SwapServiceProvider.TraderJoe ||
             swapService.provider == SwapServiceProvider.UniswapV2
         ) {
-            IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
+            IUniswapV2Router uniswapV2LikeRouter = IUniswapV2Router(
                 swapService.router
             );
 
@@ -150,7 +187,7 @@ library SwapServiceLib {
             swapService.provider == SwapServiceProvider.TraderJoe ||
             swapService.provider == SwapServiceProvider.UniswapV2
         ) {
-            IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
+            IUniswapV2Router uniswapV2LikeRouter = IUniswapV2Router(
                 swapService.router
             );
 
@@ -213,9 +250,7 @@ library SwapServiceLib {
         }
         if (swapService.provider == SwapServiceProvider.UniswapV2) {
             pathNew[pathOldLength] = address(InvestableLib.BINANCE_WBNB);
-            IUniswapV2LikeRouter router = IUniswapV2LikeRouter(
-                swapService.router
-            );
+            IUniswapV2Router router = IUniswapV2Router(swapService.router);
 
             IERC20Upgradeable(pathNew[0]).approve(address(router), amountIn);
 
@@ -246,9 +281,7 @@ library SwapServiceLib {
 
         if (swapService.provider == SwapServiceProvider.UniswapV2) {
             pathNew[0] = address(InvestableLib.BINANCE_WBNB);
-            IUniswapV2LikeRouter router = IUniswapV2LikeRouter(
-                swapService.router
-            );
+            IUniswapV2Router router = IUniswapV2Router(swapService.router);
 
             amountOut = router.swapExactETHForTokens{ value: amountIn }(
                 minAmountOut,
@@ -276,9 +309,7 @@ library SwapServiceLib {
 
         if (swapService.provider == SwapServiceProvider.UniswapV2) {
             pathNew[pathOldLength] = address(InvestableLib.BINANCE_WBNB);
-            IUniswapV2LikeRouter router = IUniswapV2LikeRouter(
-                swapService.router
-            );
+            IUniswapV2Router router = IUniswapV2Router(swapService.router);
 
             uint256[] memory maxAmountInCalculated = router.getAmountsIn(
                 amountOut,
@@ -316,7 +347,7 @@ library SwapServiceLib {
             swapService.provider == SwapServiceProvider.TraderJoe ||
             swapService.provider == SwapServiceProvider.UniswapV2
         ) {
-            IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
+            IUniswapV2Router uniswapV2LikeRouter = IUniswapV2Router(
                 swapService.router
             );
 
@@ -330,16 +361,16 @@ library SwapServiceLib {
         SwapService memory swapService,
         uint256 amountIn,
         address[] memory path
-    ) internal view returns (uint256[] memory amounts) {
+    ) internal view returns (uint256[] memory amountsOut) {
         if (
             swapService.provider == SwapServiceProvider.TraderJoe ||
             swapService.provider == SwapServiceProvider.UniswapV2
         ) {
-            IUniswapV2LikeRouter uniswapV2LikeRouter = IUniswapV2LikeRouter(
+            IUniswapV2Router uniswapV2LikeRouter = IUniswapV2Router(
                 swapService.router
             );
 
-            amounts = uniswapV2LikeRouter.getAmountsOut(amountIn, path);
+            amountsOut = uniswapV2LikeRouter.getAmountsOut(amountIn, path);
         } else {
             revert InvalidSwapServiceProvider();
         }

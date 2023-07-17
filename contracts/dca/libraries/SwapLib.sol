@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import { IUniswapV2LikeRouter } from "../../dependencies/swap/IUniswapV2LikeRouter.sol";
+import { IUniswapV2Router } from "../../dependencies/uniswapV2/IUniswapV2Router.sol";
 import { ITraderJoeLBRouter } from "../../dependencies/traderjoe/ITraderJoeLBRouter.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -35,7 +35,7 @@ library SwapLib {
         );
 
         if (router.dex == Dex.UniswapV2) {
-            IUniswapV2LikeRouter routerUniswapV2Like = IUniswapV2LikeRouter(
+            IUniswapV2Router routerUniswapV2Like = IUniswapV2Router(
                 router.router
             );
 
@@ -96,10 +96,9 @@ library SwapLib {
     ) internal view returns (uint256) {
         if (router.dex == Dex.UniswapV2) {
             return
-                IUniswapV2LikeRouter(router.router).getAmountsOut(
-                    amountIn,
-                    path
-                )[path.length - 1];
+                IUniswapV2Router(router.router).getAmountsOut(amountIn, path)[
+                    path.length - 1
+                ];
         } else {
             // solhint-disable-next-line reason-string
             revert("SwapLib: Invalid swap service provider");
