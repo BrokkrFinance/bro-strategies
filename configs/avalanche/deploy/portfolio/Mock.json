@@ -55,19 +55,23 @@
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseFeeLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseInvestmentLib",
-          "dependencies": ["PortfolioBaseAumLib"]
+          "dependencies": ["PortfolioBaseAumLib"],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseManagementLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         }
       ],
       "roleToUsers": [

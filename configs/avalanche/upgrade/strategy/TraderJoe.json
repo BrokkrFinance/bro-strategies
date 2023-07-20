@@ -6,7 +6,8 @@
       "libraries": [
         {
           "name": "TraderJoeInvestmentLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         }
       ]
     }
