@@ -73,11 +73,13 @@
       "libraries": [
         {
           "name": "DnsVectorStrategyAumLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "DnsVectorStrategyInvestmentLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         }
       ]
     }

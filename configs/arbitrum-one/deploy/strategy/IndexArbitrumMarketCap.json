@@ -93,7 +93,28 @@
       "libraries": [
         {
           "name": "SwapAdapter",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": false
+        },
+        {
+          "name": "IndexStrategyUtils",
+          "dependencies": ["SwapAdapter"],
+          "topLevel": true
+        },
+        {
+          "name": "IndexStrategyMint",
+          "dependencies": ["IndexStrategyUtils"],
+          "topLevel": true
+        },
+        {
+          "name": "IndexStrategyBurn",
+          "dependencies": ["IndexStrategyUtils"],
+          "topLevel": true
+        },
+        {
+          "name": "IndexStrategyManagement",
+          "dependencies": ["IndexStrategyUtils"],
+          "topLevel": true
         }
       ]
     }

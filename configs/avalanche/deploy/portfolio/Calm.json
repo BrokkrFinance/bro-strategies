@@ -89,19 +89,23 @@
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseFeeLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseInvestmentLib",
-          "dependencies": ["PortfolioBaseAumLib"]
+          "dependencies": ["PortfolioBaseAumLib"],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseManagementLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         }
       ],
       "roleToUsers": [
@@ -220,19 +224,23 @@
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseFeeLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseInvestmentLib",
-          "dependencies": ["PortfolioBaseAumLib"]
+          "dependencies": ["PortfolioBaseAumLib"],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseManagementLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         }
       ],
       "roleToUsers": [
@@ -299,7 +307,8 @@
       "libraries": [
         {
           "name": "TraderJoeInvestmentLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         }
       ]
     },
@@ -358,19 +367,23 @@
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseFeeLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseInvestmentLib",
-          "dependencies": ["PortfolioBaseAumLib"]
+          "dependencies": ["PortfolioBaseAumLib"],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseManagementLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         }
       ],
       "roleToUsers": [
@@ -428,19 +441,23 @@
       "libraries": [
         {
           "name": "PortfolioBaseAumLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseFeeLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseInvestmentLib",
-          "dependencies": ["PortfolioBaseAumLib"]
+          "dependencies": ["PortfolioBaseAumLib"],
+          "topLevel": true
         },
         {
           "name": "PortfolioBaseManagementLib",
-          "dependencies": []
+          "dependencies": [],
+          "topLevel": true
         }
       ],
       "roleToUsers": [

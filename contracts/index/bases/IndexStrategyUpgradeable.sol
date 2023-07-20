@@ -19,6 +19,11 @@ import { IIndexToken } from "../interfaces/IIndexToken.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { Errors } from "../libraries/Errors.sol";
 import { SwapAdapter } from "../libraries/SwapAdapter.sol";
+import { MintingData, MintParams, BurnParams, ManagementParams } from "../Common.sol";
+import { IndexStrategyMint } from "../libraries/IndexStrategyMint.sol";
+import { IndexStrategyBurn } from "../libraries/IndexStrategyBurn.sol";
+import { IndexStrategyManagement } from "../libraries/IndexStrategyManagement.sol";
+import { IndexStrategyUtils } from "../libraries/IndexStrategyUtils.sol";
 
 /**
  * @title IndexStrategyUpgradeable
@@ -36,14 +41,6 @@ abstract contract IndexStrategyUpgradeable is
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SwapAdapter for SwapAdapter.Setup;
-
-    struct MintingData {
-        uint256 amountIndex;
-        uint256 amountWNATIVETotal;
-        uint256[] amountWNATIVEs;
-        address[] bestRouters;
-        uint256[] amountComponents;
-    }
 
     address public wNATIVE;
 
@@ -192,54 +189,22 @@ abstract contract IndexStrategyUpgradeable is
         whenNotReachedEquityValuationLimit
         returns (uint256 amountIndex, uint256 amountToken)
     {
-        if (recipient == address(0)) {
-            revert Errors.Index_ZeroAddress();
-        }
-
-        address bestRouter;
-        MintingData memory mintingData;
-
-        (amountToken, bestRouter, mintingData) = _getMintingDataFromToken(
-            token,
-            amountTokenMax
+        (amountIndex, amountToken) = IndexStrategyMint.mintIndexFromToken(
+            MintParams(
+                token,
+                amountTokenMax,
+                amountIndexMin,
+                recipient,
+                _msgSender(),
+                wNATIVE,
+                components,
+                indexToken
+            ),
+            pairData,
+            dexs,
+            weights,
+            routers
         );
-
-        if (amountToken > amountTokenMax) {
-            revert Errors.Index_AboveMaxAmount();
-        }
-
-        if (mintingData.amountIndex < amountIndexMin) {
-            revert Errors.Index_BelowMinAmount();
-        }
-
-        amountIndex = mintingData.amountIndex;
-
-        IERC20Upgradeable(token).safeTransferFrom(
-            _msgSender(),
-            address(this),
-            amountToken
-        );
-
-        uint256 amountTokenSpent = _swapTokenForExactToken(
-            bestRouter,
-            mintingData.amountWNATIVETotal,
-            amountToken,
-            token,
-            wNATIVE
-        );
-
-        if (amountTokenSpent != amountToken) {
-            revert Errors.Index_WrongSwapAmount();
-        }
-
-        uint256 amountWNATIVESpent = _mintExactIndexFromWNATIVE(
-            mintingData,
-            recipient
-        );
-
-        if (amountWNATIVESpent != mintingData.amountWNATIVETotal) {
-            revert Errors.Index_WrongSwapAmount();
-        }
 
         emit Mint(_msgSender(), recipient, token, amountToken, amountIndex);
     }
@@ -312,37 +277,22 @@ abstract contract IndexStrategyUpgradeable is
         onlyWhitelistedToken(token)
         returns (uint256 amountToken)
     {
-        if (recipient == address(0)) {
-            revert Errors.Index_ZeroAddress();
-        }
-
-        uint256 amountWNATIVE = _burnExactIndexForWNATIVE(amountIndex);
-
-        (uint256 amountTokenOut, address bestRouter) = _getAmountOutMax(
-            routers[token],
-            amountWNATIVE,
-            wNATIVE,
-            token
+        amountToken = IndexStrategyBurn.burnExactIndexForToken(
+            BurnParams(
+                token,
+                amountTokenMin,
+                amountIndex,
+                recipient,
+                _msgSender(),
+                wNATIVE,
+                components,
+                indexToken
+            ),
+            pairData,
+            dexs,
+            weights,
+            routers
         );
-
-        amountToken = _swapExactTokenForToken(
-            bestRouter,
-            amountWNATIVE,
-            amountTokenOut,
-            wNATIVE,
-            token
-        );
-
-        if (amountToken != amountTokenOut) {
-            revert Errors.Index_WrongSwapAmount();
-        }
-
-        if (amountToken < amountTokenMin) {
-            revert Errors.Index_BelowMinAmount();
-        }
-
-        IERC20Upgradeable(token).safeTransfer(recipient, amountToken);
-
         emit Burn(_msgSender(), recipient, token, amountToken, amountIndex);
     }
 
@@ -390,10 +340,23 @@ abstract contract IndexStrategyUpgradeable is
     {
         MintingData memory mintingData;
 
-        (amountToken, , mintingData) = _getMintingDataFromToken(
-            token,
-            amountTokenMax
-        );
+        (amountToken, , mintingData) = IndexStrategyMint
+            .getMintingDataFromToken(
+                MintParams(
+                    token,
+                    amountTokenMax,
+                    0,
+                    address(0),
+                    _msgSender(),
+                    wNATIVE,
+                    components,
+                    indexToken
+                ),
+                pairData,
+                dexs,
+                weights,
+                routers
+            );
 
         amountIndex = mintingData.amountIndex;
     }
@@ -431,11 +394,13 @@ abstract contract IndexStrategyUpgradeable is
     {
         uint256 amountWNATIVE = _getAmountWNATIVEFromExactIndex(amountIndex);
 
-        (amountToken, ) = _getAmountOutMax(
+        (amountToken, ) = IndexStrategyUtils.getAmountOutMax(
             routers[token],
             amountWNATIVE,
             wNATIVE,
-            token
+            token,
+            dexs,
+            pairData
         );
     }
 
@@ -457,127 +422,13 @@ abstract contract IndexStrategyUpgradeable is
      * @param targetWeights The target weights for each component.
      */
     function rebalance(uint256[] calldata targetWeights) external onlyOwner {
-        if (components.length != targetWeights.length) {
-            revert Errors.Index_WrongTargetWeightsLength();
-        }
-
-        uint256 amountWNATIVETotal;
-        uint256[] memory requiredWNATIVEs = new uint256[](components.length);
-        uint256 requiredWNATIVETotal;
-
-        uint256 indexTotalSupply = indexToken.totalSupply();
-
-        for (uint256 i = 0; i < components.length; i++) {
-            if (weights[components[i]] > targetWeights[i]) {
-                // Convert component to wNATIVE.
-                uint256 amountComponent;
-
-                if (targetWeights[i] == 0) {
-                    // To avoid rounding errors.
-                    amountComponent = IERC20Upgradeable(components[i])
-                        .balanceOf(address(this));
-                } else {
-                    amountComponent =
-                        ((weights[components[i]] - targetWeights[i]) *
-                            indexTotalSupply) /
-                        Constants.PRECISION;
-                }
-
-                (
-                    uint256 amountWNATIVEOut,
-                    address bestRouter
-                ) = _getAmountOutMax(
-                        routers[components[i]],
-                        amountComponent,
-                        components[i],
-                        wNATIVE
-                    );
-
-                uint256 balanceComponent = IERC20Upgradeable(components[i])
-                    .balanceOf(address(this));
-
-                if (amountComponent > balanceComponent) {
-                    amountComponent = balanceComponent;
-                }
-
-                uint256 amountWNATIVE = _swapExactTokenForToken(
-                    bestRouter,
-                    amountComponent,
-                    amountWNATIVEOut,
-                    components[i],
-                    wNATIVE
-                );
-
-                if (amountWNATIVE != amountWNATIVEOut) {
-                    revert Errors.Index_WrongSwapAmount();
-                }
-
-                amountWNATIVETotal += amountWNATIVE;
-            } else if (weights[components[i]] < targetWeights[i]) {
-                // Calculate how much wNATIVE is required to buy component.
-                uint256 amountComponent = ((targetWeights[i] -
-                    weights[components[i]]) * indexTotalSupply) /
-                    Constants.PRECISION;
-
-                (uint256 amountWNATIVE, ) = _getAmountInMin(
-                    routers[components[i]],
-                    amountComponent,
-                    wNATIVE,
-                    components[i]
-                );
-
-                requiredWNATIVEs[i] = amountWNATIVE;
-                requiredWNATIVETotal += amountWNATIVE;
-            }
-        }
-
-        if (amountWNATIVETotal == 0) {
-            revert Errors.Index_WrongTargetWeights();
-        }
-
-        // Convert wNATIVE to component.
-        for (uint256 i = 0; i < components.length; i++) {
-            if (requiredWNATIVEs[i] == 0) {
-                continue;
-            }
-
-            uint256 amountWNATIVE = (requiredWNATIVEs[i] * amountWNATIVETotal) /
-                requiredWNATIVETotal;
-
-            (uint256 amountComponentOut, address bestRouter) = _getAmountOutMax(
-                routers[components[i]],
-                amountWNATIVE,
-                wNATIVE,
-                components[i]
-            );
-
-            uint256 amountComponent = _swapExactTokenForToken(
-                bestRouter,
-                amountWNATIVE,
-                amountComponentOut,
-                wNATIVE,
-                components[i]
-            );
-
-            if (amountComponent != amountComponentOut) {
-                revert Errors.Index_WrongSwapAmount();
-            }
-        }
-
-        // Adjust component's weights.
-        for (uint256 i = 0; i < components.length; i++) {
-            if (targetWeights[i] == 0) {
-                weights[components[i]] = 0;
-                continue;
-            }
-
-            uint256 componentBalance = IERC20Upgradeable(components[i])
-                .balanceOf(address(this));
-
-            weights[components[i]] =
-                (componentBalance * Constants.PRECISION) /
-                indexTotalSupply;
-        }
+        IndexStrategyManagement.rebalance(
+            ManagementParams(wNATIVE, components, indexToken, targetWeights),
+            pairData,
+            dexs,
+            weights,
+            routers
+        );
     }
 
     /**
@@ -741,182 +592,6 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     /**
-     * @dev Mints the exact index amount of the index token by swapping components with wNATIVE.
-     * @param mintingData The minting data containing information about the components and routers.
-     * @param recipient The address to receive the minted index tokens.
-     * @return amountWNATIVESpent The amount of wNATIVE spent during the minting process.
-     */
-    function _mintExactIndexFromWNATIVE(
-        MintingData memory mintingData,
-        address recipient
-    ) internal returns (uint256 amountWNATIVESpent) {
-        for (uint256 i = 0; i < components.length; i++) {
-            if (mintingData.amountComponents[i] == 0) {
-                continue;
-            }
-
-            amountWNATIVESpent += _swapTokenForExactToken(
-                mintingData.bestRouters[i],
-                mintingData.amountComponents[i],
-                mintingData.amountWNATIVEs[i],
-                wNATIVE,
-                components[i]
-            );
-        }
-
-        indexToken.mint(recipient, mintingData.amountIndex);
-    }
-
-    /**
-     * @dev Burns the exact index amount of the index token and swaps components for wNATIVE.
-     * @param amountIndex The amount of index tokens to burn.
-     * @return amountWNATIVE The amount of wNATIVE received from burning the index tokens.
-     */
-    function _burnExactIndexForWNATIVE(uint256 amountIndex)
-        internal
-        returns (uint256 amountWNATIVE)
-    {
-        for (uint256 i = 0; i < components.length; i++) {
-            if (weights[components[i]] == 0) {
-                continue;
-            }
-
-            uint256 amountComponent = (amountIndex * weights[components[i]]) /
-                Constants.PRECISION;
-
-            (uint256 amountWNATIVEOut, address bestRouter) = _getAmountOutMax(
-                routers[components[i]],
-                amountComponent,
-                components[i],
-                wNATIVE
-            );
-
-            amountWNATIVE += _swapExactTokenForToken(
-                bestRouter,
-                amountComponent,
-                amountWNATIVEOut,
-                components[i],
-                wNATIVE
-            );
-        }
-
-        indexToken.burnFrom(_msgSender(), amountIndex);
-    }
-
-    /**
-     * @dev Calculates the minting data for the exact index amount.
-     * @param amountIndex The exact index amount to mint.
-     * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
-     */
-    function _getMintingDataForExactIndex(uint256 amountIndex)
-        internal
-        view
-        returns (MintingData memory mintingData)
-    {
-        mintingData.amountIndex = amountIndex;
-        mintingData.amountWNATIVEs = new uint256[](components.length);
-        mintingData.bestRouters = new address[](components.length);
-        mintingData.amountComponents = new uint256[](components.length);
-
-        for (uint256 i = 0; i < components.length; i++) {
-            if (weights[components[i]] == 0) {
-                continue;
-            }
-
-            mintingData.amountComponents[i] =
-                (amountIndex * weights[components[i]]) /
-                Constants.PRECISION;
-
-            (
-                mintingData.amountWNATIVEs[i],
-                mintingData.bestRouters[i]
-            ) = _getAmountInMin(
-                routers[components[i]],
-                mintingData.amountComponents[i],
-                wNATIVE,
-                components[i]
-            );
-
-            mintingData.amountWNATIVETotal += mintingData.amountWNATIVEs[i];
-        }
-    }
-
-    /**
-     * @dev Calculates the minting data from the given token and maximum token amount.
-     * @param token The token to mint from.
-     * @param amountTokenMax The maximum token amount to use for minting.
-     * @return amountToken The actual token amount used for minting.
-     * @return bestRouter The best router to use for minting.
-     * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
-     */
-    function _getMintingDataFromToken(address token, uint256 amountTokenMax)
-        internal
-        view
-        returns (
-            uint256 amountToken,
-            address bestRouter,
-            MintingData memory mintingData
-        )
-    {
-        (uint256 amountWNATIVE, ) = _getAmountOutMax(
-            routers[token],
-            amountTokenMax,
-            token,
-            wNATIVE
-        );
-
-        mintingData = _getMintingDataFromWNATIVE(amountWNATIVE);
-
-        (amountToken, bestRouter) = _getAmountInMin(
-            routers[token],
-            mintingData.amountWNATIVETotal,
-            token,
-            wNATIVE
-        );
-    }
-
-    /**
-     * @dev Calculates the minting data from the given wNATIVE amount.
-     * @param amountWNATIVEMax The maximum wNATIVE amount to use for minting.
-     * @return mintingData The minting data containing information about the components, routers, and wNATIVE amounts.
-     */
-    function _getMintingDataFromWNATIVE(uint256 amountWNATIVEMax)
-        internal
-        view
-        returns (MintingData memory mintingData)
-    {
-        MintingData memory mintingDataUnit = _getMintingDataForExactIndex(
-            Constants.PRECISION
-        );
-
-        uint256 amountIndex = type(uint256).max;
-
-        for (uint256 i = 0; i < components.length; i++) {
-            if (mintingDataUnit.amountWNATIVEs[i] == 0) {
-                continue;
-            }
-
-            uint256 amountWNATIVE = (amountWNATIVEMax *
-                mintingDataUnit.amountWNATIVEs[i]) /
-                mintingDataUnit.amountWNATIVETotal;
-
-            (uint256 amountComponent, ) = _getAmountOutMax(
-                routers[components[i]],
-                amountWNATIVE,
-                wNATIVE,
-                components[i]
-            );
-
-            amountIndex = MathUpgradeable.min(
-                amountIndex,
-                (amountComponent * Constants.PRECISION) / weights[components[i]]
-            );
-        }
-
-        mintingData = _getMintingDataForExactIndex(amountIndex);
-    }
-
-    /**
      * @dev Calculates the amount of wNATIVE received from the exact index amount.
      * @param amountIndex The exact index amount.
      * @return amountWNATIVE The amount of wNATIVE received.
@@ -934,11 +609,13 @@ abstract contract IndexStrategyUpgradeable is
             uint256 amountComponent = (amountIndex * weights[components[i]]) /
                 Constants.PRECISION;
 
-            (uint256 amountWNATIVEOut, ) = _getAmountOutMax(
+            (uint256 amountWNATIVEOut, ) = IndexStrategyUtils.getAmountOutMax(
                 routers[components[i]],
                 amountComponent,
                 components[i],
-                wNATIVE
+                wNATIVE,
+                dexs,
+                pairData
             );
 
             amountWNATIVE += amountWNATIVEOut;
@@ -1026,152 +703,6 @@ abstract contract IndexStrategyUpgradeable is
                 routers[token][i] = routers[token][routers[token].length - 1];
                 routers[token].pop();
                 break;
-            }
-        }
-    }
-
-    /**
-     * @dev Swaps exact token for token using a specific router.
-     * @param router The router address to use for swapping.
-     * @param amountIn The exact amount of input tokens.
-     * @param amountOutMin The minimum amount of output tokens to receive.
-     * @param tokenIn The input token address.
-     * @param tokenOut The output token address.
-     * @return amountOut The amount of output tokens received.
-     */
-    function _swapExactTokenForToken(
-        address router,
-        uint256 amountIn,
-        uint256 amountOutMin,
-        address tokenIn,
-        address tokenOut
-    ) internal returns (uint256 amountOut) {
-        if (tokenIn == tokenOut) {
-            return amountIn;
-        }
-
-        address[] memory path = new address[](2);
-        path[0] = tokenIn;
-        path[1] = tokenOut;
-
-        amountOut = SwapAdapter
-            .Setup(dexs[router], router, pairData[router][tokenIn][tokenOut])
-            .swapExactTokensForTokens(amountIn, amountOutMin, path);
-    }
-
-    /**
-     * @dev Swaps a specific amount of `tokenIn` for an exact amount of `tokenOut` using a specified router.
-     * @param router The address of the router contract to use for the swap.
-     * @param amountOut The exact amount of `tokenOut` tokens to receive.
-     * @param amountInMax The maximum amount of `tokenIn` tokens to be used for the swap.
-     * @param tokenIn The address of the token to be swapped.
-     * @param tokenOut The address of the token to receive.
-     * @return amountIn The actual amount of `tokenIn` tokens used for the swap.
-     */
-    function _swapTokenForExactToken(
-        address router,
-        uint256 amountOut,
-        uint256 amountInMax,
-        address tokenIn,
-        address tokenOut
-    ) internal returns (uint256 amountIn) {
-        if (tokenIn == tokenOut) {
-            return amountOut;
-        }
-
-        address[] memory path = new address[](2);
-        path[0] = tokenIn;
-        path[1] = tokenOut;
-
-        amountIn = SwapAdapter
-            .Setup(dexs[router], router, pairData[router][tokenIn][tokenOut])
-            .swapTokensForExactTokens(amountOut, amountInMax, path);
-    }
-
-    /**
-     * @dev Calculates the maximum amount of `tokenOut` tokens that can be received for a given `amountIn` of `tokenIn` tokens,
-     *      and identifies the best router to use for the swap among a list of routers.
-     * @param _routers The list of router addresses to consider for the swap.
-     * @param amountIn The amount of `tokenIn` tokens.
-     * @param tokenIn The address of the token to be swapped.
-     * @param tokenOut The address of the token to receive.
-     * @return amountOutMax The maximum amount of `tokenOut` tokens that can be received for the given `amountIn`.
-     * @return bestRouter The address of the best router to use for the swap.
-     */
-    function _getAmountOutMax(
-        address[] memory _routers,
-        uint256 amountIn,
-        address tokenIn,
-        address tokenOut
-    ) internal view returns (uint256 amountOutMax, address bestRouter) {
-        if (tokenIn == tokenOut) {
-            return (amountIn, address(0));
-        }
-
-        if (_routers.length == 0) {
-            revert Errors.Index_WrongPair(tokenIn, tokenOut);
-        }
-
-        amountOutMax = type(uint256).min;
-
-        for (uint256 i = 0; i < _routers.length; i++) {
-            address router = _routers[i];
-
-            uint256 amountOut = SwapAdapter
-                .Setup(
-                    dexs[router],
-                    router,
-                    pairData[router][tokenIn][tokenOut]
-                )
-                .getAmountOut(amountIn, tokenIn, tokenOut);
-
-            if (amountOut > amountOutMax) {
-                amountOutMax = amountOut;
-                bestRouter = router;
-            }
-        }
-    }
-
-    /**
-     * @dev Calculates the minimum amount of `tokenIn` tokens required to receive a given `amountOut` of `tokenOut` tokens,
-     *      and identifies the best router to use for the swap among a list of routers.
-     * @param _routers The list of router addresses to consider for the swap.
-     * @param amountOut The amount of `tokenOut` tokens to receive.
-     * @param tokenIn The address of the token to be swapped.
-     * @param tokenOut The address of the token to receive.
-     * @return amountInMin The minimum amount of `tokenIn` tokens required to receive the given `amountOut`.
-     * @return bestRouter The address of the best router to use for the swap.
-     */
-    function _getAmountInMin(
-        address[] memory _routers,
-        uint256 amountOut,
-        address tokenIn,
-        address tokenOut
-    ) internal view returns (uint256 amountInMin, address bestRouter) {
-        if (tokenIn == tokenOut) {
-            return (amountOut, address(0));
-        }
-
-        if (_routers.length == 0) {
-            revert Errors.Index_WrongPair(tokenIn, tokenOut);
-        }
-
-        amountInMin = type(uint256).max;
-
-        for (uint256 i = 0; i < _routers.length; i++) {
-            address router = _routers[i];
-
-            uint256 amountIn = SwapAdapter
-                .Setup(
-                    dexs[router],
-                    router,
-                    pairData[router][tokenIn][tokenOut]
-                )
-                .getAmountIn(amountOut, tokenIn, tokenOut);
-
-            if (amountIn < amountInMin) {
-                amountInMin = amountIn;
-                bestRouter = router;
             }
         }
     }

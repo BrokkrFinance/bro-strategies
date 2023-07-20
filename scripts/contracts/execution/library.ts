@@ -56,7 +56,7 @@ export async function deployLibraries(network: string, libraryArgs: LibraryArgs)
 
     await verifyContract(library.address)
 
-    libraries[libraryInfo.name] = library.address
+    if (libraryInfo.topLevel) libraries[libraryInfo.name] = library.address
   }
 
   return libraries
