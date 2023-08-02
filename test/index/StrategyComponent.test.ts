@@ -46,7 +46,7 @@ export function testStrategyComponent() {
       for (component of components) {
         const weight = await this.strategy.weights(component)
 
-        if (weight === 0) {
+        if (weight > 0) {
           break
         }
       }
