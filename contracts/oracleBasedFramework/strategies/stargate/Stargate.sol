@@ -81,7 +81,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
 
     function reinitialize(StargateArgs calldata stargateArgs)
         external
-        reinitializer(2)
+        reinitializer(3)
     {
         __switchSwapService(stargateArgs);
     }

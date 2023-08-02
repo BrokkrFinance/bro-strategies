@@ -88,7 +88,7 @@ export function testStrategy(
       // Deposit token.
       this.depositToken = await ethers.getContractAt(
         "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
-        await this.portfolio.getDepositToken()
+        await this.strategy.getDepositToken()
       )
       this.depositTokenDecimals = await this.depositToken.decimals()
 

@@ -8,6 +8,7 @@ export function testStrategyPausable() {
     testPausable()
 
     it("should fail when any user withdraws reward and the strategy is paused", async function () {
+      const user0BalanceBefore = await this.depositToken.balanceOf(this.user0.address)
       await this.depositToken
         .connect(this.user0)
         .approve(this.strategy.address, ethers.utils.parseUnits("3", this.depositTokenDecimals))
@@ -19,8 +20,8 @@ export function testStrategyPausable() {
 
       await expect(this.strategy.connect(this.user0).withdrawReward([])).to.be.revertedWith("Pausable: paused")
 
-      expect(await this.depositToken.balanceOf(this.user0.address)).to.equal(
-        ethers.utils.parseUnits("7", this.depositTokenDecimals)
+      expect(user0BalanceBefore.sub(await this.depositToken.balanceOf(this.user0.address))).to.equal(
+        ethers.utils.parseUnits("3", this.depositTokenDecimals)
       )
     })
   })
