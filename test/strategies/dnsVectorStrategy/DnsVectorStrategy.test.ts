@@ -17,6 +17,7 @@ const dnsVectorTestOptions: StrategyTestOptions = {
   runReapRewardExtra: false,
 }
 
+// DnS strategy has been depricated and user funds are withdrawn
 // testStrategy("Dns Vector Strategy - Deploy", deployDnsStrategy, dnsVectorTestOptions, [
 //   testAum,
 //   testCollaterizationAndDeltaNeutrality,

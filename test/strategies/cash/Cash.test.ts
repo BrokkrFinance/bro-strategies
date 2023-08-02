@@ -16,22 +16,22 @@ const cashTestOptions: StrategyTestOptions = {
   runReapUninvestedReward: false,
 }
 
-// testStrategy("Cash Strategy - Deploy", deployCashStrategy, cashTestOptions, [testCashAum])
-// testStrategy(
-//   "Cash with Stargate USDC Strategy - Upgrade After Deploy",
-//   upgradeCashWithStargateUsdcStrategy,
-//   cashTestOptions,
-//   [testCashAum]
-// )
-// testStrategy(
-//   "Cash with Stargate USDT Strategy - Upgrade After Deploy",
-//   upgradeCashWithStargateUsdtStrategy,
-//   cashTestOptions,
-//   [testCashAum]
-// )
-// testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, cashTestOptions, [
-//   testCashAum,
-// ])
+testStrategy("Cash Strategy - Deploy", deployCashStrategy, cashTestOptions, [testCashAum])
+testStrategy(
+  "Cash with Stargate USDC Strategy - Upgrade After Deploy",
+  upgradeCashWithStargateUsdcStrategy,
+  cashTestOptions,
+  [testCashAum]
+)
+testStrategy(
+  "Cash with Stargate USDT Strategy - Upgrade After Deploy",
+  upgradeCashWithStargateUsdtStrategy,
+  cashTestOptions,
+  [testCashAum]
+)
+testStrategy("Cash with TraderJoe Strategy - Upgrade After Deploy", upgradeCashWithTraderJoeStrategy, cashTestOptions, [
+  testCashAum,
+])
 
 async function deployCashStrategy() {
   return await deployStrategy("avalanche", "Cash")

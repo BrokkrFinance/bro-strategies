@@ -6,7 +6,8 @@ export async function removeInvestmentLimitsAndFees(investable: Contract, owner:
   const humanReadableName = await investable.humanReadableName()
 
   if (humanReadableName.endsWith("portfolio")) {
-    const investables = await investable.getInvestables()
+    const portfolio = await ethers.getContractAt("IPortfolio", investable.address)
+    const investables = await portfolio.getInvestables()
 
     for (let i = 0; i < investables.length; i++) {
       const _investable = await ethers.getContractAt("IInvestable", await investables[i].investable)

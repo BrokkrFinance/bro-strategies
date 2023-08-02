@@ -7,6 +7,7 @@ import { deployStrategy } from "../../../scripts/contracts/forking/deploy"
 import { WhaleAddrs } from "../../helper/addresses"
 import { StrategyTestOptions } from "../../helper/interfaces/options"
 import { testStrategy } from "../Strategy.test"
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers"
 
 expect
 BigNumber
@@ -24,7 +25,7 @@ const mockTestOptions: StrategyTestOptions = {
   runReapUninvestedReward: false,
 }
 
-// testStrategy("Mock Strategy - Deploy", deployMockStrategy, mockTestOptions, [testPerformanceFee])
+testStrategy("Mock Strategy - Deploy", deployMockStrategy, mockTestOptions, [testPerformanceFee])
 
 async function deployMockStrategy() {
   let strategy = await deployStrategy("avalanche", "MockStrategy")
@@ -35,10 +36,18 @@ async function deployMockStrategy() {
   await strategy.setFreeMoneyProvider(freeMoneyProvider.address)
 
   // transfering deposit token to FreeMoneyProvider and to the strategy
-  let impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.get("avalanche")!)
+  let impersonatedSigner = await ethers.getImpersonatedSigner(WhaleAddrs.get("avalanche")[0][1])
+  await setBalance(impersonatedSigner.address, ethers.utils.parseEther("10000"))
   let usdc = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", Tokens.usdc)
   await usdc.connect(impersonatedSigner).transfer(freeMoneyProvider.address, ethers.utils.parseUnits("30000", 6))
   await usdc.connect(impersonatedSigner).transfer(strategy.address, ethers.utils.parseUnits("30000", 6))
+
+  // transfering deposit token to user0 and user1
+  const signers = await ethers.getSigners()
+  const user0 = signers[1]
+  const user1 = signers[2]
+  await usdc.connect(impersonatedSigner).transfer(user0.address, ethers.utils.parseUnits("30000", 6))
+  await usdc.connect(impersonatedSigner).transfer(user1.address, ethers.utils.parseUnits("30000", 6))
 
   return strategy
 }

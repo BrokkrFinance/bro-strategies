@@ -290,9 +290,14 @@ export class InvestHelper {
 
   private async compareDepositStates() {
     if (this.investResult === InvestResult.SUCCESS) {
-      const investmentTokenPrice: BigNumber = this.statesBefore.investmentTokenSupply.eq(BigNumber.from(0))
-        ? BigNumber.from(1)
-        : this.statesBefore.equityValuation.div(this.statesBefore.investmentTokenSupply)
+      const investmentTokenPrice: BigNumber =
+        (this.statesBefore.investmentTokenSupply.eq(
+          BigNumber.from(0) || this.statesBefore.equityValuation < this.statesBefore.investmentTokenSupply
+        )
+          ? BigNumber.from(1)
+          : this.statesBefore.equityValuation.div(this.statesBefore.investmentTokenSupply),
+        BigNumber.from(1))
+
       const investmentTokenMinted = this.investArgs.amount.div(investmentTokenPrice)
 
       expect(this.statesBefore.depositTokenBalance.sub(this.statesAfter.depositTokenBalance)).to.equal(
@@ -331,9 +336,11 @@ export class InvestHelper {
 
   private async compareWithdrawStates() {
     if (this.investResult === InvestResult.SUCCESS) {
-      const investmentTokenPrice: BigNumber = this.statesBefore.investmentTokenSupply.eq(BigNumber.from(0))
-        ? BigNumber.from(1)
-        : this.statesBefore.equityValuation.div(this.statesBefore.investmentTokenSupply)
+      const investmentTokenPrice: BigNumber =
+        this.statesBefore.investmentTokenSupply.eq(BigNumber.from(0)) ||
+        this.statesBefore.equityValuation < this.statesBefore.investmentTokenSupply
+          ? BigNumber.from(1)
+          : this.statesBefore.equityValuation.div(this.statesBefore.investmentTokenSupply)
       const withdrewEquityValuation = this.investArgs.amount.mul(investmentTokenPrice)
 
       expect(this.statesAfter.depositTokenBalance.sub(this.statesBefore.depositTokenBalance)).to.be.approximately(

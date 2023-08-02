@@ -20,15 +20,15 @@ const traderjoeTestOptions: StrategyTestOptions = {
   runReapUninvestedReward: false,
 }
 
-// testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, traderjoeTestOptions, [
-//   testTraderJoeAdjustBins,
-//   testTraderJoeAum,
-//   testTraderJoeInitialize,
-// ])
-// testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, traderjoeTestOptions, [
-//   testTraderJoeAdjustBins,
-//   testTraderJoeAum,
-// ])
+testStrategy("TraderJoe USDC-USDC.e Strategy - Deploy", deployTraderJoeStrategy, traderjoeTestOptions, [
+  testTraderJoeAdjustBins,
+  testTraderJoeAum,
+  testTraderJoeInitialize,
+])
+testStrategy("TraderJoe USDC-USDC.e Strategy - Upgrade After Deploy", upgradeTraderJoeStrategy, traderjoeTestOptions, [
+  testTraderJoeAdjustBins,
+  testTraderJoeAum,
+])
 
 async function deployTraderJoeStrategy() {
   return await deployStrategy("avalanche", "TraderJoe")

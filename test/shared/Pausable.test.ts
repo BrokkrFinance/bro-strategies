@@ -21,6 +21,8 @@ export function testPausable() {
   })
 
   it("should fail when any user withdraws and the investable is paused", async function () {
+    const user0BalanceBefore = await this.depositToken.balanceOf(this.user0.address)
+
     await this.depositToken
       .connect(this.user0)
       .approve(this.investable.address, ethers.utils.parseUnits("3", this.depositTokenDecimals))
@@ -39,8 +41,8 @@ export function testPausable() {
       })
       .revertedWith("Pausable: paused")
 
-    expect(await this.depositToken.balanceOf(this.user0.address)).to.equal(
-      ethers.utils.parseUnits("97", this.depositTokenDecimals)
+    expect(user0BalanceBefore.sub(await this.depositToken.balanceOf(this.user0.address))).to.equal(
+      ethers.utils.parseUnits("3", this.depositTokenDecimals)
     )
   })
 }
