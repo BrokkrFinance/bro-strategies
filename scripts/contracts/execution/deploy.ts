@@ -148,7 +148,7 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
   if (investable.type === "portfolio") {
     console.log("Deploy: Deposit $2 to and withdraw $1 from the top level portfolio.")
 
-    await investOneDollarToPortfolio(investable)
+    await investOneDollarToPortfolio(investable, deployConfigs[deployConfigs.length - 1].depositToken)
 
     console.log()
   } else {
@@ -320,7 +320,10 @@ async function investOneDollarToPortfolio(investable: Investable, depositTokenAd
   // Deposit $2.
   const portfolioTokenBalanceBefore = await portfolioToken.balanceOf(deployer.address)
 
-  const depositAmount = ethers.utils.parseUnits(DepositTokenAmounts.get(depositTokenAddr), depositTokenDecimals)
+  const depositAmount = ethers.utils.parseUnits(
+    DepositTokenAmounts.get(investable.network).get(depositTokenAddr),
+    depositTokenDecimals
+  )
   await depositToken.connect(deployer).approve(portfolio.address, depositAmount)
   await portfolio.connect(deployer).deposit(depositAmount, 0, deployer.address, [])
 
@@ -352,10 +355,6 @@ async function investOneDollarToIndex(
 
   // Get deployer account.
   const deployer = (await ethers.getSigners())[0]
-  const usdc = await ethers.getContractAt(
-    "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-    DepositTokens.get(investable.network)
-  )
 
   // Deposit $2.
   console.log("Deploy: Deposit $2.")
