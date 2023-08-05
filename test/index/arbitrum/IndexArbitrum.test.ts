@@ -22,25 +22,25 @@ const indexArbitrumUpgradeAfterDeployTestOptions: IndexTestOptions = {
 
 testStrategy("IndexArbitrumDeFi Strategy - Deploy", deployIndexArbitrumDeFiStrategy, indexArbitrumDeployTestOptions, [
   testIndexArbitrumEquityValuation,
-  // testIndexArbitrumDeFiSetSwapRoute,
+  testIndexArbitrumSetSwapRoute,
 ])
 testStrategy(
   "IndexArbitrumMarketCap Strategy - Deploy",
   deployIndexArbitrumMarketCapStrategy,
   indexArbitrumDeployTestOptions,
-  [testIndexArbitrumEquityValuation] // testIndexArbitrumSetSwapRoute]
+  [testIndexArbitrumEquityValuation, testIndexArbitrumSetSwapRoute]
 )
 testStrategy(
   "IndexArbitrumDeFi Strategy - Upgrade After Deploy",
   upgradeIndexArbitrumDeFiStrategy,
   indexArbitrumUpgradeAfterDeployTestOptions,
-  [testIndexArbitrumEquityValuation]
+  [testIndexArbitrumEquityValuation, testIndexArbitrumSetSwapRoute]
 )
 testStrategy(
   "IndexArbitrumMarketCap Strategy - Upgrade After Deploy",
   upgradeIndexArbitrumMarketCapStrategy,
   indexArbitrumUpgradeAfterDeployTestOptions,
-  [testIndexArbitrumEquityValuation]
+  [testIndexArbitrumEquityValuation, testIndexArbitrumSetSwapRoute]
 )
 
 async function deployIndexArbitrumDeFiStrategy() {
@@ -77,7 +77,7 @@ function testIndexArbitrumSetSwapRoute() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1000", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 1 deposits.
@@ -87,7 +87,7 @@ function testIndexArbitrumSetSwapRoute() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("500", 6)
+        ethers.utils.parseUnits("5", this.depositTokenDecimals)
       )
 
       // User 2 deposits.
@@ -97,7 +97,7 @@ function testIndexArbitrumSetSwapRoute() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("500.123", 6)
+        ethers.utils.parseUnits("5.123", this.depositTokenDecimals)
       )
 
       let indexTokenBalance: BigNumber
@@ -139,37 +139,21 @@ function testIndexArbitrumSetSwapRoute() {
       )
     })
 
-    it("should succeed to add swap route without any data", async function () {
-      await expect(
-        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
-          "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", // USDC
-          "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506", // Sushi Router
-          ethers.BigNumber.from("1"),
-          "0x905dfCD5649217c42684f23958568e533C711Aa3" // USDC-wETH pair
-        )
-      ).not.to.be.reverted
-    })
-
-    it("should succeed to add swap route with bin step", async function () {
+    it("should succeed to replace swap route with bin step", async function () {
       await expect(
         this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address,uint256)"](
           "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", // USDC
-          "0x7BFd7192E76D950832c77BB412aaE841049D8D9B", // TraderJoe V2 Router
-          ethers.BigNumber.from("2"),
-          "0x7eC3717f70894F6d9BA0be00774610394Ce006eE", // USDC-wETH pair
+          "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", // TraderJoe V2.1 Router
+          ethers.BigNumber.from("5"),
+          "0x94d53BE52706a155d27440C4a2434BEa772a6f7C", // USDC-wETH pair
           ethers.BigNumber.from("15") // Bin step
         )
       ).not.to.be.reverted
-    })
 
-    it("should succeed to add swap route with factory", async function () {
       await expect(
-        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address,address)"](
+        this.strategy.connect(this.owner).removeSwapRoute(
           "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", // USDC
-          "0xE708aA9E887980750C040a6A2Cb901c37Aa34f3b", // Chronos router
-          ethers.BigNumber.from("4"),
-          "0xA2F1C1B52E1b7223825552343297Dc68a29ABecC", // USDC-wETH pair
-          "0xCe9240869391928253Ed9cc9Bcb8cb98CB5B0722" // Factory
+          "0x7BFd7192E76D950832c77BB412aaE841049D8D9B" // TraderJoe V2 Router
         )
       ).not.to.be.reverted
     })
