@@ -22,19 +22,19 @@ testStrategy(
   "IndexAvalancheGamingNFT Strategy - Deploy",
   deployIndexAvalancheGamingNFTStrategy,
   indexAvalancheTestOptions,
-  [testIndexAvalancheEquityValuation, testIndexAvalancheSetSwapRoute]
+  [testIndexAvalancheEquityValuation]
 )
 testStrategy(
   "IndexAvalancheDeFi Strategy - Upgrade After Deploy",
   upgradeIndexAvalancheDeFiStrategy,
   indexAvalancheTestOptions,
-  [testIndexAvalancheEquityValuation] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
+  [testIndexAvalancheEquityValuation, testIndexAvalancheSetSwapRoute]
 )
 testStrategy(
   "IndexAvalancheGamingNFT Strategy - Upgrade After Deploy",
   upgradeIndexAvalancheGamingNFTStrategy,
   indexAvalancheTestOptions,
-  [testIndexAvalancheEquityValuation] // [testIndexAvalancheAddSwapRoute, testIndexAvalancheReplaceSwapRoute] // Opt-in whenever you need.
+  [testIndexAvalancheEquityValuation]
 )
 
 async function deployIndexAvalancheDeFiStrategy() {
@@ -71,7 +71,7 @@ function testIndexAvalancheSetSwapRoute() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", 6)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals)
       )
 
       // User 1 deposits.
@@ -81,7 +81,7 @@ function testIndexAvalancheSetSwapRoute() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("5", 6)
+        ethers.utils.parseUnits("5", this.depositTokenDecimals)
       )
 
       // User 2 deposits.
@@ -91,7 +91,7 @@ function testIndexAvalancheSetSwapRoute() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("5.123", 6)
+        ethers.utils.parseUnits("5.123", this.depositTokenDecimals)
       )
 
       let indexTokenBalance: BigNumber
@@ -133,120 +133,40 @@ function testIndexAvalancheSetSwapRoute() {
       )
     })
 
-    it("should succeed to add swap route without any data", async function () {
-      await expect(
-        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
-          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
-          "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", // TraderJoe V1 Router
-          ethers.BigNumber.from("1"),
-          "0xf4003F4efBE8691B60249E6afbD307aBE7758adb" // wAVAX-USDC pair
-        )
-      ).not.to.be.reverted
-    })
-
-    it("should succeed to add swap route with bin step", async function () {
+    it("should succeed to replace swap routes with bin step", async function () {
       await expect(
         this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address,uint256)"](
           "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
-          "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3", // TraderJoe V2 Router
-          ethers.BigNumber.from("2"),
-          "0xB5352A39C11a81FE6748993D586EC448A01f08b5", // wAVAX-USDC pair
+          "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", // TraderJoe V2.1 Router
+          ethers.BigNumber.from("5"),
+          "0xD446eb1660F766d533BeCeEf890Df7A69d26f7d1", // wAVAX-USDC pair
           ethers.BigNumber.from("20")
         )
       ).not.to.be.reverted
-    })
-  })
-}
-
-function testIndexAvalancheReplaceSwapRoute() {
-  describe("removeSwapRoute - IndexAvalancheDeFi Strategy Specific", async function () {
-    it("should succeed after replacing pangolin swap route of BENQI-wAVAX", async function () {
-      // Note: This only works when the strategy has a BENQI-wAVAX route on TraderJoe.
-      // This test can be removed after we replace the BENQI-wAVAX route on TraderJoe with someting else.
 
       await expect(
-        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address)"](
-          "0x8729438EB15e2C8B576fCc6AeCdA6A148776C0F5", // BENQI
-          "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // Pangolin Router
-          ethers.BigNumber.from("1"),
-          "0xE530dC2095Ef5653205CF5ea79F8979a7028065c" // Pangolin wAVAX-BENQI pair
+        this.strategy.connect(this.owner)["addSwapRoute(address,address,uint8,address,uint256)"](
+          "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd", // JOE
+          "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", // TraderJoe V2.1 Router
+          ethers.BigNumber.from("5"),
+          "0x9f8973FB86b35C307324eC31fd81Cf565E2F4a63", // wAVAX-JOE pair
+          ethers.BigNumber.from("15")
         )
       ).not.to.be.reverted
 
       await expect(
         this.strategy.connect(this.owner).removeSwapRoute(
-          "0x8729438EB15e2C8B576fCc6AeCdA6A148776C0F5", // BENQI
+          "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
           "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3" // TraderJoe V2 Router
         )
       ).not.to.be.reverted
 
-      // User 0 deposits.
-      await mint(
-        this.strategy,
-        this.indexToken,
-        this.user0,
-        this.user0,
-        this.depositToken,
-        ethers.utils.parseUnits("10", 6)
-      )
-
-      // User 1 deposits.
-      await mint(
-        this.strategy,
-        this.indexToken,
-        this.user1,
-        this.user1,
-        this.depositToken,
-        ethers.utils.parseUnits("5", 6)
-      )
-
-      // User 2 deposits.
-      await mint(
-        this.strategy,
-        this.indexToken,
-        this.user2,
-        this.user2,
-        this.depositToken,
-        ethers.utils.parseUnits("5.123", 6)
-      )
-
-      let indexTokenBalance: BigNumber
-
-      // User 1 withdraws.
-      indexTokenBalance = await this.indexToken.balanceOf(this.user1.address)
-      await burn(
-        this.strategy,
-        this.indexToken,
-        this.user1,
-        this.user1,
-        this.depositToken,
-        indexTokenBalance,
-        BigNumber.from(1)
-      )
-
-      // User 2 withdraws.
-      indexTokenBalance = await this.indexToken.balanceOf(this.user2.address)
-      await burn(
-        this.strategy,
-        this.indexToken,
-        this.user2,
-        this.user2,
-        this.depositToken,
-        indexTokenBalance,
-        BigNumber.from(1)
-      )
-
-      // User 0 withdraws.
-      indexTokenBalance = await this.indexToken.balanceOf(this.user0.address)
-      await burn(
-        this.strategy,
-        this.indexToken,
-        this.user0,
-        this.user0,
-        this.depositToken,
-        indexTokenBalance,
-        BigNumber.from(1)
-      )
+      await expect(
+        this.strategy.connect(this.owner).removeSwapRoute(
+          "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd", // JOE
+          "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3" // TraderJoe V2 Router
+        )
+      ).not.to.be.reverted
     })
   })
 }

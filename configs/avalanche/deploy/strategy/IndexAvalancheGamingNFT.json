@@ -47,10 +47,10 @@
         },
         {
           "token": { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" },
-          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/lbRouter" },
-          "dex": 2,
+          "router": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/router_v2_1" },
+          "dex": 5,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_usdc_v2" },
+            "pair": { "$ref": "../../../../constants/avalanche/addresses/TraderJoe.json#/wAvax_usdc_v2_1" },
             "data": "0x0000000000000000000000000000000000000000000000000000000000000014"
           }
         },
@@ -109,7 +109,10 @@
           }
         }
       ],
-      "whitelistedTokens": [{ "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" }],
+      "whitelistedTokens": [
+        { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/avax" },
+        { "$ref": "../../../../constants/avalanche/addresses/Tokens.json#/usdc" }
+      ],
       "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/index" },
       "equityValuationLimit": 2e13,
       "extraArgs": [],
