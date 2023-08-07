@@ -7,6 +7,7 @@ import { SwapAdapter } from "../libraries/SwapAdapter.sol";
 import { IndexStrategyUtils } from "./IndexStrategyUtils.sol";
 import { IIndexToken } from "../interfaces/IIndexToken.sol";
 import { Constants } from "../libraries/Constants.sol";
+import { INATIVE } from "../dependencies/INATIVE.sol";
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { MathUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
@@ -105,6 +106,69 @@ library IndexStrategyMint {
             mintIndexFromTokenLocals.mintingData.amountWNATIVETotal
         ) {
             revert Errors.Index_WrongSwapAmount();
+        }
+    }
+
+    /**
+     * @dev Mints index tokens by swapping the native asset (such as Ether).
+     * @param mintParams The mint parameters that species the minting details.
+     * @param pairData The datastructure describing swapping pairs (used for swapping).
+     * @param dexs The datastructure describing dexes (used for swapping).
+     * @param weights The datastructure describing component weights.
+     * @param routers The datastructure describing routers (used for swapping).
+     * @return amountIndex The amount of index tokens minted.
+     * @return amountNATIVE The amount of native tokens swapped.
+     */
+    function mintIndexFromNATIVE(
+        MintParams memory mintParams,
+        mapping(address => mapping(address => mapping(address => SwapAdapter.PairData)))
+            storage pairData,
+        mapping(address => SwapAdapter.DEX) storage dexs,
+        mapping(address => uint256) storage weights,
+        mapping(address => address[]) storage routers
+    ) external returns (uint256 amountIndex, uint256 amountNATIVE) {
+        MintingData memory mintingData = getMintingDataFromWNATIVE(
+            mintParams.amountTokenMax,
+            mintParams,
+            routers,
+            pairData,
+            dexs,
+            weights
+        );
+
+        if (mintingData.amountWNATIVETotal > mintParams.amountTokenMax) {
+            revert Errors.Index_AboveMaxAmount();
+        }
+
+        if (mintingData.amountIndex < mintParams.amountIndexMin) {
+            revert Errors.Index_BelowMinAmount();
+        }
+
+        amountIndex = mintingData.amountIndex;
+        amountNATIVE = mintingData.amountWNATIVETotal;
+
+        INATIVE(mintParams.wNATIVE).deposit{
+            value: mintingData.amountWNATIVETotal
+        }();
+
+        uint256 amountWNATIVESpent = mintExactIndexFromWNATIVE(
+            mintingData,
+            mintParams.recipient,
+            mintParams.components,
+            mintParams.wNATIVE,
+            mintParams.indexToken,
+            dexs,
+            pairData
+        );
+
+        if (amountWNATIVESpent != mintingData.amountWNATIVETotal) {
+            revert Errors.Index_WrongSwapAmount();
+        }
+
+        uint256 amountNATIVERefund = mintParams.amountTokenMax - amountNATIVE;
+
+        if (amountNATIVERefund > 0) {
+            payable(mintParams.msgSender).transfer(amountNATIVERefund);
         }
     }
 
@@ -221,7 +285,7 @@ library IndexStrategyMint {
             storage pairData,
         mapping(address => SwapAdapter.DEX) storage dexs,
         mapping(address => uint256) storage weights
-    ) internal view returns (MintingData memory mintingData) {
+    ) public view returns (MintingData memory mintingData) {
         MintingData memory mintingDataUnit = getMintingDataForExactIndex(
             Constants.PRECISION,
             dexs,
