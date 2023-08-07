@@ -186,5 +186,21 @@ library IndexStrategyManagement {
                 revert Errors.Index_WrongSwapAmount();
             }
         }
+
+        // Adjust component's weights.
+        for (uint256 i = 0; i < managementParams.components.length; i++) {
+            if (managementParams.targetWeights[i] == 0) {
+                weights[managementParams.components[i]] = 0;
+                continue;
+            }
+
+            uint256 componentBalance = IERC20Upgradeable(
+                managementParams.components[i]
+            ).balanceOf(address(this));
+
+            weights[managementParams.components[i]] =
+                (componentBalance * Constants.PRECISION) /
+                indexTotalSupply;
+        }
     }
 }

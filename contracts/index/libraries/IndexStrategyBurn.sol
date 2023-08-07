@@ -6,6 +6,7 @@ import { BurnParams } from "../Common.sol";
 import { IndexStrategyUtils } from "./IndexStrategyUtils.sol";
 import { SwapAdapter } from "../libraries/SwapAdapter.sol";
 import { Constants } from "../libraries/Constants.sol";
+import { INATIVE } from "../dependencies/INATIVE.sol";
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -84,6 +85,44 @@ library IndexStrategyBurn {
             burnParams.recipient,
             amountToken
         );
+    }
+
+    /**
+     * @dev Burns index tokens in exchange for the native asset (such as Ether).
+     * @param burnParams The burn parameters that species the burning details.
+     * @param pairData The datastructure describing swapping pairs (used for swapping).
+     * @param dexs The datastructure describing dexes (used for swapping).
+     * @param weights The datastructure describing component weights.
+     * @param routers The datastructure describing routers (used for swapping).
+     * @return amountNATIVE The amount of native tokens received.
+     */
+    function burnExactIndexForNATIVE(
+        BurnParams memory burnParams,
+        mapping(address => mapping(address => mapping(address => SwapAdapter.PairData)))
+            storage pairData,
+        mapping(address => SwapAdapter.DEX) storage dexs,
+        mapping(address => uint256) storage weights,
+        mapping(address => address[]) storage routers
+    ) external returns (uint256 amountNATIVE) {
+        if (burnParams.recipient == address(0)) {
+            revert Errors.Index_ZeroAddress();
+        }
+
+        amountNATIVE = burnExactIndexForWNATIVE(
+            burnParams,
+            pairData,
+            dexs,
+            weights,
+            routers
+        );
+
+        if (amountNATIVE < burnParams.amountTokenMin) {
+            revert Errors.Index_BelowMinAmount();
+        }
+
+        INATIVE(burnParams.wNATIVE).withdraw(amountNATIVE);
+
+        payable(burnParams.recipient).transfer(amountNATIVE);
     }
 
     struct BurnExactIndexForWNATIVELocals {

@@ -10,7 +10,6 @@ import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Co
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { MathUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
-import { INATIVE } from "../dependencies/INATIVE.sol";
 import { IIndexInit } from "../interfaces/IIndexInit.sol";
 import { IIndexLimits } from "../interfaces/IIndexLimits.sol";
 import { IIndexOracle } from "../interfaces/IIndexOracle.sol";
@@ -59,7 +58,7 @@ abstract contract IndexStrategyUpgradeable is
 
     address public constant NATIVE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    uint256[7] private __gap;
+    uint256[8] private __gap;
 
     /**
      * @dev Modifier to allow only whitelisted tokens to access a function.
@@ -224,35 +223,22 @@ abstract contract IndexStrategyUpgradeable is
         whenNotReachedEquityValuationLimit
         returns (uint256 amountIndex, uint256 amountNATIVE)
     {
-        MintingData memory mintingData = _getMintingDataFromWNATIVE(msg.value);
-
-        if (mintingData.amountWNATIVETotal > msg.value) {
-            revert Errors.Index_AboveMaxAmount();
-        }
-
-        if (mintingData.amountIndex < amountIndexMin) {
-            revert Errors.Index_BelowMinAmount();
-        }
-
-        amountIndex = mintingData.amountIndex;
-        amountNATIVE = mintingData.amountWNATIVETotal;
-
-        INATIVE(wNATIVE).deposit{ value: mintingData.amountWNATIVETotal }();
-
-        uint256 amountWNATIVESpent = _mintExactIndexFromWNATIVE(
-            mintingData,
-            recipient
+        (amountIndex, amountNATIVE) = IndexStrategyMint.mintIndexFromNATIVE(
+            MintParams(
+                NATIVE,
+                msg.value,
+                amountIndexMin,
+                recipient,
+                _msgSender(),
+                wNATIVE,
+                components,
+                indexToken
+            ),
+            pairData,
+            dexs,
+            weights,
+            routers
         );
-
-        if (amountWNATIVESpent != mintingData.amountWNATIVETotal) {
-            revert Errors.Index_WrongSwapAmount();
-        }
-
-        uint256 amountNATIVERefund = msg.value - amountNATIVE;
-
-        if (amountNATIVERefund > 0) {
-            payable(_msgSender()).transfer(amountNATIVERefund);
-        }
 
         emit Mint(_msgSender(), recipient, NATIVE, amountNATIVE, amountIndex);
     }
@@ -308,19 +294,22 @@ abstract contract IndexStrategyUpgradeable is
         uint256 amountIndex,
         address recipient
     ) external nonReentrant whenNotPaused returns (uint256 amountNATIVE) {
-        if (recipient == address(0)) {
-            revert Errors.Index_ZeroAddress();
-        }
-
-        amountNATIVE = _burnExactIndexForWNATIVE(amountIndex);
-
-        if (amountNATIVE < amountNATIVEMin) {
-            revert Errors.Index_BelowMinAmount();
-        }
-
-        INATIVE(wNATIVE).withdraw(amountNATIVE);
-
-        payable(recipient).transfer(amountNATIVE);
+        amountNATIVE = IndexStrategyBurn.burnExactIndexForNATIVE(
+            BurnParams(
+                NATIVE,
+                amountNATIVEMin,
+                amountIndex,
+                recipient,
+                _msgSender(),
+                wNATIVE,
+                components,
+                indexToken
+            ),
+            pairData,
+            dexs,
+            weights,
+            routers
+        );
 
         emit Burn(_msgSender(), recipient, NATIVE, amountNATIVE, amountIndex);
     }
@@ -372,9 +361,24 @@ abstract contract IndexStrategyUpgradeable is
         view
         returns (uint256 amountIndex, uint256 amountNATIVE)
     {
-        MintingData memory mintingData = _getMintingDataFromWNATIVE(
-            amountNATIVEMax
-        );
+        MintingData memory mintingData = IndexStrategyMint
+            .getMintingDataFromWNATIVE(
+                amountNATIVEMax,
+                MintParams(
+                    wNATIVE,
+                    amountNATIVEMax,
+                    0,
+                    address(0),
+                    _msgSender(),
+                    wNATIVE,
+                    components,
+                    indexToken
+                ),
+                routers,
+                pairData,
+                dexs,
+                weights
+            );
 
         amountIndex = mintingData.amountIndex;
         amountNATIVE = mintingData.amountWNATIVETotal;
