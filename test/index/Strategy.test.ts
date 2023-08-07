@@ -99,7 +99,7 @@ export function testStrategy(
       this.indexToken = await ethers.getContractAt("IndexToken", indexTokenAddr)
 
       // Oracle.
-      if (strategyTestOptions.network.name === "arbitrum-one") {
+      if (strategyTestOptions.network.name === "arbitrum") {
         this.oracleName = "OracleArbitrum"
         this.oracleWETH = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
         this.oracleWETHPriceFeed = "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612"

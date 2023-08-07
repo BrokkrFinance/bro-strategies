@@ -7,7 +7,7 @@ export const WhaleAddrs: Map<string, [string, string][]> = new Map<string, [stri
     ],
   ],
   [
-    "arbitrum-one",
+    "arbitrum",
     [
       ["0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", "0x489ee077994B6658eAfA855C308275EAd8097C4A"], // USDC, GMX: Vault
       ["0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "0x489ee077994B6658eAfA855C308275EAd8097C4A"], // wETH, GMX: Vault
