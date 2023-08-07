@@ -321,7 +321,7 @@ async function investOneDollarToPortfolio(investable: Investable, depositTokenAd
   const portfolioTokenBalanceBefore = await portfolioToken.balanceOf(deployer.address)
 
   const depositAmount = ethers.utils.parseUnits(
-    DepositTokenAmounts.get(investable.network).get(depositTokenAddr),
+    DepositTokenAmounts.get(investable.network)!.get(depositTokenAddr),
     depositTokenDecimals
   )
   await depositToken.connect(deployer).approve(portfolio.address, depositAmount)
