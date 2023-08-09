@@ -171,6 +171,10 @@ library IndexStrategyBurn {
                 pairData
             );
 
+            if (burnExactIndexForWNATIVELocals.amountWNATIVEOut == 0) {
+                continue;
+            }
+
             amountWNATIVE += IndexStrategyUtils.swapExactTokenForToken(
                 burnExactIndexForWNATIVELocals.bestRouter,
                 burnExactIndexForWNATIVELocals.amountComponent,
