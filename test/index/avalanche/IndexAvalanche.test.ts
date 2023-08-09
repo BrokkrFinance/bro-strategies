@@ -8,38 +8,46 @@ import { IndexTestOptions } from "../../helper/interfaces/options"
 import { testStrategy } from "../Strategy.test"
 import { burn, mint } from "../helper/InvestHelper"
 
-const indexAvalancheTestOptions: IndexTestOptions = {
+const indexAvalancheDeployTestOptions: IndexTestOptions = {
   network: Avalanche(),
   forkAt: 33695425,
   upgradeTo: "OwnableV2",
 }
+const indexAvalancheUpgradeAfterDeployTestOptions: IndexTestOptions = {
+  network: Avalanche(),
+  forkAt: 33695425,
+  upgradeTo: "OwnableV2",
+  runRebalance: false,
+}
 
-testStrategy("IndexAvalancheDeFi Strategy - Deploy", deployIndexAvalancheDeFiStrategy, indexAvalancheTestOptions, [
-  testIndexAvalancheEquityValuation,
-  testIndexAvalancheSetSwapRoute,
-])
+testStrategy(
+  "IndexAvalancheDeFi Strategy - Deploy",
+  deployIndexAvalancheDeFiStrategy,
+  indexAvalancheDeployTestOptions,
+  [testIndexAvalancheEquityValuation, testIndexAvalancheSetSwapRoute]
+)
 testStrategy(
   "IndexAvalancheGamingNFT Strategy - Deploy",
   deployIndexAvalancheGamingNFTStrategy,
-  indexAvalancheTestOptions,
+  indexAvalancheDeployTestOptions,
   [testIndexAvalancheEquityValuation]
 )
 testStrategy(
   "AvalancheTopMarketCapIndex Strategy - Deploy",
   deployIndexAvalancheTopMarketCapStrategy,
-  indexAvalancheTestOptions,
+  indexAvalancheDeployTestOptions,
   [testIndexAvalancheEquityValuation]
 )
 testStrategy(
   "IndexAvalancheDeFi Strategy - Upgrade After Deploy",
   upgradeIndexAvalancheDeFiStrategy,
-  indexAvalancheTestOptions,
+  indexAvalancheUpgradeAfterDeployTestOptions,
   [testIndexAvalancheEquityValuation, testIndexAvalancheSetSwapRoute]
 )
 testStrategy(
   "IndexAvalancheGamingNFT Strategy - Upgrade After Deploy",
   upgradeIndexAvalancheGamingNFTStrategy,
-  indexAvalancheTestOptions,
+  indexAvalancheUpgradeAfterDeployTestOptions,
   [testIndexAvalancheEquityValuation]
 )
 
