@@ -10,7 +10,7 @@ import { burn, mint } from "../helper/InvestHelper"
 
 const indexAvalancheTestOptions: IndexTestOptions = {
   network: Avalanche(),
-  forkAt: 30994300,
+  forkAt: 33695425,
   upgradeTo: "OwnableV2",
 }
 
@@ -21,6 +21,12 @@ testStrategy("IndexAvalancheDeFi Strategy - Deploy", deployIndexAvalancheDeFiStr
 testStrategy(
   "IndexAvalancheGamingNFT Strategy - Deploy",
   deployIndexAvalancheGamingNFTStrategy,
+  indexAvalancheTestOptions,
+  [testIndexAvalancheEquityValuation]
+)
+testStrategy(
+  "AvalancheTopMarketCapIndex Strategy - Deploy",
+  deployIndexAvalancheTopMarketCapStrategy,
   indexAvalancheTestOptions,
   [testIndexAvalancheEquityValuation]
 )
@@ -51,6 +57,10 @@ async function upgradeIndexAvalancheDeFiStrategy() {
 
 async function upgradeIndexAvalancheGamingNFTStrategy() {
   return await upgradeStrategy("avalanche", "IndexAvalancheGamingNFT")
+}
+
+async function deployIndexAvalancheTopMarketCapStrategy() {
+  return await deployStrategy("avalanche", "AvalancheTopMarketCapIndex")
 }
 
 function testIndexAvalancheEquityValuation() {
