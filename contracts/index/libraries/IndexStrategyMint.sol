@@ -307,6 +307,10 @@ library IndexStrategyMint {
                 mintingDataUnit.amountWNATIVEs[i]) /
                 mintingDataUnit.amountWNATIVETotal;
 
+            if (amountWNATIVE == 0) {
+                continue;
+            }
+
             (uint256 amountComponent, ) = IndexStrategyUtils.getAmountOutMax(
                 routers[mintParams.components[i]],
                 amountWNATIVE,
