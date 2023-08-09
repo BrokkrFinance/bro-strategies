@@ -39,7 +39,12 @@ export function testStrategy(
       })
 
       // Network config.
-      execSync(`cp .openzeppelin/${strategyTestOptions.network.name}.json .openzeppelin/unknown-31337.json`, {
+      let networkName = strategyTestOptions.network.name
+      if (networkName === "arbitrum") {
+        networkName = "arbitrum-one"
+      }
+
+      execSync(`cp .openzeppelin/${networkName}.json .openzeppelin/unknown-31337.json`, {
         stdio: "inherit",
       })
 
