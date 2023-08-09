@@ -7,12 +7,15 @@ import { IChronosFactory } from "../dependencies/IChronosFactory.sol";
 import { IChronosPair } from "../dependencies/IChronosPair.sol";
 import { IChronosRouter } from "../dependencies/IChronosRouter.sol";
 import { ITraderJoeV2Pair } from "../dependencies/ITraderJoeV2Pair.sol";
+import { ITraderJoeV2Point1Pair } from "../dependencies/ITraderJoeV2Point1Pair.sol";
 import { ITraderJoeV2Router } from "../dependencies/ITraderJoeV2Router.sol";
+import { ITraderJoeV2Point1Router } from "../dependencies/ITraderJoeV2Point1Router.sol";
 import { IUniswapV2Pair } from "../dependencies/IUniswapV2Pair.sol";
 import { IUniswapV2Router } from "../dependencies/IUniswapV2Router.sol";
 import { CamelotLibrary } from "./CamelotLibrary.sol";
 import { ChronosLibrary } from "./ChronosLibrary.sol";
 import { TraderJoeV2Library } from "./TraderJoeV2Library.sol";
+import { TraderJoeV2Point1Library } from "./TraderJoeV2Point1Library.sol";
 import { UniswapV2Library } from "./UniswapV2Library.sol";
 
 import { Errors } from "./Errors.sol";
@@ -22,13 +25,15 @@ library SwapAdapter {
     using ChronosLibrary for IChronosRouter;
     using UniswapV2Library for IUniswapV2Router;
     using TraderJoeV2Library for ITraderJoeV2Router;
+    using TraderJoeV2Point1Library for ITraderJoeV2Point1Router;
 
     enum DEX {
         None,
         UniswapV2,
         TraderJoeV2,
         Camelot,
-        Chronos
+        Chronos,
+        TraderJoeV2_1
     }
 
     struct PairData {
@@ -92,6 +97,19 @@ library SwapAdapter {
                 );
         }
 
+        if (setup.dex == DEX.TraderJoeV2_1) {
+            uint256[] memory binSteps = new uint256[](1);
+            binSteps[0] = abi.decode(setup.pairData.data, (uint256));
+
+            return
+                ITraderJoeV2Point1Router(setup.router).swapExactTokensForTokens(
+                    amountIn,
+                    amountOutMin,
+                    binSteps,
+                    path
+                );
+        }
+
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
@@ -141,6 +159,19 @@ library SwapAdapter {
                 IChronosRouter(setup.router).swapTokensForExactTokens(
                     amountOut,
                     amountInMax,
+                    path
+                );
+        }
+
+        if (setup.dex == DEX.TraderJoeV2_1) {
+            uint256[] memory binSteps = new uint256[](1);
+            binSteps[0] = abi.decode(setup.pairData.data, (uint256));
+
+            return
+                ITraderJoeV2Point1Router(setup.router).swapTokensForExactTokens(
+                    amountOut,
+                    amountInMax,
+                    binSteps,
                     path
                 );
         }
@@ -196,6 +227,16 @@ library SwapAdapter {
                 );
         }
 
+        if (setup.dex == DEX.TraderJoeV2_1) {
+            return
+                ITraderJoeV2Point1Router(setup.router).getAmountOut(
+                    ITraderJoeV2Point1Pair(setup.pairData.pair),
+                    amountIn,
+                    tokenIn,
+                    tokenOut
+                );
+        }
+
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
@@ -246,6 +287,16 @@ library SwapAdapter {
                     IChronosPair(setup.pairData.pair),
                     IChronosFactory(factory),
                     amountOut,
+                    tokenOut
+                );
+        }
+
+        if (setup.dex == DEX.TraderJoeV2_1) {
+            return
+                ITraderJoeV2Point1Router(setup.router).getAmountIn(
+                    ITraderJoeV2Point1Pair(setup.pairData.pair),
+                    amountOut,
+                    tokenIn,
                     tokenOut
                 );
         }

@@ -38,10 +38,10 @@
       "swapRoutes": [
         {
           "token": { "$ref": "../../../../constants/arbitrum/addresses/Tokens.json#/usdc" },
-          "router": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/router_v2" },
-          "dex": 2,
+          "router": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/router_v2_1" },
+          "dex": 5,
           "pairData": {
-            "pair": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/wETH_usdc_v2" },
+            "pair": { "$ref": "../../../../constants/arbitrum/addresses/TraderJoe.json#/wETH_usdc_v2_1" },
             "data": "0x000000000000000000000000000000000000000000000000000000000000000f"
           }
         },
