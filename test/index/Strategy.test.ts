@@ -41,9 +41,6 @@ export function testStrategy(
 
       // Network config.
       let networkName = strategyTestOptions.network.name
-      if (networkName === "arbitrum") {
-        networkName = "arbitrum-one"
-      }
 
       execSync(`cp .openzeppelin/${networkName}.json .openzeppelin/unknown-31337.json`, {
         stdio: "inherit",
