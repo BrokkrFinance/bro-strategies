@@ -9,12 +9,14 @@ import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { MathUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
+import { EnumerableSetUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import { IIndexInit } from "../interfaces/IIndexInit.sol";
 import { IIndexLimits } from "../interfaces/IIndexLimits.sol";
 import { IIndexOracle } from "../interfaces/IIndexOracle.sol";
 import { IIndexStrategy } from "../interfaces/IIndexStrategy.sol";
 import { IIndexToken } from "../interfaces/IIndexToken.sol";
+import { IFee, PerformanceFeeSuggestion } from "../interfaces/IFee.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { Errors } from "../libraries/Errors.sol";
 import { SwapAdapter } from "../libraries/SwapAdapter.sol";
@@ -23,6 +25,7 @@ import { IndexStrategyMint } from "../libraries/IndexStrategyMint.sol";
 import { IndexStrategyBurn } from "../libraries/IndexStrategyBurn.sol";
 import { IndexStrategyManagement } from "../libraries/IndexStrategyManagement.sol";
 import { IndexStrategyUtils } from "../libraries/IndexStrategyUtils.sol";
+import { IndexStrategyStorage, IndexStrategyStorageLib } from "../libraries/IndexStrategyStorageLib.sol";
 
 /**
  * @title IndexStrategyUpgradeable
@@ -36,10 +39,12 @@ abstract contract IndexStrategyUpgradeable is
     PausableUpgradeable,
     IIndexInit,
     IIndexLimits,
-    IIndexStrategy
+    IIndexStrategy,
+    IFee
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SwapAdapter for SwapAdapter.Setup;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
     address public wNATIVE;
 
@@ -124,6 +129,18 @@ abstract contract IndexStrategyUpgradeable is
         setOracle(initParams.oracle);
 
         setEquityValuationLimit(initParams.equityValuationLimit);
+
+        setFeeSuggester(initParams.feeSuggester);
+
+        addAddressesToFeeWhitelist(initParams.feeWhitelist);
+    }
+
+    function reinitialize(address feeSuggester, address[] calldata feeWhitelist)
+        external
+        reinitializer(2)
+    {
+        setFeeSuggester(feeSuggester);
+        addAddressesToFeeWhitelist(feeWhitelist);
     }
 
     /**
@@ -172,6 +189,7 @@ abstract contract IndexStrategyUpgradeable is
      * @param amountTokenMax The maximum amount of the token to be swapped.
      * @param amountIndexMin The minimum amount of index tokens to be minted.
      * @param recipient The address that will receive the minted index tokens.
+     * @param affiliateId The id of the affiliate who faciliated the index minting
      * @return amountIndex The amount of index tokens minted.
      * @return amountToken The amount of tokens swapped.
      */
@@ -179,7 +197,8 @@ abstract contract IndexStrategyUpgradeable is
         address token,
         uint256 amountTokenMax,
         uint256 amountIndexMin,
-        address recipient
+        address recipient,
+        uint64 affiliateId
     )
         external
         nonReentrant
@@ -205,17 +224,29 @@ abstract contract IndexStrategyUpgradeable is
             routers
         );
 
-        emit Mint(_msgSender(), recipient, token, amountToken, amountIndex);
+        emit Mint(
+            _msgSender(),
+            recipient,
+            token,
+            amountToken,
+            amountIndex,
+            affiliateId
+        );
     }
 
     /**
      * @dev Mints index tokens by swapping the native asset (such as Ether).
      * @param amountIndexMin The minimum amount of index tokens expected to be minted.
      * @param recipient The address that will receive the minted index tokens.
+     * @param affiliateId The id of the affiliate who faciliated the index minting
      * @return amountIndex The actual amount of index tokens minted.
      * @return amountNATIVE The actual amount of the native asset swapped.
      */
-    function mintIndexFromNATIVE(uint256 amountIndexMin, address recipient)
+    function mintIndexFromNATIVE(
+        uint256 amountIndexMin,
+        address recipient,
+        uint64 affiliateId
+    )
         external
         payable
         nonReentrant
@@ -240,7 +271,14 @@ abstract contract IndexStrategyUpgradeable is
             routers
         );
 
-        emit Mint(_msgSender(), recipient, NATIVE, amountNATIVE, amountIndex);
+        emit Mint(
+            _msgSender(),
+            recipient,
+            NATIVE,
+            amountNATIVE,
+            amountIndex,
+            affiliateId
+        );
     }
 
     /**
@@ -709,5 +747,168 @@ abstract contract IndexStrategyUpgradeable is
                 break;
             }
         }
+    }
+
+    function suggestPerformanceFees(
+        PerformanceFeeSuggestion[] calldata performanceFeeSuggestions,
+        uint256 seqNum
+    ) external {
+        // assumptions about the performanceFeeSuggestions
+        // 1. no suggestion in the array with tokensToMint == 0
+        // 2. no 2 or more suggestions with the same affiliate address
+        // 3. the number of our affiliates are low enough to update the strategyStorage.performanceFeeSuggestions
+        //    in one transaction
+
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+
+        address msgSender = _msgSender();
+        if (msgSender != strategyStorage.feeSuggester && msgSender != owner())
+            revert IFee.UnauthorizedPerformanceFeeSuggester();
+        if (seqNum != strategyStorage.seqNum)
+            revert IFee.IncorrectSeqNum(strategyStorage.seqNum);
+        if (!areAllAffiliatorAddressesWhitelisted(performanceFeeSuggestions))
+            revert IFee.UnauthorizedAffiliateAddress();
+
+        // updating the performanceFeeSuggestions storage variable with the latest suggestions
+        delete strategyStorage.performanceFeeSuggestions;
+        uint256 performanceFeeSuggestionsLength = performanceFeeSuggestions
+            .length;
+        for (uint256 i; i < performanceFeeSuggestionsLength; ++i) {
+            strategyStorage.performanceFeeSuggestions.push(
+                performanceFeeSuggestions[i]
+            );
+        }
+    }
+
+    function getSuggestedPerformanceFee()
+        external
+        view
+        returns (PerformanceFeeSuggestion[] memory performanceFeeSuggestions)
+    {
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+
+        return strategyStorage.performanceFeeSuggestions;
+    }
+
+    function approvePerformanceFees() external onlyOwner {
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+
+        // rechecking if all affiliators are still whitelisted
+        if (
+            !areAllAffiliatorAddressesWhitelisted(
+                strategyStorage.performanceFeeSuggestions
+            )
+        ) revert IFee.UnauthorizedAffiliateAddress();
+
+        // mint tokens for affiliators
+        uint256 indexTokenBalanceBeforeMinting = IERC20Upgradeable(indexToken)
+            .totalSupply();
+        uint256 performanceFeeSuggestionsLength = strategyStorage
+            .performanceFeeSuggestions
+            .length;
+        for (uint256 i; i < performanceFeeSuggestionsLength; ++i) {
+            indexToken.mint(
+                strategyStorage.performanceFeeSuggestions[i].affiliateAddress,
+                strategyStorage.performanceFeeSuggestions[i].tokenAmountToMint
+            );
+        }
+        uint256 indexTokenBalanceAfterMinting = IERC20Upgradeable(indexToken)
+            .totalSupply();
+
+        // change the weight array
+        uint256 componentsLength = components.length;
+        for (uint256 i; i < componentsLength; ++i) {
+            weights[components[i]] =
+                (weights[components[i]] * indexTokenBalanceBeforeMinting) /
+                indexTokenBalanceAfterMinting;
+        }
+
+        // increase seqNum and emit an event
+        emit PerformanceFeeApproved(
+            ++strategyStorage.seqNum,
+            strategyStorage.performanceFeeSuggestions
+        );
+
+        // delete the current suggestions
+        delete strategyStorage.performanceFeeSuggestions;
+    }
+
+    function setFeeSuggester(address newFeeSuggester) public onlyOwner {
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+        strategyStorage.feeSuggester = newFeeSuggester;
+    }
+
+    function getFeeSuggester() external view returns (address feeSuggester) {
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+        return strategyStorage.feeSuggester;
+    }
+
+    function addAddressesToFeeWhitelist(address[] calldata addressesToAdd)
+        public
+        onlyOwner
+    {
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+        uint256 addressesToAddLength = addressesToAdd.length;
+        for (uint256 i; i < addressesToAddLength; ++i) {
+            strategyStorage.feeWhitelist.add(addressesToAdd[i]);
+        }
+    }
+
+    function removeAddressesFromFeeWhitelist(
+        address[] calldata addressesToRemove
+    ) external onlyOwner {
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+        uint256 addressesToRemoveLength = addressesToRemove.length;
+        for (uint256 i; i < addressesToRemoveLength; ++i) {
+            strategyStorage.feeWhitelist.remove(addressesToRemove[i]);
+        }
+    }
+
+    function getAddressesInFeeWhitelist()
+        external
+        view
+        returns (address[] memory feeWhiteListToReturn)
+    {
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+
+        uint256 whitelistLength = strategyStorage.feeWhitelist.length();
+        feeWhiteListToReturn = new address[](whitelistLength);
+        for (uint256 i; i < whitelistLength; ++i) {
+            feeWhiteListToReturn[i] = strategyStorage.feeWhitelist.at(i);
+        }
+    }
+
+    function getSeqNum() external view returns (uint256) {
+        return IndexStrategyStorageLib.getStorage().seqNum;
+    }
+
+    function areAllAffiliatorAddressesWhitelisted(
+        PerformanceFeeSuggestion[] memory performanceFeeSuggestions
+    ) internal view returns (bool) {
+        IndexStrategyStorage storage strategyStorage = IndexStrategyStorageLib
+            .getStorage();
+
+        uint256 performanceFeeSuggestionsLength = performanceFeeSuggestions
+            .length;
+        for (uint256 i; i < performanceFeeSuggestionsLength; i++) {
+            if (
+                !strategyStorage.feeWhitelist.contains(
+                    performanceFeeSuggestions[i].affiliateAddress
+                )
+            ) return false;
+        }
+        return true;
+    }
+
+    function getComponentsLength() public view returns (uint256) {
+        return components.length;
     }
 }

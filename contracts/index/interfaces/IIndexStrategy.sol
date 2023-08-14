@@ -11,7 +11,8 @@ interface IIndexStrategy {
         address indexed recipient,
         address token,
         uint256 amountToken,
-        uint256 amountIndex
+        uint256 amountIndex,
+        uint64 affiliateId
     );
 
     event Burn(
@@ -26,7 +27,8 @@ interface IIndexStrategy {
         address token,
         uint256 amountTokenMax,
         uint256 amountIndexMin,
-        address recipient
+        address recipient,
+        uint64 affiliateId
     ) external returns (uint256 amountIndex, uint256 amountToken);
 
     function burnExactIndexForToken(

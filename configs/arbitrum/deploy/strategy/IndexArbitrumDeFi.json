@@ -94,6 +94,8 @@
       ],
       "oracle": { "$ref": "../../../../constants/arbitrum/Oracles.json#/index" },
       "equityValuationLimit": 2e13,
+      "feeSuggester": { "$ref": "../../../../constants/arbitrum/addresses/DAO.json#/multisig" },
+      "feeWhitelist": [],
       "extraArgs": [],
       "libraries": [
         {

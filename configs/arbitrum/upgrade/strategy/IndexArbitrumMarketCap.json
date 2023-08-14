@@ -3,6 +3,8 @@
     {
       "proxy": { "$ref": "../../live/strategy/IndexArbitrumMarketCap.json#/address" },
       "newImplementation": "IndexArbitrumMarketCap",
+      "functionName": "reinitialize",
+      "functionArgs": ["0x3eB1C05d33FA7173C2596BE60B73ddef73A29173", []],
       "libraries": [
         {
           "name": "SwapAdapter",

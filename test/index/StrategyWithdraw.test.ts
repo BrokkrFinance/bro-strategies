@@ -3,6 +3,7 @@ import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { NativeToken } from "../../scripts/constants/deposit-tokens"
 import { burn, mint } from "./helper/InvestHelper"
+import { defaultAffiliatorAddress } from "../helper/constants"
 
 export function testStrategyWithdraw() {
   describe("Withdraw", async function () {
@@ -14,7 +15,8 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 0 withdraws.
@@ -38,7 +40,8 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 0 withdraws.
@@ -62,7 +65,8 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 0 withdraws.
@@ -86,7 +90,8 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 0 withdraws.
@@ -110,7 +115,8 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 1 deposits.
@@ -120,7 +126,8 @@ export function testStrategyWithdraw() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("5", this.depositTokenDecimals)
+        ethers.utils.parseUnits("5", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 2 deposits.
@@ -130,7 +137,8 @@ export function testStrategyWithdraw() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("5.123", this.depositTokenDecimals)
+        ethers.utils.parseUnits("5.123", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       let indexTokenBalance: BigNumber
@@ -180,7 +188,8 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 1 deposits.
@@ -190,7 +199,8 @@ export function testStrategyWithdraw() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("5", this.depositTokenDecimals)
+        ethers.utils.parseUnits("5", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 2 deposits.
@@ -200,7 +210,8 @@ export function testStrategyWithdraw() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("5.123", this.depositTokenDecimals)
+        ethers.utils.parseUnits("5.123", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       let indexTokenBalance: BigNumber
@@ -250,7 +261,8 @@ export function testStrategyWithdraw() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 0 withdraws.

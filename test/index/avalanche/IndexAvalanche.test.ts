@@ -7,6 +7,7 @@ import { upgradeStrategy } from "../../../scripts/contracts/forking/upgrade"
 import { IndexTestOptions } from "../../helper/interfaces/options"
 import { testStrategy } from "../Strategy.test"
 import { burn, mint } from "../helper/InvestHelper"
+import { defaultAffiliatorAddress } from "../../helper/constants"
 
 const indexAvalancheDeployTestOptions: IndexTestOptions = {
   network: Avalanche(),
@@ -89,7 +90,8 @@ function testIndexAvalancheSetSwapRoute() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 1 deposits.
@@ -99,7 +101,8 @@ function testIndexAvalancheSetSwapRoute() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("5", this.depositTokenDecimals)
+        ethers.utils.parseUnits("5", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 2 deposits.
@@ -109,7 +112,8 @@ function testIndexAvalancheSetSwapRoute() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("5.123", this.depositTokenDecimals)
+        ethers.utils.parseUnits("5.123", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       let indexTokenBalance: BigNumber

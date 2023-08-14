@@ -115,6 +115,8 @@
       ],
       "oracle": { "$ref": "../../../../constants/avalanche/Oracles.json#/index" },
       "equityValuationLimit": 2e13,
+      "feeSuggester": { "$ref": "../../../../constants/avalanche/addresses/DAO.json#/multisig" },
+      "feeWhitelist": [],
       "extraArgs": [],
       "libraries": [
         {

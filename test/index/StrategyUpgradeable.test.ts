@@ -17,7 +17,7 @@ export function testStrategyUpgradeable() {
       expect(addr_before_upgrade != addr_after_upgrade).to.equal(true)
     })
 
-    it("should succeed when the owner user upgrades", async function () {
+    it("should fail when the owner tries to re-initialize", async function () {
       const indexStrategyInitParams = {
         wNATIVE: this.wNATIVE,
         indexToken: this.indexToken.address,
@@ -26,6 +26,8 @@ export function testStrategyUpgradeable() {
         whitelistedTokens: [],
         oracle: this.depositTokenAddress,
         equityValuationLimit: "0",
+        feeSuggester: "0x3eB1C05d33FA7173C2596BE60B73ddef73A29173",
+        feeWhitelist: [],
       }
 
       await expect(this.strategy.connect(this.owner).initialize(indexStrategyInitParams)).to.be.reverted
