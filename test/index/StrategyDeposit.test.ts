@@ -1,5 +1,6 @@
 import { ethers } from "hardhat"
 import { mint } from "./helper/InvestHelper"
+import { defaultAffiliatorAddress } from "../helper/constants"
 
 export function testStrategyDeposit() {
   describe("Deposit", async function () {
@@ -10,7 +11,8 @@ export function testStrategyDeposit() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
     })
 
@@ -21,7 +23,8 @@ export function testStrategyDeposit() {
         this.user0,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
     })
 
@@ -32,7 +35,8 @@ export function testStrategyDeposit() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1", this.depositTokenDecimals)
+        ethers.utils.parseUnits("1", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
     })
 
@@ -43,7 +47,8 @@ export function testStrategyDeposit() {
         this.user0,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("1", this.depositTokenDecimals)
+        ethers.utils.parseUnits("1", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
     })
 
@@ -54,7 +59,8 @@ export function testStrategyDeposit() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("1", this.depositTokenDecimals)
+        ethers.utils.parseUnits("1", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
       await mint(
         this.strategy,
@@ -62,7 +68,8 @@ export function testStrategyDeposit() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
       await mint(
         this.strategy,
@@ -70,7 +77,8 @@ export function testStrategyDeposit() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("5.212", this.depositTokenDecimals)
+        ethers.utils.parseUnits("5.212", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
     })
 
@@ -81,7 +89,8 @@ export function testStrategyDeposit() {
         this.user0,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("1", this.depositTokenDecimals)
+        ethers.utils.parseUnits("1", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
       await mint(
         this.strategy,
@@ -89,7 +98,8 @@ export function testStrategyDeposit() {
         this.user1,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
       await mint(
         this.strategy,
@@ -97,7 +107,8 @@ export function testStrategyDeposit() {
         this.user2,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("5.212", this.depositTokenDecimals)
+        ethers.utils.parseUnits("5.212", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
     })
   })

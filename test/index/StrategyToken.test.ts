@@ -1,5 +1,6 @@
 import { expect } from "chai"
 import { ethers, upgrades } from "hardhat"
+import { defaultAffiliatorAddress } from "../helper/constants"
 
 export function testStrategyToken() {
   describe("Token", async function () {

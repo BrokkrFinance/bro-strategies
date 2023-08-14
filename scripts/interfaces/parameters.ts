@@ -87,6 +87,8 @@ export interface IndexArgs {
   whitelistedTokens: string[]
   oracle: Oracle
   equityValuationLimit: BigNumber
+  feeSuggester: string
+  feeWhitelist: string[]
 }
 
 export interface IndexExtraArgs {

@@ -14,6 +14,7 @@ import { testStrategyRebalance } from "./StrategyRebalance.test"
 import { testStrategyToken } from "./StrategyToken.test"
 import { testStrategyUpgradeable } from "./StrategyUpgradeable.test"
 import { testStrategyWithdraw } from "./StrategyWithdraw.test"
+import { testStrategyFee } from "./StrategyFee.test"
 
 export function testStrategy(
   description: string,
@@ -136,6 +137,7 @@ export function testStrategy(
     testStrategyAccessControl()
     testStrategyComponent()
     testStrategyDeposit()
+    testStrategyFee()
     // testStrategyLimit() // Opt-out investment limit test because it fails when the limit is way higher than component's pool depth.
     testStrategyOracle()
     testStrategyPausable()

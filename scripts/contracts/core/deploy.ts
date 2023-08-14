@@ -197,6 +197,8 @@ async function deployUUPSUpgradeableIndex(
       indexArgs.whitelistedTokens,
       indexArgs.oracle.address,
       indexArgs.equityValuationLimit,
+      indexArgs.feeSuggester,
+      indexArgs.feeWhitelist,
     ],
     ...indexExtraArgs.extraArgs,
   ])

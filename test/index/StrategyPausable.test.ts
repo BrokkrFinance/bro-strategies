@@ -2,6 +2,7 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { burn, mint } from "./helper/InvestHelper"
+import { defaultAffiliatorAddress } from "../helper/constants"
 
 export function testStrategyPausable() {
   describe("Pausable", async function () {
@@ -19,6 +20,7 @@ export function testStrategyPausable() {
         this.user0,
         this.depositToken,
         ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress,
         true
       )
     })
@@ -30,7 +32,8 @@ export function testStrategyPausable() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       expect(await this.strategy.connect(this.owner).pause()).not.to.be.reverted

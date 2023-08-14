@@ -5,6 +5,7 @@ import { getLiveConfigPath } from "../../files/paths"
 import { DeployConfig, LiveConfig } from "../../interfaces/configs"
 import { Investable } from "../../interfaces/investable"
 import { DeployOptions } from "../../interfaces/options"
+import { defaultAffiliatorAddress } from "../../../test/helper/constants.ts"
 import {
   IndexArgs,
   IndexExtraArgs,
@@ -151,8 +152,6 @@ export async function deploy(investable: Investable, options?: DeployOptions): P
     await investOneDollarToPortfolio(investable, deployConfigs[deployConfigs.length - 1].depositToken)
 
     console.log()
-  } else {
-    console.log("Deploy: It looks like what we just deployed is not a portfolio. Skip investing $1.\n")
   }
 
   return contract!
@@ -291,6 +290,8 @@ function getIndexArgs(deployConfig: any): IndexArgs {
     whitelistedTokens: deployConfig.whitelistedTokens,
     oracle: deployConfig.oracle,
     equityValuationLimit: deployConfig.equityValuationLimit,
+    feeSuggester: deployConfig.feeSuggester,
+    feeWhitelist: deployConfig.feeWhitelist,
   }
 }
 
@@ -366,7 +367,9 @@ async function investOneDollarToIndex(
 
     await strategy
       .connect(deployer)
-      .mintIndexFromNATIVE(amountIndexWithSlippage, deployer.address, { value: depositAmount })
+      .mintIndexFromNATIVE(amountIndexWithSlippage, deployer.address, defaultAffiliatorAddress, {
+        value: depositAmount,
+      })
   } else {
     const depositToken = await ethers.getContractAt(
       "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
@@ -384,7 +387,13 @@ async function investOneDollarToIndex(
     await depositToken.connect(deployer).approve(strategy.address, depositAmount)
     await strategy
       .connect(deployer)
-      .mintIndexFromToken(depositTokenAddr, depositAmount, amountIndexWithSlippage, deployer.address)
+      .mintIndexFromToken(
+        depositTokenAddr,
+        depositAmount,
+        amountIndexWithSlippage,
+        deployer.address,
+        defaultAffiliatorAddress
+      )
   }
 
   console.log(`Deploy: Successfully deposited $2 to ${strategyLiveConfig.address}.`)

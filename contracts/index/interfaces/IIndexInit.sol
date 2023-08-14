@@ -14,6 +14,8 @@ interface IIndexInit {
         address[] whitelistedTokens;
         address oracle;
         uint256 equityValuationLimit;
+        address feeSuggester;
+        address[] feeWhitelist;
     }
 
     struct Component {

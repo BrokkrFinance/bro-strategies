@@ -2,6 +2,7 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { burn, mint } from "./helper/InvestHelper"
+import { defaultAffiliatorAddress } from "../helper/constants"
 
 export function testStrategyComponent() {
   describe("Component", async function () {
@@ -22,7 +23,8 @@ export function testStrategyComponent() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 0 withdraws.

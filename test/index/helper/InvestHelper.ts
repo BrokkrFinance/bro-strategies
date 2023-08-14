@@ -10,6 +10,7 @@ export async function mint(
   recipient: SignerWithAddress,
   token: Contract | undefined,
   tokenAmount: BigNumber,
+  affiliatorAddress: number,
   reverted: boolean = false
 ) {
   const indexTokenBalanceBefore = await indexToken.balanceOf(recipient.address)
@@ -21,11 +22,15 @@ export async function mint(
 
     if (reverted) {
       await expect(
-        indexStrategy.connect(spender).mintIndexFromNATIVE(amountIndex, recipient.address, { value: tokenAmount })
+        indexStrategy
+          .connect(spender)
+          .mintIndexFromNATIVE(amountIndex, recipient.address, affiliatorAddress, { value: tokenAmount })
       ).to.be.reverted
     } else {
       await expect(
-        indexStrategy.connect(spender).mintIndexFromNATIVE(amountIndex, recipient.address, { value: tokenAmount })
+        indexStrategy
+          .connect(spender)
+          .mintIndexFromNATIVE(amountIndex, recipient.address, affiliatorAddress, { value: tokenAmount })
       ).to.emit(indexStrategy, "Mint")
     }
   } else {
@@ -35,11 +40,15 @@ export async function mint(
 
     if (reverted) {
       await expect(
-        indexStrategy.connect(spender).mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
+        indexStrategy
+          .connect(spender)
+          .mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address, affiliatorAddress)
       ).to.be.reverted
     } else {
       await expect(
-        indexStrategy.connect(spender).mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address)
+        indexStrategy
+          .connect(spender)
+          .mintIndexFromToken(token.address, tokenAmount, amountIndex, recipient.address, affiliatorAddress)
       ).to.emit(indexStrategy, "Mint")
     }
   }

@@ -2,6 +2,7 @@ import { expect } from "chai"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 import { burn, mint } from "./helper/InvestHelper"
+import { defaultAffiliatorAddress } from "../helper/constants"
 
 export function testStrategyRebalance() {
   describe("Rebalance", async function () {
@@ -13,7 +14,8 @@ export function testStrategyRebalance() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       const components = await this.strategy.allComponents()
@@ -53,7 +55,8 @@ export function testStrategyRebalance() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 1 withdraws.
@@ -77,7 +80,8 @@ export function testStrategyRebalance() {
         this.user0,
         this.user0,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       const components = await this.strategy.allComponents()
@@ -106,7 +110,8 @@ export function testStrategyRebalance() {
         this.user1,
         this.user1,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       let indexTokenBalance: BigNumber
@@ -135,7 +140,8 @@ export function testStrategyRebalance() {
         this.user2,
         this.user2,
         this.depositToken,
-        ethers.utils.parseUnits("10", this.depositTokenDecimals)
+        ethers.utils.parseUnits("10", this.depositTokenDecimals),
+        defaultAffiliatorAddress
       )
 
       // User 1 withdraws.

@@ -78,7 +78,7 @@ library InvestableLib {
         uint256 equitySoFar,
         uint256 amountInvestedNow,
         uint256 investmentTokenSupplySoFar
-    ) internal view returns (uint256) {
+    ) internal pure returns (uint256) {
         if (investmentTokenSupplySoFar == 0) {
             return amountInvestedNow;
         } else
