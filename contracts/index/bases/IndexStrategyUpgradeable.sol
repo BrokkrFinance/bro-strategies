@@ -252,6 +252,7 @@ abstract contract IndexStrategyUpgradeable is
         nonReentrant
         whenNotPaused
         whenNotReachedEquityValuationLimit
+        onlyWhitelistedToken(NATIVE)
         returns (uint256 amountIndex, uint256 amountNATIVE)
     {
         (amountIndex, amountNATIVE) = IndexStrategyMint.mintIndexFromNATIVE(
@@ -331,7 +332,13 @@ abstract contract IndexStrategyUpgradeable is
         uint256 amountNATIVEMin,
         uint256 amountIndex,
         address recipient
-    ) external nonReentrant whenNotPaused returns (uint256 amountNATIVE) {
+    )
+        external
+        nonReentrant
+        whenNotPaused
+        onlyWhitelistedToken(NATIVE)
+        returns (uint256 amountNATIVE)
+    {
         amountNATIVE = IndexStrategyBurn.burnExactIndexForNATIVE(
             BurnParams(
                 NATIVE,

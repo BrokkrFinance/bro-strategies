@@ -79,11 +79,17 @@ export function testStrategy(
       // Deploy strategy.
       this.strategy = await deployStrategy()
 
+      // Strategy owner.
+      const ownerAddr = await this.strategy.owner()
+      this.owner = await ethers.getImpersonatedSigner(ownerAddr)
+      await setBalance(this.owner.address, ethers.utils.parseEther("10000"))
+
       // Deposit token.
       this.depositTokenAddress = await this.strategy.whitelistedTokens(0)
       if (this.depositTokenAddress === NativeToken) {
         this.depositToken = undefined
         this.depositTokenDecimals = 18
+        await this.strategy.connect(this.owner).addWhitelistedTokens([NativeToken])
       } else {
         this.depositToken = await ethers.getContractAt(
           "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
@@ -91,11 +97,6 @@ export function testStrategy(
         )
         this.depositTokenDecimals = await this.depositToken.decimals()
       }
-
-      // Strategy owner.
-      const ownerAddr = await this.strategy.owner()
-      this.owner = await ethers.getImpersonatedSigner(ownerAddr)
-      await setBalance(this.owner.address, ethers.utils.parseEther("10000"))
 
       // Strategy token.
       const indexTokenAddr = await this.strategy.indexToken()
