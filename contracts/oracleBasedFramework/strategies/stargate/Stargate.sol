@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./StargateStorageLib.sol";
 import "../../bases/strategy/StrategyOwnablePausableBaseUpgradeable.sol";
 import "../../libraries/SwapServiceLib.sol";
+import "../../interfaces/IPriceOracleDepricated.sol";
 import "../../../dependencies/stargate/IStargateLpStaking.sol";
 import "../../../dependencies/stargate/IStargatePool.sol";
 import "../../../dependencies/stargate/IStargateRouter.sol";
@@ -236,7 +237,7 @@ contract Stargate is UUPSUpgradeable, StrategyOwnablePausableBaseUpgradeable {
         if (depositToken != strategyStorage.poolDepositToken) {
             assetValuations[0].valuation =
                 (assetValuations[0].valuation *
-                    priceOracle.getPrice(
+                    IPriceOracleDepricated(address(priceOracle)).getPrice(
                         strategyStorage.poolDepositToken,
                         shouldMaximise,
                         shouldIncludeAmmPrice

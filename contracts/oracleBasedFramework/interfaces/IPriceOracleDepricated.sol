@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import { IERC20UpgradeableExt } from "./IERC20UpgradeableExt.sol";
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 
-interface IPriceOracle {
+interface IPriceOracleDepricated {
     error InvalidAssetPrice();
 
     function getPrice(
-        IERC20UpgradeableExt baseToken,
-        IERC20UpgradeableExt quoteToken,
-        uint8 precisionDigits,
+        IERC20Upgradeable token,
         bool shouldMaximise,
         bool includeAmmPrice
     ) external view returns (uint256);

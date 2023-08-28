@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./DnsVectorStrategyCommon.sol";
 import "./DnsVectorStrategyStorageLib.sol";
 import "../../interfaces/IAum.sol";
+import "../../interfaces/IPriceOracleDepricated.sol";
 
 library DnsVectorStrategyAumLib {
     function getAssetBalances() public view returns (Balance[] memory) {
@@ -63,11 +64,12 @@ library DnsVectorStrategyAumLib {
         // get the aaveBorrowToken AUM in depositToken
         uint256 lpBorrowTokenAumInDepositToken = (aaveBorrowTokenReserve *
             lpTokenContractBalance *
-            strategyStorage.priceOracle.getPrice(
-                strategyStorage.aaveBorrowToken,
-                shouldMaximise,
-                shouldIncludeAmmPrice
-            )) /
+            IPriceOracleDepricated(address(strategyStorage.priceOracle))
+                .getPrice(
+                    strategyStorage.aaveBorrowToken,
+                    shouldMaximise,
+                    shouldIncludeAmmPrice
+                )) /
             lpTokenTotalSupply /
             10**18;
 
@@ -96,11 +98,12 @@ library DnsVectorStrategyAumLib {
             address(strategyStorage.vAaveBorrowToken),
             (strategyStorage.vAaveBorrowToken.balanceOf(address(this)) *
                 (
-                    strategyStorage.priceOracle.getPrice(
-                        strategyStorage.aaveBorrowToken,
-                        shouldMaximise,
-                        shouldIncludeAmmPrice
-                    )
+                    IPriceOracleDepricated(address(strategyStorage.priceOracle))
+                        .getPrice(
+                            strategyStorage.aaveBorrowToken,
+                            shouldMaximise,
+                            shouldIncludeAmmPrice
+                        )
                 )) / 10**18
         );
         return liabilityValuations;
@@ -151,11 +154,12 @@ library DnsVectorStrategyAumLib {
         // assuming aAaveSupplyToken is at index 0 of getAssetBalances()
         // assuming vAaveBorrowToken is at index 0 of getLiabilityBalances()
         return
-            (((strategyStorage.priceOracle.getPrice(
-                strategyStorage.aaveBorrowToken,
-                shouldMaximise,
-                shouldIncludeAmmPrice
-            ) * liabilityBalances[0].balance) *
+            (((IPriceOracleDepricated(address(strategyStorage.priceOracle))
+                .getPrice(
+                    strategyStorage.aaveBorrowToken,
+                    shouldMaximise,
+                    shouldIncludeAmmPrice
+                ) * liabilityBalances[0].balance) *
                 Math.SHORT_FIXED_DECIMAL_FACTOR) / 10**18) /
             (assetBalances[0].balance);
     }

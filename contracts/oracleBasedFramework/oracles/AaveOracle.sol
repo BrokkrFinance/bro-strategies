@@ -8,25 +8,20 @@ import "../../dependencies/aave/IPriceOracleGetter.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
+import { IERC20UpgradeableExt } from "../interfaces/IERC20UpgradeableExt.sol";
 
 contract AaveOracle is OwnableUpgradeable, UUPSUpgradeable, IPriceOracle {
     IPriceOracleGetter public vendorFeed;
-    IERC20Upgradeable internal baseToken;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address vendorFeed_, IERC20Upgradeable baseToken_)
-        external
-        initializer
-    {
+    function initialize(address vendorFeed_) external initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();
         setVendorFeed(vendorFeed_);
-        baseToken = baseToken_;
     }
 
     function _authorizeUpgrade(address) internal virtual override onlyOwner {}
@@ -36,26 +31,32 @@ contract AaveOracle is OwnableUpgradeable, UUPSUpgradeable, IPriceOracle {
     }
 
     function getPrice(
-        IERC20Upgradeable token,
+        IERC20UpgradeableExt baseToken,
+        IERC20UpgradeableExt quoteToken,
+        uint8 precisionDigits,
         bool,
         bool
     ) external view returns (uint256) {
-        if (token == baseToken) return 10**InvestableLib.PRICE_PRECISION_DIGITS;
+        if (quoteToken == baseToken) return 10**precisionDigits;
 
         // vendor returns prices in usd in 8 decimal point precision
-        uint256 tokenPriceInUsd = vendorFeed.getAssetPrice(address(token));
-        uint256 usdcPriceInUsd = vendorFeed.getAssetPrice(address(baseToken));
+        uint256 quoteTokenPriceInUsd = vendorFeed.getAssetPrice(
+            address(quoteToken)
+        );
+        uint256 baseTokenPriceInUsd = vendorFeed.getAssetPrice(
+            address(baseToken)
+        );
 
-        if (tokenPriceInUsd == 0 || usdcPriceInUsd == 0)
+        if (quoteTokenPriceInUsd == 0 || baseTokenPriceInUsd == 0)
             revert InvalidAssetPrice();
 
         // returns prices in usd in 6 decimal point precision
         return
             InvestableLib.convertPricePrecision(
-                ((tokenPriceInUsd * Math.LONG_FIXED_DECIMAL_FACTOR) /
-                    usdcPriceInUsd),
+                ((quoteTokenPriceInUsd * Math.LONG_FIXED_DECIMAL_FACTOR) /
+                    baseTokenPriceInUsd),
                 Math.LONG_FIXED_DECIMAL_FACTOR,
-                InvestableLib.PRICE_PRECISION_FACTOR
+                10**precisionDigits
             );
     }
 }

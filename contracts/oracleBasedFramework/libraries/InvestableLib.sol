@@ -45,6 +45,9 @@ library InvestableLib {
     // 2. Investment token
     uint8 public constant PRICE_PRECISION_DIGITS = 6;
     uint256 public constant PRICE_PRECISION_FACTOR = 10**PRICE_PRECISION_DIGITS;
+    uint8 public constant PRICE_HIGH_PRECISION_DIGITS = 18;
+    uint256 public constant PRICE_HIGH_PRECISION_FACTOR =
+        10**PRICE_HIGH_PRECISION_DIGITS;
 
     function convertPricePrecision(
         uint256 price,
@@ -56,22 +59,6 @@ library InvestableLib {
         else if (currentPrecision < desiredPrecision)
             return price * (desiredPrecision / currentPrecision);
         else return price;
-    }
-
-    function convertTokenPriceToUsdc(
-        IERC20UpgradeableExt tokenToConvert,
-        uint256 tokenAmount,
-        IPriceOracle priceOracle,
-        bool shouldMaximise,
-        bool includeAmmPrice
-    ) internal view returns (uint256) {
-        // assuming priceOracle's decimal count is equal to USDC's
-        return
-            (priceOracle.getPrice(
-                tokenToConvert,
-                shouldMaximise,
-                includeAmmPrice
-            ) * tokenAmount) / (10**tokenToConvert.decimals());
     }
 
     function calculateMintAmount(

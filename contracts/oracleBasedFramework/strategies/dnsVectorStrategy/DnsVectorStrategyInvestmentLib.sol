@@ -5,6 +5,7 @@ import "./DnsVectorStrategyCommon.sol";
 import "./DnsVectorStrategyStorageLib.sol";
 import "../../Common.sol";
 import "../../libraries/InvestableLib.sol";
+import "../../interfaces/IPriceOracleDepricated.sol";
 
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -43,11 +44,9 @@ library DnsVectorStrategyInvestmentLib {
 
         uint256 poolTokenAllocationInDepositToken = amount -
             aaveSupplyAllocationInDepositToken;
-        uint256 avaxUsdcMinimumPrice = strategyStorage.priceOracle.getPrice(
-            strategyStorage.aaveBorrowToken,
-            false,
-            false
-        );
+        uint256 avaxUsdcMinimumPrice = IPriceOracleDepricated(
+            address(strategyStorage.priceOracle)
+        ).getPrice(strategyStorage.aaveBorrowToken, false, false);
         uint256 aaveBorrowAllocationInBorrowToken = InvestableLib
             .convertPricePrecision(
                 (aaveBorrowAllocationUsdcInDepositToken *
@@ -614,9 +613,9 @@ library DnsVectorStrategyInvestmentLib {
 
         // Calculate only necessary amount to swap to match Pangolin's pool assets ratio.
         if (swapAmmPairDepositTokenToAaveBorrowToken) {
-            uint256 aaveBorrowTokenPriceInAmmPairDepositToken = strategyStorage
-                .priceOracle
-                .getPrice(strategyStorage.aaveBorrowToken, true, false);
+            uint256 aaveBorrowTokenPriceInAmmPairDepositToken = IPriceOracleDepricated(
+                    address(strategyStorage.priceOracle)
+                ).getPrice(strategyStorage.aaveBorrowToken, true, false);
 
             amountToSwap =
                 (ammPairDepositTokenDesiredMulByReserve -
@@ -630,11 +629,8 @@ library DnsVectorStrategyInvestmentLib {
         } else if (swapAaveBorrowTokenToAmmPairDepositToken) {
             uint256 ammPairDepositTokenPriceInAaveBorrowToken = 10 **
                 (InvestableLib.PRICE_PRECISION_DIGITS * 2) /
-                strategyStorage.priceOracle.getPrice(
-                    strategyStorage.aaveBorrowToken,
-                    true,
-                    false
-                );
+                IPriceOracleDepricated(address(strategyStorage.priceOracle))
+                    .getPrice(strategyStorage.aaveBorrowToken, true, false);
 
             amountToSwap =
                 (aaveBorrowTokenDesiredMulByReserve -
