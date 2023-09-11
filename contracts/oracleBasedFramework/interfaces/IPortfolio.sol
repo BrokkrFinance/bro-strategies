@@ -9,7 +9,7 @@ import "../interfaces/IInvestable.sol";
 struct InvestableDesc {
     IInvestable investable;
     uint24 allocationPercentage;
-    string[] keys;
+    address[] keys;
     bytes[] values;
 }
 

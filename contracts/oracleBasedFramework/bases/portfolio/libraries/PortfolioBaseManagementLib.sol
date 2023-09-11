@@ -155,9 +155,9 @@ library PortfolioBaseManagementLib {
 
     function deconstructNameValuePairArray(
         NameValuePair[] calldata nameValueParams
-    ) internal pure returns (string[] memory keys, bytes[] memory values) {
+    ) internal pure returns (address[] memory keys, bytes[] memory values) {
         uint256 paramsLength = nameValueParams.length;
-        keys = new string[](paramsLength);
+        keys = new address[](paramsLength);
         values = new bytes[](paramsLength);
         for (uint256 i = 0; i < paramsLength; ++i) {
             keys[i] = nameValueParams[i].key;
@@ -185,7 +185,7 @@ library PortfolioBaseManagementLib {
 
         // workaround for 'Copying of type struct memory[] memory to storage not yet supported'
         (
-            string[] memory keys,
+            address[] memory keys,
             bytes[] memory values
         ) = deconstructNameValuePairArray(params);
 
