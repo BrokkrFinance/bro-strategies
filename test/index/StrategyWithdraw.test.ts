@@ -269,7 +269,7 @@ export function testStrategyWithdraw() {
       const indexTokenBalance = await this.indexToken.balanceOf(this.user0.address)
 
       if (this.depositTokenAddress === NativeToken) {
-        const amountNative = await this.strategy.connect(this.user0).getAmountNATIVEFromExactIndex(indexTokenBalance)
+        const amountNative = await this.strategy.callStatic.getAmountNATIVEFromExactIndex(indexTokenBalance)
 
         await this.indexToken.connect(this.user0).approve(this.strategy.address, indexTokenBalance)
         await expect(
@@ -278,9 +278,10 @@ export function testStrategyWithdraw() {
             .burnExactIndexForNATIVE(amountNative.add(1), indexTokenBalance, this.user0.address)
         ).to.be.reverted
       } else {
-        const amountToken = await this.strategy
-          .connect(this.user0)
-          .getAmountTokenFromExactIndex(this.depositTokenAddress, indexTokenBalance)
+        const amountToken = await this.strategy.callStatic.getAmountTokenFromExactIndex(
+          this.depositTokenAddress,
+          indexTokenBalance
+        )
 
         await this.indexToken.connect(this.user0).approve(this.strategy.address, indexTokenBalance)
 

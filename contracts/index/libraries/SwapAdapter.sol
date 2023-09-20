@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import { Errors } from "./Errors.sol";
+
 import { ICamelotPair } from "../dependencies/ICamelotPair.sol";
 import { ICamelotRouter } from "../dependencies/ICamelotRouter.sol";
 import { IChronosFactory } from "../dependencies/IChronosFactory.sol";
@@ -17,8 +19,16 @@ import { ChronosLibrary } from "./ChronosLibrary.sol";
 import { TraderJoeV2Library } from "./TraderJoeV2Library.sol";
 import { TraderJoeV2Point1Library } from "./TraderJoeV2Point1Library.sol";
 import { UniswapV2Library } from "./UniswapV2Library.sol";
+import { IQuoterV2 } from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
+import { ISwapRouter } from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 
-import { Errors } from "./Errors.sol";
+import "hardhat/console.sol";
+
+struct UniswapV3PairData {
+    uint24[] fees;
+    IQuoterV2 quoter;
+}
 
 library SwapAdapter {
     using CamelotLibrary for ICamelotRouter;
@@ -33,7 +43,8 @@ library SwapAdapter {
         TraderJoeV2,
         Camelot,
         Chronos,
-        TraderJoeV2_1
+        TraderJoeV2_1,
+        UniswapV3
     }
 
     struct PairData {
@@ -110,6 +121,33 @@ library SwapAdapter {
                 );
         }
 
+        if (setup.dex == DEX.UniswapV3) {
+            if (path.length != 2) {
+                revert Errors.SwapAdapter_WrongPathLength(path.length);
+            }
+
+            UniswapV3PairData memory uniswapV3PairData = abi.decode(
+                setup.pairData.data,
+                (UniswapV3PairData)
+            );
+
+            IERC20Upgradeable(path[0]).approve(address(setup.router), amountIn);
+
+            return
+                ISwapRouter(setup.router).exactInputSingle(
+                    ISwapRouter.ExactInputSingleParams(
+                        path[0],
+                        path[1],
+                        uniswapV3PairData.fees[0],
+                        address(this),
+                        block.timestamp,
+                        amountIn,
+                        amountOutMin,
+                        0
+                    )
+                );
+        }
+
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
@@ -176,15 +214,45 @@ library SwapAdapter {
                 );
         }
 
+        if (setup.dex == DEX.UniswapV3) {
+            if (path.length != 2) {
+                revert Errors.SwapAdapter_WrongPathLength(path.length);
+            }
+
+            UniswapV3PairData memory uniswapV3PairData = abi.decode(
+                setup.pairData.data,
+                (UniswapV3PairData)
+            );
+
+            IERC20Upgradeable(path[0]).approve(
+                address(setup.router),
+                amountInMax
+            );
+
+            return
+                ISwapRouter(setup.router).exactOutputSingle(
+                    ISwapRouter.ExactOutputSingleParams(
+                        path[0],
+                        path[1],
+                        uniswapV3PairData.fees[0],
+                        address(this),
+                        block.timestamp,
+                        amountOut,
+                        amountInMax,
+                        0
+                    )
+                );
+        }
+
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
-    function getAmountOut(
+    function getAmountOutView(
         Setup memory setup,
         uint256 amountIn,
         address tokenIn,
         address tokenOut
-    ) external view returns (uint256 amountOut) {
+    ) public view returns (uint256 amountOut) {
         if (tokenIn == tokenOut) {
             return amountIn;
         }
@@ -240,12 +308,44 @@ library SwapAdapter {
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
     }
 
+    function getAmountOut(
+        Setup memory setup,
+        uint256 amountIn,
+        address tokenIn,
+        address tokenOut
+    ) external returns (uint256 amountOut) {
+        if (tokenIn == tokenOut) {
+            return amountIn;
+        }
+
+        if (setup.dex == DEX.UniswapV3) {
+            UniswapV3PairData memory uniswapV3PairData = abi.decode(
+                setup.pairData.data,
+                (UniswapV3PairData)
+            );
+
+            (amountOut, , , ) = IQuoterV2(uniswapV3PairData.quoter)
+                .quoteExactInputSingle(
+                    IQuoterV2.QuoteExactInputSingleParams(
+                        tokenIn,
+                        tokenOut,
+                        amountIn,
+                        uniswapV3PairData.fees[0],
+                        0
+                    )
+                );
+            return amountOut;
+        }
+
+        return getAmountOutView(setup, amountIn, tokenIn, tokenOut);
+    }
+
     function getAmountIn(
         Setup memory setup,
         uint256 amountOut,
         address tokenIn,
         address tokenOut
-    ) external view returns (uint256 amountIn) {
+    ) external returns (uint256 amountIn) {
         if (tokenIn == tokenOut) {
             return amountOut;
         }
@@ -299,6 +399,25 @@ library SwapAdapter {
                     tokenIn,
                     tokenOut
                 );
+        }
+
+        if (setup.dex == DEX.UniswapV3) {
+            UniswapV3PairData memory uniswapV3PairData = abi.decode(
+                setup.pairData.data,
+                (UniswapV3PairData)
+            );
+
+            (amountIn, , , ) = IQuoterV2(uniswapV3PairData.quoter)
+                .quoteExactOutputSingle(
+                    IQuoterV2.QuoteExactOutputSingleParams(
+                        tokenIn,
+                        tokenOut,
+                        amountOut,
+                        uniswapV3PairData.fees[0],
+                        0
+                    )
+                );
+            return amountIn;
         }
 
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));

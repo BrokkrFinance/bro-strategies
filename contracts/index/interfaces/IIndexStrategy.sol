@@ -40,12 +40,10 @@ interface IIndexStrategy {
 
     function getAmountIndexFromToken(address token, uint256 amountTokenMax)
         external
-        view
         returns (uint256 amountIndex, uint256 amountToken);
 
     function getAmountTokenFromExactIndex(address token, uint256 amountIndex)
         external
-        view
         returns (uint256 amountToken);
 
     function setOracle(address oracle) external;

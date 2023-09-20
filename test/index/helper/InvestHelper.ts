@@ -18,7 +18,7 @@ export async function mint(
   let amountIndex: BigNumber
 
   if (token === undefined) {
-    ;[amountIndex] = await indexStrategy.connect(spender).getAmountIndexFromNATIVE(tokenAmount)
+    ;[amountIndex] = await indexStrategy.callStatic.getAmountIndexFromNATIVE(tokenAmount)
 
     if (reverted) {
       await expect(
@@ -34,7 +34,7 @@ export async function mint(
       ).to.emit(indexStrategy, "Mint")
     }
   } else {
-    ;[amountIndex] = await indexStrategy.connect(spender).getAmountIndexFromToken(token.address, tokenAmount)
+    ;[amountIndex] = await indexStrategy.callStatic.getAmountIndexFromToken(token.address, tokenAmount)
 
     await token.connect(spender).approve(indexStrategy.address, tokenAmount)
 
@@ -75,7 +75,7 @@ export async function burn(
   if (token === undefined) {
     const nativeBalanceBefore = await ethers.provider.getBalance(recipient.address)
 
-    const amountNative = await indexStrategy.connect(spender).getAmountNATIVEFromExactIndex(indexAmount)
+    const amountNative = await indexStrategy.callStatic.getAmountNATIVEFromExactIndex(indexAmount)
     const amountNativeMin = amountNative.mul(BigNumber.from(1e2).sub(slippageTolerance)).div(1e2)
 
     await indexToken.connect(spender).approve(indexStrategy.address, indexAmount)
@@ -98,7 +98,7 @@ export async function burn(
   } else {
     const tokenBalanceBefore = await token.balanceOf(recipient.address)
 
-    const amountToken = await indexStrategy.connect(spender).getAmountTokenFromExactIndex(token.address, indexAmount)
+    const amountToken = await indexStrategy.callStatic.getAmountTokenFromExactIndex(token.address, indexAmount)
     const amountTokenMin = amountToken.mul(BigNumber.from(1e2).sub(slippageTolerance)).div(1e2)
 
     await indexToken.connect(spender).approve(indexStrategy.address, indexAmount)
