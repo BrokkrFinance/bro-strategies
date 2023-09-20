@@ -192,7 +192,6 @@ library IndexStrategyMint {
         mapping(address => address[]) storage routers
     )
         public
-        view
         returns (
             uint256 amountToken,
             address bestRouter,
@@ -285,7 +284,7 @@ library IndexStrategyMint {
             storage pairData,
         mapping(address => SwapAdapter.DEX) storage dexs,
         mapping(address => uint256) storage weights
-    ) public view returns (MintingData memory mintingData) {
+    ) public returns (MintingData memory mintingData) {
         MintingData memory mintingDataUnit = getMintingDataForExactIndex(
             Constants.PRECISION,
             dexs,
@@ -358,7 +357,7 @@ library IndexStrategyMint {
         address[] memory components,
         mapping(address => address[]) storage routers,
         address wNATIVE
-    ) internal view returns (MintingData memory mintingData) {
+    ) internal returns (MintingData memory mintingData) {
         mintingData.amountIndex = amountIndex;
         mintingData.amountWNATIVEs = new uint256[](components.length);
         mintingData.bestRouters = new address[](components.length);

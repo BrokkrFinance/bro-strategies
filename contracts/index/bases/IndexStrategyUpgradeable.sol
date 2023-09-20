@@ -89,6 +89,39 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     /**
+     * @dev Calculates the equity valuation.
+     * @param maximize Boolean value to maximize.
+     * @param includeAmmPrice Boolean value to include AMM price.
+     * @return The equity valuation as a uint256.
+     */
+    function equityValuation(bool maximize, bool includeAmmPrice)
+        public
+        view
+        override
+        returns (uint256)
+    {
+        uint256 totalSupply = indexToken.totalSupply();
+
+        if (totalSupply == 0) {
+            return 0;
+        }
+
+        uint256 amountWNATIVEUnit = _getAmountWNATIVEFromExactIndexView(
+            Constants.PRECISION
+        );
+
+        uint256 priceWNATIVE = oracle.getPrice(
+            wNATIVE,
+            maximize,
+            includeAmmPrice
+        );
+
+        return
+            (amountWNATIVEUnit * priceWNATIVE * totalSupply) /
+            (Constants.DECIMALS * Constants.PRECISION);
+    }
+
+    /**
      * @dev Initializes the IndexStrategyUpgradeable contract.
      * @param initParams The parameters needed for initialization.
      */
@@ -368,7 +401,6 @@ abstract contract IndexStrategyUpgradeable is
      */
     function getAmountIndexFromToken(address token, uint256 amountTokenMax)
         external
-        view
         onlyWhitelistedToken(token)
         returns (uint256 amountIndex, uint256 amountToken)
     {
@@ -403,7 +435,6 @@ abstract contract IndexStrategyUpgradeable is
      */
     function getAmountIndexFromNATIVE(uint256 amountNATIVEMax)
         external
-        view
         returns (uint256 amountIndex, uint256 amountNATIVE)
     {
         MintingData memory mintingData = IndexStrategyMint
@@ -437,7 +468,6 @@ abstract contract IndexStrategyUpgradeable is
      */
     function getAmountTokenFromExactIndex(address token, uint256 amountIndex)
         external
-        view
         onlyWhitelistedToken(token)
         returns (uint256 amountToken)
     {
@@ -460,7 +490,6 @@ abstract contract IndexStrategyUpgradeable is
      */
     function getAmountNATIVEFromExactIndex(uint256 amountIndex)
         external
-        view
         returns (uint256 amountNATIVE)
     {
         amountNATIVE = _getAmountWNATIVEFromExactIndex(amountIndex);
@@ -614,18 +643,6 @@ abstract contract IndexStrategyUpgradeable is
     }
 
     /**
-     * @dev Calculates the equity valuation of the index strategy.
-     * @param maximize A boolean indicating whether to maximize the valuation.
-     * @param includeAmmPrice A boolean indicating whether to include the AMM price in the valuation.
-     * @return The equity valuation of the index strategy.
-     */
-    function equityValuation(bool maximize, bool includeAmmPrice)
-        public
-        view
-        virtual
-        returns (uint256);
-
-    /**
      * @dev Checks if a token is whitelisted.
      * @param token The address of the token to check.
      * @return bool Returns true if the token is whitelisted, false otherwise.
@@ -647,7 +664,6 @@ abstract contract IndexStrategyUpgradeable is
      */
     function _getAmountWNATIVEFromExactIndex(uint256 amountIndex)
         internal
-        view
         returns (uint256 amountWNATIVE)
     {
         for (uint256 i = 0; i < components.length; i++) {
@@ -666,6 +682,38 @@ abstract contract IndexStrategyUpgradeable is
                 dexs,
                 pairData
             );
+
+            amountWNATIVE += amountWNATIVEOut;
+        }
+    }
+
+    /**
+     * @dev Calculates the amount of wNATIVE received from the exact index amount.
+     * @param amountIndex The exact index amount.
+     * @return amountWNATIVE The amount of wNATIVE received.
+     */
+    function _getAmountWNATIVEFromExactIndexView(uint256 amountIndex)
+        internal
+        view
+        returns (uint256 amountWNATIVE)
+    {
+        for (uint256 i = 0; i < components.length; i++) {
+            if (weights[components[i]] == 0) {
+                continue;
+            }
+
+            uint256 amountComponent = (amountIndex * weights[components[i]]) /
+                Constants.PRECISION;
+
+            (uint256 amountWNATIVEOut, ) = IndexStrategyUtils
+                .getAmountOutMaxView(
+                    routers[components[i]],
+                    amountComponent,
+                    components[i],
+                    wNATIVE,
+                    dexs,
+                    pairData
+                );
 
             amountWNATIVE += amountWNATIVEOut;
         }

@@ -20,6 +20,7 @@ library Errors {
     // SwapAdapter errors.
     error SwapAdapter_WrongDEX(uint8 dex);
     error SwapAdapter_WrongPair(address tokenIn, address tokenOut);
+    error SwapAdapter_WrongPathLength(uint256 wrongLength);
 
     // IndexOracle errors.
     error Oracle_TokenNotSupported(address token);

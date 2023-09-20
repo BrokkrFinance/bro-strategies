@@ -5,7 +5,7 @@ import { getLiveConfigPath } from "../../files/paths"
 import { DeployConfig, LiveConfig } from "../../interfaces/configs"
 import { Investable } from "../../interfaces/investable"
 import { DeployOptions } from "../../interfaces/options"
-import { defaultAffiliatorAddress } from "../../../test/helper/constants.ts"
+import { defaultAffiliatorAddress } from "../../../test/helper/constants"
 import {
   IndexArgs,
   IndexExtraArgs,
@@ -362,7 +362,7 @@ async function investOneDollarToIndex(
 
   if (depositTokenAddr === NativeToken) {
     const depositAmount = ethers.utils.parseEther("2", 18)
-    const [amountIndex] = await strategy.connect(deployer).getAmountIndexFromNATIVE(depositAmount)
+    const [amountIndex] = await strategy.callStatic.getAmountIndexFromNATIVE(depositAmount)
     const amountIndexWithSlippage = amountIndex.mul(995).div(1000)
 
     await strategy
@@ -381,7 +381,7 @@ async function investOneDollarToIndex(
       DepositTokenAmounts.get(investable.network)!.get(depositTokenAddr)!,
       depositTokenDecimals
     )
-    const [amountIndex] = await strategy.connect(deployer).getAmountIndexFromToken(depositTokenAddr, depositAmount)
+    const [amountIndex] = await strategy.callStatic.getAmountIndexFromToken(depositTokenAddr, depositAmount)
     const amountIndexWithSlippage = amountIndex.mul(995).div(1000)
 
     await depositToken.connect(deployer).approve(strategy.address, depositAmount)
@@ -411,13 +411,13 @@ async function investOneDollarToIndex(
   const withdrawAmount = indexTokenBalance.div(2)
 
   if (depositTokenAddr === NativeToken) {
-    const amountNative = await strategy.connect(deployer).getAmountNATIVEFromExactIndex(withdrawAmount)
+    const amountNative = await strategy.callStatic.getAmountNATIVEFromExactIndex(withdrawAmount)
     const amountNativeMin = amountNative.mul(BigNumber.from(1e2).sub(1)).div(1e2)
 
     await indexToken.connect(deployer).approve(strategy.address, withdrawAmount)
     await strategy.connect(deployer).burnExactIndexForNATIVE(amountNativeMin, withdrawAmount, deployer.address)
   } else {
-    const amountToken = await strategy.connect(deployer).getAmountTokenFromExactIndex(depositTokenAddr, withdrawAmount)
+    const amountToken = await strategy.callStatic.getAmountTokenFromExactIndex(depositTokenAddr, withdrawAmount)
     const amountTokenMin = amountToken.mul(BigNumber.from(1e2).sub(1)).div(1e2)
 
     await indexToken.connect(deployer).approve(strategy.address, withdrawAmount)

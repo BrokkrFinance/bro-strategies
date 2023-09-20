@@ -21,11 +21,15 @@ export function testStrategyLimit() {
         // Deposit large enough amount so that equity valuation increment exceed equity valuation limit.
         const _depositAmount = exceedingAmount
 
-        const [_amountIndex] = await this.strategy
-          .connect(this.whale)
-          .getAmountIndexFromToken(this.depositTokenAddress, _depositAmount)
+        const [_amountIndex] = await this.strategy.callStatic.getAmountIndexFromToken(
+          this.depositTokenAddress,
+          _depositAmount
+        )
 
-        const amountToken = await this.strategy.getAmountTokenFromExactIndex(this.depositTokenAddress, _amountIndex)
+        const amountToken = await this.strategy.callStatic.getAmountTokenFromExactIndex(
+          this.depositTokenAddress,
+          _amountIndex
+        )
 
         // TODO: This only holds when the price of depositToken equals to 1 USD.
         if (amountToken.div(1e6) >= equityValuationLimit) {

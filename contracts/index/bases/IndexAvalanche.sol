@@ -12,39 +12,6 @@ import { SwapAdapter } from "../libraries/SwapAdapter.sol";
  */
 contract IndexAvalanche is IndexStrategyUpgradeable {
     /**
-     * @dev Calculates the equity valuation.
-     * @param maximize Boolean value to maximize.
-     * @param includeAmmPrice Boolean value to include AMM price.
-     * @return The equity valuation as a uint256.
-     */
-    function equityValuation(bool maximize, bool includeAmmPrice)
-        public
-        view
-        override
-        returns (uint256)
-    {
-        uint256 totalSupply = indexToken.totalSupply();
-
-        if (totalSupply == 0) {
-            return 0;
-        }
-
-        uint256 amountWNATIVEUnit = _getAmountWNATIVEFromExactIndex(
-            Constants.PRECISION
-        );
-
-        uint256 priceWNATIVE = oracle.getPrice(
-            wNATIVE,
-            maximize,
-            includeAmmPrice
-        );
-
-        return
-            (amountWNATIVEUnit * priceWNATIVE * totalSupply) /
-            (Constants.DECIMALS * Constants.PRECISION);
-    }
-
-    /**
      * @dev Adds a swap route.
      * @param token The token address.
      * @param router The router address.

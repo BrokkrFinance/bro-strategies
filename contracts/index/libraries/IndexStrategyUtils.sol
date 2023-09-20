@@ -25,7 +25,7 @@ library IndexStrategyUtils {
         mapping(address => SwapAdapter.DEX) storage dexs,
         mapping(address => mapping(address => mapping(address => SwapAdapter.PairData)))
             storage pairData
-    ) external view returns (uint256 amountOutMax, address bestRouter) {
+    ) external returns (uint256 amountOutMax, address bestRouter) {
         if (tokenIn == tokenOut) {
             return (amountIn, address(0));
         }
@@ -55,6 +55,56 @@ library IndexStrategyUtils {
     }
 
     /**
+     * @dev Calculates the maximum amount of `tokenOut` tokens that can be received for a given `amountIn` of `tokenIn` tokens,
+     *      and identifies the best router to use for the swap among a list of routers.
+     * @param routers The list of router addresses to consider for the swap.
+     * @param amountIn The amount of `tokenIn` tokens.
+     * @param tokenIn The address of the token to be swapped.
+     * @param tokenOut The address of the token to receive.
+     * @return amountOutMax The maximum amount of `tokenOut` tokens that can be received for the given `amountIn`.
+     * @return bestRouter The address of the best router to use for the swap.
+     */
+    function getAmountOutMaxView(
+        address[] memory routers,
+        uint256 amountIn,
+        address tokenIn,
+        address tokenOut,
+        mapping(address => SwapAdapter.DEX) storage dexs,
+        mapping(address => mapping(address => mapping(address => SwapAdapter.PairData)))
+            storage pairData
+    ) external view returns (uint256 amountOutMax, address bestRouter) {
+        if (tokenIn == tokenOut) {
+            return (amountIn, address(0));
+        }
+
+        if (routers.length == 0) {
+            revert Errors.Index_WrongPair(tokenIn, tokenOut);
+        }
+
+        amountOutMax = type(uint256).min;
+
+        for (uint256 i = 0; i < routers.length; i++) {
+            address router = routers[i];
+
+            // UniswapV3 estimation functions are not view, so skipping them
+            if (dexs[router] == SwapAdapter.DEX.UniswapV3) continue;
+
+            uint256 amountOut = SwapAdapter
+                .Setup(
+                    dexs[router],
+                    router,
+                    pairData[router][tokenIn][tokenOut]
+                )
+                .getAmountOutView(amountIn, tokenIn, tokenOut);
+
+            if (amountOut > amountOutMax) {
+                amountOutMax = amountOut;
+                bestRouter = router;
+            }
+        }
+    }
+
+    /**
      * @dev Calculates the minimum amount of `tokenIn` tokens required to receive a given `amountOut` of `tokenOut` tokens,
      *      and identifies the best router to use for the swap among a list of routers.
      * @param routers The list of router addresses to consider for the swap.
@@ -72,7 +122,7 @@ library IndexStrategyUtils {
         mapping(address => SwapAdapter.DEX) storage dexs,
         mapping(address => mapping(address => mapping(address => SwapAdapter.PairData)))
             storage pairData
-    ) external view returns (uint256 amountInMin, address bestRouter) {
+    ) external returns (uint256 amountInMin, address bestRouter) {
         if (tokenIn == tokenOut) {
             return (amountOut, address(0));
         }
