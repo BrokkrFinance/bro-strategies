@@ -86,9 +86,6 @@ library IndexStrategyUtils {
         for (uint256 i = 0; i < routers.length; i++) {
             address router = routers[i];
 
-            // UniswapV3 estimation functions are not view, so skipping them
-            if (dexs[router] == SwapAdapter.DEX.UniswapV3) continue;
-
             uint256 amountOut = SwapAdapter
                 .Setup(
                     dexs[router],

@@ -21,6 +21,7 @@ import { TraderJoeV2Point1Library } from "./TraderJoeV2Point1Library.sol";
 import { UniswapV2Library } from "./UniswapV2Library.sol";
 import { IQuoterV2 } from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 import { ISwapRouter } from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import { IUniswapV3Pool } from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 
 import "hardhat/console.sol";
@@ -265,9 +266,7 @@ library SwapAdapter {
                     tokenIn,
                     tokenOut
                 );
-        }
-
-        if (setup.dex == DEX.TraderJoeV2) {
+        } else if (setup.dex == DEX.TraderJoeV2) {
             return
                 ITraderJoeV2Router(setup.router).getAmountOut(
                     ITraderJoeV2Pair(setup.pairData.pair),
@@ -275,27 +274,21 @@ library SwapAdapter {
                     tokenIn,
                     tokenOut
                 );
-        }
-
-        if (setup.dex == DEX.Camelot) {
+        } else if (setup.dex == DEX.Camelot) {
             return
                 ICamelotRouter(setup.router).getAmountOut(
                     ICamelotPair(setup.pairData.pair),
                     amountIn,
                     tokenIn
                 );
-        }
-
-        if (setup.dex == DEX.Chronos) {
+        } else if (setup.dex == DEX.Chronos) {
             return
                 IChronosRouter(setup.router).getAmountOut(
                     IChronosPair(setup.pairData.pair),
                     amountIn,
                     tokenIn
                 );
-        }
-
-        if (setup.dex == DEX.TraderJoeV2_1) {
+        } else if (setup.dex == DEX.TraderJoeV2_1) {
             return
                 ITraderJoeV2Point1Router(setup.router).getAmountOut(
                     ITraderJoeV2Point1Pair(setup.pairData.pair),
@@ -303,6 +296,19 @@ library SwapAdapter {
                     tokenIn,
                     tokenOut
                 );
+        } else if (setup.dex == DEX.UniswapV3) {
+            IUniswapV3Pool uniswapV3Pool = IUniswapV3Pool(setup.pairData.pair);
+            (uint160 sqrtPriceX96, , , , , , ) = uniswapV3Pool.slot0();
+
+            uint256 priceX96 = ((uint256(sqrtPriceX96) *
+                uint256(sqrtPriceX96)) / (2**96));
+            address token0 = uniswapV3Pool.token0();
+
+            if (token0 == tokenIn) {
+                return (priceX96 * amountIn) / (2**96);
+            } else {
+                return ((((2**192) / priceX96)) * amountIn) / (2**96);
+            }
         }
 
         revert Errors.SwapAdapter_WrongDEX(uint8(setup.dex));
@@ -335,9 +341,7 @@ library SwapAdapter {
                     )
                 );
             return amountOut;
-        }
-
-        return getAmountOutView(setup, amountIn, tokenIn, tokenOut);
+        } else return getAmountOutView(setup, amountIn, tokenIn, tokenOut);
     }
 
     function getAmountIn(

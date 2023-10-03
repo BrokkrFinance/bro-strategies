@@ -1,6 +1,22 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import { IIndexInit } from "../interfaces/IIndexInit.sol";
+import { IIndexLimits } from "../interfaces/IIndexLimits.sol";
+import { IIndexOracle } from "../interfaces/IIndexOracle.sol";
+import { IIndexStrategy } from "../interfaces/IIndexStrategy.sol";
+import { IIndexToken } from "../interfaces/IIndexToken.sol";
+import { IFee, PerformanceFeeSuggestion } from "../interfaces/IFee.sol";
+import { Constants } from "../libraries/Constants.sol";
+import { Errors } from "../libraries/Errors.sol";
+import { SwapAdapter, UniswapV3PairData } from "../libraries/SwapAdapter.sol";
+import { MintingData, MintParams, BurnParams, ManagementParams } from "../Common.sol";
+import { IndexStrategyMint } from "../libraries/IndexStrategyMint.sol";
+import { IndexStrategyBurn } from "../libraries/IndexStrategyBurn.sol";
+import { IndexStrategyManagement } from "../libraries/IndexStrategyManagement.sol";
+import { IndexStrategyUtils } from "../libraries/IndexStrategyUtils.sol";
+import { IndexStrategyStorage, IndexStrategyStorageLib } from "../libraries/IndexStrategyStorageLib.sol";
+
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
@@ -10,22 +26,7 @@ import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Co
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { MathUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 import { EnumerableSetUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-
-import { IIndexInit } from "../interfaces/IIndexInit.sol";
-import { IIndexLimits } from "../interfaces/IIndexLimits.sol";
-import { IIndexOracle } from "../interfaces/IIndexOracle.sol";
-import { IIndexStrategy } from "../interfaces/IIndexStrategy.sol";
-import { IIndexToken } from "../interfaces/IIndexToken.sol";
-import { IFee, PerformanceFeeSuggestion } from "../interfaces/IFee.sol";
-import { Constants } from "../libraries/Constants.sol";
-import { Errors } from "../libraries/Errors.sol";
-import { SwapAdapter } from "../libraries/SwapAdapter.sol";
-import { MintingData, MintParams, BurnParams, ManagementParams } from "../Common.sol";
-import { IndexStrategyMint } from "../libraries/IndexStrategyMint.sol";
-import { IndexStrategyBurn } from "../libraries/IndexStrategyBurn.sol";
-import { IndexStrategyManagement } from "../libraries/IndexStrategyManagement.sol";
-import { IndexStrategyUtils } from "../libraries/IndexStrategyUtils.sol";
-import { IndexStrategyStorage, IndexStrategyStorageLib } from "../libraries/IndexStrategyStorageLib.sol";
+import { IQuoterV2 } from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 
 /**
  * @title IndexStrategyUpgradeable
@@ -541,6 +542,25 @@ abstract contract IndexStrategyUpgradeable is
         _setDEX(router, dex);
 
         _setPairData(router, token, wNATIVE, _pairData);
+    }
+
+    function addUniswapV3SwapRoute(
+        address token,
+        address router,
+        SwapAdapter.DEX dex,
+        address pair,
+        uint24[] calldata fees,
+        IQuoterV2 quoter
+    ) external onlyOwner {
+        addSwapRoute(
+            token,
+            router,
+            dex,
+            SwapAdapter.PairData(
+                pair,
+                abi.encode(UniswapV3PairData(fees, quoter))
+            )
+        );
     }
 
     /**
